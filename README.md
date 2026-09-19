@@ -1,17 +1,17 @@
 # maqamrock-yue2-lora-finetuning
 
-A LoRA fine-tune of [YuE2](https://github.com/ostris/ai-toolkit) (3B, int8 `convrot`) on Arabic maqam rock, trained with [`ostris/ai-toolkit`](https://github.com/ostris/ai-toolkit). The goal is a style/timbre adapter, not a melodic one: 267 clips across four maqams sharing one fixed genre, production, and instrumentation, with a trigger word `arabmaqamrock`.
+A LoRA fine-tune of [YuE2](https://github.com/ostris/ai-toolkit) (3B, int8 `convrot`) on Arabic maqam rock, trained with [`ostris/ai-toolkit`](https://github.com/ostris/ai-toolkit). The goal is a LoRA that can generate **structurally coherent full songs**, not a timbre-only adapter: 267 clips across four maqams sharing one fixed genre, production, and instrumentation, with a trigger word `arabmaqamrock`.
 
 Training runs on a rented single GPU in Google Colab, driven over the CLI rather than the Web UI, and is monitored through an agent-readable SQLite metrics db. Colab is ephemeral, so all expensive artifacts are mirrored to GCS as the run proceeds.
 
 ## Status
 
-Nothing has been trained yet (as of the `PROGRESS.md` 2026-09-19 entry). The dataset is built and independently verified, the config is final, and `bootstrap/setup.sh` is written but not yet validated end-to-end on a fresh Colab L4. The next step is to stand up that VM, run the bootstrap, confirm `loss_log.db` is created and updating, then launch the real run.
+As of the `PROGRESS.md` 2026-09-19 entries: `bootstrap/setup.sh` is validated end-to-end on a fresh Colab L4 (the first run exposed and fixed a torch/CUDA stack bug — see `DECISIONS.md`). The first training run reached ~step 875/3000 and was **killed deliberately** when the goal was re-scoped to full-song structure; the cause was `train_window_frames` defaulting to a random 60 s crop per step. Its artifacts are archived as `akbar_arabic_rock_lora_crop60_killed` (local folder and matching GCS prefix). A fresh whole-song run (`train_window_frames: 0`) has been relaunched; whole-song VRAM/step-time is still being smoke-tested on the L4. A step-654 snapshot and analysis live in `TRAINING_ANALYSIS/`.
 
 ## Repo layout
 
 ```
-config/akbar_arabic_rock_lora.yml   # the training config (rank 32, EMA, cot: off)
+config/akbar_arabic_rock_lora.yml   # the training config (rank 32, EMA, cot: off, whole-song)
 prepare_yue2_dataset.py             # build audio + .txt caption pairs from manifests
 monitor_loss.py                     # read-only loss_log.db inspector (step, metrics, ETA)
 gpu_logger.py                       # nvidia-smi poller -> CSV (AI Toolkit logs no GPU stats)
@@ -36,7 +36,7 @@ Result: **267 audio/caption pairs**, all native `mp3, 48000 Hz, stereo` — exac
 
 ## Training config
 
-`config/akbar_arabic_rock_lora.yml` runs `process[].type: diffusion_trainer` with `arch: yue2` on `Comfy-Org/YuE2/checkpoints/yue2_3b_int8_convrot.safetensors` (`quantize: true`, `qtype: convrot8`). Key choices: rank 32 combined LoRA, `ema_config.use_ema: true` with `ema_decay: 0.999`, `model_kwargs.cot: "off"` (captions carry no melodic information, so SheetSage2 is never loaded), `cache_latents_to_disk: true` (mandatory for YuE2), `noise_scheduler: flowmatch`, and `max_step_saves_to_keep: 12` so the background GCS sync has a buffer before local rotation deletes older checkpoints.
+`config/akbar_arabic_rock_lora.yml` runs `process[].type: diffusion_trainer` with `arch: yue2` on `Comfy-Org/YuE2/checkpoints/yue2_3b_int8_convrot.safetensors` (`quantize: true`, `qtype: convrot8`). Key choices: rank 32 combined LoRA, `ema_config.use_ema: true` with `ema_decay: 0.999`, `model_kwargs.cot: "off"` (captions carry no melodic information, so SheetSage2 is never loaded), `model_kwargs.train_window_frames: 0` (train on whole songs; the implicit default crops one random 60 s window per step, which starves the AR expert of any multi-section gradient — see `DECISIONS.md`), `cache_latents_to_disk: true` (mandatory for YuE2), `noise_scheduler: flowmatch`, and `max_step_saves_to_keep: 12` so the background GCS sync has a buffer before local rotation deletes older checkpoints.
 
 `log_config` at the process root is a dead key left in with a comment, and `aitk_db.db` is not a metrics source — see `DECISIONS.md` for both.
 
@@ -72,7 +72,7 @@ Everything for the job lands under `/content/ai-toolkit/output/akbar_arabic_rock
 
 Three real surfaces, in priority order:
 
-1. **`loss_log.db`** — the per-step metrics source, written by `UILogger` because `logging.use_ui_logger: true`. Read it with `python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db` (add `--key nar_flow --history 50`, or `--watch 30 --total-steps 3000` for a live ETA). It is WAL-mode, so read-only inspection during training is safe.
+1. **`loss_log.db`** — the per-step metrics source, written by `UILogger` because `logging.use_ui_logger: true`. Read it with `python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db` (add `--key "loss/loss" --history 50`, or `--watch 30 --total-steps 3000` for a live ETA). It is WAL-mode, so read-only inspection during training is safe. The confirmed keys are `additional_model_loss`, `learning_rate`, `loss/ar_ce`, `loss/ar_kl`, `loss/loss` (there is no `nar_flow`).
 2. **`/content/logs/train.log`** — the `-l` stdout/stderr log; the tqdm progress line and any traceback live here.
 3. **`/content/logs/gpu_usage.csv`** — utilization/memory/temp/power, sampled every 10s by `gpu_logger.py`. AI Toolkit logs none of this itself.
 
