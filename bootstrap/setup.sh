@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+# maqamrock-yue2-lora-finetuning — Colab bootstrap
+#
+# Run this BACKGROUNDED while you do vscode.dev tunnel auth in the
+# foreground, so the auth wait and the install/download time overlap.
+# Ostris's own deps (torch + its requirements.txt) take noticeably longer
+# to install than FL-YuE2's did last project — budget for it.
+#
+#   git clone <this repo's URL>
+#   cd maqamrock-yue2-lora-finetuning
+#   bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 &
+#   /content/code tunnel
+#
+# Deliberately non-interactive — nothing here should prompt. HF_TOKEN is
+# staged into a plain file by the notebook cell BEFORE this script runs
+# (`userdata` only exists inside the notebook kernel, not in a terminal
+# shell). GCP auth and the dataset's GCS location both come from that same
+# cell: the path arrives as GCP_DATASET_PATH. No bucket or path is
+# hardcoded in this repo.
+#
+# Toolchain note (see DECISIONS.md for the full source-verified writeup):
+# unlike FL-YuE2, which needed every weight staged into a specific
+# ComfyUI/models/yue2/<name>/ folder, Ostris's yue2 support resolves every
+# asset through plain `huggingface_hub.hf_hub_download`, which lands in the
+# STANDARD HF cache (~/.cache/huggingface/hub). So this script does not
+# build or merge a custom directory tree — it just pre-warms that cache with
+# `hf download` for the same repos, so the first training step doesn't stall
+# on a multi-GB download mid-run. SheetSage2 is deliberately NOT pre-warmed:
+# it only loads when model_kwargs.cot != "off", and this config has
+# cot: "off" — downloading it would just waste bandwidth and disk.
+
+set -e
+mkdir -p /content/logs
+
+if [ -f /root/.secrets.env ]; then
+  source /root/.secrets.env
+else
+  echo "[WARN] /root/.secrets.env not found — HF_TOKEN must already be in the environment"
+fi
+if [ -z "${HF_TOKEN:-}" ]; then
+  echo "[FAIL] HF_TOKEN is empty; stage /root/.secrets.env from the notebook cell first"
+  exit 1
+fi
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+AI_TOOLKIT="/content/ai-toolkit"
+AI_TOOLKIT_REPO="https://github.com/ostris/ai-toolkit.git"
+# Not pinned to a commit on purpose: unlike FL-YuE2 (a third-party custom
+# node with its own release cadence), Ostris's yue2 support is upstream and
+# moving fast. The resolved commit is printed by the verify step below so
+# the exact build this run used is still identifiable after the fact.
+
+# The dataset's GCS location is supplied at runtime by the launching
+# notebook (exported into /root/.secrets.env); it is never hardcoded here.
+DATASET_GCS="${GCP_DATASET_PATH:?GCP_DATASET_PATH must be set (the launching notebook exports it)}"
+DATASET_LOCAL="/content/yue2_dataset"
+
+echo "=== $(date) — maqamrock-yue2 bootstrap starting ==="
+
+# --- Fast, synchronous: the `hf` CLI (>=0.34) and credentials ---
+pip install -q --no-input "huggingface_hub>=0.36.0"
+if ! command -v hf >/dev/null 2>&1; then
+  echo "[FAIL] 'hf' CLI not found after installing huggingface_hub>=0.36 — check pip's bin dir is on PATH"
+  exit 1
+fi
+hf auth login --token "$HF_TOKEN"
+
+# --- Jobs (functions, so the background dispatch needs no quote gymnastics) ---
+
+job_opencode() {
+  curl -fsSL https://opencode.ai/install | bash
+}
+
+job_ai_toolkit() {
+  if [ ! -f "$AI_TOOLKIT/run.py" ]; then
+    rm -rf "$AI_TOOLKIT" && git clone --quiet "$AI_TOOLKIT_REPO" "$AI_TOOLKIT"
+  fi
+  git -C "$AI_TOOLKIT" rev-parse --short HEAD
+  # Torch first, per ai-toolkit's own README — pinned versions there can
+  # move; check config/../README.md at bootstrap time if this install fails
+  # with a version conflict rather than assuming this pin is still current.
+  pip install -q --no-input torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+  pip install -q --no-input -r "$AI_TOOLKIT/requirements.txt"
+}
+
+job_dataset() {
+  local marker="${DATASET_LOCAL}/.bootstrap_complete"
+  if [ -f "$marker" ]; then
+    echo "dataset already downloaded (marker $marker); skipping"
+    return 0
+  fi
+  # rsync (no -d) transfers only missing/changed objects, so a re-run after a
+  # partial download resumes cheaply instead of re-pulling all 267 tracks.
+  mkdir -p "$DATASET_LOCAL"
+  gsutil -m rsync -r "$DATASET_GCS" "$DATASET_LOCAL"
+  touch "$marker"
+}
+
+# --- HF cache pre-warm: no custom directory tree, just make these a cache
+# hit instead of a stall the first time training actually asks for them. ---
+job_hf_yue2_backbone() {
+  hf download Comfy-Org/YuE2 checkpoints/yue2_3b_int8_convrot.safetensors
+}
+
+job_hf_mert() {
+  hf download m-a-p/MERT-v2-FullSong
+}
+
+job_hf_tokenizer_head() {
+  hf download Mothersuperior/yue2-mothersuperior-realaudio-tokenizer-v4 \
+    tokenizer_head_joint_v4.pt
+  # nar_lora_joint_v4.pt is only loaded if model_kwargs.merge_nar_lora is
+  # set, which this config does not set — not pre-warmed, on purpose.
+}
+
+# --- Launch every independent, slow task in parallel ---
+pids=()
+names=()
+
+start_job() {
+  local name="$1"; shift
+  ("$@") > "/content/logs/${name}.log" 2>&1 &
+  pids+=("$!")
+  names+=("$name")
+}
+
+start_job opencode job_opencode
+start_job ai_toolkit job_ai_toolkit
+start_job dataset job_dataset
+start_job hf_yue2_backbone job_hf_yue2_backbone
+start_job hf_mert job_hf_mert
+start_job hf_tokenizer_head job_hf_tokenizer_head
+
+echo "Launched in parallel: ${names[*]}"
+echo "tail -f /content/logs/<n>.log to watch any one of these live."
+
+fail=0
+for i in "${!pids[@]}"; do
+  if wait "${pids[$i]}"; then
+    echo "[ok]   ${names[$i]}"
+  else
+    echo "[FAIL] ${names[$i]} — see /content/logs/${names[$i]}.log"
+    fail=1
+  fi
+done
+
+# --- Verify what actually landed, don't just trust exit codes ---
+echo "=== Verifying setup ==="
+
+track_count=$(find "$DATASET_LOCAL" -maxdepth 1 -name "*.mp3" 2>/dev/null | wc -l)
+if [ "$track_count" -eq 0 ]; then
+  echo "[FAIL] dataset looks empty — check /content/logs/dataset.log and the GCS path"
+  fail=1
+else
+  echo "[ok]   dataset: $track_count tracks in $DATASET_LOCAL"
+fi
+
+if [ -f "$AI_TOOLKIT/run.py" ]; then
+  echo "[ok]   ai-toolkit at $(git -C "$AI_TOOLKIT" rev-parse --short HEAD 2>/dev/null || echo '??') (tracking main, not pinned)"
+else
+  echo "[FAIL] ai-toolkit did not clone correctly — run.py missing"
+  fail=1
+fi
+
+if command -v opencode >/dev/null 2>&1 || [ -x "$HOME/.opencode/bin/opencode" ]; then
+  echo "[ok]   opencode installed"
+else
+  echo "[WARN] opencode not found on PATH after install — check /content/logs/opencode.log"
+fi
+
+# Confirm the HF cache actually picked up what we pre-warmed. `hf download`
+# is idempotent against the cache -- a cache hit just prints the path back
+# instantly instead of re-downloading -- so re-running it here is a cheap,
+# honest check rather than trusting the earlier background job's exit code.
+if hf download Comfy-Org/YuE2 checkpoints/yue2_3b_int8_convrot.safetensors >/dev/null 2>&1; then
+  echo "[ok]   YuE2-3B backbone present in HF cache"
+else
+  echo "[FAIL] YuE2-3B backbone not confirmed in HF cache — re-run hf download manually before training"
+  fail=1
+fi
+
+if [ "$fail" -eq 1 ]; then
+  echo "=== setup.sh finished WITH FAILURES — check the [FAIL] lines above ==="
+  exit 1
+fi
+
+cat <<EOF
+=== setup.sh done ===
+Next (in a terminal):
+  cd $REPO_ROOT
+  # 1. start the backup daemon + GPU logger (see AGENTS.md for the exact commands)
+  # 2. launch training:
+  cd $AI_TOOLKIT
+  python run.py $REPO_ROOT/config/akbar_arabic_rock_lora.yml -l /content/logs/train.log
+EOF
