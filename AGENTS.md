@@ -12,6 +12,8 @@ Nothing else. Not a monitor running in a loop, not a companion — a problem sol
 
 Read `DECISIONS.md` and `PROGRESS.md` (repo root) at the start of any task involving training or tooling. `DECISIONS.md` records major, cross-session decisions and non-obvious insights verified against actual `ai-toolkit` source — the things a fresh session must not re-litigate or rediscover by reading a GitHub issue thread again. `PROGRESS.md` records the milestone trail: runs and their outcomes, and what's next. Keep both short and add an entry only when losing it would cost real work; neither is a log. Routine, per-session state goes in `agent_notes/current.md`.
 
+**Maintain `agent_notes/current.md` yourself — don't wait to be asked.** The user drives this over `vscode.dev`, where selecting and copying text out of the chat is glitchy and laggy. So keep that file current as the copy-free handoff surface: after any session that changes run state, fixes tooling, or produces a command worth re-running, write/refresh it (date, what happened, exact commands, what's next). Put anything the user might otherwise have to copy from the conversation there. It's git-ignored, but `backup_to_gcp.py` mirrors it to GCS.
+
 ## The stack, so a fresh session isn't guessing
 
 `ostris/ai-toolkit`, launched via its real CLI: `python run.py config/akbar_arabic_rock_lora.yml -l /content/logs/train.log` — not the Web UI (see `DECISIONS.md` for why that loses nothing on observability). `job: extension` / `process[].type: diffusion_trainer`, `arch: yue2`. Everything for this job lands under one folder: `training_folder/akbar_arabic_rock_lora/` — checkpoints, `loss_log.db`, `config.yaml` (auto-saved), samples, and the `tensorboard/` subfolder all together. One GPU, shared, rented.

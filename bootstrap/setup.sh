@@ -76,10 +76,28 @@ job_ai_toolkit() {
     rm -rf "$AI_TOOLKIT" && git clone --quiet "$AI_TOOLKIT_REPO" "$AI_TOOLKIT"
   fi
   git -C "$AI_TOOLKIT" rev-parse --short HEAD
-  # Torch first, per ai-toolkit's own README — pinned versions there can
-  # move; check config/../README.md at bootstrap time if this install fails
-  # with a version conflict rather than assuming this pin is still current.
-  pip install -q --no-input torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+  # Torch first, pinned to ai-toolkit's own README (torch 2.13.0 / cu130).
+  # Do NOT leave this unpinned: a bare `pip install torch ... cu128` resolves
+  # to 2.11.0+cu128, and torchaudio 2.11 decodes audio through torchcodec —
+  # whose 0.15.0 wheel links against CUDA 13 (libnvrtc.so.13). Under cu128,
+  # torchaudio.load() fails on EVERY file, so latent caching never starts.
+  # Colab's L4 driver (580.x) supports CUDA 13. Re-check ai-toolkit's README
+  # install block at bootstrap time if this pin drifts.
+  # Exact local versions (+cu130), not bare 2.11.0: PEP 440 says `==2.11.0`
+  # also matches `2.11.0+cu128`, so a plain pin silently keeps a stale cu128
+  # torchaudio on a re-run and torchaudio then refuses to import.
+  pip install -q --no-input \
+    torch==2.13.0+cu130 torchvision==0.28.0+cu130 torchaudio==2.11.0+cu130 \
+    --index-url https://download.pytorch.org/whl/cu130
+  # Two ai-toolkit requirement pins are stale for Colab's Python 3.13 + this
+  # torch stack. Patch both before installing (idempotent seds — the clone
+  # persists for the session, and the patterns stop matching after one run):
+  #  - scipy==1.12.0 has no cp313 wheel and its failed source build aborts the
+  #    ENTIRE requirements install, leaving every other pinned dep missing.
+  #  - torchcodec==0.9.1 is ABI-incompatible with torch 2.13; upstream installs
+  #    0.15.0 as an override (manager/spec.py). See DECISIONS.md.
+  sed -i 's|^scipy==1\.12\.0$|scipy>=1.14|' "$AI_TOOLKIT/requirements.txt"
+  sed -i 's|^torchcodec==[0-9.]*$|torchcodec==0.15.0|' "$AI_TOOLKIT/requirements_base.txt"
   pip install -q --no-input -r "$AI_TOOLKIT/requirements.txt"
 }
 
@@ -176,6 +194,24 @@ if hf download Comfy-Org/YuE2 checkpoints/yue2_3b_int8_convrot.safetensors >/dev
   echo "[ok]   YuE2-3B backbone present in HF cache"
 else
   echo "[FAIL] YuE2-3B backbone not confirmed in HF cache — re-run hf download manually before training"
+  fail=1
+fi
+
+# The stack latent caching actually depends on: torch and torchaudio must
+# agree on CUDA (torchaudio refuses to import otherwise), and torchaudio —
+# which in this version routes decode through torchcodec — must be able to
+# read a real dataset file. A stale `==` pin silently kept a cu128 torchaudio
+# next to a cu130 torch and broke every decode; catch that here, not at the
+# first training step mid-cache. See DECISIONS.md.
+if python - <<PY >/dev/null 2>&1
+import glob, torch, torchaudio
+assert torch.version.cuda == "13.0", torch.version.cuda
+torchaudio.load(sorted(glob.glob("$DATASET_LOCAL/*.mp3"))[0])
+PY
+then
+  echo "[ok]   torch/torchaudio cu130 + torchaudio decodes a dataset mp3"
+else
+  echo "[FAIL] torch/torchaudio CUDA mismatch or audio decode failed — see DECISIONS.md 'torch/CUDA stack'"
   fail=1
 fi
 
