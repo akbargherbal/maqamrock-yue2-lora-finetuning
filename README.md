@@ -22,6 +22,7 @@ DECISIONS.md                        # source-verified decisions and non-obvious 
 PROGRESS.md                         # milestone trail across sessions
 verification.md                     # independent dataset audit
 AGENTS.md                           # operating instructions for the coding agent
+docs/                               # task runbooks: start, pause/resume, backup, monitor
 ```
 
 ## Dataset
@@ -84,4 +85,4 @@ Three real surfaces, in priority order:
 
 ## Docs
 
-`DECISIONS.md` records source-verified decisions and the reasoning behind non-obvious config fields; read it before changing anything that looks wrong. `PROGRESS.md` is the milestone trail. `verification.md` is the dataset audit. `AGENTS.md` is the operating contract for the coding agent, including the run-control policy (no new or changed run without the user typing the command; auto-resume only an unchanged, already-approved run after an unplanned interruption).
+`docs/` holds task runbooks — [start on a fresh VM](docs/START.md), [pause/resume across sessions](docs/PAUSE_RESUME.md), [backup/restore](docs/BACKUP_RESTORE.md), and [monitoring](docs/MONITOR.md). `DECISIONS.md` records source-verified decisions and the reasoning behind non-obvious config fields; read it before changing anything that looks wrong. `PROGRESS.md` is the milestone trail. `verification.md` is the dataset audit. `AGENTS.md` is the operating contract for the coding agent, including the run-control policy (no new or changed run without the user typing the command; auto-resume only an unchanged, already-approved run after an unplanned interruption).

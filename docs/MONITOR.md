@@ -1,0 +1,52 @@
+# Check how training is going
+
+Three real surfaces, in priority order. (Do **not** use `aitk_db.db` — a CLI run
+never writes it; see `../DECISIONS.md`.)
+
+## 1. `loss_log.db` — the metrics
+
+Per-step metrics, written because `logging.use_ui_logger: true`. WAL-mode, so
+reading it while training runs is safe. Use the script, not hand-written SQL:
+
+```bash
+cd /content/maqamrock-yue2-lora-finetuning
+python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db \
+  --total-steps 3000
+# live ETA:
+python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db \
+  --watch 30 --total-steps 3000
+# history of one metric:
+python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db \
+  --key "loss/loss" --history 50
+```
+
+Confirmed keys: `additional_model_loss`, `learning_rate`, `loss/ar_ce`,
+`loss/ar_kl`, `loss/loss`. There is **no** `nar_flow`. Watch `loss/loss` — but
+raw loss is noisy at batch size 1, so read the smoothed trend, not single steps.
+
+## 2. `/content/logs/train.log` — liveness and errors
+
+```bash
+tail -f /content/logs/train.log        # tqdm progress line + any traceback
+pgrep -af run.py                        # is it alive?
+```
+
+The first few minutes after launch are the step-0 sample generation, so
+`loss_log.db` has 0 steps until that finishes — normal, not a stall.
+
+## 3. `/content/logs/gpu_usage.csv` — hardware
+
+Sampled every 10 s by `gpu_logger.py` (AI Toolkit logs no GPU stats):
+
+```bash
+tail -n 10 /content/logs/gpu_usage.csv
+nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw --format=csv
+```
+
+Confirm `gpu_logger.py` is actually running before trusting a "GPU looks idle"
+read (`pgrep -af gpu_logger.py`).
+
+## Step-654 analysis snapshot
+
+For an example of the kind of write-up to produce (and a sense of run-1
+behavior), see `../TRAINING_ANALYSIS/ANALYSIS.md` and its charts.

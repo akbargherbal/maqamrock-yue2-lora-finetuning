@@ -75,6 +75,7 @@ bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 &
 - Dataset build + independent verification: `prepare_yue2_dataset.py` (already run, don't re-run) and `verification.md` (the audit record — read it before assuming anything about dataset format is unverified).
 - Config: `config/akbar_arabic_rock_lora.yml`. Read the inline comments before "fixing" anything that looks off — several apparent issues (`log_config`, `type: diffusion_trainer`) are already resolved in `DECISIONS.md`.
 - Metrics: `monitor_loss.py <path to loss_log.db>` — latest step, latest metric values, step-rate/ETA. GPU: `gpu_logger.py`.
+- Operational runbooks: `docs/` — `START.md`, `PAUSE_RESUME.md`, `BACKUP_RESTORE.md`, `MONITOR.md`. Point the user there for "how do I do X" instead of re-deriving it, and keep them in sync when a procedure changes.
 
 ## Where to look before answering "what's going on"
 
