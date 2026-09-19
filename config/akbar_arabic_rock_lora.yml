@@ -62,7 +62,10 @@ config:
       train:
         batch_size: 1
         bypass_guidance_embedding: false
-        steps: 3000   # revisit -- 267 clips at num_repeats:1 means this sees each clip only a handful of times; consider raising substantially (see earlier note on dataset size vs. steps)
+        steps: 3000   # revisit -- 267 clips at num_repeats:1 means this sees each clip only a handful of times; consider raising substantially (see earlier note on dataset size vs. steps).
+        # Also: the killed run's ~7.8s/step and ~6h ETA (TRAINING_ANALYSIS) were measured under
+        # the 60s train_window_frames, not the whole-song window above -- don't reuse that ETA.
+        # Recompute from the smoke test's actual s/step before trusting this step count's wall-clock cost.
         gradient_accumulation: 1
         train_unet: true
         train_text_encoder: false
@@ -104,6 +107,24 @@ config:
           abc_dropout: 0.5   # moot while cot:"off" -- only relevant if you switch cot back to "full"
           sample_ar_repetition_penalty: 1.2
           ar_kl_weight: 0.2
+          # NEW, was unset (implicit default 1500 = 60s). Verified against yue2_model.py's
+          # condition_noisy_latents(): every step was cropping ONE random 60s window out of the
+          # cached full-song latents and computing BOTH the NAR flow loss and the AR next-token
+          # loss (loss/ar_ce -- confirmed the dominant term in TRAINING_ANALYSIS) on that window
+          # only. Fine for a pure timbre/style adapter; wrong for a full-song-structure goal,
+          # since the AR expert never once saw a gradient spanning a verse->chorus transition.
+          # 0 = whole song, no cropping (condition_noisy_latents no-ops when window<=0). Safe per
+          # verification.md: dataset max is 370s, well inside the ~983s AR context ceiling
+          # (CONTEXT 24576 / 25fps), and the VAE's "60s chunks" are only an offline encode-time
+          # memory trick (src/vae.py encode()) -- cached latents are one contiguous per-song
+          # tensor, so a larger window isn't crossing any real boundary.
+          # UNVERIFIED ON THIS HARDWARE: this was not evaluated on an actual L4 run before the
+          # kill/relaunch decision. Current 60s-window run peaked ~16GB/23GB VRAM at ~7.8s/step;
+          # whole-song (up to ~6x the frames on the longest clips) will cost materially more of
+          # both. Smoke-test a handful of steps on the longest clips first -- if VRAM or
+          # step-time blows the budget, fall back to a bounded window (e.g. 4000-6000 frames,
+          # ~2.5-4 min) rather than 0, which still buys far more structure than 60s did.
+          train_window_frames: 0
         compile: false
       sample:
         sampler: "flowmatch"
