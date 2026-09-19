@@ -18,7 +18,7 @@ Where a claim below says "verified against source," it means the actual `ostris/
   - `metric_keys(key TEXT PRIMARY KEY, first_seen_step, last_seen_step)`
   - `metrics(step, key, value_real, value_text)`
   Opened with `PRAGMA journal_mode=WAL`, so it is safe to read with a read-only connection *while training is actively writing to it* — no lock contention, no need to stop the run to inspect it. `monitor_loss.py` reads this file; don't hand-write SQL against it ad hoc, that script is the tested path.
-- Column names for `yue2`/`diffusion_trainer` match `loss_dict` keys the trainer logs each step (learning_rate, plus whatever `loss_dict.items()` the model returns — expect something like `ar_ce`, `nar_flow`, similar in spirit to the AR/NAR split seen in the FL-YuE2 project's `DECISIONS.md`, but **not guaranteed to be the same key names** — confirm the actual keys in `metric_keys` once the first checkpoint interval has passed, don't assume the old project's names carry over.
+- Column names for `yue2`/`diffusion_trainer` match `loss_dict` keys the trainer logs each step (learning_rate, plus whatever `loss_dict.items()` the model returns — expect something like `ar_ce`, `nar_flow`, similar in spirit to the AR/NAR split seen in the FL-YuE2 project's `DECISIONS.md`, but **not guaranteed to be the same key names**. **Confirmed on the first real run (2026-09-19):** the actual keys are `additional_model_loss`, `learning_rate`, `loss/ar_ce`, `loss/ar_kl`, `loss/loss`. There is **no** `nar_flow` key — don't look for one. The primary scalar to watch is `loss/loss`.
 
 ## `process[].type: "diffusion_trainer"` is correct, not a mismatch with `verification.md`
 
