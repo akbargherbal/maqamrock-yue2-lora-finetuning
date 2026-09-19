@@ -34,8 +34,11 @@ step that is a multiple of 250.
 ## Resume (next morning, fresh VM)
 
 1. Follow [START.md](START.md) steps 1–3 (clone, bootstrap, then this restore).
-2. Restore the run folder from GCS **into the exact training folder path**:
+2. Restore the run folder from GCS **into the exact training folder path**. The
+   parent directory must exist first — `gsutil rsync` aborts with *"does not
+   name a directory"* otherwise:
    ```bash
+   mkdir -p /content/ai-toolkit/output/akbar_arabic_rock_lora
    gsutil -m rsync -r \
      gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/akbar_arabic_rock_lora/output \
      /content/ai-toolkit/output/akbar_arabic_rock_lora

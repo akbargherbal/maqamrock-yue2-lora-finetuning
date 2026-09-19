@@ -6,7 +6,7 @@ Training runs on a rented single GPU in Google Colab, driven over the CLI rather
 
 ## Status
 
-As of the `PROGRESS.md` 2026-09-19 entries: `bootstrap/setup.sh` is validated end-to-end on a fresh Colab L4 (the first run exposed and fixed a torch/CUDA stack bug — see `DECISIONS.md`). The first training run reached ~step 875/3000 and was **killed deliberately** when the goal was re-scoped to full-song structure; the cause was `train_window_frames` defaulting to a random 60 s crop per step. Its artifacts are archived as `akbar_arabic_rock_lora_crop60_killed` (local folder and matching GCS prefix). A fresh whole-song run (`train_window_frames: 0`) has been relaunched; whole-song VRAM/step-time is still being smoke-tested on the L4. A step-654 snapshot and analysis live in `TRAINING_ANALYSIS/`.
+As of the `PROGRESS.md` 2026-09-19 entries: **the whole-song run is complete** — `akbar_arabic_rock_lora` finished **3000/3000** on a Colab **A100-SXM4-80GB** (resumed from the step-250 checkpoint after a deliberate L4→A100 move). Measured A100 step time was **3.10 s/step** (~4.3× the L4's 13.4), and final `loss/loss` fell from 6.49 to ~5.17. All 12 checkpoints (11 numbered plus the final `akbar_arabic_rock_lora.safetensors`), `optimizer.pt`, `loss_log.db`, and 52 samples are in GCS; the full analysis is in `TRAINING_ANALYSIS/ANALYSIS.md`. Earlier, the first training run reached ~step 875/3000 and was **killed deliberately** when the goal was re-scoped to full-song structure (`train_window_frames` defaulted to a random 60 s crop per step); its artifacts are archived as `akbar_arabic_rock_lora_crop60_killed` (local folder and matching GCS prefix).
 
 ## Repo layout
 

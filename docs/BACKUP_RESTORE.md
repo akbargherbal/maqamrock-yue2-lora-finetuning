@@ -28,7 +28,11 @@ tail -n 20 /content/logs/gcp_backup.log
 
 ## Restore
 
+The destination's parent directory must exist first — `gsutil rsync` aborts with
+*"does not name a directory"* if it doesn't:
+
 ```bash
+mkdir -p /content/ai-toolkit/output/akbar_arabic_rock_lora
 gsutil -m rsync -r \
   gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/akbar_arabic_rock_lora/output \
   /content/ai-toolkit/output/akbar_arabic_rock_lora

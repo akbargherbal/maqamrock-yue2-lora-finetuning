@@ -1,5 +1,9 @@
 # Live status snapshot — 2026-09-19 12:01 UTC (A100, post-resume)
 
+> **Later update (14:55 UTC):** the run went on to **complete 3000/3000**
+> cleanly on the A100. This file is preserved as the 12:01 mid-run observation;
+> see `TRAINING_ANALYSIS/ANALYSIS.md` and `PROGRESS.md` for the final numbers.
+
 Read-only observation. No config was changed and the training run was not
 restarted or killed. Run: `akbar_arabic_rock_lora` (whole-song,
 `train_window_frames: 0`), resumed on an **A100-SXM4-80GB** from the step-250

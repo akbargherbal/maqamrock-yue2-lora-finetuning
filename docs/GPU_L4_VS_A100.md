@@ -92,3 +92,15 @@ Current L4 run: ~12 h × 1.54 = **~18.5 compute units**.
 - This project deliberately changes one variable at a time; the comparison
   assumes the **identical config** (batch 1, whole-song window), not a larger
   batch that an A100's extra VRAM would allow.
+
+## Post-run result (added 2026-09-19)
+
+- The whole-song run **completed 3000/3000 on the A100**. Measured median was
+  **3.10 s/step** (p10/p90 2.59 / 3.69, over 2730 post-resume steps) vs the L4's
+  13.4 s/step = **~4.3×** — materially above the 2–2.6× tensor-core-ceiling
+  estimate above, which was derived from spec-sheet ratios rather than a measured
+  run. Sample generation was also faster (~226 s vs ~388 s per event).
+- The direction of the economics conclusion is unchanged (A100 buys wall-clock at
+  a higher compute-unit cost), but the turnaround win is larger than predicted:
+  ~12 h of L4 work became ~3 h on the A100. VRAM peaked at ~15–16 GB, so the
+  extra 80 GB was never needed for this config.
