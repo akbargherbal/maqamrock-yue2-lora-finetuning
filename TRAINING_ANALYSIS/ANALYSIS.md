@@ -1,7 +1,10 @@
 # Training analysis — `akbar_arabic_rock_lora`
 
-Snapshot taken **2026-09-19 14:09 UTC** (17:09 Bahrain) at **step ~2346 / 3000 (~78%)**.
-Charts are regenerated from the live `loss_log.db` and `gpu_usage.csv` with:
+**COMPLETE** — snapshot taken **2026-09-19 14:55 UTC** (17:55 Bahrain) at
+**step 3000 / 3000 (100%)**. The run finished cleanly (no traceback; final
+checkpoint + optimizer written; 52 samples generated).
+
+Charts are regenerated from the final `loss_log.db` and `gpu_usage.csv` with:
 
 ```bash
 python TRAINING_ANALYSIS/generate_plots.py
@@ -12,10 +15,10 @@ python TRAINING_ANALYSIS/generate_plots.py
 > the LoRA learned the maqam.
 
 > **Cross-VM note.** This run began on an L4 (steps 1–250, whole-song) and was
-> resumed on an A100-SXM4-80GB at step 250 (now to ~2346). The loss history is
-> continuous across the switch; the throughput/GPU panels are A100-only
-> (`gpu_usage.csv` started fresh on this VM). Steps 251–295 were re-processed on
-> the A100 after resume (they existed locally but never reached a saved
+> resumed on an A100-SXM4-80GB at step 250 and ran to completion. The loss history
+> is continuous across the switch; the throughput/GPU panels are A100-only
+> (`gpu_usage.csv` started fresh on the A100 VM). Steps 251–295 were re-processed
+> on the A100 after resume (they existed locally but never reached a saved
 > checkpoint on the L4).
 
 ## Run at a glance
@@ -26,13 +29,11 @@ python TRAINING_ANALYSIS/generate_plots.py
 | Model | YuE2 3B int8 `convrot8`, flowmatch, batch 1 |
 | Dataset | 267 clips, 267 captions, one combined LoRA across four maqams |
 | GPU | Colab **A100-SXM4-80GB** (steps 1–250 were L4 24 GB) |
-| Steps done | **~2346 / 3000 (78.2%)** |
-| Median step time | **3.10 s/step** on A100 (p10/p90 = 2.59 / 3.69), over 2079 steps; L4 was 13.4 s/step |
+| Steps done | **3000 / 3000 (100%)**, latest logged step 2999 |
+| Median step time | **3.10 s/step** on A100 (p10/p90 = 2.59 / 3.69, over 2730 steps); L4 was 13.4 s/step |
 | Sample tax | ~226 s (~3.8 min) per sample event, every 250 steps (L4 was ~388 s) |
-| Effective rate incl. samples | ~0.25 steps/s (~4.0 s/step amortised) |
-| ETA | **~45 min from snapshot → ~14:55 UTC / ~17:55 Bahrain** (incl. sample pauses at 2500/2750/3000) |
-| Checkpoints | `..._000000250` … `..._000002250.safetensors` (9) — all on disk **and in GCS** (every 250, keep 12) |
-| Samples | 40 mp3s (4 prompts at steps 0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250) |
+| Checkpoints | `_000000250` … `_000002750` (11) **+ final `akbar_arabic_rock_lora.safetensors`** + `optimizer.pt` — on disk and in GCS |
+| Samples | **52 mp3s** (4 prompts at steps 0, 250, …, 3000) |
 
 ## Charts
 
@@ -70,73 +71,71 @@ python TRAINING_ANALYSIS/generate_plots.py
 | 2101–2200 | 5.369 | 4.198 | 1.325 | 4.463 |
 | 2201–2300 | 5.352 | 4.197 | 1.321 | 4.461 |
 | 2301–2400 | 5.388 | 4.200 | 1.333 | 4.466 |
+| 2401–2500 | 5.304 | 4.126 | 1.392 | 4.405 |
+| 2501–2600 | 5.291 | 4.130 | 1.359 | 4.402 |
+| 2601–2700 | 5.252 | 4.080 | 1.385 | 4.357 |
+| 2701–2800 | 5.206 | 4.036 | 1.422 | 4.320 |
+| 2801–2900 | 5.249 | 4.079 | 1.394 | 4.358 |
+| 2901–3000 | 5.167 | 3.976 | 1.480 | 4.272 |
 
 Confirmed metric keys: `additional_model_loss`, `learning_rate`, `loss/ar_ce`,
 `loss/ar_kl`, `loss/loss`. There is **no** `nar_flow` key (see `DECISIONS.md`).
 
-Headline first-50 vs last-50 (from `generate_plots.py`): `loss/loss` 6.49 → 5.39
-(**−1.11**), `loss/ar_ce` 5.45 → 4.20 (−1.25), `loss/ar_kl` 0.37 → 1.34 (+0.96),
-`additional_model_loss` 5.53 → 4.47 (−1.06).
+Headline first-50 vs last-50: `loss/loss` 6.49 → 5.17 (**−1.32**), `loss/ar_ce`
+5.45 → 3.97 (−1.49), `loss/ar_kl` 0.37 → 1.50 (+1.12),
+`additional_model_loss` 5.53 → 4.27 (−1.26). Minimum `loss/loss` 4.53 at step
+2941 (single-step noise).
 
 ## Observations
 
-1. **Healthy, monotone descent over the whole run.** `loss/loss` fell steeply
-   for the first ~100 steps, then declined slowly and steadily all the way to
-   ~5.39. Raw loss swings ~4.7–6.2 step-to-step, so only the smoothed line is
-   meaningful — normal at batch size 1.
+1. **Completed cleanly and monotonically.** `loss/loss` fell steeply for the
+   first ~100 steps, then declined slowly and steadily all the way to ~5.17.
+   Raw loss swings ~4.5–6.2 step-to-step; only the smoothed line is meaningful,
+   as expected at batch size 1.
 2. **`loss/ar_ce` is the whole story.** It dominates `loss/loss` and tracks it
-   almost one-to-one (5.23 → 4.20). This is the autoregressive cross-entropy —
-   the AR expert doing the composition/arrangement learning that
+   almost one-to-one (5.23 → 4.20 → 3.98 by the end). This is the autoregressive
+   cross-entropy — the AR expert doing the composition/arrangement learning that
    `train_window_frames: 0` was set to enable.
-3. **`loss/ar_kl` is no longer flat — it is creeping up again.** It rose to a
-   ~1.16–1.20 band by step ~900–1300, then resumed a slow climb: 1.28 by
-   1801–1900, 1.32 by 2101–2200, **1.33 by 2301–2400**. This is still a gentle
-   drift, not a spike or a divergence, but the earlier "plateau" reading no
-   longer holds. Treat a continued/accelerating rise as the early warning to
-   watch — it measures how far the adapted AR distribution has moved from the
-   base (weight 0.2).
-4. **Diminishing returns, very clearly.** Per-100-mean improvement of `loss/loss`
-   is now within noise of zero: 1301–1400 → 2301–2400 moved only 5.50 → 5.39,
-   with several flat/noisy windows (e.g. 2301–2400 ticks *up* slightly from
-   2201–2300). At constant LR 1e-4 on a small, repetitive dataset this is the
-   expected approach to a plateau. Loss is no longer the useful signal — sample
-   quality is.
+3. **`loss/ar_kl` never stopped rising.** It climbed from ~0, paused briefly near
+   1.2 around steps 900–1300, then resumed climbing and ended at **~1.48–1.50**.
+   The gradient moderated in places (e.g. 2501–2600 dipped to 1.359) but the
+   trend is upward and it is now the highest it has been. This measures how far
+   the adapted AR distribution has drifted from the base (weight 0.2); it is
+   still a bounded drift, not a blow-up, but it did **not** plateau as hoped. If
+   a future run continues past 3000 or repeats this one, this is the first metric
+   to watch.
+4. **Diminishing returns by the end.** From 2701–2800 (5.206) to 2901–3000
+   (5.167) the per-100 improvement was only ~0.04, and 2801–2900 ticked up
+   slightly. At constant LR 1e-4 on a small, repetitive dataset this is the
+   expected approach to a plateau; the remaining signal is in the samples.
 5. **The L4→A100 resume shows as a small, benign bump.** The 201–300 mean
    (6.072) sits above 101–200 (5.904) and 301–400 (5.953). This window straddles
-   the step-250 switch (L4 → A100, re-processing 250–295 after restore); the
-   decline resumes cleanly afterward. Not a real regression.
-6. **A100 throughput is excellent and now very well-measured.** Over 2079
-   post-resume steps (all clip lengths), **median 3.10 s/step**, p10/p90
-   2.59/3.69. That is **~4.3× the L4's 13.4 s/step** — above the 2–2.6× estimate
-   in `docs/GPU_L4_VS_A100.md`, which was derived from peak-spec ratios rather
-   than a measured A100 run. The earlier "does it hold on the longest clips?"
-   caution is resolved: it does.
-7. **The sample tax is real but smaller here.** Each sample event pauses training
-   ~226 s (~3.8 min) — about 42% of the L4's ~388 s. Over the 250-step interval
-   it adds ~0.9 s/step amortised, so the headline ETA is longer than the raw
-   3.1 s/step implies.
-8. **GPU is healthy with large headroom.** While training: ~100% util, ~15–16 GB
-   of 80 GB, ~334 W mean / ~424 W max against a 400 W cap, 45–67 °C. Memory was
-   never the constraint and there is now ~64 GB free — batch size is deliberately
-   left at 1 (`DECISIONS.md`: one variable at a time).
-9. **Everything is persisted.** Checkpoints 250–2250 are on disk and in GCS; the
-   metrics db, samples, and logs are mirrored on the ~15-min backup cadence.
+   the step-250 switch; the decline resumes cleanly afterward — not a regression.
+6. **A100 throughput, well-measured:** over 2730 post-resume steps (all clip
+   lengths), **median 3.10 s/step**, p10/p90 2.59/3.69 — **~4.3× the L4's
+   13.4 s/step**, above the 2–2.6× peak-spec estimate in
+   `docs/GPU_L4_VS_A100.md`.
+7. **Sample tax:** each sample event paused training ~226 s (~3.8 min), about 42%
+   of the L4's ~388 s; amortised ~0.9 s/step over each 250-step interval.
+8. **GPU healthy throughout:** ~100% util, ~15–16 GB of 80 GB, ~334 W mean /
+   ~424 W max against a 400 W cap, 45–67 °C. Memory was never the constraint;
+   batch was deliberately kept at 1 (one variable at a time).
+9. **Everything persisted:** 11 numbered checkpoints + the final save +
+   `optimizer.pt` + `loss_log.db` + 52 samples are mirrored to GCS.
 
-## Things to watch / decisions to make later
+## Next steps / things to judge
 
-- **Judge the samples, not the loss.** The 40 generated audios are the quality
-  signal; loss has plateaued. Use the step-0 samples as the base-model reference
-  and listen for whether arrangement-level coherence improves across
-  500 → 1250 → 2250 (the whole point of `train_window_frames: 0`).
-- **Overfitting.** With 267 highly similar captions and no validation split,
-  watch for samples that copy incidental artifacts of specific clips rather than
-  generalizing the shared style — the reason rank was kept at 32
-  (`DECISIONS.md`).
-- **`ar_kl`** — no longer plateaued; a continued climb past ~1.35 is the early
-  warning to correlate with sample quality.
-- **End of run.** At ~78% with loss flat, the step-2500/2750/3000 samples are the
-  main reason to let it finish; consider whether a later run should lower LR or
-  add a holdout rather than add steps at this LR.
-- The ETA assumes the current sustained rate; a Colab disconnect would invalidate
-  it, but auto-resume of this unchanged, approved run is permitted
-  (`AGENTS.md`/`DECISIONS.md`).
+- **Listen to the samples.** The 52 generated audios (4 prompts at each 250-step
+  mark, step 0 → 3000) are the only quality signal. Compare step 0 (base model)
+  against 1250/2500/3000 and listen specifically for arrangement-level coherence
+  — that is the point of `train_window_frames: 0`, and it is not something loss
+  can confirm.
+- **Pick the artifact.** The final `akbar_arabic_rock_lora.safetensors` and the
+  numbered checkpoints 2250/2500/2750 are all in GCS; if an earlier checkpoint
+  sounds better (possible if late steps overfit), it is available.
+- **Overfitting check.** With 267 highly similar captions and no validation
+  split, listen for samples copying incidental artifacts of specific clips
+  rather than generalizing the shared style (why rank stayed at 32).
+- **If a v2 is considered:** `ar_kl`'s unbroken rise suggests either fewer steps,
+  a lower LR, or a KL-weight/loss adjustment — but change one variable at a time
+  and keep the dataset/goal fixed (`DECISIONS.md`).

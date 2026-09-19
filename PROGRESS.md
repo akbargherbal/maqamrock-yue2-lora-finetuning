@@ -45,3 +45,27 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 - **Persisted + verified:** GCS `.../akbar_arabic_rock_lora/output/` holds `akbar_arabic_rock_lora_000000250.safetensors` + `optimizer.pt` + `loss_log.db` + `config.yaml` + `samples/` + `tensorboard/`; `.../agent_notes/current.md` is synced. GitHub clean. The L4 backup daemon and GPU logger are stopped.
 - **Resume on the A100 Colab (fresh session):** clone the repo → `bash bootstrap/setup.sh` (wait for all `[ok]`) → `gsutil -m rsync -r` the GCS `output/` into `/content/ai-toolkit/output/akbar_arabic_rock_lora` → start the two sidecars → launch the identical command (user types it). Full runbooks: `docs/START.md` + `docs/PAUSE_RESUME.md`; session-specific handoff in `agent_notes/current.md` (gitignored — pull from GCS if absent). The fresh VM re-caches latents (~12 min) on first launch.
 - Next: on A100, measure real s/step over the first ~20 steps, recompute the ETA, then run to 3000.
+
+## 2026-09-19 — A100 resume completed the whole-song run (3000/3000) ✅
+
+- Resumed on a Colab **A100-SXM4-80GB** from the step-250 checkpoint and ran to
+  **step 3000/3000**. Clean finish, no traceback; final checkpoint + optimizer
+  written, 52 samples generated. `run.py` exited, GPU freed.
+- **~4.3× faster than the L4:** A100 median **3.10 s/step** (p10/p90 2.59 / 3.69,
+  over 2730 steps) vs the L4's 13.4 s/step. Sample pauses ~226 s each (~42% of
+  the L4's ~388 s). This resolved the 2–2.6× estimate in
+  `docs/GPU_L4_VS_A100.md` (that estimate was peak-spec-derived, not measured).
+- **Final loss** (first-50 → last-50): `loss/loss` 6.49 → 5.17, `loss/ar_ce`
+  5.45 → 3.97, `additional_model_loss` 5.53 → 4.27. `loss/ar_kl` 0.37 → **1.50**
+  — it never plateaued and drifted upward to its highest value; flagged as the
+  metric to watch for any v2. Full write-up: `TRAINING_ANALYSIS/ANALYSIS.md`.
+- **Persisted + verified:** 11 numbered checkpoints (`_000000250` … `_000002750`)
+  **+ the final `akbar_arabic_rock_lora.safetensors`** + `optimizer.pt` +
+  `loss_log.db` + 52 samples, all on disk and in GCS. Docs committed/pushed:
+  `docs/LIVE_STATUS.md` (12:01 post-resume snapshot) and
+  `TRAINING_ANALYSIS/` (`0f205a1`, `00f4534`).
+- **Next:** evaluate the 52 samples by ear for arrangement-level coherence — the
+  whole point of `train_window_frames: 0`, and not something loss can confirm.
+  Pick the best artifact (final vs an earlier checkpoint if late steps overfit).
+  A v2, if any, should change one variable (steps / LR / `ar_kl_weight`) given
+  the unbroken `ar_kl` rise.
