@@ -84,6 +84,25 @@ Where a claim below says "verified against source," it means the actual `ostris/
 - Correct way to genuinely restart after a config fix: archive the prior output, either via a distinct run name, or by moving the local folder and `gsutil mv`-ing the GCS prefix. Done 2026-09-19 for the killed 60s-window run: `output/akbar_arabic_rock_lora` → `..._crop60_killed` locally, same move in GCS, then the backup daemon was restarted so it writes a **fresh** `run_manifest.json` at the clean prefix.
 - Latent cache is **not** invalidated by this: `/content/yue2_dataset/_latent_cache` holds full-song latents, and `train_window_frames` only crops at train time — so a relaunch reuses the cache and skips the ~12-min re-cache.
 
+## Whole-song (`train_window_frames: 0`) on L4 — measured
+
+- The config comment's "UNVERIFIED ON THIS HARDWARE" is now resolved. Whole-song ran cleanly on the L4 over steps 1–295: **~13.4 s/step** median, 100% GPU util, ~**70.5 W of L4's 72 W TDP**, 12.9 GB mean / **15.8 GB peak** of 24 GB, ~74 °C. No bounded-window fallback was needed on VRAM grounds. 3000 steps ≈ **~12 h** (incl. ~1.2 h of sampling every 250).
+- **Do not reuse the earlier 60 s-window run's ~7.8 s/step or ~6 h ETA** for this config — whole-song is ~1.7× slower per step.
+
+## L4 vs A100 for this workload: ~2–2.6×, not 4× (and A100 here is 80 GB)
+
+- The measured ~100% util and ~98%-of-TDP power mean the L4 is GPU-bound, not dataloader-bound, so a faster GPU helps. But the ceiling is the tensor-core ratio: BF16/FP16 dense **121 (L4) vs 312 (A100) = 2.58×** (INT8 242 vs 624 = 2.57×). The run is **not** memory-bandwidth-bound (weights read well under 1 GB/s at 13 s/step), and **A100's FP32 CUDA-core rate is *lower* than L4's (19.5 vs 30.3 TFLOPS)**, so non-tensor ops don't speed up. Realistic speedup ≈ **2–2.6×** (~12 h → ~4.5–6 h).
+- Colab compute-unit break-even = `6.7 / 1.54` = **4.35×**, so A100 costs ~**1.7–2.2× more units** for the same run. It buys turnaround time, not savings. Full write-up: `docs/GPU_L4_VS_A100.md`.
+- The Colab A100 on offer here is **SXM4-80GB** (2,039 GB/s, 80 GB VRAM) but the **same 312 TFLOPS compute** — the ~2.6× ceiling does not change.
+
+## Cross-VM / cross-GPU resume (Colab session switch)
+
+- Run state is portable across VMs/GPUs: restore the GCS `output/` prefix into `/content/ai-toolkit/output/<run>/` on the new VM, then launch the identical command — ai-toolkit auto-resumes from the newest checkpoint (see the auto-resume entry above). Runbooks: `docs/PAUSE_RESUME.md`, `docs/START.md`.
+- A run is only portable once a checkpoint exists **and** reached GCS. With `save_every: 250`, the first resumable point is step 250; killing before that loses all progress. (We stopped the L4 run at step 295, so resume is from 250.)
+- The latent cache (`/content/yue2_dataset/_latent_cache`) is per-VM and **not** in GCS, so a fresh VM rebuilds it (~12 min) on first launch — expected.
+- Never run the same run name on two VMs at once: they share one GCS prefix and `run_manifest.json`. Stop one before starting the other.
+- Performance-only knobs (e.g. `gradient_checkpointing`) don't affect resume or the trained objective; changing hyperparameters / network / lr defines a *different* experiment, not a resume.
+
 ## Agent training-control policy (explicit, don't re-litigate)
 
 - The agent may **auto-resume an unchanged, already-approved run** after an unplanned interruption (VM death, disconnect) — same config, same run name, nothing changed. This exists specifically to avoid burning a Colab session's availability waiting for a human to notice and retype a resume command.

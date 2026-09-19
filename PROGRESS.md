@@ -36,3 +36,12 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 - Corrected the stale `README.md` (untouched by earlier commits): opening goal now full-song structure (was "style/timbre adapter"); Status updated from "Nothing has been trained yet" to the killed-run/archive/relaunch state; `train_window_frames: 0` added to the config summary; Observability example fixed from the non-existent `--key nar_flow` to `--key "loss/loss"` and the confirmed key list.
 - Corrected the run-1 kill step to 875/3000 (~29%) in this file and `DECISIONS.md` (was noted as ~810/27%).
 - Next: smoke-test the whole-song window's VRAM/step-time on the L4 before trusting the `steps: 3000` budget.
+
+## 2026-09-19 — Whole-song run on L4, stopped at step 295; moving to A100
+
+- The whole-song run (`train_window_frames: 0`) launched and ran healthily to **step 295/3000**: ~**13.4 s/step**, 100% GPU util, ~70.5 W of 72 W TDP, 15.8 GB peak VRAM. This resolves the config comment's "UNVERIFIED ON THIS HARDWARE" warning — whole-song fit on the L4, no bounded-window fallback needed. 3000 steps ≈ **~12 h** including ~1.2 h of sample overhead.
+- Cost/time analysis (`docs/GPU_L4_VS_A100.md`): A100 is ~**2–2.6×** faster, not the ≥4× required for compute-unit break-even (`6.7 / 1.54 = 4.35×`). The user chose to switch anyway for turnaround; the offered Colab A100 is **SXM4-80GB**.
+- **The L4 run was stopped deliberately at step 295** to move to a separate A100 Colab session. Resume begins at the **step-250** checkpoint (steps 251–295 lost, ~10 min).
+- **Persisted + verified:** GCS `.../akbar_arabic_rock_lora/output/` holds `akbar_arabic_rock_lora_000000250.safetensors` + `optimizer.pt` + `loss_log.db` + `config.yaml` + `samples/` + `tensorboard/`; `.../agent_notes/current.md` is synced. GitHub clean. The L4 backup daemon and GPU logger are stopped.
+- **Resume on the A100 Colab (fresh session):** clone the repo → `bash bootstrap/setup.sh` (wait for all `[ok]`) → `gsutil -m rsync -r` the GCS `output/` into `/content/ai-toolkit/output/akbar_arabic_rock_lora` → start the two sidecars → launch the identical command (user types it). Full runbooks: `docs/START.md` + `docs/PAUSE_RESUME.md`; session-specific handoff in `agent_notes/current.md` (gitignored — pull from GCS if absent). The fresh VM re-caches latents (~12 min) on first launch.
+- Next: on A100, measure real s/step over the first ~20 steps, recompute the ETA, then run to 3000.
