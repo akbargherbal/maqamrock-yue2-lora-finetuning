@@ -13,6 +13,9 @@ operating contract is `../AGENTS.md`.
 | Check how training is going | [MONITOR.md](MONITOR.md) |
 | Decide L4 vs A100 (cost/time) | [GPU_L4_VS_A100.md](GPU_L4_VS_A100.md) |
 
+Future ideas (not runbooks, not scheduled): [FUTURE_PRONUNCIATION_LORA.md](FUTURE_PRONUNCIATION_LORA.md)
+— fixing Arabic pronunciation with a second, AR-only LoRA.
+
 ## Constants (memorize / copy)
 
 | | |
