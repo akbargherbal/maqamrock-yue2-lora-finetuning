@@ -383,39 +383,38 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   confirm. A v3, if any, changes one variable (steps / LR / `ar_kl_weight`) given
   the unbroken `ar_kl` rise.
 
-## 2026-09-20 — v2 listening result + future idea documented (pronunciation via a second LoRA)
+## 2026-09-20 — First systematic listening pass on v2, step 3000, all four maqams
 
-- **Listening evaluation (user, v2 final checkpoint):** style/timbre/arrangement
-  fidelity to the training data is strong — the target sound is matched
-  closely. Pronunciation is much improved over v1 but not perfect (~9/10):
-  certain letters soften, notably ح drifting toward خ/ه and ع toward أ. This is
-  a big change from v1's substantial degradation, consistent with the caption
-  fix (lyrics now condition the AR).
-- **User's hypothesis for the residual gap:** the training audio is ~90%
-  dialectal Arabic singing, so the model learned dialect-influenced
-  articulation; standard Arabic is rare in sung material. Proposed fix: a
-  second, low-weight "pronunciation LoRA" trained on Quran recitation (the
-  strongest source of precise MSA/tajweed articulation), stacked like image
-  multi-LoRA (e.g. style 1.0 + pronunciation 0.1). **Not scheduled** — a
-  future idea to research, not an action item.
-- **Research written up** at
-  [`docs/FUTURE_PRONUNCIATION_LORA.md`](docs/FUTURE_PRONUNCIATION_LORA.md).
-  All mechanics verified against a fresh `ostris/ai-toolkit` clone, not
-  recalled. Key findings: pronunciation is an **AR** (semantic) quantity, style
-  is **NAR** (acoustic); LoRA deltas are additive
-  (`lora_special.py merge_in()`), so a NAR-only style adapter and an AR-only
-  pronunciation adapter live in **disjoint weights** and compose exactly —
-  unlike image LoRAs, which collide. But today's tooling loads **one** adapter
-  for YuE2 (the second slot is Flux-only; `Yue2_Studio` says there is "no
-  arbitrary Style + Artist stacking"), so this would be an **offline merge**,
-  not a live 1.0/0.1 stack.
-- **Two things to resolve before spending compute** (both in the doc): (1) the
-  decisive risk — if the MERT semantic tokens don't cleanly encode the ح/خ and
-  ع/أ contrasts, *no* adapter can fix it; test the base model, no LoRA, on the
-  held-out hard-letter prompts first (free). (2) Cheaper levers that target the
-  same thing and go first: `do_separation: true` (purpose-built lyrics→vocals
-  AR term), full diacritics in prompts, lower `sample_ar_temperature`.
-- **Licensing caveat recorded:** the Quran text is public domain; specific
-  recitation *recordings* are not necessarily license-free.
-- **Next:** when this is picked up, start with the base-model hard-letter probe
-  and the cheap config levers — not with training a donor adapter.
+- **Method:** interviewer-style, word-by-word — one specific track + specific
+  rare/hard target words per probe (from `heldout_eval_prompts.json`), not a
+  general impression ask. Confirmed suffix→maqam mapping:
+  `_0`=Hijaz, `_1`=Kurd, `_2`=Nahawand, `_3`=Ajam.
+- **Result, step 3000, all four maqams:** no word substitutions, no dropped
+  words, except one genuine phoneme substitution (**ح → خ**: "حُصُونٌ" heard
+  as "خُصُونٌ", Ajam). Everything else flagged was performance-level (a rushed
+  ر, a soft ع, a light/fast ق) or mix/mastering (vocal prominence tracking
+  how quiet the instrumentation is at that moment), not mispronunciation —
+  this is a materially better picture than v1's substitution-heavy result
+  logged above. This is a first pass, not a full evaluation — see Next.
+- **Enjambment resolved, not a v2/LoRA issue:** the model pauses at the end of
+  each *written* lyric line even when the grammar spans into the next line
+  (e.g. Kurd's "رابِئِ" / "الضُّرَباءِ", one grammatical iḍāfa split across
+  two lines). Confirmed present identically in **step 0 (base, no LoRA)** —
+  inherited from YuE2/Suno-style generation in general, not introduced or
+  amplified by training. The usual mitigation is `...` at line end to mark
+  continuation (already used in some captions, e.g. Nahawand's, where no
+  phrasing issue was observed).
+- **A suspected "weak ع" pattern (Kurd's "الأَكْرُعُ", Nahawand's
+  "يُصَدِّعُ"/"يُصَدِّعُهُ") did not replicate in Ajam** ("أَرْعَنَ",
+  "الْعَمَاءُ" both clear) — most likely occasional performance softness,
+  not a systematic phoneme weakness. Not ruled fully out, just downgraded.
+- **Hijaz-only drift check, step 2250 vs 3000, same lines:** no consistent
+  directional regression despite `ar_kl` being higher at 3000 — some phonemes
+  slightly better at 2250, others at 3000. Style/arrangement favors 3000. This
+  check has not yet been repeated on Kurd/Nahawand/Ajam.
+- **Next (explicitly deferred to next session for in-depth discussion):**
+  decide whether/how to track the single ح→خ substitution across other
+  tracks/checkpoints, whether to repeat the step-2250-vs-3000 drift check on
+  the other three maqams, whether to sample early checkpoints (0/250/500) on
+  non-Hijaz maqams, and ultimately the artifact pick (final vs. an earlier
+  checkpoint) — no decision made yet on any of these.
