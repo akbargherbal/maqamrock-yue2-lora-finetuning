@@ -359,3 +359,26 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   documents the live v2 run.
 - **Next:** let it reach 3000, finalize the analysis, then listen to the
   held-out-lyric samples.
+
+## 2026-09-20 — v2 run completed 3000/3000 ✅
+
+- Finished **~12:23 UTC** at **step 3000/3000**, clean exit (no traceback,
+  final adapter + optimizer written, 52 samples, GPU freed). ~4.73 h logged
+  wall span incl. 13 sample events; **median 3.42 s/step**; VRAM peak 17.0 GB.
+- **Final loss** (first-50 → last-50): `loss/loss` 6.23 → **4.79**,
+  `loss/ar_ce` 5.19 → **3.61**, `additional_model_loss` 5.26 → **3.92**,
+  `loss/ar_kl` 0.39 → **1.54**.
+- **vs v1** (same config, lyric-free captions): v2 ends lower everywhere except
+  `ar_kl` — `loss/loss` 4.79 vs 5.17, `ar_ce` 3.61 vs 3.97, `ar_kl` 1.54 vs
+  1.50. The lower `ar_ce` is the mechanism of the caption fix (lyrics now
+  condition the AR), **not** by itself proof of better audio; and `ar_kl` still
+  never plateaued in either run. Full write-up: `TRAINING_ANALYSIS/ANALYSIS.md`.
+- **Persisted + verified:** 11 numbered checkpoints (`_000000250` …
+  `_000002750`) **+ the final `akbar_arabic_rock_lora.safetensors`** +
+  `optimizer.pt` + `loss_log.db` + `config.yaml` + 52 samples, on disk and in
+  GCS. Verified by a no-diff dry-run `rsync` (12 checkpoints, 52 samples remote
+  == local). 4 stale smoke-test step-0 samples removed from GCS earlier.
+- **Next:** evaluate the 52 samples by ear — the actual v2 goal is pronunciation/
+  lyric fidelity in addition to arrangement coherence, neither of which loss can
+  confirm. A v3, if any, changes one variable (steps / LR / `ar_kl_weight`) given
+  the unbroken `ar_kl` rise.

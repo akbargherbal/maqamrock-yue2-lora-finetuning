@@ -318,3 +318,23 @@ Where a claim below says "verified against source," it means the actual `ostris/
     (Hijaz) has 14,334 tokens of headroom.
 - No caption anywhere near the 24,576 context ceiling — token count is not a
   risk for this run. Nothing to change in the config.
+
+## v2 finished: the lyric fix worked as designed, and `ar_kl` drift replicated
+
+- v2 (lyric-conditioned captions, otherwise identical to v1) ran **3000/3000**
+  cleanly, 2026-09-20. Full numbers: `TRAINING_ANALYSIS/ANALYSIS.md`.
+- **`loss/ar_ce` is ~0.35 lower than v1's at the same steps and at the end**
+  (3.61 vs 3.97 last-50). This is the expected, mechanical consequence of the
+  AR now receiving the real lyrics in its prompt — it confirms the caption fix
+  reached the AR (v1's failure), but it is **not** a quality claim on its own.
+  Style/pronunciation still has to be judged by ear on the samples.
+- **`loss/ar_kl` rose unbroken to the end in both runs** (v1 0.37 → 1.50, v2
+  0.39 → **1.54**; v2 marginally ahead in the second half). `ar_kl_weight: 0.2`
+  visibly did not make it plateau. It stayed bounded (no blow-up), but this is
+  now a **reproduced** two-run trend, not a v1 quirk — making it the first,
+  well-motivated lever for any v3: fewer steps, lower LR, or lower
+  `ar_kl_weight`. One variable at a time (see the one-variable discipline in
+  `PROGRESS.md`/the kill-and-relaunch entries).
+- **Diagnostic caveat to carry forward:** `ar_ce` and `ar_kl` are computed under
+  different prompt conditioning between v1 and v2, so cross-run loss values are
+  directional evidence, not an A/B on audio quality. The samples are the arbiter.
