@@ -290,13 +290,49 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `evaluation_alharith.json`'s clean Ajam entry; whether to commit
   `prepare_yue2_dataset_v2.py` for build reproducibility (open, user's call).
   **v2 training has not started.**
-  `ar_loss_weight: 0`, exclude it via `ignore_if_contains`, raise
-  `ar_kl_weight`, or average across checkpoints) are **downgraded to
-  fallbacks only**, not first-choice fixes: each either forfeits the
-  structural-coherence learning `train_window_frames: 0` was introduced for,
-  or re-creates the same averaging the user explicitly rejected. They remain
-  worth knowing about if the caption fix above turns out to be blocked or
-  insufficient, but are not the plan.
-- **Next:** confirm the raw manifest's lyrics field (step 1 above), then
-  decide whether to lift the dataset freeze for this specific, narrowly-
-  scoped change.
+
+## 2026-09-20 — Pre-launch checklist closed out; ready for the smoke test
+
+- `AGENTS.md` rewritten (1217 words, down from 2120) — base structure from
+  `f9a9c03`, two missing Tier-A rules restored (no unilateral config edits;
+  `agent_notes/current.md` reminder), the superseded "Approved amendment"
+  section cut. See commit `ed6bca1`.
+- Final YAML sanity check done: **no value changes**, 7 stale/wrong comments
+  fixed (trigger-word framing, GCS sync interval, a dead script reference,
+  the `steps` TODO framing, `content_or_style`'s "unconfirmed" note, the
+  whole-song VRAM warning, the stale "style-only samples" note). Commit
+  `83b1450`.
+- `GCP_DATASET_PATH` confirmed from the launching notebook: exactly
+  `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/dataset`
+  (the v2-content prefix) — the one item that could have silently trained on
+  the wrong data. No action needed.
+- **Token-count check done, real tokenizer, no overflow.** 267 training
+  captions: 780–1631 prefix tokens (mean 1214), 13,690-token headroom on the
+  tightest case against a 370s worst-case clip. 4 held-out prompts: 983–1237
+  (mean 1124), 14,334-token headroom against `duration: 360`. Full method +
+  numbers in `DECISIONS.md`.
+- **Only the smoke test (before the real launch) remains.** Procedure, on
+  the A100 Colab session, after `docs/START.md` steps 1–4 (repo cloned,
+  `bootstrap/setup.sh` finished all `[ok]`, both sidecars running):
+  1. Launch the real command from `docs/START.md` step 5, but stop it
+     deliberately well short of step 250 (`save_every: 250` — nothing is
+     saved before that, so nothing needs wiping if you stop earlier):
+     ```bash
+     cd /content/ai-toolkit
+     python run.py /content/maqamrock-yue2-lora-finetuning/config/akbar_arabic_rock_lora.yml \
+       -l /content/logs/train.log
+     ```
+  2. Watch `gpu_usage.csv` / step time in `train.log` for ~20–30 steps —
+     confirm VRAM and s/step look sane (whole-song already measured clean
+     on this exact config in the v1 run: ~15.8 GB peak, ~3.1 s/step on
+     A100 — see `DECISIONS.md`). Then `Ctrl+C`.
+  3. Check `output/akbar_arabic_rock_lora/` for any `.safetensors`. If the
+     smoke test was stopped before step 250, there shouldn't be any.
+  4. If any checkpoint *did* get written (smoke test ran past step 250),
+     wipe just that run folder before the real launch — reusing the run
+     name means `get_latest_save_path()` would otherwise silently
+     auto-resume from it instead of starting fresh (see `DECISIONS.md`'s
+     "Run name" entry, condition 3).
+  5. Launch the real run — same command, same VM, same terminal.
+- **Next:** run the smoke test above, then launch for real. User types both
+  commands.
