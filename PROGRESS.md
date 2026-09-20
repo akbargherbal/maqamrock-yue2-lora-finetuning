@@ -336,3 +336,26 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   5. Launch the real run — same command, same VM, same terminal.
 - **Next:** run the smoke test above, then launch for real. User types both
   commands.
+
+## 2026-09-20 — Smoke test passed; v2 run launched (in progress)
+
+- **Smoke test passed** on the A100 with the unchanged v2 config: latent cache
+  built ~3.5 min, step-0 sample event 9:43, stopped at step 57/3000 (no
+  checkpoint written). Median **3.29 s/step**, VRAM peak ~17.6 GB (steady
+  training ~14.8 GB). Output was archived to
+  `...akbar_arabic_rock_lora_smoketest_archived` (13 objects) and the local run
+  folder wiped, so the real launch started genuinely fresh. Latent cache kept.
+- **v2 run launched** by the user (foreground, foreground-only so Ctrl+C works
+  — a detached launch inherits SIGINT=ignored, see `agent_notes/current.md`).
+  Sidecars `backup_to_gcp.py` + `gpu_logger.py` running throughout.
+- **Live snapshot at step ~652/3000 (21.7%, 2026-09-20 08:26 UTC):** ~3.3 s/step,
+  VRAM peak 16.4 GB, no errors. `loss/loss` first-50 6.23 → last-50 5.36;
+  `ar_ce` 5.19 → 4.26; `ar_kl` 0.39 → 1.16. v2's `loss/loss`/`ar_ce` run below
+  v1's at the same step (lyrics now condition the AR); `ar_kl` is the metric to
+  watch (slightly above v1 same-step, still rising) — see
+  `TRAINING_ANALYSIS/ANALYSIS.md`.
+- v1's completed analysis moved to `TRAINING_ANALYSIS/v1_nolyrics_archived/` as
+  the no-lyrics baseline; the top-level `TRAINING_ANALYSIS/ANALYSIS.md` now
+  documents the live v2 run.
+- **Next:** let it reach 3000, finalize the analysis, then listen to the
+  held-out-lyric samples.
