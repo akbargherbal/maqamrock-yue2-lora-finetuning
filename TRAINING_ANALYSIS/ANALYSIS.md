@@ -1,15 +1,16 @@
 # Training analysis — `akbar_arabic_rock_lora` (v2, lyric-conditioned captions)
 
-> **IN PROGRESS — live snapshot at 2026-09-20 10:00 UTC, step ~1551 / 3000 (51.7%).**
-> The run is still training. Numbers below are current, not final; this file is
-> regenerated/updated as the run proceeds and finalized at step 3000. Charts are
-> regenerated from the live `loss_log.db` and `gpu_usage.csv` with:
+> **IN PROGRESS — live snapshot at 2026-09-20 11:24 UTC, step ~2481 / 3000 (82.7%).**
+> The run is still training (~30 min of steps + 3 sample events left). Numbers
+> below are current, not final; this file is regenerated/updated as the run
+> proceeds and finalized at step 3000. Charts are regenerated from the live
+> `loss_log.db` and `gpu_usage.csv` with:
 >
 > ```bash
 > python TRAINING_ANALYSIS/generate_plots.py
 > ```
 > (Note: the script's "recent rate"/ETA line can be distorted downward by a
-> sample pause inside its last-100 window — use the median below, not that line.)
+> sample pause inside its last-100 window — use the median below.)
 
 > This is **training loss only**. There is no held-out validation split, so
 > quality must be judged from the generated samples too — loss alone can't tell
@@ -33,12 +34,12 @@
 | Model | YuE2 3B int8 `convrot8`, flowmatch, batch 1 |
 | Dataset | 267 clips, 267 **lyric-bearing** captions, one combined LoRA across four maqams |
 | GPU | Colab **A100-SXM4-80GB** |
-| Steps done | **~1551 / 3000 (51.7%)** at snapshot |
-| Step time | **median 3.40 s/step** (p10 2.80 / p90 4.00, excluding sample pauses) |
-| Sample tax | 4 samples per event at `duration: 360`, ~**10.5 min/event** (595–679 s gaps); **28 samples** so far (steps 0/250/…/1500) |
-| Checkpoints | 6 so far: `_000000250` … `_000001500`, on disk and in GCS |
-| ETA | **~2.4 h** remaining (~82 min of steps + ~63 min of 6 sample events) |
-| GPU | peak **16.7 GB** (17134 MiB), mean 12.4 GB of 80 GB; ~93% util, ~286 W mean (incl. sample pauses) |
+| Steps done | **~2481 / 3000 (82.7%)** at snapshot |
+| Step time | **median 3.41 s/step** (p10 2.80 / p90 4.00, excluding sample pauses) |
+| Sample tax | 4 samples per event at `duration: 360`, ~**10.5 min/event** (594–679 s gaps); **40 samples** so far (steps 0/250/…/2250) |
+| Checkpoints | 9 so far: `_000000250` … `_000002250`, on disk and in GCS |
+| ETA | **~1 h** remaining (~30 min of steps + 3 sample events) |
+| GPU | peak **16.9 GB** (17282 MiB), mean 12.7 GB of 80 GB; ~94% util, ~294 W mean (incl. sample pauses) |
 | Health | no tracebacks; loss descending cleanly; VRAM flat |
 
 ## Charts
@@ -68,16 +69,26 @@
 | 1201–1300 | 5.261 | 4.108 | 1.230 | 4.354 |
 | 1301–1400 | 5.198 | 4.048 | 1.261 | 4.300 |
 | 1401–1500 | 5.198 | 4.054 | 1.251 | 4.304 |
-| 1501–1600 * | 5.203 | 4.041 | 1.281 | 4.298 |
+| 1501–1600 | 5.198 | 4.041 | 1.275 | 4.296 |
+| 1601–1700 | 5.122 | 3.962 | 1.313 | 4.225 |
+| 1701–1800 | 5.164 | 4.010 | 1.272 | 4.264 |
+| 1801–1900 | 5.110 | 3.961 | 1.323 | 4.225 |
+| 1901–2000 | 5.080 | 3.920 | 1.327 | 4.185 |
+| 2001–2100 | 5.086 | 3.906 | 1.353 | 4.177 |
+| 2101–2200 | 5.061 | 3.900 | 1.326 | 4.165 |
+| 2201–2300 | 5.019 | 3.847 | 1.400 | 4.127 |
+| 2301–2400 | 5.005 | 3.858 | 1.386 | 4.135 |
+| 2401–2500 * | 4.936 | 3.763 | 1.426 | 4.048 |
 
-\* partial window (to ~step 1551 at snapshot).
+\* partial window (to ~step 2481 at snapshot).
 
 Confirmed metric keys: `additional_model_loss`, `learning_rate`, `loss/ar_ce`,
 `loss/ar_kl`, `loss/loss`. There is **no** `nar_flow` key (see `DECISIONS.md`).
 
-First-50 vs last-50 (step ~1551): `loss/loss` 6.23 → 5.20 (**−1.03**),
-`loss/ar_ce` 5.19 → 4.04 (−1.15), `loss/ar_kl` 0.39 → 1.28 (**+0.90**),
-`additional_model_loss` 5.26 → 4.29 (−0.97).
+First-50 vs last-50 (step ~2481): `loss/loss` 6.23 → 4.94 (**−1.29**),
+`loss/ar_ce` 5.19 → 3.77 (−1.42), `loss/ar_kl` 0.39 → 1.42 (**+1.04**),
+`additional_model_loss` 5.26 → 4.05 (−1.21). Minimum `loss/loss` 4.43 at step
+2451 (single-step noise).
 
 ## v2 vs v1 at the same step (not apples-to-apples — read the caveat)
 
@@ -85,10 +96,10 @@ First-50 vs last-50 (step ~1551): `loss/loss` 6.23 → 5.20 (**−1.03**),
 |---|---|---|---|---|
 | v1 1–100 | 6.287 | 5.227 | 0.579 | 5.343 |
 | **v2 1–100** | **6.015** | **4.942** | 0.588 | **5.060** |
-| v1 1401–1500 | 5.536 | 4.409 | 1.194 | 4.648 |
-| **v2 1401–1500** | **5.198** | **4.054** | 1.251 | **4.304** |
-| v1 1501–1600 | 5.509 | 4.372 | 1.215 | 4.615 |
-| **v2 1501–1600** | **5.203** | **4.041** | 1.281 | **4.298** |
+| v1 1901–2000 | 5.409 | 4.252 | 1.280 | 4.508 |
+| **v2 1901–2000** | **5.080** | **3.920** | 1.327 | **4.185** |
+| v1 2401–2500 | 5.304 | 4.126 | 1.392 | 4.405 |
+| **v2 2401–2500** | **4.936** | **3.763** | 1.426 | **4.048** |
 
 **Caveat:** the audio targets are identical, but v2's prompts now contain the
 lyrics, so the AR has the actual words to predict from. A lower `loss/ar_ce` is
@@ -99,31 +110,34 @@ lyric signal is reaching the AR (the v1 failure was that it never did).
 ## Observations / flags
 
 1. **Healthy and still descending.** `loss/loss` fell steeply over the first
-   ~100 steps then declined steadily; at the last window it is ~5.20. No
-   tracebacks, no loss spikes beyond batch-1 noise, VRAM flat (never climbing).
-2. **The lyric signal is present and stable.** `loss/ar_ce` sits ~0.33 lower
-   than v1's at the same step (4.04 vs 4.37 by 1501–1600) — consistent with the
-   AR conditioning on real lyrics rather than style tags alone.
-3. **`loss/ar_kl` — the one to watch, and it has not plateaued.** It rose
-   0.39 → 1.28 (+0.90) and is now *above* v1's same-step (1.19–1.22). v1 briefly
-   paused near ~1.2 around steps 900–1300, then resumed to 1.50 by step 3000; v2
-   has shown no such pause and is ahead of that curve. **Bounded drift, not a
-   blow-up — but the trend is up.** If it keeps climbing past ~1.3–1.5 to the
-   end, that is the first lever for a v3 (fewer steps / lower LR / lower
-   `ar_kl_weight`), one variable at a time.
-4. **Throughput/VRAM as expected.** Median 3.40 s/step, ~16.7 GB peak; each
-   `duration: 360` sample event pauses training ~10.5 min (visible as spikes in
-   `04_throughput.png`) — the ETA in `generate_plots.py`'s summary line can read
-   too pessimistic if a sample pause falls in its last-100 window.
-5. **Sample quality is the real test.** 28 samples so far (steps 0/250/…/1500)
-   with held-out lyrics; the point of this run is that checkpoints can now
+   ~100 steps then declined steadily; last window ~4.94. No tracebacks, no loss
+   spikes beyond batch-1 noise, VRAM flat (never climbing).
+2. **The lyric signal is present and stable.** `loss/ar_ce` sits ~0.33–0.36
+   lower than v1's at the same step (e.g. 3.76 vs 4.13 by 2401–2500) —
+   consistent with the AR conditioning on real lyrics rather than style tags
+   alone.
+3. **`loss/ar_kl` — still rising, no plateau, and now tracking v1 closely.**
+   It rose 0.39 → 1.42 (+1.04); at 2401–2500 v2 is 1.43 vs v1's 1.39. v1 ended
+   its run at 1.48. With ~520 steps left, **v2 looks set to finish at ~1.5 or
+   above** — the same unbounded-drift signature v1 showed. Bounded, not a
+   blow-up, but if a v3 is run this is still the first lever (fewer steps /
+   lower LR / lower `ar_kl_weight`), one variable at a time.
+4. **Diminishing returns.** The per-100 drop has shrunk to ~0.07–0.08 by
+   2201–2500 (e.g. 5.019 → 5.005 → 4.936), the expected approach to a plateau
+   at constant LR on a small, repetitive dataset. Remaining signal is in the
+   samples.
+5. **Throughput/VRAM as expected.** Median 3.41 s/step, ~16.9 GB peak; each
+   `duration: 360` sample event pauses training ~10.5 min (spikes in
+   `04_throughput.png`).
+6. **Sample quality is the real test.** 40 samples so far (steps 0/250/…/2250)
+   with held-out lyrics — the point of this run is that checkpoints can now
    *show* pronunciation. Listen for lyric fidelity + arrangement coherence, not
    loss.
-6. **Ops note (resolved 2026-09-20):** `backup_to_gcp.py` uses append-only
+7. **Ops note (resolved 2026-09-20):** `backup_to_gcp.py` uses append-only
    `gsutil rsync`, so the 4 smoke-test step-0 samples had persisted in the run's
    GCS `output/samples/` after the local wipe (8 step-0 files instead of 4).
-   They were removed from GCS; the run prefix is now exactly 4 per step
-   (0/250/…/1500, 28 total). No effect on training.
+   They were removed from GCS; the run prefix is now exactly 4 per step. No
+   effect on training.
 
 ## Next steps
 
