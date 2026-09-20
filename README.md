@@ -6,11 +6,14 @@ Training runs on a rented single GPU in Google Colab, driven over the CLI rather
 
 ## Status
 
-As of the `PROGRESS.md` 2026-09-20 entries: **v1 finished training but is archived and superseded; v2 is prepared and not yet launched.**
+As of the `PROGRESS.md` 2026-09-20 entries: **both training runs have finished
+(3000/3000 each); v2 is the current artifact. Nothing is training right now.**
 
 **v1** (`akbar_arabic_rock_lora`, style-only captions) finished **3000/3000** on a Colab A100-SXM4-80GB, with strong style/timbre fidelity but degraded Arabic pronunciation — traced to the dataset's captions carrying no lyrics at all, so the AR expert was never once rewarded for getting the words right (full root-cause in `PROGRESS.md`/`DECISIONS.md`). Its run is archived in GCS as `akbar_arabic_rock_lora_v1_nolyrics_archived` (185 objects, verified), and its dataset as `yue2_dataset_v1_style_only_obsolete` (local) / `dataset_v1_style_only_obsolete/` (GCS). An earlier, even-earlier run was killed at ~875/3000 steps on a separate scope correction (`train_window_frames`); that's archived as `akbar_arabic_rock_lora_crop60_killed`.
 
-**v2** fixes the caption gap: 267 audio/caption pairs rebuilt from scratch with real lyrics appended in YuE2's native `[Lyrics]` format, verified against the manifest and promoted to be *the* dataset under the same plain names v1 used (`./yue2_dataset` locally, `dataset/` in GCS) — no config path edits needed. A held-out evaluation set (`INFERENCE/yue2_eval_heldout/`) and updated training-time sample prompts (real lyrics, `duration: 360`) are built and committed (`config/akbar_arabic_rock_lora.yml`). **No v2 run has started yet** — see `PROGRESS.md` for what's still pending before launch (YAML sanity check, `GCP_DATASET_PATH` confirmation, token-count check, smoke test).
+**v2** fixes the caption gap: 267 audio/caption pairs rebuilt from scratch with real lyrics appended in YuE2's native `[Lyrics]` format, verified against the manifest and promoted to be *the* dataset under the same plain names v1 used (`./yue2_dataset` locally, `dataset/` in GCS) — no config path edits needed. It then **ran to 3000/3000** on the same A100 with captions as the only change; the lower `loss/ar_ce` there confirms the lyrics now condition the AR (see `TRAINING_ANALYSIS/ANALYSIS.md`). A held-out evaluation set (`INFERENCE/yue2_eval_heldout/`) and updated training-time sample prompts (real lyrics, `duration: 360`) are committed in `config/akbar_arabic_rock_lora.yml`.
+
+**v2 listening result:** style/timbre/arrangement match the target strongly and pronunciation is much improved over v1 (~9/10), with some letters still soft (ح drifting toward خ/ه, ع toward أ). A proposed future fix — a second, **AR-only** pronunciation LoRA (Quran-recitation donor), merged at low weight — is researched but **not scheduled**: [`docs/FUTURE_PRONUNCIATION_LORA.md`](docs/FUTURE_PRONUNCIATION_LORA.md).
 
 ## Repo layout
 
@@ -28,7 +31,7 @@ DECISIONS.md                        # source-verified decisions and non-obvious 
 PROGRESS.md                         # milestone trail across sessions
 verification.md                     # independent dataset audit
 AGENTS.md                           # operating instructions for the coding agent
-docs/                               # task runbooks: start, pause/resume, backup, monitor
+docs/                               # runbooks (start, pause/resume, backup, monitor) + future ideas
 ```
 
 ## Dataset
@@ -95,4 +98,4 @@ Three real surfaces, in priority order:
 
 ## Docs
 
-`docs/` holds task runbooks — [start on a fresh VM](docs/START.md), [pause/resume across sessions](docs/PAUSE_RESUME.md), [backup/restore](docs/BACKUP_RESTORE.md), and [monitoring](docs/MONITOR.md). `DECISIONS.md` records source-verified decisions and the reasoning behind non-obvious config fields; read it before changing anything that looks wrong. `PROGRESS.md` is the milestone trail. `verification.md` is the dataset audit. `AGENTS.md` is the operating contract for the coding agent, including the run-control policy (no new or changed run without the user typing the command; auto-resume only an unchanged, already-approved run after an unplanned interruption).
+`docs/` holds task runbooks — [start on a fresh VM](docs/START.md), [pause/resume across sessions](docs/PAUSE_RESUME.md), [backup/restore](docs/BACKUP_RESTORE.md), [monitoring](docs/MONITOR.md), [L4 vs A100 cost/time](docs/GPU_L4_VS_A100.md), and the [post-run completion/backup checklist](docs/FINAL_BACKUP.md) — plus future ideas that are researched but not scheduled ([pronunciation LoRA](docs/FUTURE_PRONUNCIATION_LORA.md)); see [`docs/README.md`](docs/README.md) for the index. `DECISIONS.md` records source-verified decisions and the reasoning behind non-obvious config fields; read it before changing anything that looks wrong. `PROGRESS.md` is the milestone trail. `TRAINING_ANALYSIS/ANALYSIS.md` is the final v2 training analysis (v1's is archived under `TRAINING_ANALYSIS/v1_nolyrics_archived/`). `verification.md` is the v1 dataset audit. `AGENTS.md` is the operating contract for the coding agent, including the run-control policy (no new or changed run without the user typing the command; auto-resume only an unchanged, already-approved run after an unplanned interruption).

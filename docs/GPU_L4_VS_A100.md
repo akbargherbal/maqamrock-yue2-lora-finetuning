@@ -3,6 +3,11 @@
 Date: 2026-09-19. Measured on the live whole-song run (`akbar_arabic_rock_lora`),
 at ~step 164/3000 (~5%). This is a *cost/benefit* note, not a config change.
 
+> **Post-run measured (see bottom):** the whole-song run completed on the A100
+> at **3.10 s/step, ~4.3× the L4** — above the 2–2.6× estimate below, which was
+> derived from spec sheets mid-run. The estimate and its reasoning are kept
+> as written; the measured result is at the end of this file.
+
 ## Bottom line
 
 - **A100 is not ~4× faster. Realistic estimate is ~2–2.6×.**

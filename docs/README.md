@@ -12,6 +12,7 @@ operating contract is `../AGENTS.md`.
 | GCS mirror layout, verify a backup, restore from it | [BACKUP_RESTORE.md](BACKUP_RESTORE.md) |
 | Check how training is going | [MONITOR.md](MONITOR.md) |
 | Decide L4 vs A100 (cost/time) | [GPU_L4_VS_A100.md](GPU_L4_VS_A100.md) |
+| Finish a run: final backup + push checklist | [FINAL_BACKUP.md](FINAL_BACKUP.md) |
 
 Future ideas (not runbooks, not scheduled): [FUTURE_PRONUNCIATION_LORA.md](FUTURE_PRONUNCIATION_LORA.md)
 — fixing Arabic pronunciation with a second, AR-only LoRA.

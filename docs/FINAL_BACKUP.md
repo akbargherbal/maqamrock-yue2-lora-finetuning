@@ -1,15 +1,22 @@
-# Final backup & push — v2 run completion checklist
+# Final backup & push — run completion checklist
+
+> **Status: COMPLETED for v2 on 2026-09-20.** v2 reached 3000/3000 and every
+> step here was run and passed — artifacts on disk and in GCS (dry-run rsync
+> showed no diffs), docs pushed, tree clean. Kept as the **reusable completion
+> checklist for any future run**; the "expected end time" and sidecar pids below
+> are v2-specific artifacts of when this was written and will differ next time.
 
 Run: `akbar_arabic_rock_lora` (v2, lyric-conditioned captions).
-Use this once training reaches **3000/3000**. Background/format:
-[BACKUP_RESTORE.md](BACKUP_RESTORE.md) and [PAUSE_RESUME.md](PAUSE_RESUME.md).
+Background/format: [BACKUP_RESTORE.md](BACKUP_RESTORE.md) and
+[PAUSE_RESUME.md](PAUSE_RESUME.md).
 
 `<base>` = `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`
 `<run>`  = `akbar_arabic_rock_lora`
 `<out>`  = `/content/ai-toolkit/output/akbar_arabic_rock_lora`
 
-Expected end time (as of 11:53 UTC, step 2750): **~12:08 UTC** for the final
-step, then the step-3000 sample event (~10 min) and the final save.
+v2 forecast (written at 11:53 UTC, step 2750): **~12:08 UTC** for the final step,
+then the step-3000 sample event and the final save. It actually finished
+**~12:23 UTC** on 2026-09-20.
 
 ---
 
