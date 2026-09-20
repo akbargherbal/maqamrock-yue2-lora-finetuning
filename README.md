@@ -6,13 +6,19 @@ Training runs on a rented single GPU in Google Colab, driven over the CLI rather
 
 ## Status
 
-As of the `PROGRESS.md` 2026-09-19 entries: **the whole-song run is complete** — `akbar_arabic_rock_lora` finished **3000/3000** on a Colab **A100-SXM4-80GB** (resumed from the step-250 checkpoint after a deliberate L4→A100 move). Measured A100 step time was **3.10 s/step** (~4.3× the L4's 13.4), and final `loss/loss` fell from 6.49 to ~5.17. All 12 checkpoints (11 numbered plus the final `akbar_arabic_rock_lora.safetensors`), `optimizer.pt`, `loss_log.db`, and 52 samples are in GCS; the full analysis is in `TRAINING_ANALYSIS/ANALYSIS.md`. Earlier, the first training run reached ~step 875/3000 and was **killed deliberately** when the goal was re-scoped to full-song structure (`train_window_frames` defaulted to a random 60 s crop per step); its artifacts are archived as `akbar_arabic_rock_lora_crop60_killed` (local folder and matching GCS prefix).
+As of the `PROGRESS.md` 2026-09-20 entries: **v1 finished training but is archived and superseded; v2 is prepared and not yet launched.**
+
+**v1** (`akbar_arabic_rock_lora`, style-only captions) finished **3000/3000** on a Colab A100-SXM4-80GB, with strong style/timbre fidelity but degraded Arabic pronunciation — traced to the dataset's captions carrying no lyrics at all, so the AR expert was never once rewarded for getting the words right (full root-cause in `PROGRESS.md`/`DECISIONS.md`). Its run is archived in GCS as `akbar_arabic_rock_lora_v1_nolyrics_archived` (185 objects, verified), and its dataset as `yue2_dataset_v1_style_only_obsolete` (local) / `dataset_v1_style_only_obsolete/` (GCS). An earlier, even-earlier run was killed at ~875/3000 steps on a separate scope correction (`train_window_frames`); that's archived as `akbar_arabic_rock_lora_crop60_killed`.
+
+**v2** fixes the caption gap: 267 audio/caption pairs rebuilt from scratch with real lyrics appended in YuE2's native `[Lyrics]` format, verified against the manifest and promoted to be *the* dataset under the same plain names v1 used (`./yue2_dataset` locally, `dataset/` in GCS) — no config path edits needed. A held-out evaluation set (`INFERENCE/yue2_eval_heldout/`) and updated training-time sample prompts (real lyrics, `duration: 360`) are built and committed (`config/akbar_arabic_rock_lora.yml`). **No v2 run has started yet** — see `PROGRESS.md` for what's still pending before launch (YAML sanity check, `GCP_DATASET_PATH` confirmation, token-count check, smoke test).
 
 ## Repo layout
 
 ```
-config/akbar_arabic_rock_lora.yml   # the training config (rank 32, EMA, cot: off, whole-song)
-prepare_yue2_dataset.py             # build audio + .txt caption pairs from manifests
+config/akbar_arabic_rock_lora.yml   # the training config (rank 32, EMA, cot: off, whole-song, lyric samples)
+prepare_yue2_dataset.py             # v1 build: style-only audio + .txt caption pairs (obsolete dataset)
+INFERENCE/evaluation_alharith.json  # post-run inference eval prompts (partly contaminated, see DECISIONS.md)
+INFERENCE/yue2_eval_heldout/        # v2 held-out eval set: 4 prompts, 0 shared lines with training
 monitor_loss.py                     # read-only loss_log.db inspector (step, metrics, ETA)
 gpu_logger.py                       # nvidia-smi poller -> CSV (AI Toolkit logs no GPU stats)
 backup_to_gcp.py                    # periodic GCS mirror of run artifacts
@@ -27,19 +33,23 @@ docs/                               # task runbooks: start, pause/resume, backup
 
 ## Dataset
 
-Built by `prepare_yue2_dataset.py` from a `min_4stars_ai_music/` tree and its per-workspace `workspace_manifest.json` files:
+**`./yue2_dataset` currently holds v2 — lyric-conditioned captions — not the original style-only build.** v1's style-only captions (built by `prepare_yue2_dataset.py`, still in this repo and still runnable) are preserved at `./yue2_dataset_v1_style_only_obsolete`:
 
 ```bash
-python prepare_yue2_dataset.py --root ./min_4stars_ai_music --out ./yue2_dataset
+python prepare_yue2_dataset.py --root ./min_4stars_ai_music --out ./yue2_dataset_v1_style_only_obsolete
 ```
 
-Result: **267 audio/caption pairs**, all native `mp3, 48000 Hz, stereo` — exactly what YuE2's loader expects, so no conversion is needed. Captions are style-only (genre, maqam, vocals, production, instrumentation, mood); the Suno control headers and all lyrics are stripped. The shortlist is the filesystem plus the manifest: a take is used only if it is both listed and physically present. Do not use `--convert-wav`; it hardcodes 44.1 kHz and would force a needless lossy round-trip. The full audit is in `verification.md`.
+Both builds produce **267 audio/caption pairs**, all native `mp3, 48000 Hz, stereo` — exactly what YuE2's loader expects, so no conversion is needed. The shortlist logic is unchanged between v1 and v2: a take is used only if it is both listed in a workspace manifest and physically present. Do not use `--convert-wav`; it hardcodes 44.1 kHz and would force a needless lossy round-trip. v1's audit is in `verification.md`.
+
+v2's captions add a `\n[Lyrics]\n{cleaned_lyrics}` block after the same style text v1 used (genre, maqam, vocals, production, instrumentation, mood) — built to fix v1's degraded pronunciation, traced to the AR expert never seeing real lyric text during training (see `DECISIONS.md`). v2 was built by a standalone `prepare_yue2_dataset_v2.py`, which is **not currently in this repo** (local-only; whether to commit it for reproducibility is open). Caption lyric-formatting rules (which section tags survive, how SFX asides are dropped) are recorded in `DECISIONS.md` and are binding on any other tooling that builds prompts from the same manifests — including the held-out evaluation set at `INFERENCE/yue2_eval_heldout/`. Trigger word (`arabmaqamrock `, space, no comma) is baked into every v2 caption directly rather than relying solely on `ai-toolkit`'s runtime injection; both are verified byte-equivalent, so `trigger_word` in the config is unaffected (`DECISIONS.md`).
 
 ## Training config
 
 `config/akbar_arabic_rock_lora.yml` runs `process[].type: diffusion_trainer` with `arch: yue2` on `Comfy-Org/YuE2/checkpoints/yue2_3b_int8_convrot.safetensors` (`quantize: true`, `qtype: convrot8`). Key choices: rank 32 combined LoRA, `ema_config.use_ema: true` with `ema_decay: 0.999`, `model_kwargs.cot: "off"` (captions carry no melodic information, so SheetSage2 is never loaded), `model_kwargs.train_window_frames: 0` (train on whole songs; the implicit default crops one random 60 s window per step, which starves the AR expert of any multi-section gradient — see `DECISIONS.md`), `cache_latents_to_disk: true` (mandatory for YuE2), `noise_scheduler: flowmatch`, and `max_step_saves_to_keep: 12` so the background GCS sync has a buffer before local rotation deletes older checkpoints.
 
 `log_config` at the process root is a dead key left in with a comment, and `aitk_db.db` is not a metrics source — see `DECISIONS.md` for both.
+
+`sample.samples` carries the four `INFERENCE/yue2_eval_heldout/` prompts (one per maqam, real lyrics the model never trained on) at `sample.duration: 360`, so in-training checkpoint samples can actually show pronunciation, not just style — v1's lyric-free, 120s samples never could. See `DECISIONS.md` for the rationale and generation-cost tradeoff.
 
 ## Running on Colab
 

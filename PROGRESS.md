@@ -193,3 +193,110 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 - **Next:** confirm the raw manifest's lyrics field (step 1 above), then
   decide whether to lift the dataset freeze for this specific, narrowly-
   scoped change.
+
+## 2026-09-20 — v2 dataset built, verified, and promoted to canonical (local + GCS)
+
+- Fix from the previous entry's "Fix plan" implemented, but via a different
+  path than planned: the user built v2 offline with a separate agent that
+  rebuilt the dataset from scratch from the raw `min_4stars_ai_music` tree,
+  rather than patching the old `.txt` captions in place. This diverges from
+  `AGENTS.md`'s "Approved amendment: lyric-conditioned captions" procedure
+  (gated Colab-agent workflow, manifests pushed to the repo, append-only patch
+  script). Claude flagged the divergence; the user chose to proceed — dataset
+  decisions are the user's call. The freeze's safety invariants (audio
+  untouched, shortlist unchanged, v1 preserved, no GPU/YAML touched during the
+  build) held anyway. See `DECISIONS.md`.
+- New standalone `prepare_yue2_dataset_v2.py` (local only, not in this repo);
+  `prepare_yue2_dataset.py` untouched. Same shortlist/filename/style-caption
+  logic as v1, trigger `arabmaqamrock ` (space, no comma), plus a new
+  `\n[Lyrics]\n{cleaned_lyrics}` block. Caption lyric-format rules (Claude's
+  call, delegated "as you see fit") in `DECISIONS.md`.
+- One bug caught in review: the first build's section-tag whitelist lacked
+  `Refrain`, dropping real sung sections as SFX noise in a handful of tracks.
+  Fixed and rebuilt; verified `hijaz_tarafa_23072026_008_4cd0acdc` now has
+  `[Refrain]` between `[Verse 3]` and `[Verse 4]`.
+- Final verified numbers (`yue2_dataset_v2_report.md`, cross-checked): 267
+  pairs (matches v1); 1967 manifest tracks scanned, 1700 skipped (not on
+  disk); 0 empty lyrics; 157 distinct cleaned lyric texts across 267
+  captions; dropped-tag log 70 occurrences / 34 distinct texts, all genuine
+  SFX/instrumental asides.
+- **Promoted to be "the" dataset**, local and GCS, so the config/eval that
+  already point at the plain names need no path edits: local `./yue2_dataset`
+  (v1) → `./yue2_dataset_v1_style_only_obsolete`, `./yue2_dataset_v2` →
+  `./yue2_dataset`; GCS `dataset/` (v1) → `dataset_v1_style_only_obsolete/`,
+  then v2 copied into `dataset/`. Verified: dry-run rsync 0 diffs post-push,
+  `[Refrain]` present in the pushed caption, obsolete prefix's Ajam caption
+  unchanged (`Symphonic...`, no `[Lyrics]`). GCS prefixes under
+  `.../OSTRIS_Arabic_Suno_Finetuning/` are now: `akbar_arabic_rock_lora_crop60_killed/`,
+  `akbar_arabic_rock_lora_v1_nolyrics_archived/` (v1's finished-run archive,
+  185 objects), `dataset/` (v2, current), `dataset_v1_style_only_obsolete/`
+  (v1). See `DECISIONS.md`.
+- **Trigger word re-verified against upstream `ai-toolkit` source**
+  (`toolkit/prompt_utils.py:715-748`): the prepend is `trigger + " " +
+  caption` and only fires when the trigger appears zero times already. v2's
+  baked-in `arabmaqamrock ` prefix is byte-equivalent, so `trigger_word`
+  stays set in the YAML with no doubling. See `DECISIONS.md`.
+- **Run name decided: reuse `akbar_arabic_rock_lora`**, no suffix — matches
+  the repo's own precedent (archives get descriptive suffixes, live runs
+  never get a number) and needs no change to `name`/`log_dir`/
+  `backup_to_gcp.py`'s hardcoded `JOB_NAME`. Conditions for safe reuse (output
+  folder empty before launch, GCS restore not run first, wipe any smoke-test
+  `.safetensors` before the real run) recorded in `DECISIONS.md`.
+
+## 2026-09-20 — Held-out evaluation set built; training-time samples switched to lyrics + `duration: 360`
+
+- **Why:** every v1 training-time sample prompt had no lyrics, so no
+  in-training checkpoint sample could ever show pronunciation (see the prior
+  entry's Rule 4). Samples now need lyrics the model never trained on, so
+  good pronunciation there can't be memory.
+- **Finding: `INFERENCE/evaluation_alharith.json` is not clean held-out.**
+  Distinct eval lines shared (diacritic-insensitive) with the 267 training
+  captions: Hijaz 8/18, Kurd 6/24, Nahawand 6/24 (same source Mu'allaqa,
+  overlapping workspaces); **Ajam 0/22 is clean**. The same poem section
+  recurs across workspaces (157 distinct texts across 267 captions), so
+  held-out status has to be judged by lyric-line overlap, not by title or
+  shortlist membership. See `DECISIONS.md`.
+- Built by the user's local offline agent from a self-contained spec
+  (selection rules, definitions, checks — no repo references) that reused
+  v2's own build functions. One track per maqam, that maqam's own text,
+  `shared_lines == 0` vs. all 267 training captions, 24–28 lines, tags
+  covering Intro+Verse+Chorus+Outro, four different workspaces, zero mutual
+  overlap:
+
+  | Maqam | Workspace | Lines |
+  |---|---|---|
+  | Hijaz | `New_Abu_Tammam_16082026` | 26 |
+  | Kurd | `amin_almanoon_17082026` | 24 |
+  | Nahawand | `ibn_zuraiq_20082026` | 26 |
+  | Ajam | `alharith_bin_heliza_22082026` | 26 |
+
+  The Ajam pick shares 8 lines with the eval file's own (already-clean) Ajam
+  entry, so it's directly comparable to the existing full-length inference
+  evaluation.
+- Verified independently, not just from the agent's own report: each prompt
+  parses through the toolkit's real `parse_caption`; correct maqam and
+  `arabmaqamrock ` prefix; only allowed section tags, no `|`, no
+  `///***///`; 0 shared normalized lines against every `yue2_dataset/*.txt`.
+- **YAML updated and pushed** (`c38fb88`): `sample.samples` replaced with the
+  four held-out prompts (one per maqam, its own text — not one shared excerpt
+  across all four as originally planned); `sample.duration: 120 → 360`.
+  Everything else left alone — see `DECISIONS.md`'s "Leave alone" list.
+- **Held-out set pushed to the repo** at `INFERENCE/yue2_eval_heldout/`
+  (`heldout_eval_prompts.json`, `heldout_samples_block.yml`,
+  `heldout_eval_report.md`), next to the existing `evaluation_alharith.json`
+  (`39a4a71`).
+- **Not yet done:** final sanity-check pass over the full YAML; deciding
+  whether the post-run evaluation uses the held-out set or
+  `evaluation_alharith.json`'s clean Ajam entry; whether to commit
+  `prepare_yue2_dataset_v2.py` for build reproducibility (open, user's call).
+  **v2 training has not started.**
+  `ar_loss_weight: 0`, exclude it via `ignore_if_contains`, raise
+  `ar_kl_weight`, or average across checkpoints) are **downgraded to
+  fallbacks only**, not first-choice fixes: each either forfeits the
+  structural-coherence learning `train_window_frames: 0` was introduced for,
+  or re-creates the same averaging the user explicitly rejected. They remain
+  worth knowing about if the caption fix above turns out to be blocked or
+  insufficient, but are not the plan.
+- **Next:** confirm the raw manifest's lyrics field (step 1 above), then
+  decide whether to lift the dataset freeze for this specific, narrowly-
+  scoped change.

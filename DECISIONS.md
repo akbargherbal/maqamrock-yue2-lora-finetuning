@@ -120,6 +120,173 @@ Where a claim below says "verified against source," it means the actual `ostris/
 - Never run the same run name on two VMs at once: they share one GCS prefix and `run_manifest.json`. Stop one before starting the other.
 - Performance-only knobs (e.g. `gradient_checkpointing`) don't affect resume or the trained objective; changing hyperparameters / network / lr defines a *different* experiment, not a resume.
 
+## v2 dataset build diverged from `AGENTS.md`'s approved amendment — user's call, invariants held anyway
+
+- `AGENTS.md`'s "Approved amendment: lyric-conditioned captions" specifies a
+  gated Colab-agent procedure: manifests pushed to the repo, a read-only
+  investigation report, a Gate on caption format, an append-only
+  `add_lyrics_to_captions.py` patch script. The user instead worked locally
+  and offline with a separate agent that had no knowledge of this repo's
+  docs, and had it rebuild the dataset from scratch from the raw
+  `min_4stars_ai_music` tree rather than patch the existing captions in
+  place.
+- Claude flagged the divergence before proceeding; the user chose to
+  continue — dataset/config decisions are the user's to make, not the
+  agent's or the doc's.
+- The amendment's underlying safety invariants held regardless of the path
+  taken: audio untouched, shortlist logic unchanged (same "in manifest AND
+  on disk" rule), v1 preserved (archived, not overwritten), no GPU/YAML
+  touched during the build.
+- Practical effect: the repo's docs said nothing about the v2 build until
+  this session's update — a known gap the user deliberately deferred closing
+  until now.
+
+## Caption lyric format for v2 — Claude's call, delegated by the user
+
+- The user delegated the caption lyric-formatting rules "as you see fit."
+  Rules applied, named as such at the time:
+  - The raw `///***///` line is removed entirely.
+  - A bracketed tag whose content starts with a canonical section name
+    (`Intro`, `Verse` [+ number], `Chorus`, `Pre-Chorus`, `Bridge`, `Outro`,
+    `Hook`, `Refrain`) collapses to bare `[Section Name]`, dropping
+    everything after the first `|` (production descriptors).
+  - Any other bracketed tag — arrangement/SFX asides like `[guitars surge —
+    Ajam]`, `[Instrumental Interlude | ...]` — is dropped entirely and
+    logged.
+  - Diacritics, the trailing `...` on lyric lines, and the Arabic wording
+    itself are never touched.
+- **Binding on anything that builds inference/sample prompts** — the
+  held-out set and any future eval tooling must use this same format, not
+  re-derive their own.
+- One bug found in review: the first pass's tag whitelist lacked `Refrain`,
+  used as a chorus-equivalent in some tracks; `[Refrain | ...]` was dropped
+  as SFX noise, leaving real sung sections unlabeled. Fixed by whitelisting
+  `Refrain`; rebuilt and reverified.
+- Still-open diagnostic, never run: base model, no LoRA, same seed, eval
+  lyrics with vs. without Suno descriptors — available if v2 pronunciation or
+  structure comes out oddly and the cause needs isolating from the caption
+  format itself.
+
+## Dataset naming convention: descriptive suffixes on archives, no numeric versions
+
+- Decided (user): "v1, v2, v3 ... those are meaningless." The live dataset
+  and the live run keep their original plain names; only a *superseded*
+  artifact gets a suffix, and that suffix describes why it was superseded,
+  not a version number.
+- Applied this session: the plain name `yue2_dataset` always means the
+  current dataset — v1's content moved to
+  `yue2_dataset_v1_style_only_obsolete` locally /
+  `dataset_v1_style_only_obsolete/` in GCS, freeing the plain name for v2,
+  which now occupies it. Same pattern already used for the killed
+  60s-window run (`akbar_arabic_rock_lora_crop60_killed`).
+- Consequence: neither the training YAML's `folder_path` (absolute
+  `/content/yue2_dataset`) nor `GCP_DATASET_PATH` (points at `dataset/`)
+  needed to change — the promotion is entirely a naming/content swap at the
+  storage layer. See `bootstrap/setup.sh:104-115`'s `job_dataset()` for why
+  this works: it rsyncs whatever `GCP_DATASET_PATH` currently points to,
+  with no notion of "v1" or "v2" baked in.
+- A loose file named e.g. `akbar_arabic_rock_lora.safetensors` becomes
+  ambiguous between the two datasets' outputs once separated from its
+  containing folder — keep archive folder names attached, don't rename the
+  file itself.
+
+## Trigger word: v2's baked-in prefix does not double with `trigger_word`
+
+- v1's dataset captions had no trigger baked in (`verification.md:43`);
+  `trigger_word: "arabmaqamrock"` in the YAML had `ai-toolkit` prepend it at
+  train time.
+- Re-verified against upstream `ai-toolkit main` this session:
+  `inject_trigger_into_prompt` (`toolkit/prompt_utils.py:715-748`, called
+  from `get_caption` in `toolkit/dataloader_mixins.py:398-461`) prepends
+  `trigger + " " + caption` (space, no comma) and only does so when the
+  trigger appears **zero** times already (`:738-742`).
+- v2's captions now start with a baked-in `arabmaqamrock ` prefix,
+  byte-equivalent to what the injector would add — so the injector's
+  zero-occurrence check means it does **not** double it. `trigger_word`
+  stays set in the YAML unchanged.
+- The YAML's line-10 comment ("dataset captions have none baked in") is now
+  stale and was not edited — see the deferred comment-cleanup item.
+- `setup.sh:177` clones `ai-toolkit` unpinned (`main`), so this is
+  re-verified against current upstream, not assumed; re-check if the
+  toolkit's caption-injection code is ever suspected of having changed.
+
+## Run name: reuse `akbar_arabic_rock_lora`, no suffix
+
+- Decided (user). Reasoning: the repo's own precedent is that archives get a
+  descriptive suffix when superseded and live runs never get a number (see
+  the dataset-naming entry above); reuse means `name`, `log_dir`, and
+  `backup_to_gcp.py`'s hardcoded `JOB_NAME = "akbar_arabic_rock_lora"`
+  (`backup_to_gcp.py:69`) all stay untouched, no code change required.
+- Reuse is only bug-free under these conditions, all must hold at launch:
+  1. `/content/ai-toolkit/output/` is empty on the VM before launch —
+     `get_latest_save_path()` silently resumes from the newest matching
+     `.safetensors` otherwise (see the auto-resume entry above).
+  2. The GCS restore rsync (`docs/BACKUP_RESTORE.md`) is **not** run before
+     this launch — that step is for resuming an interrupted run, not
+     starting a new one.
+  3. After any smoke test, wipe `output/akbar_arabic_rock_lora/` (or use a
+     fresh VM) if it wrote any `.safetensors` — with `save_every: 250`,
+     only a smoke test reaching step 250+ would.
+- v1's finished run is archived as `akbar_arabic_rock_lora_v1_nolyrics_archived`
+  in GCS (185 objects, verified) — the plain name is free for v2 to reuse.
+
+## Held-out evaluation set: `evaluation_alharith.json` is not clean, and how the replacement was built
+
+- **Finding:** `INFERENCE/evaluation_alharith.json`'s four prompts are not
+  all held-out. Checked line-by-line (diacritic-insensitive) against the 267
+  v2 training captions: Hijaz shares 8/18 distinct lines, Kurd 6/24,
+  Nahawand 6/24 — all from training workspaces named
+  `{maqam}_alharith_bin_heliza_22082026` (same Mu'allaqa poem, overlapping
+  lines across workspaces). **Ajam is clean, 0/22 shared.**
+- The contamination is structural, not a one-off: the same poem section
+  recurs across multiple workspaces and takes (267 captions = only 157
+  distinct cleaned lyric texts). So held-out status can only be judged by
+  actual lyric-line overlap against the full training set — never by title,
+  workspace name, or "not in the training shortlist," since a
+  non-shortlisted take can still carry lyrics a shortlisted take trained on.
+- Normalization used for the overlap check (and everywhere else in v2):
+  delete Arabic diacritics (U+064B–U+065F, U+0670) and `.` and whitespace;
+  map U+0671 (alef wasla) → U+0627; a lyric line is any non-empty line that
+  doesn't start with `[` and isn't `///***///`.
+- **Replacement set built** by the user's local offline agent, from a
+  self-contained spec (no reference to this repo's docs) that reused v2's
+  build-script functions. Selection: one pick per maqam, using that maqam's
+  own text (first `Maqam (Hijaz|Kurd|Nahawand|Ajam)` match in the track's
+  `styles`), `shared_lines == 0` against all 267 training captions, 24–28
+  lyric lines, tags covering Intro+Verse+Chorus+Outro, four different source
+  workspaces, zero mutual overlap between the four picks themselves.
+- Claude independently re-verified the delivered files rather than trusting
+  the agent's own report: each prompt parses through the toolkit's real
+  `parse_caption`; correct maqam and `arabmaqamrock ` prefix; only allowed
+  section tags present, no `|`, no `///***///`; each lyric line
+  character-for-character identical to its manifest source; 0 shared
+  normalized lines against every `yue2_dataset/*.txt`.
+- The Ajam pick (`alharith_bin_heliza_22082026`,
+  `03-الرد-على-الواشي-والرسوخ-كالأرعن`) shares 8 lines with
+  `evaluation_alharith.json`'s own (clean) Ajam entry — same poem, neither
+  trained on — so it's directly comparable to the existing full-length
+  inference evaluation.
+- Open, user's call: whether the post-run evaluation uses this held-out set
+  or `evaluation_alharith.json`'s clean Ajam entry (or both); whether to
+  commit `prepare_yue2_dataset_v2.py` for reproducibility, since the report
+  cites it as the prompts' source but it's not in the repo.
+
+## `sample.duration: 360` — why, and its cost
+
+- v1's training-time samples ran at `duration: 120`, generating from
+  lyric-free prompts, so no checkpoint sample could ever show
+  pronunciation — only the post-run listening test could. Since these
+  samples are the only in-training look at the actual goal metric (structure
+  + lyric fidelity), they now carry real held-out lyrics, and duration was
+  raised to 360 so a sample has room to show a full arc
+  (intro→verse→chorus→outro) rather than being cut off mid-section.
+- Cost: sample generation scales with generated length; one 4-prompt event
+  at 120s cost ~226s on the A100 (`TRAINING_ANALYSIS/ANALYSIS.md:34`). At
+  `sample_every: 250` over `steps: 3000`, that's 12 sample events. Tripling
+  duration to 360 roughly triples the per-event generation cost — factor
+  this into any ETA recompute in the final YAML sanity pass, not just the
+  training step time.
+
 ## Agent training-control policy (explicit, don't re-litigate)
 
 - The agent may **auto-resume an unchanged, already-approved run** after an unplanned interruption (VM death, disconnect) — same config, same run name, nothing changed. This exists specifically to avoid burning a Colab session's availability waiting for a human to notice and retype a resume command.
