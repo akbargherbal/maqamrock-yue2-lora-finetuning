@@ -119,10 +119,11 @@ lyric signal is reaching the AR (the v1 failure was that it never did).
    with held-out lyrics; the point of this run is that checkpoints can now
    *show* pronunciation. Listen for lyric fidelity + arrangement coherence, not
    loss.
-6. **Ops note (not analysis):** `backup_to_gcp.py` uses append-only `gsutil
-   rsync`, so 4 stale smoke-test step-0 samples remain in the run's GCS
-   `output/samples/` (see `agent_notes/current.md` for the cleanup command).
-   Harmless to training; only matters for counting/baseline in the final eval.
+6. **Ops note (resolved 2026-09-20):** `backup_to_gcp.py` uses append-only
+   `gsutil rsync`, so the 4 smoke-test step-0 samples had persisted in the run's
+   GCS `output/samples/` after the local wipe (8 step-0 files instead of 4).
+   They were removed from GCS; the run prefix is now exactly 4 per step
+   (0/250/…/1500, 28 total). No effect on training.
 
 ## Next steps
 
