@@ -291,3 +291,30 @@ Where a claim below says "verified against source," it means the actual `ostris/
 
 - The agent may **auto-resume an unchanged, already-approved run** after an unplanned interruption (VM death, disconnect) — same config, same run name, nothing changed. This exists specifically to avoid burning a Colab session's availability waiting for a human to notice and retype a resume command.
 - The agent may **not** start a new run, or resume with any changed config or hyperparameter, without the human typing the command themselves. A run finishing without errors is not the same as a run being *right* — see the FL-YuE2 project's `arabic_joint_v2`, which ran to completion cleanly while training on scores that didn't capture the maqam. That kind of mistake is cheap to catch by eyeballing a launch command before it runs and expensive (hours of rented GPU) to catch after the fact.
+
+## Token-count check (agenda step 5b) — measured, no overflow
+
+- Never previously measured with the real tokenizer; `verification.md` only
+  had a char-count/4 estimate (~200 tokens per caption). Measured this
+  session on a CPU-only Colab runtime, no `ai-toolkit` clone needed — the
+  tokenizer is a tensor embedded in the checkpoint itself
+  (`text_encoders.yue2_tokenizer_json`), extracted via `safetensors`'
+  lazy `safe_open` (no full ~4GB model load), then run through the plain
+  `tokenizers` library. Script: `check_token_counts.py` (not committed —
+  local tooling, like the v2 build script).
+- Reproduced the AR expert's actual prefix construction, verified against a
+  fresh `ostris/ai-toolkit` clone (`src/tokenizer.py:43-51`, `cot="off"`
+  matching this project's `model_kwargs.cot`):
+  `[EOD] + encode(INSTRUCTION + "[Tags]" + style + "[Lyrics]" + lyrics) +
+  [ABC_START, ABC_END, MUSIC_START]`, checked against
+  `CONTEXT = 24576` (`src/model.py:30`).
+- **Results, real BPE tokenizer, both sets clear with large margin:**
+  - 267 v2 training captions: prefix tokens 780–1631 (mean 1214). Checked
+    against the worst-case 370s clip (9250 audio tokens @ 25fps,
+    `verification.md`'s dataset max) — tightest case
+    (`hijaz_short-poems_16082026_027`) still has 13,690 tokens of headroom.
+  - 4 held-out eval prompts: prefix tokens 983–1237 (mean 1124). Checked
+    against `sample.duration: 360` (9000 audio tokens) — tightest case
+    (Hijaz) has 14,334 tokens of headroom.
+- No caption anywhere near the 24,576 context ceiling — token count is not a
+  risk for this run. Nothing to change in the config.
