@@ -7,7 +7,7 @@ config:
       training_folder: "/content/ai-toolkit/output"
       sqlite_db_path: "/content/ai-toolkit/aitk_db.db"   # made absolute -- easier to target in the backup script below
       device: "cuda"
-      trigger_word: "arabmaqamrock"   # was null -- set explicitly since your dataset captions have none baked in; AI Toolkit auto-prepends this at train time
+      trigger_word: "arabmaqamrock"   # v2 captions now bake this in directly ("arabmaqamrock " prefix); AI Toolkit's injector only prepends when the trigger appears zero times in the caption (toolkit/prompt_utils.py), so this is a no-op, not a double-prepend -- keep it set
       performance_log_every: 10
       network:
         type: "lora"
@@ -38,11 +38,11 @@ config:
       save:
         dtype: "bf16"
         save_every: 250
-        max_step_saves_to_keep: 12   # was 4 -- widened so the background GCS sync (every ~5 min) has a buffer before local rotation deletes older checkpoints
+        max_step_saves_to_keep: 12   # was 4 -- widened so the background GCS sync (every 15 min, backup_to_gcp.py default) has a buffer before local rotation deletes older checkpoints
         save_format: "diffusers"
         push_to_hub: false
       datasets:
-        - folder_path: "/content/yue2_dataset"  # downloaded fresh into /content/ each Colab session -- see colab_gcs_backup.sh
+        - folder_path: "/content/yue2_dataset"  # downloaded fresh into /content/ each Colab session via bootstrap/setup.sh's job_dataset(), backed up by backup_to_gcp.py
           mask_path: null
           mask_min_value: 0.1
           default_caption: ""
@@ -62,10 +62,10 @@ config:
       train:
         batch_size: 1
         bypass_guidance_embedding: false
-        steps: 3000   # revisit -- 267 clips at num_repeats:1 means this sees each clip only a handful of times; consider raising substantially (see earlier note on dataset size vs. steps).
-        # Also: the killed run's ~7.8s/step and ~6h ETA (TRAINING_ANALYSIS) were measured under
-        # the 60s train_window_frames, not the whole-song window above -- don't reuse that ETA.
-        # Recompute from the smoke test's actual s/step before trusting this step count's wall-clock cost.
+        steps: 3000   # deliberate leave-alone for v2: one-variable discipline -- v2's only intended change vs. v1 is caption content (lyrics), so step count stays fixed to keep the comparison clean.
+        # Wall-clock cost: don't reuse the killed run's ~7.8s/step (that was measured under the
+        # 60s train_window_frames, not whole-song). Measured whole-song A100 step-time instead:
+        # see docs/GPU_L4_VS_A100.md (~3.10 s/step A100 vs ~13.4 s/step L4, ~4.3x).
         gradient_accumulation: 1
         train_unet: true
         train_text_encoder: false
@@ -73,7 +73,7 @@ config:
         noise_scheduler: "flowmatch"
         optimizer: "adamw8bit"
         timestep_type: "sigmoid"
-        content_or_style: "balanced"   # unconfirmed whether this field is honored under yue2's schema -- worth checking
+        content_or_style: "balanced"   # confirmed honored -- traced to the generic timestep sampler in BaseSDTrainProcess.py; a separate axis from train_window_frames below, left alone by design
         optimizer_params:
           weight_decay: 0.0001
         unload_text_encoder: false
@@ -118,12 +118,8 @@ config:
           # (CONTEXT 24576 / 25fps), and the VAE's "60s chunks" are only an offline encode-time
           # memory trick (src/vae.py encode()) -- cached latents are one contiguous per-song
           # tensor, so a larger window isn't crossing any real boundary.
-          # UNVERIFIED ON THIS HARDWARE: this was not evaluated on an actual L4 run before the
-          # kill/relaunch decision. Current 60s-window run peaked ~16GB/23GB VRAM at ~7.8s/step;
-          # whole-song (up to ~6x the frames on the longest clips) will cost materially more of
-          # both. Smoke-test a handful of steps on the longest clips first -- if VRAM or
-          # step-time blows the budget, fall back to a bounded window (e.g. 4000-6000 frames,
-          # ~2.5-4 min) rather than 0, which still buys far more structure than 60s did.
+          # VERIFIED: whole-song (this setting) ran cleanly to 3000/3000 steps on both L4 and
+          # A100 in the v1 run, peak VRAM ~15-16GB, no OOM. No fallback-window logic needed.
           train_window_frames: 0
         compile: false
       sample:
@@ -133,8 +129,10 @@ config:
         width: 1024   # vestigial from the image template, harmless
         height: 1024
         samples:
-          # Style-only prompts mirroring your actual training captions (no [Lyrics] block) --
-          # the stock "Laura Training" demo song was a different input shape than what this LoRA trains on.
+          # Four held-out lyric prompts (one per maqam, own maqam's own text), v2 caption format
+          # with a [Lyrics] block -- clean of the 267 training captions (see INFERENCE/yue2_eval_heldout/
+          # heldout_eval_report.md). Duration 360s so a sample can actually show pronunciation,
+          # not just style/timbre, at any checkpoint from sample_every:250 on.
           - prompt: "arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Hijaz. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Hijaz with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: Poignant, Chivalric, Emotional.\n[Lyrics]\n[Intro]\nلَبَّيْتَ صَوْتاً زِبَطْرِيّاً هَرَقْتَ لَهُ\nكَأْسَ الْكَرَى وَرُضَابَ الْخُرَّدِ الْعُرُبِ...\n\n[Verse 1]\nلَبَّيْتَ صَوْتاً زِبَطْرِيّاً هَرَقْتَ لَهُ\nكَأْسَ الْكَرَى وَرُضَابَ الْخُرَّدِ الْعُرُبِ...\nعَدَاكَ حَرُّ الثُّغُورِ الْمُسْتَضَامَةِ عَنْ\nبَرْدِ الثُّغُورِ وَعَنْ سَلْسَالِهَا الْحَصِبِ...\n\n[Chorus]\nأَجَبْتَهُ مُعْلِناً بِالسَّيْفِ مُنْصَلِتاً\nوَلَوْ أَجَبْتَ بِغَيْرِ السَّيْفِ لَمْ تُجِبِ...\nحَتَّى تَرَكْتَ عَمُودَ الشِّرْكِ مُنْعَفِراً\nوَلَمْ تُعَرِّجْ عَلَى الْأَوْتَادِ وَالطُّنُبِ...\n\n[Verse 2]\nلَمَّا رَأَى الْحَرْبَ رَأْيَ الْعَيْنِ تُوفِلِسٌ\nوَالْحَرْبُ مُشْتَقَّةُ الْمَعْنَى مِنَ الْحَرَبِ...\nغَدَا يُصَرِّفُ بِالْأَمْوَالِ جِرْيَتَهَا\nفَعَزَّهُ الْبَحْرُ ذُو التَّيَّارِ وَالْحَدَبِ...\nهَيْهَاتَ زُعْزِعَتِ الْأَرْضُ الْوَقُورُ بِهِ\nعَنْ غَزْوِ مُحْتَسِبٍ لَا غَزْوِ مُكْتَسِبِ...\nلَمْ يُنْفِقِ الذَّهَبَ الْمُرْبِي بِكَثْرَتِهِ\nعَلَى الْحَصَى وَبِهِ فَقْرٌ إِلَى الذَّهَبِ...\nإِنَّ الْأُسُودَ أُسُودَ الْغَيْلِ هِمَّتُهَا\nيَوْمَ الْكَرِيهَةِ فِي الْمَسْلُوبِ لَا السَّلَبِ...\n\n[Chorus]\nأَجَبْتَهُ مُعْلِناً بِالسَّيْفِ مُنْصَلِتاً\nوَلَوْ أَجَبْتَ بِغَيْرِ السَّيْفِ لَمْ تُجِبِ...\nحَتَّى تَرَكْتَ عَمُودَ الشِّرْكِ مُنْعَفِراً\nوَلَمْ تُعَرِّجْ عَلَى الْأَوْتَادِ وَالطُّنُبِ...\n\n[Outro]\nإِنَّ الْأُسُودَ أُسُودَ الْغَيْلِ هِمَّتُهَا\nيَوْمَ الْكَرِيهَةِ فِي الْمَسْلُوبِ لَا السَّلَبِ..."
           - prompt: "arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Kurd. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Kurd with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: tense, ominous, lethal, dramatic.\n[Lyrics]\n[Intro]\nفَوَرَدْنَ وَالعَيّوقُ مَقْعَدَ رابِئِ\nالضُّرَباءِ فَوْقَ النَّظْمِ لا يَتَتَلَّعُ...\n\n[Verse 1]\nفَوَرَدْنَ وَالعَيّوقُ مَقْعَدَ رابِئِ\nالضُّرَباءِ فَوْقَ النَّظْمِ لا يَتَتَلَّعُ...\nفَشَرَعْنَ في حَجَراتِ عَذْبٍ بارِدٍ\nحَصِبِ البِطاحِ تَغيبُ فيهِ الأَكْرُعُ...\nفَشَرِبْنَ ثُمَّ سَمِعْنَ حِسًّا دونَهُ\nشَرَفُ الحِجابِ وَرَيْبَ قَرْعٍ يُقْرَعُ...\nوَنَميمَةً مِنْ قانِصٍ مُتَلَبِّبٍ\nفي كَفِّهِ جَشْءٌ أَجَشُّ وَأَقْطُعُ...\n\n[Chorus]\nفَنَكِرْنَهُ فَنَفَرْنَ وَامْتَرَسَتْ بِهِ\nسَطْعاءُ هادِيَةٌ وَهادٍ جُرْشُعُ...\nفَرَمى فَأَنْفَذَ مِنْ نَجودٍ عائِطٍ\nسَهْمًا فَخَرَّ وَريشُهُ مُتَصَمِّعُ...\n\n[Verse 2]\nفَبَدا لَهُ أَقْرابُ هذا رائِغًا\nعَجِلًا فَعَيَّثَ في الكِنانَةِ يُرْجِعُ...\nفَرَمى فَأَلْحَقَ صاعِدِيًّا مِطْحَرًا\nبِالكَشْحِ فَاشْتَمَلَتْ عَلَيْهِ الأَضْلُعُ...\n\n[Verse 3]\nفَأَبَدَّهُنَّ حُتوفَهُنَّ فَهارِبٌ\nبِذَمائِهِ أَوْ بارِكٌ مُتَجَعْجِعُ...\nيَعْثُرْنَ في حَدِّ الظُّباتِ كَأَنَّما\nكُسِيَتْ بُرودَ بَني يَزيدَ الأَذْرُعُ...\n\n[Outro]\nيَعْثُرْنَ في حَدِّ الظُّباتِ كَأَنَّما\nكُسِيَتْ بُرودَ بَني يَزيدَ الأَذْرُعُ..."
           - prompt: "arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Nahawand. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Nahawand with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: nostalgic, faithful, solemn hope.\n[Lyrics]\n[Intro]\nبِاللَّهِ يَا مَنْزِلَ الْعَيْشِ ٱلَّذِي دَرَسَتْ\nآثَارُهُ وَعَفَتْ مُذْ بِنْتُ أَرْبُعُهُ...\n\n[Verse 1]\nبِاللَّهِ يَا مَنْزِلَ الْعَيْشِ ٱلَّذِي دَرَسَتْ\nآثَارُهُ وَعَفَتْ مُذْ بِنْتُ أَرْبُعُهُ...\nهَلِ الزَّمَانُ مُعِيدٌ فِيكَ لَذَّتَنَا\nأَمِ ٱلَّيَالِي ٱلَّتِي أَمْضَتْهُ تُرْجِعُهُ...\nفِي ذِمَّةِ اللَّهِ مَنْ أَصْبَحْتَ مَنْزِلَهُ\nوَجَادَ غَيْثٌ عَلَى مَغْنَاكَ يُمَرِّعُهُ...\nمَنْ عِنْدَهُ لِيَ عَهْدٌ لَا يَضِيعُ كَمَا\nعِنْدِي لَهُ عَهْدُ صِدْقٍ لَا أُضَيِّعُهُ...\nوَمَنْ يُصَدِّعُ قَلْبِي ذِكْرُهُ وَإِذَا\nجَرَى عَلَى قَلْبِهِ ذِكْرِي يُصَدِّعُهُ...\nلَأَصْبِرَنَّ لِدَهْرٍ لَا يُمَتِّعُنِي\nبِهِ وَلَا بِيَ فِي حَالٍ يُمَتِّعُهُ...\n\n[Chorus]\nعِلْمًا بِأَنَّ اصْطِبَارِي مُعْقِبٌ فَرَجًا\nفَأَضْيَقُ الْأَمْرِ إِنْ فَكَّرْتَ أَوْسَعُهُ...\nعَسَى ٱلَّيَالِي ٱلَّتِي أَضْنَتْ بِفُرْقَتِنَا\nجِسْمِي سَتَجْمَعُنِي يَوْمًا وَتَجْمَعُهُ...\n\n[Verse 2]\nوَإِنْ تُغِلَّ أَحَدًا مِنَّا مَنِيَّتُهُ\nلَا بُدَّ فِي غَدِهِ الثَّانِي سَيَتْبَعُهُ...\n\n[Chorus]\nعِلْمًا بِأَنَّ اصْطِبَارِي مُعْقِبٌ فَرَجًا\nفَأَضْيَقُ الْأَمْرِ إِنْ فَكَّرْتَ أَوْسَعُهُ...\nعَسَى ٱلَّيَالِي ٱلَّتِي أَضْنَتْ بِفُرْقَتِنَا\nجِسْمِي سَتَجْمَعُنِي يَوْمًا وَتَجْمَعُهُ...\n\n[Outro]\nوَإِنْ تُغِلَّ أَحَدًا مِنَّا مَنِيَّتُهُ\nلَا بُدَّ فِي غَدِهِ الثَّانِي سَيَتْبَعُهُ..."
