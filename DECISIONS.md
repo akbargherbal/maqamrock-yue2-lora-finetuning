@@ -95,6 +95,36 @@ Where a claim below says "verified against source," it means the actual `ostris/
 - Correct way to genuinely restart after a config fix: archive the prior output, either via a distinct run name, or by moving the local folder and `gsutil mv`-ing the GCS prefix. Done 2026-09-19 for the killed 60s-window run: `output/akbar_arabic_rock_lora` → `..._crop60_killed` locally, same move in GCS, then the backup daemon was restarted so it writes a **fresh** `run_manifest.json` at the clean prefix.
 - Latent cache is **not** invalidated by this: `/content/yue2_dataset/_latent_cache` holds full-song latents, and `train_window_frames` only crops at train time — so a relaunch reuses the cache and skips the ~12-min re-cache.
 
+## Extending a finished run overwrites the final adapter — snapshot step 3000 first
+
+- **Why it matters.** The end-of-run save is `self.save()` with no step (`BaseSDTrainProcess.py:2814`), which
+  names the file `<run name>.safetensors` with no step suffix (`save()`: `filename = f'{self.job.name}{step_num}.safetensors'`).
+  Extending `akbar_arabic_rock_lora` past 3000 under the same run name will therefore rewrite
+  `akbar_arabic_rock_lora.safetensors` — the v2 step-3000 artifact, and the exact file the audio.cpp LoRA converter
+  consumed (its two outputs are pinned by sha256 in the T4 entry below). Numbered checkpoints are also rotated by
+  `max_step_saves_to_keep: 12`, which v2 already filled (`docs/FINAL_BACKUP.md` expects 11 numbered + the final), so
+  each new save deletes the oldest local checkpoint.
+- **GCS is not append-only for that file.** `docs/FINAL_BACKUP.md:65` calls GCS append-only; that holds for numbered
+  checkpoints, but the un-suffixed final adapter is the same-name case described in the auto-resume entry above and
+  would be overwritten. Fixing that wording is the user's call.
+- **`train.start_step` is not the answer.** It is a config key, not a CLI flag, and it only sets the step counter: with
+  it unset, the counter comes from the newest checkpoint's embedded metadata (`:887–891`); with it set, that read is
+  skipped (`:2151–2153`). It does not choose which checkpoint loads — `get_latest_save_path()` always takes the newest
+  `<run name>*.safetensors` — so it does nothing to protect the final adapter.
+- **`network.pretrained_lora_path` is not an equivalent of a resume.** It is only consulted when the save folder has no
+  checkpoint (`:859–862`), and it deliberately skips the metadata (`:873–876`). It would load weights only: no
+  optimizer state, no EMA, and no step counter unless `start_step` is also set. That is a different experiment. The rest
+  of its loading path was not traced and no run has tested it.
+- **EMA (source-read, untested).** Saved checkpoints are EMA weights (`save()` puts the EMA in eval first); `setup_ema()`
+  builds a fresh EMA from the current params after the optimizer loads, and no EMA state restore was found. A resume
+  therefore continues from the EMA'd weights and restarts the average. The step-250 A100 resume already went through
+  this. All line numbers above are from a shallow clone of ai-toolkit `main` on 2026-09-21 and may drift.
+- **Rule before any extension of v2.** (1) Copy the final adapter to a separate GCS prefix, outside the run's prefix,
+  as `akbar_arabic_rock_lora_v2_step3000.safetensors`, and record its sha256. (2) Extend under a **new run name**, with
+  the step-3000 checkpoint and `optimizer.pt` copied into that run's output folder, so ai-toolkit performs a true
+  resume and the v2 folder stays untouched. (3) Per `AGENTS.md`, the user types the launch command; a changed step
+  count is a changed config. Whether a separate step-3000 snapshot already exists in GCS has not been checked.
+
 ## Whole-song (`train_window_frames: 0`) on L4 — measured
 
 - The config comment's "UNVERIFIED ON THIS HARDWARE" is now resolved. Whole-song ran cleanly on the L4 over steps 1–295: **~13.4 s/step** median, 100% GPU util, ~**70.5 W of L4's 72 W TDP**, 12.9 GB mean / **15.8 GB peak** of 24 GB, ~74 °C. No bounded-window fallback was needed on VRAM grounds. 3000 steps ≈ **~12 h** (incl. ~1.2 h of sampling every 250).
@@ -364,8 +394,19 @@ Where a claim below says "verified against source," it means the actual `ostris/
   `--duration-seconds` is ignored; the model self-terminates (`truncated=0`) under an ample cap; the generic
   `--temperature/--top-p/--top-k/--repetition-penalty` flags are no-ops — use the prefixed
   `semantic_*`/`abc_*` request-options.
-- Still open: **audio quality** of the flash path (nobody has listened to a full 4-minute render; upstream
-  checked numerics only on ~3.8 s clips), other seeds/maqams, and longer-than-4:14 lengths.
+- **Listening result on the flash render (2026-09-21, user):** the full 4:14 Hijaz/seed-1000 render
+  (`out/Hijaz_1000_cap9000_flash.wav`) was judged good/acceptable, with no noticeable pronunciation problems. Two isolated
+  words were flagged: `له` heard as `يه`, and `المسلوب` heard as `المسيوب`. The user reports both also occur with "the
+  normal model"; **which baseline that meant (PyTorch v2 step-3000, or base YuE2) was not pinned down** — if only the
+  PyTorch path is clean on those words, the flash path could be adding drift, so pin it down when logging. One track,
+  one seed: this is not yet a verdict on the flash path in general.
+- Still open: the other three maqams and other seeds with flash, and lengths beyond 4:14.
+- **Why `auto` picks eager on a T4 (inference, not verified on hardware).** Upstream's gate is
+  `cc >= 700 && cc < 800` (`attention_fallback.cpp`), added by `e39fe22` ("fallback for GPUs without flash MMA kernels
+  (sm70)") for Volta (7.0), where the MMA flash kernel lacks usable device code. The range also catches Turing (7.5),
+  so the T4 may get eager attention through an over-broad range rather than a real kernel limitation. That would make
+  forcing `flash` legitimate rather than a workaround; it would also mean an L4 (8.9) needs no override. The measured
+  VRAM drop supports this, but the log does not show which kernel actually ran.
 - **LoRA conversion is required, and it must be exact.** ai-toolkit saves a *fused* LoRA
   (`text_encoders…self_attn.qkv_proj`/`o_proj`, `diffusion_model…mlp.gate_up_proj`/`down_proj`; rank 32,
   alpha == rank). audio.cpp does exact-name lookups for *unfused* per-projection adapters — AR
@@ -391,3 +432,44 @@ Where a claim below says "verified against source," it means the actual `ostris/
 - Output filenames must carry the varying parameter (e.g. the cap) — a cap-9000 log was once silently
   overwritten by a cap-6500 rerun under the same name, which produced the wrong 6536 frame figure above.
 - Writing this workflow into `AGENTS.md` is a user's call, not done here.
+
+## audio.cpp seeds and reproducibility: what it gives, and the sidecar policy
+
+- **Seed range.** `yue2.seed` is accepted in `[0, 2^63)` (`request.cpp`), default 1234 (`session.cpp`), but both the AR
+  sampler (`ar_runtime.cpp:683`) and the NAR noise (`nar_runtime.cpp:637`) seed with
+  `std::mt19937 rng(static_cast<uint32_t>(seed))`. Seeds that differ by a multiple of 2^32 produce identical output. **Use
+  seeds below 2^32.** (Source-read at upstream `f7f5dd1`.)
+- **Nothing is recorded by default.** The settings line (seed, cot, guidance, `num_inference_steps`, context, sampling
+  options) is emitted only when trace logging is enabled (`pipeline.cpp`, `run()`); no metadata sidecar was found in the
+  YuE2 path. `--batch-manifest-out` exists in the CLI help, but what it records was not checked.
+- **Policy: every generated track gets a JSON sidecar**, written by the wrapper around `scripts/run_one.sh`, with the seed
+  drawn and written *before* generation so a crash still leaves a record (`secrets.randbelow(2**32)` when random).
+  Fields: seed; full command and request options; prompt-file sha256; sha256 of the main GGUF, the VAE GGUF and both LoRA
+  files; checkpoint step; `audio.cpp` commit; GPU name, compute capability and attention mode; the cap, final frame
+  count, `truncated`, wall time; and the output WAV's sha256. Output filenames must carry every varying parameter (see
+  the manual-execution entry above).
+- **Untested hypothesis — the seed alone may not reproduce a track.** The seed pins the RNG, but tokens are sampled from
+  GPU-computed logits; a different GPU or attention kernel (T4 vs L4, eager vs flash) could shift the floats slightly and
+  flip one sampled token, after which the trajectory diverges. Not observed, not ruled out. Two cheap tests settle it:
+  the same seed twice on the T4 (is the WAV bit-identical?), then the same seed on T4 vs L4. Until then, the sidecar's
+  GPU and attention-mode fields are what make a replication attempt honest, and the WAV itself is the only guaranteed copy
+  of a track.
+
+## Current plan (2026-09-21): generate many tracks with the step-3000 LoRA before deciding on more training
+
+- **Deferred, not dropped:** extending training past 3000. It is a future step; see the extension entry above for what
+  must happen first.
+- **Urgent:** generate many tracks with random seeds using `audio.cpp` + GGUF + the converted step-3000 LoRA, with
+  `yue2.attention=flash` forced, and use them to judge whether 3000 is good enough or more fine-tuning is needed. The user
+  suspects more fine-tuning is needed; nothing measured yet says so, and `ar_kl` has risen in both runs (see the v2
+  finished entry), so more steps could as easily hurt.
+- **Order:** (1) the sidecar wrapper, (2) the same-seed-twice bit-identity test on the T4, (3) time one full track to size
+  the batch in compute units, (4) the batch.
+- **Hardware (user's figures, 2026-09-21 — recheck current Colab pricing):** T4 High-RAM (~1.27 CU/h) is the inference
+  workhorse, pushed to its limit; L4 (~1.54 CU/h) is optional; the A100 (~6.77 CU/h) is for fine-tuning only, not inference.
+  No GGUF generation time is recorded anywhere in the repo yet.
+- **Verdict criteria are fixed before generating, not after.** What counts as "3000 is enough" vs "needs more training"
+  is to be set by the user, e.g. a substitution rate on hard words, or maqam adherence; different failures point to
+  different levers (more steps, lower `ar_kl_weight` / LR, dataset changes). Placeholder: **TODO(user) — write the
+  criteria here before the batch runs.** Suggested method: quick triage listening across all tracks, and word-level
+  interviewer probes only on flagged ones.
