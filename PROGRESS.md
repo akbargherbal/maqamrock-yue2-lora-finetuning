@@ -419,32 +419,43 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   non-Hijaz maqams, and ultimately the artifact pick (final vs. an earlier
   checkpoint) — no decision made yet on any of these.
 
-## 2026-09-21 — audio.cpp YuE2 LoRA inference (separate work area): T4 OOM root cause + frame ceiling
+## 2026-09-21 — audio.cpp YuE2 LoRA inference on a T4: OOM was eager attention, not the LoRA — `yue2.attention=flash` fixes it
 
-- **Scope.** Ad-hoc inference run alongside training: `0xShug0/audio.cpp` @ `e3de8e3`, CUDA, driven with
-  the converted step-3000 LoRA (`/content/converter/out/akbar_arabic_rock_lora_{ar,nar}.safetensors`,
-  AR+NAR scale 1.0) on the four held-out maqam prompts. Everything lives under `/content/audiocpp_test/`
-  and is mirrored to GCS `.../OSTRIS_Arabic_Suno_Finetuning/audiocpp_gguf_test/`. This repo's only change
-  is this entry — nothing committed/pushed.
-- **Output length = `semantic_max_tokens` (25 frames/s); `--duration-seconds` is ignored by YuE2.**
-  Sampling knobs are the prefixed `semantic_*` / `abc_*` request-options (audio.cpp `docs/models/yue2.md`);
-  the generic `--temperature/--top-p/--top-k/--repetition-penalty` flags are **no-ops** for YuE2.
-- **`docs/text_to_duration_formula.md` used for a dynamic cap** (`duration_s ≈ 92 + 0.280·N_letters`,
-  rounded to nearest 10 s, ×25): Hijaz 6500, Nahawand 6000, Ajam 5750, Kurd 5500 for our held-out lyrics.
-- **OOM root cause — VRAM, not the cap.** The model self-terminates (`truncated=0`) well under the cap;
-  length is seed-dependent (Hijaz seed 42 → 5189 frames; seed 1000 → 6355; seed 1001 → 6536). The crash is
-  `CUDA error: out of memory` / `cuMemCreate` at `ggml-cuda.cu:535`, during **NAR graph construction**.
-  NAR-graph VRAM is ~linear in frames, and the LoRA adds ~2.6 GiB of merged decoder weights right before it
-  (`yue2.lora.decoder_merge_values 2818572288`). Measured: no-LoRA 6095 frames peaked 14,843 MiB (96.6%,
-  OK); LoRA 5189 frames 12,463 MiB (OK); LoRA 6536 frames → OOM. **The earlier 360-cap run survived only
-  because its seed emitted 5189 frames — the cap was never the binding constraint.**
-- **T4 ceiling ≈ ≤5800 frames (~3:52).** So the formula-based dynamic cap does **not** rescue
-  Hijaz/Nahawand (they naturally emit ~6355 / ~6045). Options for a next session (not decided):
-  (1) cap ≤5800 → all runs complete but endings truncate; (2) drop/omit the NAR LoRA at long lengths;
-  (3) run on the A100-80GB, where natural-length LoRA songs fit easily.
-- **State.** GCS `audiocpp_gguf_test/` holds `converter/`, `out/` (30 s + 360-cap A/B, batch runs, logs,
-  1 Hz `_gpu.csv`), `prompts/`, `scripts/` (`run_one.sh`, `run_batch16_resilient.sh`, `duration_cap.py`,
-  `backup_live.py`), `agent_notes/`. A resilient batch runner (continues past OOM, skips completed runs,
-  logs failures to `out/_failed_runs.log`) was launched; all Hijaz seeds at cap 9000 OOM'd, then it was
-  relaunched with dynamic caps (still running at session end). Per-session detail: `agent_notes/current.md`
-  and GCS `audiocpp_gguf_test/agent_notes/current.md`.
+- **Scope.** Ad-hoc inference alongside training (separate work area): `0xShug0/audio.cpp` @ `e3de8e3`,
+  CUDA, driven with the converted step-3000 LoRA (`akbar_arabic_rock_lora_{ar,nar}.safetensors`, AR+NAR
+  scale 1.0; conversion details in `DECISIONS.md`) on the four held-out maqam prompts. Harness in
+  `/content/audiocpp_test/`, mirrored to GCS `.../OSTRIS_Arabic_Suno_Finetuning/audiocpp_gguf_test/`.
+  No training-side file was touched.
+- **Correction of the earlier version of this entry (`ebb3f10`).** It claimed a "≤5800-frame T4 ceiling"
+  and blamed the LoRA's ~2.69 GiB merge. **Both are withdrawn.** The run it cited hit its cap exactly
+  (`truncated=1`, 6500 frames), not a self-termination; the 6536 figure belonged to a cap-9000 attempt
+  whose log a later rerun overwrote; the "fix" (drop to cap 6500) OOM'd again; and the controlled runs
+  below show 5800/6000 succeed and 6200 works once the attention mode is forced. Do not cite ≤5800.
+- **Kept from the earlier entry** (still true): output length is `semantic_max_tokens` at 25 frames/s;
+  `--duration-seconds` is ignored by YuE2; the generic `--temperature/--top-p/--top-k/--repetition-penalty`
+  flags are no-ops for YuE2 (use the prefixed `semantic_*`/`abc_*` options); T4 reports **14,912 MiB** total
+  VRAM, not 15,360; Colab High-RAM raises system RAM, not VRAM.
+- **Root cause — attention mode, not the LoRA or the cap.** Under default `yue2.attention=auto` on compute
+  capability 7.5, the NAR path selects the **eager** attention kernel (`src/framework/core/attention_fallback.cpp`:
+  eager for CC 700–799). Hijaz/seed-1000, LoRA on, eager: cap 5000 → exit 0 / 12,005 MiB; cap 5800 →
+  exit 0 / 14,033 MiB; cap 6000 → exit 0 / 14,577 MiB; **cap 6200 → OOM (exit 134,
+  `CUDA error: out of memory` at `ggml-cuda.cu:535`)**. Forcing `--session-option yue2.attention=flash`
+  (one flag added; runners otherwise unchanged): cap 6200 → exit 0 / **7,607 MiB**; cap 9000 →
+  **self-terminated at 6,355 frames** (`truncated=0`), exit 0 / **7,683 MiB**. Roughly half the VRAM, and
+  the point that OOM'd passes. The log records only `allow_flash 0`/`1`, not which kernel was selected.
+- **Memory barely grows with length under flash:** 6,200 → 6,355 frames added ~76 MiB, so there is real
+  headroom past 4:14 — but nothing longer has been tested, and this is Hijaz/seed-1000 only.
+- **Length cross-check + open quality question.** Natural length 6,355 frames = 254.2 s (4:14); the WAV is
+  254.199 s, confirming the 25 fps mapping. **Nobody has listened to a full 4-minute render** — upstream
+  checked numerics only on ~3.8 s clips. Audio quality is the key open question.
+- **State.** GCS `audiocpp_gguf_test/` holds `converter/` (scripts + `out/`), `prompts/`, `scripts/`, logs,
+  1 Hz `_gpu.csv`, `agent_notes/`. The uncapped flash WAV (`out/Hijaz_1000_cap9000_flash.*`) was not yet
+  mirrored at report time (next backup pass). Two caveats on the runs themselves: a live backup daemon was
+  running when the protocol said none (host-side only; cannot explain ~7 GiB), and the GGUF weight type used
+  is not recorded. Per-session detail: `agent_notes/current.md` and GCS
+  `audiocpp_gguf_test/agent_notes/current.md`.
+- **Next.** (1) Listen to `out/Hijaz_1000_cap9000_flash.wav` with the listening-pass protocol, against the
+  PyTorch step-3000 Hijaz sample on the same words (seeds differ, so not a byte comparison). (2) If quality
+  holds, the other three maqams uncapped with flash. (3) User's calls: commit the converter + tests to the
+  repo; `.gitignore` (or delete) the leftover `akbar_arabic_rock_lora.safetensors` in the Colab repo root;
+  write the manual-execution workflow for inference tests into `AGENTS.md`.

@@ -338,3 +338,45 @@ Where a claim below says "verified against source," it means the actual `ostris/
 - **Diagnostic caveat to carry forward:** `ar_ce` and `ar_kl` are computed under
   different prompt conditioning between v1 and v2, so cross-run loss values are
   directional evidence, not an A/B on audio quality. The samples are the arbiter.
+
+## T4 VRAM is governed by the attention kernel, not the cap or the LoRA — force `yue2.attention=flash`
+
+- `0xShug0/audio.cpp` @ `e3de8e3` OOM'd on a T4 building the NAR graph (Hijaz/seed-1000, LoRA on,
+  cap 6200): `CUDA error: out of memory` at `ggml-cuda.cu:535`, exit 134. A first write-up (`ebb3f10`)
+  blamed a fixed LoRA decoder-merge cost (~2.69 GiB, `decoder_merge_values`) plus frame-scaled NAR
+  allocation and posited a "≤5800-frame ceiling." **That ceiling is retracted** — the run it cited hit its
+  cap (6500, `truncated=1`), not a self-termination; the 6536 figure came from an overwritten log; and the
+  "fix" (drop to cap 6500) OOM'd too. It was a stale/guessed number, not a measured one.
+- **Verified cause: the attention kernel.** On compute capability 7.5, `yue2.attention=auto` selects the
+  **eager** NAR attention (`audio.cpp` `src/framework/core/attention_fallback.cpp`: eager for CC 700–799).
+  Controlled, LoRA-on, eager: cap 5800 → 14,033 MiB / cap 6000 → 14,577 MiB / cap 6200 → OOM. With
+  `--session-option yue2.attention=flash`: cap 6200 → **7,607 MiB** (exit 0) and cap 9000 → natural
+  self-termination at **6,355 frames / 7,683 MiB** (exit 0). About half the VRAM; the OOM point passes.
+  The log reports only `allow_flash 0`/`1`, not the chosen kernel — the conclusion rests on the measured
+  VRAM drop, not a kernel name in the log.
+- Consequence: uncapped-length, LoRA-on inference on a 16 GB T4 is back on the table (peak ~7.7 GiB at
+  4:14, ~76 MiB added from 6,200→6,355 frames), no bounded-window fallback needed. T4 reports **14,912 MiB**
+  total VRAM (not 15,360); Colab High-RAM raises system RAM only.
+- Length mechanics for any future YuE2 inference: output length is `semantic_max_tokens` (25 frames/s);
+  `--duration-seconds` is ignored; the model self-terminates (`truncated=0`) under an ample cap; the generic
+  `--temperature/--top-p/--top-k/--repetition-penalty` flags are no-ops — use the prefixed
+  `semantic_*`/`abc_*` request-options.
+- Still open: **audio quality** of the flash path (nobody has listened to a full 4-minute render; upstream
+  checked numerics only on ~3.8 s clips), other seeds/maqams, and longer-than-4:14 lengths.
+- Corollary for any doc that repeats it: `docs/yue2-gguf-lora-findings.md` (`afab34e`) also says the LoRA
+  needs no conversion for `audio.cpp` — **wrong for this file** (see the conversion notes in
+  `claude_context.md`); that doc was left stale on purpose, flag it if it comes up.
+
+## Inference tests run commands manually; the Colab agent reports from files, not memory
+
+- Changed 2026-09-21 (user's call), because of how the OOM post-mortem went: the Colab agent's own prose
+  summary in `PROGRESS.md` (`ebb3f10`) asserted things (self-termination before the cap, a specific OOM
+  frame count) that the raw log did not support. When the human reads the same raw files, a bad summary is
+  caught immediately.
+- New workflow for Colab-agent inference tests: the agent writes the exact commands to
+  `agent_notes/current.md` as a copy-paste block and **does not run them**; the user runs them in a separate
+  terminal; the agent monitors by **reading** `out/*.log`, `_runs_status.log`, `_gpu.csv` and reports only
+  what the files say, quoting the line rather than paraphrasing.
+- Output filenames must carry the varying parameter (e.g. the cap) — a cap-9000 log was once silently
+  overwritten by a cap-6500 rerun under the same name, which produced the wrong 6536 frame figure above.
+- Writing this workflow into `AGENTS.md` is a user's call, not done here.
