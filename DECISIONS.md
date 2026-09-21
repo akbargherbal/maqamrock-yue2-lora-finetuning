@@ -473,3 +473,72 @@ Where a claim below says "verified against source," it means the actual `ostris/
   different levers (more steps, lower `ar_kl_weight` / LR, dataset changes). Placeholder: **TODO(user) — write the
   criteria here before the batch runs.** Suggested method: quick triage listening across all tracks, and word-level
   interviewer probes only on flagged ones.
+
+## `audio.cpp`'s ~30 min Colab build was `--model-set full` compiling all 80+ families — not something to cache around
+
+- **Root cause, confirmed from `audio.cpp`'s own README, not guessed.** Composite builds are a first-party feature:
+  `full` (the default `scripts/build_linux.sh` uses if you don't pass `--model-set`) compiles every one of `audio.cpp`'s
+  80+ model families — TTS, ASR, VAD, diarization, all of it — not just `yue2`. That is almost certainly the entire
+  30-minute cost observed this session. **Nothing to cache, build once, or design infrastructure around — just don't
+  build what isn't needed.**
+- **Fix, three flags, all first-party (no custom scripting required):**
+  ```
+  scripts/build_linux.sh --backend cuda --cuda-arch 75 --ccache \
+    --model-set custom --models yue2 \
+    --target audiocpp_cli
+  ```
+  - `--model-set custom --models yue2` — compiles only the `yue2` loader instead of all 80+ families.
+  - `--cuda-arch 75` — T4 is Turing, compute capability 7.5. Without `--cuda-arch`, the build targets a **portable
+    multi-arch list** (works on many GPUs, much slower to build) instead of just the local GPU.
+  - `--ccache` — wires up `ccache` as the compiler launcher. Per the README: "leaves a cold build about as slow as it
+    already is and makes a rebuild roughly **14x faster**." This is the project's own answer to "cache the build" —
+    **persist the ccache directory itself** (e.g. to GCS/Drive, same pattern as everything else this project persists
+    across VMs) rather than designing a commit-keyed tarball cache from scratch. A from-scratch GCS-tarball build-cache
+    scheme was drafted earlier this session and should be treated as **superseded and unnecessary** — don't rebuild it
+    next session.
+- **No prebuilt CUDA binary exists for Linux to skip the build entirely.** Checked the Releases page: prebuilt packages
+  cover Windows (CPU/Vulkan/CUDA) and Ubuntu x64 (CPU/Vulkan only) and macOS (Metal). No Ubuntu+CUDA prebuilt — a
+  from-scratch build (now scoped down per above) is genuinely required on Colab's T4.
+
+## YuE2 LoRA loading is a native, first-party `audio.cpp` feature — no server/wrapper code needed, and it confirms the conversion requirement already in place
+
+- **Verified against `audio.cpp`'s own `docs/models/yue2.md`, not inferred.** LoRA loading is built into the CLI/server
+  via session options — nothing to build or patch:
+  ```
+  --session-option yue2.ar_lora=/path/to/akbar_arabic_rock_lora_ar.safetensors \
+  --session-option yue2.ar_lora_scale=1.0 \
+  --session-option yue2.nar_lora=/path/to/akbar_arabic_rock_lora_nar.safetensors \
+  --session-option yue2.nar_lora_scale=1.0
+  ```
+  Either adapter can be used alone or together. A new session is required to change adapters or scale (merged weights
+  are cached in CPU memory for the life of the session, not re-merged per request). `0` disables an adapter entirely,
+  including the NAR adapter's `vae2llm`/`llm2vae` projection replacements.
+- **This confirms, rather than replaces, the existing conversion step.** `audio.cpp`'s docs require "unfused SafeTensors
+  files, not the `_comfyui` layouts" — exactly the fused→unfused split `converter/convert_aitoolkit_yue2_lora.py`
+  already produces (see the earlier T4/LoRA-conversion entry). **No new conversion tooling needed; the existing
+  converter's output format is the correct target.**
+- **Do not confuse `cot` guidance between adapters.** `audio.cpp`'s docs recommend `cot=full` for *their* reference
+  instrumental adapter (Mothersuperior's). That is unrelated to `akbar_arabic_rock_lora`, which was trained with
+  `model_kwargs.cot: "off"` — keep `cot=off` at inference to match training, regardless of what the upstream docs say
+  about a different LoRA.
+- **BF16 main GGUF is recommended for LoRA merges.** Loading a LoRA onto a Q8/Q4 base merges into dequantized weights
+  and requantizes the result — not equivalent to merging into the original BF16 model first. If quality matters more
+  than the VRAM/speed savings of quantization, prefer `yue2.model_gguf=yue2-3b-bf16.gguf` when a LoRA is loaded.
+
+## T4 `auto` picking eager attention is upstream's documented, intentional behavior — not an over-broad-range guess
+
+- The earlier "why `auto` picks eager on a T4 (inference, not verified on hardware)" entry's speculation is now
+  **resolved, not just corroborated.** `audio.cpp`'s own `docs/models/yue2.md` states outright: `yue2.attention=auto`
+  "uses flash, except on Volta/Turing CUDA GPUs (missing MMA kernels) ... where it uses eager." This is official,
+  documented, intentional behavior for that hardware class — not an accidentally over-broad `cc >= 700 && cc < 800`
+  gate as speculated. **Forcing `--session-option yue2.attention=flash` on the T4 remains the correct override**; there
+  is no longer any open question about whether it's "legitimate rather than a workaround" — it is legitimate,
+  confirmed by upstream's own docs, and needs no further verification.
+
+## `docs/models/yue2.md` is the source of truth for yue2 CLI flags — read it before re-deriving flags from source
+
+- Full request/session/sampling option tables exist in the upstream doc (seed range `[0, 2^63)` default `1234`,
+  `cot`/`abc`/`abc_file`/`guidance_scale`/`num_inference_steps`, the `semantic_*`/`abc_*` sampling knobs, and every
+  `yue2.*` session option including weight-type and graph-arena sizing). Next session should **read this doc first**
+  rather than re-deriving flag names/behavior from `audio.cpp` source reads or guesswork — it already matches and
+  extends what earlier source-reading sessions found (e.g. the seed range and default agree exactly).
