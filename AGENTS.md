@@ -14,6 +14,10 @@ Read `DECISIONS.md` and `PROGRESS.md` (repo root) at the start of any task invol
 
 **Maintain `agent_notes/current.md` yourself — don't wait to be asked.** The user drives this over `vscode.dev`, where selecting and copying text out of the chat is glitchy and laggy. So keep that file current as the copy-free handoff surface: after any session that changes run state, fixes tooling, or produces a command worth re-running, write/refresh it (date, what happened, exact commands, what's next). Put anything the user might otherwise have to copy from the conversation there. It's git-ignored, but `backup_to_gcp.py` mirrors it to GCS.
 
+**Overwrite it — never append.** `current.md` is the user's read-and-copy surface in a terminal, not a growing log. Every write replaces the whole file with the *current* state, so it stays short (roughly a screenful, two at the very most). History belongs in `PROGRESS.md`/`DECISIONS.md`, not here. When asked to "write that to current.md!", the reply is the complete new content, replacing what was there — not a new section bolted onto the old.
+
+**Actually write the file in the same turn, and verify — then claim it.** Never say "I wrote/appended/updated current.md" unless the write/edit tool call actually succeeded in that turn. Claiming the write without doing it has recurred and is the worst failure mode here, because the whole point is that the user can trust this file without re-reading the chat. After writing, confirm with a read or grep and cite the result. Running a shell command is not writing the file.
+
 ## The stack
 
 `ostris/ai-toolkit`, launched via its real CLI — not the Web UI (see `DECISIONS.md` for why that loses nothing on observability):
@@ -45,6 +49,7 @@ Everything for this job lands under one folder, `training_folder/akbar_arabic_ro
 - Modify the dataset (`/content/yue2_dataset`) or re-run any dataset build script — it's already built and verified; don't regenerate it "to be sure."
 - **Edit `config/akbar_arabic_rock_lora.yml` (or any run config) on your own initiative.** Config and hyperparameter decisions are the user's. Measure, report, and recommend; don't apply.
 - Run anything GPU-heavy while a run might be active — check `nvidia-smi` first. One GPU, shared, rented.
+- **Claim to have written `agent_notes/current.md` without actually writing it that turn.** Do the write, verify it, then say so. This failure has recurred; treat it as a hard rule.
 
 ## Runtime reality — Colab is ephemeral, storage is cheap
 
