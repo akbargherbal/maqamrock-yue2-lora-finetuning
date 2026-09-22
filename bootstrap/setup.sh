@@ -227,9 +227,11 @@ job_lora_adapters() {
 # --- Launch every independent, slow task in parallel ---
 pids=()
 names=()
+starts=()
 
 start_job() {
   local name="$1"; shift
+  starts+=("$(date +%s)")
   ("$@") > "/content/logs/${name}.log" 2>&1 &
   pids+=("$!")
   names+=("$name")
@@ -254,14 +256,23 @@ echo "Launched in parallel: ${names[*]}"
 echo "tail -f /content/logs/<n>.log to watch any one of these live."
 
 fail=0
+: > /content/logs/timing.txt
 for i in "${!pids[@]}"; do
   if wait "${pids[$i]}"; then
-    echo "[ok]   ${names[$i]}"
+    status="ok"
   else
-    echo "[FAIL] ${names[$i]} — see /content/logs/${names[$i]}.log"
+    status="FAIL"
     fail=1
   fi
+  elapsed=$(( $(date +%s) - ${starts[$i]} ))
+  if [ "$status" = "ok" ]; then
+    echo "[ok]   ${names[$i]} (${elapsed}s)"
+  else
+    echo "[FAIL] ${names[$i]} — see /content/logs/${names[$i]}.log (${elapsed}s)"
+  fi
+  echo "${names[$i]}	${elapsed}s	${status}" >> /content/logs/timing.txt
 done
+echo "total	${SECONDS}s	${MODE}" >> /content/logs/timing.txt
 
 # --- Verify what actually landed, don't just trust exit codes ---
 echo "=== Verifying setup ==="
@@ -358,13 +369,13 @@ else
 fi
 
 if [ "$fail" -eq 1 ]; then
-  echo "=== setup.sh finished WITH FAILURES — check the [FAIL] lines above ==="
+  echo "=== setup.sh finished WITH FAILURES — check the [FAIL] lines above (total ${SECONDS}s) ==="
   exit 1
 fi
 
 if [ "$MODE" = "training" ]; then
   cat <<EOF
-=== setup.sh done (training) ===
+=== setup.sh done (training) — total ${SECONDS}s ===
 Next (in a terminal):
   cd $REPO_ROOT
   # 1. start the backup daemon + GPU logger (see AGENTS.md for the exact commands)
@@ -374,7 +385,7 @@ Next (in a terminal):
 EOF
 else
   cat <<EOF
-=== setup.sh done (inference) ===
+=== setup.sh done (inference) — total ${SECONDS}s ===
 audio.cpp was CLONED but NOT built, on purpose. yue2 model dir + LoRA are staged:
   model dir: $YUE2_MODEL_DIR
   LoRA:      $LORA_LOCAL

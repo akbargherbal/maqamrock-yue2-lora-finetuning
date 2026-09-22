@@ -524,3 +524,21 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   is unchanged and still open — see the 2026-09-22 split entry and
   `DECISIONS.md`'s `--model-set full` entry. This entry only makes the
   documented flag combination runnable.
+
+## 2026-09-22 — `setup.sh` timing instrumentation; `bfa8f29` staging fix smoke-tested (warm VM only)
+
+- **Timing instrumentation** (`bootstrap/setup.sh`): `start_job` now stamps each
+  job, the shared wait loop prints per-job elapsed next to `[ok]`/`[FAIL]`
+  (`[ok]   hf_yue2_gguf (3s)`), both `done` banners carry total `$SECONDS`, and
+  the same per-job + total lines are written to `/content/logs/timing.txt`
+  (intentionally not synced to GCS). Applies to both modes via the shared
+  `start_job`/wait loop; no job behavior changed.
+- **`bfa8f29` smoke test — warm VM, NOT a fresh-VM proof.** Re-ran
+  `setup.sh --inference` on this session's already-warm VM: exit 0, all jobs
+  `[ok]` with durations (`opencode 1s`, `ccache 3s`, `audio_cpp 3s`,
+  `hf_yue2_gguf 3s`, `hf_yue2_sidecars 3s`, `lora_adapters 3s`), banner
+  `=== setup.sh done (inference) — total 7s ===`, and `timing.txt` matching
+  exactly. Most jobs were cache hits on pre-staged assets, so this only proves
+  the timing code runs and the jobs don't error — the from-clean-VM proof of
+  `bfa8f29`'s staging (model dir + sidecars + LoRA) is deferred to next session,
+  after a restart, on purpose.
