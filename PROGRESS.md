@@ -560,6 +560,28 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   metadata wrapper and same-seed-twice bit-identity test are still not started;
   do those before any batch generation. Batch verdict criteria remain
   `TODO(user)`, not an agent task.
+- **4. Bring-your-own-lyrics + "4 songs per maqam" — the cold-start ask
+  `docs/INFERENCE.md` can't yet answer.** Framed last session as: from a fresh
+  context, hand the agent a bunch of new lyrics and ask it to "quickly make 4
+  songs for each maqam using the GGUF + our LoRA". The runbook would have to be
+  reverse-engineered rather than followed, for two reasons:
+  - **(a) New lyrics aren't an input.** `INFERENCE/run_one.sh:22-23` hardcodes the
+    prompt files to `/content/audiocpp_inference/prompts/<Maqam>_{style,lyrics}.txt`
+    and takes only `<Maqam> <seed> [cap]` — there is no lyrics path argument, so
+    "here are a bunch of lyrics" has no path in; you must overwrite the staged
+    files, and nothing documents that. Also undocumented: the maqam→file mapping,
+    that `style=` comes from a separate file from the lyrics, and that the LoRA is
+    fixed (one Arabic-rock LoRA; "maqam" selects the style/lyric pair).
+  - **(b) "4 each" needs a batch, and no driver exists.** 4 maqams × 4 songs = 16
+    one-shot `run_one.sh` invocations; no loop/wrapper script and no documented
+    seed convention (`_runs_status.log` implies batches were run ad hoc; the
+    random-seed-batch plan above is still open).
+  - **Deliverables, in order:** add a "bring your own lyrics" section and a batch
+    section to `docs/INFERENCE.md` (drop path, mapping, seed convention, a
+    documented `for`-loop or `run_batch.sh <seeds>` wrapper, and a ~16-run
+    estimate). Doc-only first; a new `run_batch.sh` is code, so keep it a proposal
+    until the user approves it. This is additive to item 1: it's about the doc
+    being answerable from cold, independent of whether the clean-VM proof passes.
 
 ## 2026-09-22 — First T4 inference run: four held-out maqams generated; missing GNU `time` fixed in bootstrap
 
