@@ -100,6 +100,61 @@ self-contained:
 | `<Maqam>_<seed>_gpu.csv` | 1 Hz GPU util/mem/power/temp during the run |
 | `_runs_status.log` | one START/END line per run (always written) |
 
+## Generate from your own JSON (bring your own lyrics)
+
+For user-supplied songs, skip the staged maqam prompts and drive a whole batch from
+one JSON file: 1..N songs x 1..M takes each, **sequential** (never parallel — two
+concurrent runs can OOM the NAR graph), random seeds by default. `generate.py`
+validates the input, writes a self-contained run folder, and calls `run_one.sh`
+once per track:
+
+```bash
+python INFERENCE/generate.py INFERENCE/songs.example.json --dry-run   # validate + print plan (no GPU, writes nothing)
+python INFERENCE/generate.py my_songs.json                            # real run, on the GPU VM
+```
+
+```json
+{
+  "defaults": { "style": "arabmaqamrock ...", "repeat": 2, "quantile": 0.95 },
+  "songs": [
+    { "name": "my_song", "lyrics": "[Verse 1]\n..." },
+    { "name": "kurd_night",
+      "style_file": "/content/audiocpp_inference/prompts/Kurd_style.txt",
+      "lyrics_file": "../my_lyrics/kurd_night.txt",
+      "seeds": [101, 202, 303] },
+    { "name": "quick_smoke", "style": "...", "lyrics": "...", "seed": 7, "cap": 750 }
+  ]
+}
+```
+
+Per-song fields (unknown keys are a hard error):
+
+| Field | Meaning |
+|---|---|
+| `name` | required, ASCII slug `[A-Za-z0-9][A-Za-z0-9_-]*`, unique; output prefix |
+| `style` / `style_file` | exactly one; inline text or path (relative to the JSON) |
+| `lyrics` / `lyrics_file` | exactly one |
+| `repeat` | takes with fresh random seeds (`< 2^32`), default 1 |
+| `seeds` / `seed` | explicit seed list, or one seed; mutually exclusive with `repeat` |
+| `cap` / `quantile` | explicit `semantic_max_tokens`, or 0.90/0.95/0.975 (default 0.95) |
+
+`defaults` supplies `style`/`style_file`, `repeat`, and `quantile` for every song;
+precedence is song > CLI flag > `defaults` > built-in. If a style lacks the
+`arabmaqamrock` trigger it is prepended (every training caption has it);
+`--no-trigger` disables that.
+
+Output: one folder `out/<YYYYMMDD-HHMMSS>_<label>/` with `input.json`,
+`batch_manifest.json` (resolved seeds/caps/hashes, written **before** generation),
+`batch_summary.txt`, per-track `<name>_<seed>.{wav,log,_time.txt,_gpu.csv,json}`
+sidecars, and `prompts/<name>_{style,lyrics}.txt`. `out/latest` points at the
+newest run. Resume with `--out-dir <folder>`: tracks whose WAV succeeded are
+skipped and the manifest's seeds are reused; `--force` regenerates.
+
+At ~6.5 min/track on a T4 (benchmark above), `--dry-run` prints the projected
+total. Other flags: `--limit N` (smoke tests), `--label`, `--quantile`,
+`--allow-concurrent` (overrides the refusal when an ai-toolkit training run is
+detected).
+
 ## Two ways to have the binary
 
 1. **Prebuilt (default, what `setup.sh` stages).** The flat GCS object

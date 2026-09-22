@@ -22,6 +22,9 @@ config/akbar_arabic_rock_lora.yml   # the training config (rank 32, EMA, cot: of
 prepare_yue2_dataset.py             # v1 build: style-only audio + .txt caption pairs (obsolete dataset)
 INFERENCE/evaluation_alharith.json  # post-run inference eval prompts (partly contaminated, see DECISIONS.md)
 INFERENCE/yue2_eval_heldout/        # v2 held-out eval set: 4 prompts, 0 shared lines with training
+INFERENCE/generate.py               # JSON-driven batch generation (bring your own lyrics/style)
+INFERENCE/songs.example.json        # template/example input for generate.py
+INFERENCE/run_one.sh                # one observed generation; generate.py's execution engine
 monitor_loss.py                     # read-only loss_log.db inspector (step, metrics, ETA)
 gpu_logger.py                       # nvidia-smi poller -> CSV (AI Toolkit logs no GPU stats)
 backup_to_gcp.py                    # periodic GCS mirror of run artifacts

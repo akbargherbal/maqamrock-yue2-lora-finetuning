@@ -182,6 +182,10 @@ Legend: **S** ≈ minutes, **M** ≈ ~an hour, **L** ≈ days. Impact: High / Me
 - **Fix (S doc; M code).** Add a section to `INFERENCE.md` (drop location, mapping,
   seed convention, worked batch command). Optionally add `--lyrics`/`--style` args
   later (proposal only).
+- **Addressed 2026-09-22.** `INFERENCE/generate.py` (+ `songs.example.json`) renders
+  1..N songs from a JSON (inline or file style/lyrics, `repeat`/`seeds`, sequential,
+  random seeds); `run_one.sh` gained `STYLE_FILE`/`LYRICS_FILE` env overrides; the
+  schema + mapping + worked commands are in `docs/INFERENCE.md`.
 
 ### 16. A listening/evaluation runbook
 - The actual arbiter of the project is by-ear evaluation; the protocol (word-by-word
@@ -194,6 +198,9 @@ Legend: **S** ≈ minutes, **M** ≈ ~an hour, **L** ≈ days. Impact: High / Me
 - Only `run_batch_random.sh` writes a JSON sidecar; a manual `run_one.sh` run loses its
   seed/provenance (`DECISIONS.md` policy says every track gets one). And `truncated`
   is only visible by opening logs — no summary.
+- *Partly addressed 2026-09-22:* `INFERENCE/generate.py` writes a per-track sidecar
+  (seed first, results after) and a `batch_summary.txt` with a truncation flag for its
+  own runs; a bare `run_one.sh` invocation still writes neither.
 - **Fix (S–M / M).** Move sidecar writing into `run_one.sh`; add
   `INFERENCE/summarize_batch.py <seeds.tsv>` printing idx/maqam/seed/cap/exit/duration/
   truncated/wav-sha and flagging truncated rows.
@@ -219,6 +226,8 @@ Legend: **S** ≈ minutes, **M** ≈ ~an hour, **L** ≈ days. Impact: High / Me
 - **Pairs with** #11 (a `status` command can then report "current run folder") and #18
   (the summary lives inside the run folder).
 - **Impact: Med–High · Effort: S–M.**
+- *Partly addressed 2026-09-22:* `run_one.sh` now honors `OUT_DIR`, and
+  `INFERENCE/generate.py` creates a per-run folder for every batch it drives.
 
 ---
 

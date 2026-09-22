@@ -1,0 +1,19 @@
+{
+  "defaults": {
+    "style": "arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Hijaz. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, precise Arabic diction, melismatic phrasing with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, large dynamic range. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: Poignant, Chivalric, Emotional.",
+    "repeat": 2,
+    "quantile": 0.95
+  },
+  "songs": [
+    {
+      "name": "quick_smoke",
+      "lyrics": "[Verse 1]\nيا لَيلُ هُدْ هُدْ ... يا لَيلُ ...",
+      "seed": 7,
+      "cap": 750
+    },
+    {
+      "name": "sabah_alwatan",
+      "lyrics": "[Intro]\nيا صَباحَ الوَطَنِ المَشدودِ بِالأَلَمِ...\n\n[Verse 1]\nيا صَباحَ الوَطَنِ المَشدودِ بِالأَلَمِ\nنادِ الفَجْرَ وَخُذْ بِيَ إلى النَّدَى...\n\n[Chorus]\nوَإِذا ما سَأَلوني عَن حَبيبي\nقُلتُ: ذاكَ الصَّوتُ في قَلبِ المَدى...\n\n[Outro]\nيا صَباحَ الوَطَنِ المَشدودِ بِالأَلَمِ..."
+    }
+  ]
+}

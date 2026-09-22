@@ -6,6 +6,10 @@
 #   cap dur_cap = 111.1 + 0.3126*N_letters, rounded to 10 s; covers 94.8%).
 #   The staged GCS scripts/duration_cap.py is a mirror -- the repo copy wins.
 #   For a more forgiving cap the doc's 97.5th percentile is dur = 122.9 + 0.3081*N.
+# Env overrides (used by INFERENCE/generate.py, and usable directly):
+#   OUT_DIR     output folder for this run's files (default: $ROOT/out)
+#   STYLE_FILE  style text file (default: $ROOT/prompts/<Maqam>_style.txt)
+#   LYRICS_FILE lyrics text file (default: $ROOT/prompts/<Maqam>_lyrics.txt)
 # Writes everything under $OUT so it can be monitored from another terminal.
 # $OUT defaults to $ROOT/out; a batch driver sets OUT_DIR to a per-run folder
 # (e.g. out/20260922-1537_random16/) so each run's tracks stay self-contained.
@@ -25,8 +29,8 @@ MODEL="$ROOT/models/Yue2-3B-GGUF"
 OUT="${OUT_DIR:-$ROOT/out}"
 mkdir -p "$OUT"
 
-style="$ROOT/prompts/${M}_style.txt"
-lyrics="$ROOT/prompts/${M}_lyrics.txt"
+style="${STYLE_FILE:-$ROOT/prompts/${M}_style.txt}"
+lyrics="${LYRICS_FILE:-$ROOT/prompts/${M}_lyrics.txt}"
 wav="$OUT/${M}_${S}.wav"
 log="$OUT/${M}_${S}.log"
 tfile="$OUT/${M}_${S}_time.txt"
