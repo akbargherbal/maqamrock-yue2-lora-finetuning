@@ -70,8 +70,8 @@ bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 &
 
 ## Backup responsibility
 
-- `backup_to_gcp.py` mirrors `training_folder` (checkpoints, `loss_log.db`, config, samples, tensorboard), `/content/logs` (train log + GPU CSV), and `agent_notes/`. Before a run that writes a new output folder, confirm `TARGETS` actually covers it — if not, fix the script, don't work around it by hand.
-- Before the user starts a run, confirm the backup daemon is actually running (`pgrep -af backup_to_gcp.py`, or freshness of `/content/logs/gcp_backup.log`) and that `gpu_logger.py` is too (`pgrep -af gpu_logger.py`). If either isn't, give the exact command — `--run-name` is required for the backup script, and the GCS base comes from `GCP_BACKUP_BASE`, exported by the launching notebook:
+- `backup_to_gcp.py` mirrors `training_folder` (checkpoints, `loss_log.db`, config, samples, tensorboard), `/content/logs` (train log + GPU CSV), and `agent_notes/`. Before a run that writes a new output folder, confirm `TARGETS` actually covers it — if not, fix the script, don't work around it by hand. For the audio.cpp inference workspace use `--inference` (targets `INFERENCE_TARGETS`; defaults `--run-name audiocpp_inference`, mirrors `/content/audiocpp_inference/{out,prompts,scripts}` + the converted LoRA under `gs://<base>/audiocpp_inference/`).
+- Before the user starts a run, confirm the backup daemon is actually running (`pgrep -af backup_to_gcp.py`, or freshness of `/content/logs/gcp_backup.log`) and that `gpu_logger.py` is too (`pgrep -af gpu_logger.py`). If either isn't, give the exact command — `--run-name` defaults per mode (`akbar_arabic_rock_lora` for training, `audiocpp_inference` with `--inference`), and the GCS base comes from `GCP_BACKUP_BASE`, exported by the launching notebook:
 
   ```bash
   cd /content/maqamrock-yue2-lora-finetuning

@@ -590,3 +590,26 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `exit=127` line there is the pre-fix Ajam attempt).
 - **Not yet done:** the clean-VM proof + cold timing (agenda items 1–2), the
   random-seed-batch plan (item 3), and any listening pass on these four wavs.
+
+## 2026-09-22 — `backup_to_gcp.py` gains `--inference`, so the audio.cpp workspace is auto-backed-up
+
+- `backup_to_gcp.py` previously only had one hardcoded target set (training
+  output + `/content/logs` + `agent_notes`); the inference workspace was being
+  mirrored by hand, against `AGENTS.md`'s "fix the script, don't work around it".
+- Added **`--inference`**, mirroring `bootstrap/setup.sh`'s own `--training`/
+  `--inference` split: targets `INFERENCE_TARGETS` and defaults `--run-name` to
+  `audiocpp_inference`. Mirrors `/content/audiocpp_inference/{out,prompts,scripts}`
+  + `/content/converter/out` (the converted LoRA) + `logs/` + `agent_notes/` to
+  `gs://<base>/audiocpp_inference/`. `models/` (multi-GB GGUFs) and `bin/`
+  (prebuilt CLI) are deliberately excluded — regenerable via `setup.sh`.
+- `--run-name` is now optional (defaults per mode). `ensure_manifest` now adopts
+  a manifest whose recorded `prefix` disagrees with where it sits (the stale
+  `audiocpp_gguf_test` manifest at the `audiocpp_inference/` prefix) instead of
+  refusing; a manifest naming another run *while claiming this exact prefix*
+  still refuses.
+- Verified: `py_compile`; dry-run in both modes; a real
+  `backup_to_gcp.py --inference --once` synced 6/6 folders and rewrote the
+  manifest to `run_name: audiocpp_inference`; a follow-up dry-run copied nothing.
+  `README.md` + `AGENTS.md` updated. Committed + pushed.
+- **Still open:** the clean-VM proof + cold timing (agenda 1–2), random-seed
+  batch (agenda 3), and any listening pass on the four seed-1 wavs.

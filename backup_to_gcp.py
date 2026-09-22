@@ -24,15 +24,25 @@ self-heals.
 
 Every run gets its own subfolder -- `<base>/<run-name>/` -- under one generic
 root, so a new run can never overwrite a previous one and the bucket root
-stays fixed. `--run-name` is required and a `run_manifest.json` is written at
-the run folder's root so it identifies itself. `dataset/` already lives
-under the root and is reserved.
+stays fixed. `--run-name` defaults per mode (see below) and a
+`run_manifest.json` is written at the run folder's root so it identifies
+itself. `dataset/` already lives under the root and is reserved.
+
+Two modes, mirroring bootstrap/setup.sh's own --training/--inference split:
+
+  training (default)  the run's training output + logs + agent_notes under
+                      <base>/<run-name>/ (default run-name akbar_arabic_rock_lora).
+  --inference         the audio.cpp inference workspace under
+                      <base>/audiocpp_inference/ (out, prompts, scripts, the
+                      converted LoRA) + logs + agent_notes. See INFERENCE_TARGETS.
 
 Usage:
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora --interval-minutes 15
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora --once
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora --dry-run
+    python backup_to_gcp.py --inference
+    python backup_to_gcp.py --inference --once
 """
 
 from __future__ import annotations
@@ -70,9 +80,32 @@ JOB_NAME = "akbar_arabic_rock_lora"
 TRAINING_FOLDER = Path("/content/ai-toolkit/output")
 JOB_ROOT = TRAINING_FOLDER / JOB_NAME
 
+# Inference workspace (bootstrap/setup.sh --inference). Not a numbered run but a
+# standing work area, and the one the agent actually drives audiocpp_cli from;
+# it must survive the VM like a training run does. Local layout:
+#   out/       generated wavs + per-run .log/_time.txt/_gpu.csv/_runs_status.log
+#   prompts/   the Maqam <style,lyrics> pairs the runs are driven from
+#   scripts/   duration_cap.py etc.
+#   ../converter/out/  the converted step-3000 LoRA (.safetensors) + converter
+#                      scripts -- expensive to regenerate, so mirrored too.
+# Deliberately NOT backed up (reproducible, not precious):
+#   models/    multi-GB GGUFs; setup.sh re-downloads them from HF
+#   bin/       prebuilt audiocpp_cli; already GCS-resident under .../build/
+INFERENCE_ROOT = Path("/content/audiocpp_inference")
+INFERENCE_RUN_NAME = "audiocpp_inference"
+LORA_LOCAL = Path("/content/converter/out")
+
 # (source folder, remote subfolder, wait for writes to settle before syncing)
-TARGETS = [
+TRAINING_TARGETS = [
     (JOB_ROOT, "output", True),
+    (Path("/content/logs"), "logs", False),
+    (REPO_ROOT / "agent_notes", "agent_notes", False),
+]
+INFERENCE_TARGETS = [
+    (INFERENCE_ROOT / "out", "out", False),
+    (INFERENCE_ROOT / "prompts", "prompts", False),
+    (INFERENCE_ROOT / "scripts", "scripts", False),
+    (LORA_LOCAL, "converter", False),
     (Path("/content/logs"), "logs", False),
     (REPO_ROOT / "agent_notes", "agent_notes", False),
 ]
@@ -92,8 +125,16 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--run-name",
-        required=True,
-        help="This run's subfolder under <base> (e.g. akbar_arabic_rock_lora).",
+        default=None,
+        help="This run's subfolder under <base>. Defaults to "
+             f"{JOB_NAME!r} in training mode and {INFERENCE_RUN_NAME!r} with "
+             "--inference.",
+    )
+    p.add_argument(
+        "--inference",
+        action="store_true",
+        help="Back up the audio.cpp inference workspace instead of the training "
+             "run (targets INFERENCE_TARGETS).",
     )
     p.add_argument(
         "--base",
@@ -237,12 +278,26 @@ def ensure_manifest(
     remote = f"{prefix.rstrip('/')}/run_manifest.json"
     existing = read_remote_json(remote, args, logger)
     if existing is not None and existing.get("run_name") != run_name:
-        logger.error(
-            "run prefix %s already belongs to run %r; refusing to mix.",
+        # A manifest whose own recorded `prefix` does not match the prefix it
+        # sits at is not the authoritative owner of this prefix -- it was
+        # written elsewhere and relocated. Adopt it (rewrite below) instead of
+        # refusing; only a manifest that both names another run AND claims this
+        # exact prefix is a real collision.
+        if existing.get("prefix", "").rstrip("/") == prefix.rstrip("/"):
+            logger.error(
+                "run prefix %s already belongs to run %r; refusing to mix.",
+                prefix,
+                existing.get("run_name"),
+            )
+            return False
+        logger.warning(
+            "adopting prefix %s: manifest here names run %r but records prefix "
+            "%r; rewriting it for run %r",
             prefix,
             existing.get("run_name"),
+            existing.get("prefix"),
+            run_name,
         )
-        return False
     stamp = dt.datetime.now().isoformat(timespec="seconds")
     manifest = {
         "run_name": run_name,
@@ -288,6 +343,9 @@ def main() -> int:
         )
         return 3
 
+    if not args.run_name:
+        args.run_name = INFERENCE_RUN_NAME if args.inference else JOB_NAME
+
     if args.run_name in RESERVED_SUBFOLDERS:
         logger.error(
             "%r is a reserved non-run folder under %s; pick another run name.",
@@ -298,11 +356,12 @@ def main() -> int:
 
     prefix = f"{args.base}/{args.run_name}"
 
-    targets = list(TARGETS)
+    targets = list(INFERENCE_TARGETS if args.inference else TRAINING_TARGETS)
 
     logger.info(
-        "backup run %r to %s/%s every %.0f min (once=%s, dry-run=%s)",
+        "backup run %r (%s) to %s/%s every %.0f min (once=%s, dry-run=%s)",
         args.run_name,
+        "inference" if args.inference else "training",
         args.base,
         args.run_name,
         args.interval_minutes,

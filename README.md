@@ -101,6 +101,13 @@ Three real surfaces, in priority order:
 
 `backup_to_gcp.py` mirrors the run's artifacts to `gs://<base>/<run-name>/` every 15 minutes: `training_folder/akbar_arabic_rock_lora/` → `output/`, `/content/logs/` → `logs/`, and `agent_notes/` → `agent_notes/`. It uses `gsutil rsync` without `-d` (append/update only, never deletes remote), writes a `run_manifest.json` that refuses to mix two runs in one prefix, and gates each sync on the newest file being untouched (`--settle-seconds`) except for `loss_log.db` and its WAL sidecars, which are perpetually fresh during a run. To confirm progress is actually backed up, compare GCS object timestamps against local ones rather than assuming.
 
+For the inference workspace (`setup.sh --inference`) run it with `--inference` instead: it defaults `--run-name` to `audiocpp_inference` and mirrors `/content/audiocpp_inference/{out,prompts,scripts}` plus the converted LoRA (`/content/converter/out`) and the shared `logs/` + `agent_notes/` under `gs://<base>/audiocpp_inference/`. The model GGUFs and prebuilt binary are not mirrored (regenerable; `setup.sh` re-fetches them).
+
+```bash
+python backup_to_gcp.py --inference            # daemon
+python backup_to_gcp.py --inference --once     # single pass
+```
+
 ## Docs
 
 `docs/` holds task runbooks — [start on a fresh VM](docs/START.md), [pause/resume across sessions](docs/PAUSE_RESUME.md), [backup/restore](docs/BACKUP_RESTORE.md), [monitoring](docs/MONITOR.md), [L4 vs A100 cost/time](docs/GPU_L4_VS_A100.md), and the [post-run completion/backup checklist](docs/FINAL_BACKUP.md) — plus future ideas that are researched but not scheduled ([pronunciation LoRA](docs/FUTURE_PRONUNCIATION_LORA.md)); see [`docs/README.md`](docs/README.md) for the index. `DECISIONS.md` records source-verified decisions and the reasoning behind non-obvious config fields; read it before changing anything that looks wrong. `PROGRESS.md` is the milestone trail. `TRAINING_ANALYSIS/ANALYSIS.md` is the final v2 training analysis (v1's is archived under `TRAINING_ANALYSIS/v1_nolyrics_archived/`). `verification.md` is the v1 dataset audit. `AGENTS.md` is the operating contract for the coding agent, including the run-control policy (no new or changed run without the user typing the command; auto-resume only an unchanged, already-approved run after an unplanned interruption).
