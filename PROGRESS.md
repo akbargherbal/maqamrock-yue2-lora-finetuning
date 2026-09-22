@@ -560,3 +560,33 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   metadata wrapper and same-seed-twice bit-identity test are still not started;
   do those before any batch generation. Batch verdict criteria remain
   `TODO(user)`, not an agent task.
+
+## 2026-09-22 — First T4 inference run: four held-out maqams generated; missing GNU `time` fixed in bootstrap
+
+- **First GPU inference on this project** (T4, driver `580.82.07`, CUDA 13.0).
+  `bootstrap/setup.sh --inference` ran all `[ok]` (7s) — but still on a **warm**
+  VM, so this is **not** the clean-VM proof the 2026-09-22 agenda item 1 asks
+  for; that remains open.
+- **First `run_one.sh` invocation crashed exit 127 before the model loaded:**
+  `INFERENCE/run_one.sh: line 44: /usr/bin/time: No such file or directory`.
+  `run_one.sh` wraps every generation in `/usr/bin/time -v -o`, and Colab ships
+  only the bash builtin `time`. Fixed `bootstrap/setup.sh`'s `job_ccache` to
+  install `ccache time` (both are hard requirements of the build/run path, not
+  optional speedups); verify block unchanged. Commit **`34322b7`**, `bash -n`
+  clean, pushed. Worked around on this VM with `apt-get install -y time`, then
+  re-ran the identical command.
+- **All four staged maqams generated, seed 1, exit 0** (one at a time, via
+  `INFERENCE/run_one.sh <Maqam> 1`; `duration_cap` auto):
+
+  | Maqam | cap | exit | wav dur | wav size | wall |
+  |---|---|---|---|---|---|
+  | Ajam | 5750 | 0 | 230.0s | 44,159,788 | 7:02 |
+  | Hijaz | 6500 | 0 | 231.2s | 44,390,188 | 7:26 |
+  | Kurd | 5500 | 0 | 216.7s | 41,602,348 | 6:42 |
+  | Nahawand | 6000 | 0 | 240.0s | 46,079,788 | 7:29 |
+
+  All 48 kHz stereo. Artifacts under `/content/audiocpp_inference/out/`; full
+  `_runs_status.log` and setup verify block in `agent_notes/current.md` (the one
+  `exit=127` line there is the pre-fix Ajam attempt).
+- **Not yet done:** the clean-VM proof + cold timing (agenda items 1–2), the
+  random-seed-batch plan (item 3), and any listening pass on these four wavs.
