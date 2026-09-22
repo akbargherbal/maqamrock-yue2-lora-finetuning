@@ -467,3 +467,39 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   holds, the other three maqams uncapped with flash. (3) User's calls: commit the converter + tests to the
   repo; write the manual-execution workflow for inference tests into `AGENTS.md`. (No stray
   `akbar_arabic_rock_lora.safetensors` is present in the repo root — verified 2026-09-21.)
+
+## 2026-09-22 — Bootstrap split into `--training` / `--inference`; notebook gains an inference cell
+
+- **`bootstrap/setup.sh` now takes a mode flag** (default `--training`, so nothing
+  existing breaks). Training is byte-for-byte unchanged: dataset + ai-toolkit/torch
+  + training HF assets. New **`--inference`** skips the dataset download *and* the
+  (slow) ai-toolkit/torch install entirely; instead it clones `0xShug0/audio.cpp`
+  to `/content/audio.cpp` (**clone only — never built**, by the user's explicit
+  call) and pre-warms `audio-cpp/Yue2-3B-GGUF` → `yue2-3b-bf16.gguf` +
+  `yue2-vae-f16.gguf` into the standard HF cache. Both modes install opencode and
+  do the HF login. `--help` prints usage; unknown flags exit 1. The mode-dependent
+  verify block checks the dataset/ai-toolkit/asset stack for training, and the
+  audio.cpp clone + GGUF assets for inference.
+- **BF16 main GGUF, not the Q8 of the 2026-09-21 test runs**, per `DECISIONS.md`:
+  BF16 is recommended when a LoRA is merged (Q8/Q4 merge into dequantized weights
+  and requantize the result).
+- **Notebook** `OSTRIS_ArabicSuno_vscode_anywhere.ipynb` (repo-external; the user's
+  local launching copy) gained a final `## Inference setup (fresh VM)` markdown
+  cell that mirrors the training cell and launches `setup.sh --inference`; the
+  existing cell was labelled `## Training setup (fresh VM)`. Two separate copy-paste
+  paths for the two purposes, as intended.
+- **Docs synced:** `README.md` (repo-layout line + Colab section now say
+  `--training`, with a one-line `--inference` description) and `docs/START.md`
+  step 2.
+- **Open question — the audio.cpp build may be simpler than the 2026-09-21 entry
+  concluded.** That entry's guidance (manual `scripts/build_linux.sh --backend cuda
+  --cuda-arch 75 --ccache --model-set custom --models yue2 --target audiocpp_cli`)
+  is now suspect: the user's read is that **`build_linux.sh` may itself be buggy or
+  redundant**, i.e. a plain cmake/build path might suffice and the earlier ~30 min
+  build was self-inflicted by the script's `full` default. **Not re-tested yet.**
+  The inference summary `setup.sh` prints still shows that command, now annotated
+  in-place as the unverified best guess. Re-verify the real build path on the next
+  inference VM before treating any of it as settled.
+- **Next:** on a fresh inference VM, verify the actual audio.cpp build path (whether
+  `build_linux.sh` is needed at all), then run the held-out prompts through
+  `audiocpp_cli` with the converted step-3000 LoRA.

@@ -25,7 +25,7 @@ INFERENCE/yue2_eval_heldout/        # v2 held-out eval set: 4 prompts, 0 shared 
 monitor_loss.py                     # read-only loss_log.db inspector (step, metrics, ETA)
 gpu_logger.py                       # nvidia-smi poller -> CSV (AI Toolkit logs no GPU stats)
 backup_to_gcp.py                    # periodic GCS mirror of run artifacts
-bootstrap/setup.sh                  # idempotent Colab bootstrap (ai-toolkit, HF cache, dataset)
+bootstrap/setup.sh                  # idempotent Colab bootstrap; --training (default) / --inference
 bootstrap/github_auth.sh            # token-based git push auth, never exposed to the agent
 DECISIONS.md                        # source-verified decisions and non-obvious findings
 PROGRESS.md                         # milestone trail across sessions
@@ -61,10 +61,15 @@ On a fresh VM, restore the repo and start the bootstrap in the background while 
 ```bash
 git clone <this repo's URL>
 cd maqamrock-yue2-lora-finetuning
-bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 &
+bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 &
 ```
 
-The notebook cell must export `HF_TOKEN` (staged into `/root/.secrets.env`), `GCP_DATASET_PATH`, and `GCP_BACKUP_BASE` first; nothing bucket- or account-specific is hardcoded in the repo. `setup.sh` is idempotent: it skips the dataset download when the completion marker is present and skips any HF asset already cached. It clones ai-toolkit (tracking `main`, deliberately not pinned) and pre-warms only the assets this config actually loads.
+`--training` is the default; `bash bootstrap/setup.sh --inference` prepares a
+lean inference-only VM (clones `0xShug0/audio.cpp` — not built — and pre-warms
+the `audio-cpp/Yue2-3B-GGUF` bf16 model + VAE; it skips the dataset and the
+ai-toolkit/torch install). `--help` prints both modes.
+
+The notebook cell must export `HF_TOKEN` (staged into `/root/.secrets.env`), `GCP_DATASET_PATH` (training only), and `GCP_BACKUP_BASE` first; nothing bucket- or account-specific is hardcoded in the repo. `setup.sh` is idempotent: it skips the dataset download when the completion marker is present and skips any HF asset already cached. It clones ai-toolkit (tracking `main`, deliberately not pinned) and pre-warms only the assets this config actually loads.
 
 Then start the two sidecar processes and launch training from ai-toolkit's directory:
 

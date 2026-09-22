@@ -23,8 +23,10 @@ torch 2.13 / cu130 — see `../DECISIONS.md`), pre-warms the HF cache, and pulls
 the 267-track dataset from GCS.
 
 ```bash
-bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 &
+bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 &
 ```
+
+(`--training` is the default; for inference instead, see `setup.sh --help`.)
 
 While it runs, authenticate the `vscode.dev` tunnel in the foreground. Watch
 for the verify block; it must end with all `[ok]` (including the torch/CUDA +

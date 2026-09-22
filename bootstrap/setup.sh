@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # maqamrock-yue2-lora-finetuning — Colab bootstrap
 #
+# Two modes, selected by flag (default: --training):
+#   --training   dataset + ai-toolkit + the training HF assets
+#   --inference  audio.cpp (cloned, NOT built) + the inference GGUF assets
+# Both modes install opencode and log into HF. Inference deliberately skips
+# the dataset download and the (slow) ai-toolkit/torch install.
+#
 # Run this BACKGROUNDED while you do vscode.dev tunnel auth in the
 # foreground, so the auth wait and the install/download time overlap.
 # Ostris's own deps (torch + its requirements.txt) take noticeably longer
@@ -8,15 +14,16 @@
 #
 #   git clone <this repo's URL>
 #   cd maqamrock-yue2-lora-finetuning
-#   bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 &
+#   bash bootstrap/setup.sh --training  > /content/logs/setup.log 2>&1 &
+#   bash bootstrap/setup.sh --inference > /content/logs/setup.log 2>&1 &
 #   /content/code tunnel
 #
 # Deliberately non-interactive — nothing here should prompt. HF_TOKEN is
 # staged into a plain file by the notebook cell BEFORE this script runs
 # (`userdata` only exists inside the notebook kernel, not in a terminal
 # shell). GCP auth and the dataset's GCS location both come from that same
-# cell: the path arrives as GCP_DATASET_PATH. No bucket or path is
-# hardcoded in this repo.
+# cell: the path arrives as GCP_DATASET_PATH (training mode only). No bucket
+# or path is hardcoded in this repo.
 #
 # Toolchain note (see DECISIONS.md for the full source-verified writeup):
 # unlike FL-YuE2, which needed every weight staged into a specific
@@ -28,8 +35,32 @@
 # on a multi-GB download mid-run. SheetSage2 is deliberately NOT pre-warmed:
 # it only loads when model_kwargs.cot != "off", and this config has
 # cot: "off" — downloading it would just waste bandwidth and disk.
+# Inference pre-warms the audio.cpp GGUF assets into that same cache; it uses
+# `hf download` (not a custom tree) for the same reason.
 
 set -e
+
+# --- Mode (default: training) ---
+MODE="training"
+usage() {
+  cat <<'USAGE'
+Usage: bash bootstrap/setup.sh [--training | --inference]
+
+  --training   (default) dataset + ai-toolkit + training HF assets
+  --inference  audio.cpp clone + inference GGUF assets (no dataset, no ai-toolkit)
+  -h, --help   show this message
+USAGE
+}
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --training)  MODE="training" ;;
+    --inference) MODE="inference" ;;
+    -h|--help)   usage; exit 0 ;;
+    *) echo "[FAIL] unknown argument: $1"; usage; exit 1 ;;
+  esac
+  shift
+done
+
 mkdir -p /content/logs
 
 if [ -f /root/.secrets.env ]; then
@@ -45,6 +76,9 @@ fi
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 AI_TOOLKIT="/content/ai-toolkit"
 AI_TOOLKIT_REPO="https://github.com/ostris/ai-toolkit.git"
+AUDIO_CPP="/content/audio.cpp"
+AUDIO_CPP_REPO="https://github.com/0xShug0/audio.cpp"
+GGUF_REPO="audio-cpp/Yue2-3B-GGUF"
 # Not pinned to a commit on purpose: unlike FL-YuE2 (a third-party custom
 # node with its own release cadence), Ostris's yue2 support is upstream and
 # moving fast. The resolved commit is printed by the verify step below so
@@ -52,10 +86,13 @@ AI_TOOLKIT_REPO="https://github.com/ostris/ai-toolkit.git"
 
 # The dataset's GCS location is supplied at runtime by the launching
 # notebook (exported into /root/.secrets.env); it is never hardcoded here.
-DATASET_GCS="${GCP_DATASET_PATH:?GCP_DATASET_PATH must be set (the launching notebook exports it)}"
+# Training-only: inference has nothing to download from GCS here.
 DATASET_LOCAL="/content/yue2_dataset"
+if [ "$MODE" = "training" ]; then
+  DATASET_GCS="${GCP_DATASET_PATH:?GCP_DATASET_PATH must be set (the launching notebook exports it)}"
+fi
 
-echo "=== $(date) — maqamrock-yue2 bootstrap starting ==="
+echo "=== $(date) — maqamrock-yue2 bootstrap starting (mode: $MODE) ==="
 
 # --- Fast, synchronous: the `hf` CLI (>=0.34) and credentials ---
 pip install -q --no-input "huggingface_hub>=0.36.0"
@@ -131,6 +168,29 @@ job_hf_tokenizer_head() {
   # set, which this config does not set — not pre-warmed, on purpose.
 }
 
+# --- Inference (--inference) ---
+# audio.cpp is only CLONED here, never built: the build is scoped and
+# deliberate (see DECISIONS.md) and is left as a manual step. The GGUF files
+# are pre-warmed into the standard HF cache, same rationale as training.
+job_audio_cpp() {
+  if [ -d "$AUDIO_CPP/.git" ]; then
+    echo "audio.cpp already cloned at $AUDIO_CPP; skipping clone"
+  else
+    rm -rf "$AUDIO_CPP" && git clone --quiet "$AUDIO_CPP_REPO" "$AUDIO_CPP"
+  fi
+  git -C "$AUDIO_CPP" rev-parse --short HEAD
+}
+
+# BF16, not Q8: DECISIONS.md recommends BF16 when a LoRA is merged (Q8/Q4
+# merge into dequantized weights and requantize the result).
+job_hf_gguf_main() {
+  hf download "$GGUF_REPO" yue2-3b-bf16.gguf
+}
+
+job_hf_gguf_vae() {
+  hf download "$GGUF_REPO" yue2-vae-f16.gguf
+}
+
 # --- Launch every independent, slow task in parallel ---
 pids=()
 names=()
@@ -143,11 +203,17 @@ start_job() {
 }
 
 start_job opencode job_opencode
-start_job ai_toolkit job_ai_toolkit
-start_job dataset job_dataset
-start_job hf_yue2_backbone job_hf_yue2_backbone
-start_job hf_mert job_hf_mert
-start_job hf_tokenizer_head job_hf_tokenizer_head
+if [ "$MODE" = "training" ]; then
+  start_job ai_toolkit job_ai_toolkit
+  start_job dataset job_dataset
+  start_job hf_yue2_backbone job_hf_yue2_backbone
+  start_job hf_mert job_hf_mert
+  start_job hf_tokenizer_head job_hf_tokenizer_head
+else
+  start_job audio_cpp job_audio_cpp
+  start_job hf_gguf_main job_hf_gguf_main
+  start_job hf_gguf_vae job_hf_gguf_vae
+fi
 
 echo "Launched in parallel: ${names[*]}"
 echo "tail -f /content/logs/<n>.log to watch any one of these live."
@@ -165,54 +231,71 @@ done
 # --- Verify what actually landed, don't just trust exit codes ---
 echo "=== Verifying setup ==="
 
-track_count=$(find "$DATASET_LOCAL" -maxdepth 1 -name "*.mp3" 2>/dev/null | wc -l)
-if [ "$track_count" -eq 0 ]; then
-  echo "[FAIL] dataset looks empty — check /content/logs/dataset.log and the GCS path"
-  fail=1
-else
-  echo "[ok]   dataset: $track_count tracks in $DATASET_LOCAL"
-fi
-
-if [ -f "$AI_TOOLKIT/run.py" ]; then
-  echo "[ok]   ai-toolkit at $(git -C "$AI_TOOLKIT" rev-parse --short HEAD 2>/dev/null || echo '??') (tracking main, not pinned)"
-else
-  echo "[FAIL] ai-toolkit did not clone correctly — run.py missing"
-  fail=1
-fi
-
 if command -v opencode >/dev/null 2>&1 || [ -x "$HOME/.opencode/bin/opencode" ]; then
   echo "[ok]   opencode installed"
 else
   echo "[WARN] opencode not found on PATH after install — check /content/logs/opencode.log"
 fi
 
-# Confirm the HF cache actually picked up what we pre-warmed. `hf download`
-# is idempotent against the cache -- a cache hit just prints the path back
-# instantly instead of re-downloading -- so re-running it here is a cheap,
-# honest check rather than trusting the earlier background job's exit code.
-if hf download Comfy-Org/YuE2 checkpoints/yue2_3b_int8_convrot.safetensors >/dev/null 2>&1; then
-  echo "[ok]   YuE2-3B backbone present in HF cache"
-else
-  echo "[FAIL] YuE2-3B backbone not confirmed in HF cache — re-run hf download manually before training"
-  fail=1
-fi
+# Confirm an HF cache asset actually landed. `hf download` is idempotent
+# against the cache -- a cache hit just prints the path back instantly
+# instead of re-downloading -- so re-running it here is a cheap, honest check
+# rather than trusting the earlier background job's exit code.
+confirm_hf() {
+  local repo="$1"; shift
+  if hf download "$repo" "$@" >/dev/null 2>&1; then
+    echo "[ok]   $repo $* present in HF cache"
+  else
+    echo "[FAIL] $repo $* not confirmed in HF cache — re-run hf download manually"
+    fail=1
+  fi
+}
 
-# The stack latent caching actually depends on: torch and torchaudio must
-# agree on CUDA (torchaudio refuses to import otherwise), and torchaudio —
-# which in this version routes decode through torchcodec — must be able to
-# read a real dataset file. A stale `==` pin silently kept a cu128 torchaudio
-# next to a cu130 torch and broke every decode; catch that here, not at the
-# first training step mid-cache. See DECISIONS.md.
-if python - <<PY >/dev/null 2>&1
+if [ "$MODE" = "training" ]; then
+  track_count=$(find "$DATASET_LOCAL" -maxdepth 1 -name "*.mp3" 2>/dev/null | wc -l)
+  if [ "$track_count" -eq 0 ]; then
+    echo "[FAIL] dataset looks empty — check /content/logs/dataset.log and the GCS path"
+    fail=1
+  else
+    echo "[ok]   dataset: $track_count tracks in $DATASET_LOCAL"
+  fi
+
+  if [ -f "$AI_TOOLKIT/run.py" ]; then
+    echo "[ok]   ai-toolkit at $(git -C "$AI_TOOLKIT" rev-parse --short HEAD 2>/dev/null || echo '??') (tracking main, not pinned)"
+  else
+    echo "[FAIL] ai-toolkit did not clone correctly — run.py missing"
+    fail=1
+  fi
+
+  confirm_hf Comfy-Org/YuE2 checkpoints/yue2_3b_int8_convrot.safetensors
+
+  # The stack latent caching actually depends on: torch and torchaudio must
+  # agree on CUDA (torchaudio refuses to import otherwise), and torchaudio —
+  # which in this version routes decode through torchcodec — must be able to
+  # read a real dataset file. A stale `==` pin silently kept a cu128 torchaudio
+  # next to a cu130 torch and broke every decode; catch that here, not at the
+  # first training step mid-cache. See DECISIONS.md.
+  if python - <<PY >/dev/null 2>&1
 import glob, torch, torchaudio
 assert torch.version.cuda == "13.0", torch.version.cuda
 torchaudio.load(sorted(glob.glob("$DATASET_LOCAL/*.mp3"))[0])
 PY
-then
-  echo "[ok]   torch/torchaudio cu130 + torchaudio decodes a dataset mp3"
+  then
+    echo "[ok]   torch/torchaudio cu130 + torchaudio decodes a dataset mp3"
+  else
+    echo "[FAIL] torch/torchaudio CUDA mismatch or audio decode failed — see DECISIONS.md 'torch/CUDA stack'"
+    fail=1
+  fi
 else
-  echo "[FAIL] torch/torchaudio CUDA mismatch or audio decode failed — see DECISIONS.md 'torch/CUDA stack'"
-  fail=1
+  if [ -d "$AUDIO_CPP/.git" ]; then
+    echo "[ok]   audio.cpp at $(git -C "$AUDIO_CPP" rev-parse --short HEAD 2>/dev/null || echo '??') (tracking main, not pinned; NOT built)"
+  else
+    echo "[FAIL] audio.cpp did not clone correctly — $AUDIO_CPP/.git missing"
+    fail=1
+  fi
+
+  confirm_hf "$GGUF_REPO" yue2-3b-bf16.gguf
+  confirm_hf "$GGUF_REPO" yue2-vae-f16.gguf
 fi
 
 if [ "$fail" -eq 1 ]; then
@@ -220,8 +303,9 @@ if [ "$fail" -eq 1 ]; then
   exit 1
 fi
 
-cat <<EOF
-=== setup.sh done ===
+if [ "$MODE" = "training" ]; then
+  cat <<EOF
+=== setup.sh done (training) ===
 Next (in a terminal):
   cd $REPO_ROOT
   # 1. start the backup daemon + GPU logger (see AGENTS.md for the exact commands)
@@ -229,3 +313,19 @@ Next (in a terminal):
   cd $AI_TOOLKIT
   python run.py $REPO_ROOT/config/akbar_arabic_rock_lora.yml -l /content/logs/train.log
 EOF
+else
+  cat <<EOF
+=== setup.sh done (inference) ===
+audio.cpp was CLONED but NOT built, on purpose. GGUF assets are in the HF cache.
+Next (in a terminal):
+  # 1. build audio.cpp — BUILD PATH UNDER REVIEW: the scoped build_linux.sh
+  #    command recorded 2026-09-21 may be unnecessary (the script itself may be
+  #    buggy/redundant); verify before trusting the exact flags below.
+  cd $AUDIO_CPP
+  scripts/build_linux.sh --backend cuda --cuda-arch 75 --ccache \\
+    --model-set custom --models yue2 --target audiocpp_cli
+  # 2. pull the converted step-3000 LoRA + runner scripts from the run's GCS
+  #    prefix (see DECISIONS.md / docs), then drive audiocpp_cli with
+  #    --session-option yue2.ar_lora / yue2.nar_lora (and yue2.attention=flash on a T4).
+EOF
+fi
