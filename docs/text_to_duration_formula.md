@@ -1,8 +1,24 @@
-# Text Length → Audio Duration Formula (yue2_dataset)
+# Text Length → Audio Duration Cap (yue2_dataset)
 
-Derived the relationship between the number of Arabic letters in each lyric
-`.txt` and the duration of the matching `.mp3`, generalizing over 95% of the
-tracks (outliers excluded).
+How many seconds of audio a lyric of `N` Arabic letters needs, as an **upper
+cap**: the length at which a generated song is very likely to have finished
+singing. Fitted on the 267 `yue2_dataset/` `.txt` / `.mp3` pairs.
+
+For lyrics-to-song generation the model may always stop early, but a truncated
+song is a failure. Under-shooting costs a broken output; over-shooting costs
+only a little wasted compute. The loss is **asymmetric**, so the correct target
+is a high quantile of duration — not the mean.
+
+## TL;DR
+
+```
+duration_cap_s ≈ 111.1 + 0.3126 × N_letters      # 95th percentile
+```
+
+Covers **94.8% of all 267 tracks** (14 exceed it). The ~111 s intercept is the
+fixed non-vocal overhead (intro / instrumental / gaps); ~0.31 s/letter is the
+sung part. For a more forgiving cap use the 97.5th percentile:
+`122.9 + 0.3081 × N`.
 
 ## Data
 
@@ -31,74 +47,74 @@ content.
 | Letters `N`   | 328 | 571    | 829 |
 | Duration (s)  | 162 | 253    | 370 |
 
-Average recitation rate is ~2.3 letters/second, but it rises with `N`
-(~2.15 l/s at low counts → ~2.4 l/s at high counts), which indicates a fixed
-non-vocal overhead (intro / instrumental / gaps) per track plus a roughly linear
-vocal part.
+Average recitation is ~2.3 letters/second, rising with `N` (~2.15 l/s at low
+counts → ~2.4 l/s at high counts), which indicates a fixed non-vocal overhead
+per track plus a roughly linear vocal part.
 
-## Formula
+## The cap
 
-Trimmed (least-trimmed-squares style) linear regression fit on the best 95% of
-tracks (254/267), outliers excluded:
+Quantile regression (pinball loss) at the 95th percentile over all 267 tracks:
 
-```
-duration_s ≈ 92.0 + 0.280 × N_letters
-```
+| Quantile | Fit (`s = a + b·N`) | Coverage | Tracks over cap |
+|----------|----------------------|---------:|----------------:|
+| 0.90     | `105.1 + 0.3059·N`   | 90.3%    | 26 / 267        |
+| **0.95** | **`111.1 + 0.3126·N`** | **94.8%** | **14 / 267** |
+| 0.975    | `122.9 + 0.3081·N`   | 97.8%    | 6 / 267         |
 
-Inverse:
+The cap slope (0.313) exceeds the central slope (0.280): spread is
+heteroscedastic, so the ceiling rises faster than the middle. That is exactly
+why a central fit makes a poor cap.
 
-```
-N_letters ≈ (duration_s − 92.0) / 0.280
-```
+### Do not trim the long tracks
 
-### Accuracy
+Robust "trim the outliers" regressions drop points with the largest absolute
+residual — symmetrically, high **and** low. That is correct for estimating the
+centre, but wrong for a cap: of the 13 tracks such a fit discards, 11 run
+*longer* than the line. Those long tracks define the ceiling; discarding them
+pulls the cap down. The 95% cap above is fit on the full data for that reason.
+The only genuine anomalies are the two unusually *short* performances
+(`kurd_qais_24072026_011_7176eef3` 161.9 s at N=422;
+`ajam_Lamiyat_Alshanfara_16082026_005_5fcfcead` 189.6 s at N=515), and they sit
+harmlessly below the cap.
 
-- Coverage: 94.4% of all tracks within ±35 s (1.96σ)
-- MAE: 16.1 s, RMSE: 20.8 s
-- Marginal rate ≈ 3.6 letters/second; average ≈ 2.3 letters/second
+## Accuracy
 
-### Sanity check (example from the request)
+- `q=0.95` covers 94.8% of tracks; the 14 exceptions overshoot by ~11 s on average.
+- `q=0.975` covers 97.8% (6 exceptions).
+
+### Sanity check
 
 `ajam_aasha_23072026_001_51a73d83`
 
 - `N` = 389 letters
-- Predicted: 92.0 + 0.280 × 389 = **200.8 s**
-- Actual: **193.2 s**
+- Cap: 111.1 + 0.3126 × 389 = **232.7 s**
+- Actual: **193.2 s** → comfortably under the cap, as intended.
 
-### Alternative models
+## Reference: the centre fit (not a cap)
 
-| Model                     | Fit                          | Residual σ | Notes                          |
-|---------------------------|------------------------------|-----------:|--------------------------------|
-| Linear (95% trimmed)      | `dur = 92.0 + 0.280·N`       | 17.7 s     | best                           |
-| Huber robust (all)        | `dur = 88.0 + 0.289·N`       | 18.6 s     | covers 90.6% at 1.96σ          |
-| Through-origin            | `dur = 0.442·N`              | 20.5 s     | worse; ignores fixed overhead  |
-| Quadratic                 | `dur = 79.5 + 0.317·N − 2.2e−5·N²` | 20.7 s | no real gain                |
+An earlier trimmed fit through the middle of the data:
 
-## Excluded outliers (13 of 267 ≈ 5%)
+```
+duration_s ≈ 92.0 + 0.280 × N_letters      # median / centre — NOT a cap
+```
 
-All are structural / tempo anomalies (intro-heavy, slowed, or long-poem tracks
-running ~40–70 s from prediction):
+It is the conditional mean (least-squares) of the symmetrically trimmed 95%,
+and covers only **54.7%** of tracks. Useful to describe typical pacing, but it
+under-provisions a cap by design and must not be used to size generation.
 
-| File | N | Actual (s) | Predicted (s) | Residual (s) |
-|------|--:|-----------:|--------------:|-------------:|
-| `ajam_Lamiyat_Alshanfara_16082026_005_5fcfcead` | 515 | 189.6 | 236.1 | −46.5 |
-| `ajam_majnoon_layla_18082026_008_99dd0dab`      | 670 | 344.0 | 279.5 | +64.5 |
-| `ajam_muallaqt_antra_21082026_006_504d6b9f`     | 554 | 298.1 | 247.0 | +51.1 |
-| `ajam_nabigah_19072026_004_e1f451d0`            | 328 | 232.9 | 183.8 | +49.1 |
-| `hijaz_short-poems_16082026_025_b9e9154b`       | 745 | 369.7 | 300.5 | +69.3 |
-| `kurd_jarir_24072026_006_d0fd493c`              | 484 | 272.0 | 227.4 | +44.5 |
-| `kurd_qais_24072026_011_7176eef3`               | 422 | 161.9 | 210.1 | −48.2 |
-| `nahawand_amro_bin_kalthoum_20082026_022_1f09f875` | 643 | 313.1 | 271.9 | +41.2 |
-| `nahawand_amro_bin_kalthoum_20082026_023_ff8033ff` | 643 | 319.7 | 271.9 | +47.8 |
-| `nahawand_amro_bin_kalthoum_23072026_032_0be82bf8` | 630 | 313.0 | 268.3 | +44.8 |
-| `nahawand_amro_bin_kalthoum_24072026_015_8ea19939` | 630 | 338.1 | 268.3 | +69.8 |
-| `nahawand_ghayra_mujdin_19082026_001_8308a510`      | 576 | 300.3 | 253.2 | +47.1 |
-| `nahawand_ghayra_mujdin_19082026_010_7666435c`      | 557 | 297.8 | 247.9 | +49.9 |
+## Caveats
+
+- The fit describes *this* corpus: 267 tracks, one style/config at 110 BPM. A
+  95% cap here is a 95% cap within this distribution, not a guarantee for any
+  arbitrary singer or performance. For distribution shift, prefer the 97.5%
+  variant or add a headroom factor.
+- Validate against a held-out set before relying on it for new material.
 
 ## Reproduce
 
+Run from inside `yue2_dataset/`. Numpy only, no scikit-learn required.
+
 ```bash
-cd yue2_dataset
 python3 - <<'PY'
 import os, glob, subprocess, unicodedata
 import numpy as np
@@ -115,19 +131,25 @@ for txt in sorted(glob.glob('*.txt')):
     dur = float(subprocess.run(
         ['ffprobe', '-v', 'error', '-show_entries', 'format=duration',
          '-of', 'csv=p=0', mp3], capture_output=True, text=True).stdout.strip())
-    rows.append((txt[:-4], arabic_letters(open(txt, encoding='utf-8').read()), dur))
+    rows.append((arabic_letters(open(txt, encoding='utf-8').read()), dur))
 
-x = np.array([r[1] for r in rows], float)
-y = np.array([r[2] for r in rows], float)
-n, keep = len(x), int(round(0.95 * len(x)))
+x = np.array([r[0] for r in rows], float)
+y = np.array([r[1] for r in rows], float)
 
-# least-trimmed-squares: drop worst residual until 95% remain
-mask = np.ones(n, bool)
-while mask.sum() > keep:
-    b, a = np.polyfit(x[mask], y[mask], 1)
-    r = np.abs(y - (a + b * x)); r[~mask] = -1
-    mask[np.argmax(r)] = False
-b, a = np.polyfit(x[mask], y[mask], 1)
-print(f"duration_s = {a:.3f} + {b:.5f} * N_letters  (n={mask.sum()}/{n})")
+def quantile_fit(x, y, tau, iters=200000, lr=0.05):
+    """Pinball-loss (quantile) regression by subgradient descent."""
+    xm, xs = x.mean(), x.std()
+    xz = (x - xm) / xs
+    a, b = np.median(y), 0.0
+    for _ in range(iters):
+        g = tau - (y - (a + b * xz) < 0)      # d(pinball)/d(residual)
+        a += lr * np.mean(g)
+        b += lr * np.mean(g * xz)
+    return a - b * xm / xs, b / xs            # back to raw N
+
+for tau in (0.50, 0.90, 0.95, 0.975):
+    a, b = quantile_fit(x, y, tau)
+    cover = 100 * np.mean(y <= a + b * x)
+    print(f"q={tau:.3f}: dur = {a:7.2f} + {b:.5f}*N  covers {cover:5.1f}%")
 PY
 ```
