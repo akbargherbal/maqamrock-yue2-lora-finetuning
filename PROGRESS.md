@@ -673,3 +673,38 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   closing banner still prints the stale "cloned but NOT built" build instructions
   (predates `job_audiocpp_binary`); the clean-VM proof + cold timing (earlier agenda)
   also remain open.
+
+## 2026-09-22 — First random-seed inference batch (16 tracks); repo audit; outputs partitioned per run
+
+- **First real generation batch on the T4**: 4 maqams × 4 random seeds, alternating
+  order (Hijaz→Kurd→Nahawand→Ajam ×4), run detached through a new resilient driver
+  (`run_batch_random.sh`) that skips already-succeeded tracks and writes a per-track
+  JSON sidecar (seed, prompt + LoRA sha256, GPU, exit, WAV sha256) **before**
+  generation. **16/16 `exit=0`**, 13:37–15:21 UTC. Seeds kept for re-runs at
+  `out/batch_20260922_seeds.tsv` (local + GCS). ~2 h wall.
+- **Benchmark**: mean **389.6 s (6.49 min)/track** on a T4 (median 380.2 s), ~9
+  tracks/hour; per-maqam means track the auto cap. In `docs/INFERENCE.md`.
+- **Lyrics source unified.** The four `sample.samples` lyrics in
+  `config/akbar_arabic_rock_lora.yml` are now canonical everywhere — copied to the
+  audio.cpp prompts (local + GCS) and the repo held-out artifacts, with the held-out
+  property re-verified (0 shared normalized lines). Commit `4ad9053`. Cause of the
+  original gap: `7c14dc4` had corrected only the YAML, while audio.cpp reads the
+  separate staged prompt files.
+- **Bug found — the batch ran under-capped.** The staged `duration_cap.py` still
+  used the old centre fit `92.0 + 0.280·N` while `run_one.sh`/docs specify the
+  95th-percentile `111.1 + 0.3126·N`, so all 16 used low caps (6500/5500/6000/5750)
+  and **5 self-terminated at the cap (`truncated 1`)**: `Ajam_140828086`,
+  `Kurd_1389690935`, `Kurd_3975969445`, `Kurd_514634212`, `Nahawand_441956428`.
+  Fix + re-run open (audit item 1).
+- **Repo audit** `docs/IMPROVEMENTS.md` (`4527d3a`, extended by `6d65c99`): 21 ranked
+  findings (stale docs, script drift, workflow gaps) + ARCHIVED / SUPERSEDED /
+  RETRACTED banners on `verification.md`, `docs/investigation.md`,
+  `docs/yue2-gguf-lora-findings.md`.
+- **Outputs partitioned by run** (audit item 21, applied by hand): the 16 tracks
+  moved to `audiocpp_inference/out/20260922-1337_random16/` (82 files); the ~91 old
+  experiment renders (735 MiB) + a stray `out/out/` archived to
+  `audiocpp_inference/out_archive/20260921_experiments/`. Flat `out/` now holds only
+  per-run folders.
+- **Supersedes agenda item 3** (random-seed batch): it ran; the sidecar wrapper now
+  exists, though the same-seed-twice bit-identity test was not done. Clean-VM proof +
+  cold timing (items 1–2) remain open.
