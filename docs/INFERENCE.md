@@ -130,11 +130,10 @@ T4, 2026-09-22: `setup.sh --inference` (all `[ok]`) then `INFERENCE/run_one.sh
 
 ## Benchmark — wall time per track on a T4 (2026-09-22)
 
-Measured on the first **12 of 16** tracks of the random-seed batch
-(`out/batch_20260922_seeds.tsv`; batch still running when this was written).
-Wall time is `/usr/bin/time -v`'s `Elapsed (wall clock)` for the whole
-`audiocpp_cli` process — i.e. **model load + generation**, as reported in each
-`out/<Maqam>_<seed>_time.txt`.
+Measured on the full **16-track** random-seed batch (`out/batch_20260922_seeds.tsv`,
+4 maqams × 4 random seeds, all `exit=0`). Wall time is `/usr/bin/time -v`'s
+`Elapsed (wall clock)` for the whole `audiocpp_cli` process — i.e. **model load +
+generation**, as reported in each `out/<Maqam>_<seed>_time.txt`.
 
 **Setup:** Tesla T4 (compute 7.5), bf16 GGUFs (`yue2-3b-bf16.gguf` +
 `yue2-vae-f16.gguf`), converted step-3000 LoRA (AR + NAR, scale 1.0),
@@ -143,27 +142,29 @@ Wall time is `/usr/bin/time -v`'s `Elapsed (wall clock)` for the whole
 
 | Metric | Value |
 |---|---|
-| Tracks measured | 12 |
-| **Mean** | **386.7 s (6.45 min)** |
-| Median | 378.4 s (6.31 min) |
+| Tracks measured | 16 |
+| **Mean** | **389.6 s (6.49 min)** |
+| Median | 380.2 s (6.34 min) |
 | Min / Max | 336.4 / 446.9 s |
-| Total (12 tracks) | 77.3 min |
+| Total (16 tracks) | 103.9 min |
 
-Per-maqam means (each n=3) — tracks with longer lyrics get the larger auto cap,
+Per-maqam means (each n=4) — tracks with longer lyrics get the larger auto cap,
 which dominates the difference:
 
 | Maqam | Auto cap | Mean wall |
 |---|---|---|
-| Hijaz | 6500 | 423.8 s |
-| Ajam | 5750 | 383.4 s |
-| Nahawand | 6000 | 377.1 s |
-| Kurd | 5500 | 362.6 s |
+| Hijaz | 6500 | 424.4 s |
+| Ajam | 5750 | 378.0 s |
+| Nahawand | 6000 | 388.8 s |
+| Kurd | 5500 | 367.3 s |
 
 > **Cap caveat.** The "Auto cap" values above are what the staged `duration_cap.py`
 > actually produced on 2026-09-22 — which used the **old centre-fit** formula
 > `92.0 + 0.280·N`. This runner and `text_to_duration_formula.md` specify the
-> 95th-percentile `111.1 + 0.3126·N`, so these caps were ~750–1000 tokens low and 5
-> tracks self-terminated at the cap (`truncated 1`). See `IMPROVEMENTS.md` item 1.
+> 95th-percentile `111.1 + 0.3126·N`, so these caps were ~750–1000 tokens low and
+> **5 of 16** tracks self-terminated at the cap (`truncated 1`):
+> `Ajam_140828086`, `Kurd_1389690935`, `Kurd_3975969445`, `Kurd_514634212`,
+> `Nahawand_441956428`. See `IMPROVEMENTS.md` item 1.
 
 Rule of thumb for planning a batch: **~6.5 min/track, ~9 tracks/hour on a T4**,
 scaling with the cap (larger lyrics → longer track → longer wall time).
