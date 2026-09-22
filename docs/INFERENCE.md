@@ -26,7 +26,7 @@ INFERENCE/run_one.sh Hijaz 1                                          # cap defa
 | Prebuilt `audiocpp_cli` (sm_75 / T4) | GCS `audiocpp_inference/build/audiocpp_cli` | `/content/audiocpp_inference/bin/audiocpp_cli` | **Yes** |
 | Converted step-3000 LoRA, unfused (`akbar_arabic_rock_lora_{ar,nar}.safetensors`) | GCS `audiocpp_inference/converter/` | `/content/converter/out/` | **Yes** |
 | Prompts (one `*_style.txt` + `*_lyrics.txt` per maqam) | GCS `audiocpp_inference/prompts/` | `/content/audiocpp_inference/prompts/` | **Yes** |
-| Helper scripts (`duration_cap.py`, `run_one.sh` siblings) | GCS `audiocpp_inference/scripts/` | `/content/audiocpp_inference/scripts/` | **Yes** |
+| Runner + cap script (`run_one.sh`, `duration_cap.py`) | **Repo `INFERENCE/`** (canonical; the GCS `audiocpp_inference/scripts/` copy is a legacy mirror) | `/content/maqamrock-yue2-lora-finetuning/INFERENCE/` | `scripts/` still mirrored, but the repo copy is what runs |
 
 Consequence: to "use the GGUF from GCP" you can't — there isn't one there. Either
 let `setup.sh` re-fetch it from HF, or copy your local
@@ -70,8 +70,8 @@ INFERENCE/run_one.sh <Maqam> <seed> [cap|auto]
 
 - `<Maqam>` ∈ {`Ajam`, `Hijaz`, `Kurd`, `Nahawand`} (the staged `prompts/*_style.txt`).
 - `<seed>` — use a value below 2^32 (see `../DECISIONS.md`'s seeds entry).
-- `cap` defaults to `auto`: derived from the lyrics by
-  `scripts/duration_cap.py`, per
+- `cap` defaults to `auto`: derived from the lyrics by the canonical
+  [`INFERENCE/duration_cap.py`](../INFERENCE/duration_cap.py), per
   [`text_to_duration_formula.md`](text_to_duration_formula.md). This is an
   **upper cap** (95th-percentile quantile regression, not a mean):
   `dur_cap = 111.1 + 0.3126·N_letters`, rounded to 10 s — covers 94.8% of the
@@ -164,7 +164,12 @@ which dominates the difference:
 > 95th-percentile `111.1 + 0.3126·N`, so these caps were ~750–1000 tokens low and
 > **5 of 16** tracks self-terminated at the cap (`truncated 1`):
 > `Ajam_140828086`, `Kurd_1389690935`, `Kurd_3975969445`, `Kurd_514634212`,
-> `Nahawand_441956428`. See `IMPROVEMENTS.md` item 1.
+> `Nahawand_441956428`.
+>
+> **Fixed:** `run_one.sh` now computes the cap with the canonical repo
+> `INFERENCE/duration_cap.py` (95th percentile), so new runs are correctly
+> capped. Re-running the 5 truncated seeds at the corrected cap is a separate
+> open item.
 
 Rule of thumb for planning a batch: **~6.5 min/track, ~9 tracks/hour on a T4**,
 scaling with the cap (larger lyrics → longer track → longer wall time).

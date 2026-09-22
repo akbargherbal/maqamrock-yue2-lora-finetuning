@@ -12,7 +12,6 @@ Legend: **S** ≈ minutes, **M** ≈ ~an hour, **L** ≈ days. Impact: High / Me
 
 | # | Item | Type | Impact | Effort |
 |---|---|---|---|---|
-| 1 | `duration_cap.py` is the old median fit — this whole batch ran under-capped | correctness | **High** | S |
 | 2 | Staged `scripts/` drifted from the repo and self-perpetuates (marker-gated) | correctness | **High** | S–M |
 | 3 | `INFERENCE/run_one.sh` committed non-executable but docs call it directly | correctness | Med | S |
 | 4 | `verification.md` audits v1 (style-only) and has no archive banner | stale doc | **High** | S |
@@ -38,24 +37,6 @@ Legend: **S** ≈ minutes, **M** ≈ ~an hour, **L** ≈ days. Impact: High / Me
 
 ## P0 — Correctness (fix before the next GPU run)
 
-### 1. `duration_cap.py` uses the superseded formula → tracks are under-capped
-- **Evidence.** The executed script `/content/audiocpp_inference/scripts/duration_cap.py:5,33`
-  computes `dur = 92.0 + 0.280 * N` (the old *median* fit, 54.7% coverage in
-  `docs/text_to_duration_formula.md:98`). But `INFERENCE/run_one.sh:6` and
-  `docs/text_to_duration_formula.md:15` now specify the **95th-percentile** cap
-  `111.1 + 0.3126 * N` (94.8% coverage). `run_one.sh` calls the staged copy, so the
-  corrected formula never executes.
-- **Impact, measured.** Every track in the 2026-09-22 batch used the old caps
-  (Hijaz 6500 / Kurd 5500 / Nahawand 6000 / Ajam 5750). Corrected caps are
-  **7250 / 6500 / 7000 / 6500**. 5 of 14 finished tracks already self-report
-  `truncated 1` (hit the cap instead of ending naturally): `Ajam_140828086`,
-  `Kurd_514634212`, `Kurd_1389690935`, `Kurd_3975969445`, `Nahawand_441956428`.
-  Truncation is exactly the failure the asymmetric cap is meant to avoid.
-- **Fix (S).** Change `dur = 92.0 + 0.280 * n` → `111.1 + 0.3126 * n`, and keep the
-  docstring in sync. Better: make `duration_cap.py` canonical in the repo (it is
-  untracked today) and stage it from there (see #2). Re-run the truncated seeds at
-  the corrected cap if you want complete songs.
-
 ### 2. Staged `scripts/` has drifted from the repo and self-perpetuates
 - **Evidence.** `/content/audiocpp_inference/scripts/` (staged by `setup.sh` from GCS
   `audiocpp_inference/scripts/`, `setup.sh:113,259`) holds stale copies:
@@ -66,7 +47,9 @@ Legend: **S** ≈ minutes, **M** ≈ ~an hour, **L** ≈ days. Impact: High / Me
     seeds `1000-1003` that no longer match any documented batch.
   - `backup_live.py:31` — `/content/audiocpp_test`, GCS `audiocpp_gguf_test`
     (retired prefix); it is superseded by `backup_to_gcp.py --inference`.
-  - `duration_cap.py` — item #1.
+  - `duration_cap.py` — the old, superseded centre fit. Fixed at the source:
+    `INFERENCE/duration_cap.py` is now canonical in the repo and `run_one.sh`
+    calls it, so the staged copy is no longer consulted (2026-09-22).
 - **Why it persists.** `job_audiocpp_binary` is marker-gated (`setup.sh:247-260`), so
   on a warm VM *nothing* re-stages — the cheap `prompts/`/`scripts/` rsyncs are
   skipped too, and the repo's canonical `INFERENCE/run_one.sh` is never the staged
@@ -75,7 +58,7 @@ Legend: **S** ≈ minutes, **M** ≈ ~an hour, **L** ≈ days. Impact: High / Me
   `scripts/` is a mirror. Split the marker so `prompts/`+`scripts/` always rsync and
   only the 350 MiB binary is marker-gated; regenerate the GCS `scripts/` prefix
   (keep `run_batch_random.sh`; delete `run_one.sh`, `run_batch16*.sh`,
-  `backup_live.py`, fix `duration_cap.py`).
+  `backup_live.py`, `duration_cap.py` — the repo `INFERENCE/` copy is now canonical).
 
 ### 3. `INFERENCE/run_one.sh` is committed non-executable
 - **Evidence.** `git ls-files -s INFERENCE/run_one.sh` → mode `100644`; the working
@@ -241,9 +224,9 @@ Legend: **S** ≈ minutes, **M** ≈ ~an hour, **L** ≈ days. Impact: High / Me
 
 ## Open decisions (user's call — not applied)
 
-- Commit the inference tooling that is currently GCS-only: `duration_cap.py`,
-  `run_batch_random.sh`, `converter/convert_aitoolkit_yue2_lora.py` (without these,
-  inference isn't reproducible from the repo).
+- Commit the inference tooling that is currently GCS-only: `run_batch_random.sh`,
+  `converter/convert_aitoolkit_yue2_lora.py` (without these, inference isn't
+  reproducible from the repo; `duration_cap.py` is now in the repo).
 - Whether to re-run the 5 truncated tracks (and tracks 14–16 of the running batch) at
   the corrected cap.
 - Whether extending training past step 3000 (see `DECISIONS.md`'s extension entry) —

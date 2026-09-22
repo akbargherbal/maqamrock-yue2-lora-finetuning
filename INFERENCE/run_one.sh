@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # One observed YuE2 generation (LoRA AR+NAR scale 1.0).
 # Usage: run_one.sh <Maqam> <seed> [semantic_max_tokens]
-#   cap defaults to "auto": derived from the lyrics via scripts/duration_cap.py
-#   (docs/text_to_duration_formula.md: 95th-percentile cap
-#   dur_cap = 111.1 + 0.3126*N_letters, rounded to 10 s; covers 94.8% of tracks).
+#   cap defaults to "auto": derived from the lyrics via the canonical repo copy
+#   INFERENCE/duration_cap.py (docs/text_to_duration_formula.md: 95th-percentile
+#   cap dur_cap = 111.1 + 0.3126*N_letters, rounded to 10 s; covers 94.8%).
+#   The staged GCS scripts/duration_cap.py is a mirror -- the repo copy wins.
 #   For a more forgiving cap the doc's 97.5th percentile is dur = 122.9 + 0.3081*N.
 # Writes everything under out/ so it can be monitored from another terminal:
 #   out/<Maqam>_<seed>.wav        audio
@@ -12,6 +13,7 @@
 #   out/<Maqam>_<seed>_gpu.csv    1 Hz: util, mem_used, power, temp
 #   out/_runs_status.log          one START/END line per run (always)
 set -u
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT=/content/audiocpp_inference
 M="${1:?usage: run_one.sh <Maqam> <seed> [cap|auto]}"
 S="${2:?usage: run_one.sh <Maqam> <seed> [cap|auto]}"
@@ -30,7 +32,7 @@ csv="$OUT/${M}_${S}_gpu.csv"
 status="$OUT/_runs_status.log"
 
 if [ "$CAP_ARG" = "auto" ]; then
-  CAP=$(python3 "$ROOT/scripts/duration_cap.py" "$lyrics")
+  CAP=$(python3 "$SCRIPT_DIR/duration_cap.py" "$lyrics")
 else
   CAP="$CAP_ARG"
 fi
