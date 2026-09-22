@@ -3,7 +3,7 @@
 #
 # Two modes, selected by flag (default: --training):
 #   --training   dataset + ai-toolkit + the training HF assets
-#   --inference  audio.cpp (cloned, NOT built) + the inference GGUF assets
+#   --inference  audio.cpp (cloned, NOT built) + ccache + the inference GGUF assets
 # Both modes install opencode and log into HF. Inference deliberately skips
 # the dataset download and the (slow) ai-toolkit/torch install.
 #
@@ -47,7 +47,7 @@ usage() {
 Usage: bash bootstrap/setup.sh [--training | --inference]
 
   --training   (default) dataset + ai-toolkit + training HF assets
-  --inference  audio.cpp clone + inference GGUF assets (no dataset, no ai-toolkit)
+  --inference  audio.cpp clone + ccache + inference GGUF assets (no dataset, no ai-toolkit)
   -h, --help   show this message
 USAGE
 }
@@ -172,6 +172,16 @@ job_hf_tokenizer_head() {
 # audio.cpp is only CLONED here, never built: the build is scoped and
 # deliberate (see DECISIONS.md) and is left as a manual step. The GGUF files
 # are pre-warmed into the standard HF cache, same rationale as training.
+#
+# ccache is installed here because the recommended build (scripts/build_linux.sh
+# --ccache ...) hard-fails when the binary is missing — it is not an optional
+# speedup that silently no-ops (verified in that script: `--ccache was passed
+# but ccache is not installed` + exit 1). Training has no build step, so this
+# stays inference-only.
+job_ccache() {
+  apt-get install -y ccache
+}
+
 job_audio_cpp() {
   if [ -d "$AUDIO_CPP/.git" ]; then
     echo "audio.cpp already cloned at $AUDIO_CPP; skipping clone"
@@ -210,6 +220,7 @@ if [ "$MODE" = "training" ]; then
   start_job hf_mert job_hf_mert
   start_job hf_tokenizer_head job_hf_tokenizer_head
 else
+  start_job ccache job_ccache
   start_job audio_cpp job_audio_cpp
   start_job hf_gguf_main job_hf_gguf_main
   start_job hf_gguf_vae job_hf_gguf_vae
@@ -291,6 +302,13 @@ else
     echo "[ok]   audio.cpp at $(git -C "$AUDIO_CPP" rev-parse --short HEAD 2>/dev/null || echo '??') (tracking main, not pinned; NOT built)"
   else
     echo "[FAIL] audio.cpp did not clone correctly — $AUDIO_CPP/.git missing"
+    fail=1
+  fi
+
+  if command -v ccache >/dev/null 2>&1; then
+    echo "[ok]   ccache installed: $(ccache --version | head -n1)"
+  else
+    echo "[FAIL] ccache not found after install — the --ccache build would exit 1; see /content/logs/ccache.log"
     fail=1
   fi
 

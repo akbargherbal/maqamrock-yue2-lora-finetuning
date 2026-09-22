@@ -503,3 +503,24 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 - **Next:** on a fresh inference VM, verify the actual audio.cpp build path (whether
   `build_linux.sh` is needed at all), then run the held-out prompts through
   `audiocpp_cli` with the converted step-3000 LoRA.
+
+## 2026-09-22 — `setup.sh --inference` now installs `ccache` (the `--ccache` build flag hard-fails without it)
+
+- Preflight on the inference VM (2026-09-22 05:42 UTC) found `ccache` not
+  installed, while `setup.sh`'s own recommended next-step build command passes
+  `--ccache` to `scripts/build_linux.sh`.
+- Verified in `audio.cpp`'s `scripts/build_linux.sh:413-417`: `--ccache` is not
+  a graceful no-op — if `command -v ccache` fails it prints
+  `--ccache was passed but ccache is not installed` and `exit 1`. The
+  recommended build would have died on its first action, before compiling
+  anything.
+- Fix: `bootstrap/setup.sh`'s `--inference` branch now runs
+  `apt-get install -y ccache` (new `job_ccache`, dispatched alongside the other
+  inference jobs) and its verify block checks `ccache --version`, failing the
+  bootstrap if absent. `--training` untouched.
+- Verified on this VM: installed `ccache 4.9.1-1`; `which ccache && ccache
+  --version` → `/usr/bin/ccache`, `ccache version 4.9.1`.
+- Whether `build_linux.sh` is even the right build tool (vs. a plain cmake path)
+  is unchanged and still open — see the 2026-09-22 split entry and
+  `DECISIONS.md`'s `--model-set full` entry. This entry only makes the
+  documented flag combination runnable.
