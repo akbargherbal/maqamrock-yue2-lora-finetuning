@@ -542,3 +542,21 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   the timing code runs and the jobs don't error — the from-clean-VM proof of
   `bfa8f29`'s staging (model dir + sidecars + LoRA) is deferred to next session,
   after a restart, on purpose.
+
+## 2026-09-22 — NEXT SESSION AGENDA (fresh VM, after restart)
+
+- **1. First task: the real clean-VM proof.** On a genuinely fresh `/content`
+  (nothing pre-staged, nothing cached), run `bootstrap/setup.sh --inference` and
+  confirm the verify block passes — model dir + all four sidecars + both LoRA
+  files present, no `[FAIL]` lines. This is what actually proves `bfa8f29`'s
+  staging works; every test so far ran on an already-warm VM. Also confirm
+  `run_one.sh` resolves the build path, defaults to bf16, and includes
+  `yue2.attention=flash` (`bfa8f29` + `4a7e4be`), with no manual override.
+- **2. Capture the real cold timing number.** That same run is the first honest
+  total from the `8289abe` instrumentation — the 7s seen so far was all cache
+  hits and means nothing. Record actual per-job + total seconds from the console
+  output and `/content/logs/timing.txt`, not from memory.
+- **3. Only after 1–2 pass: resume the random-seed-batch plan.** Its sidecar
+  metadata wrapper and same-seed-twice bit-identity test are still not started;
+  do those before any batch generation. Batch verdict criteria remain
+  `TODO(user)`, not an agent task.
