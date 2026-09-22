@@ -32,6 +32,7 @@ Legend: **S** ≈ minutes, **M** ≈ ~an hour, **L** ≈ days. Impact: High / Me
 | 18 | No batch summary / truncation report | workflow | Med | M |
 | 19 | `DECISIONS.md` sample-event count 12 vs 13; file:line citations drifted | stale doc | Low | S |
 | 20 | `setup.sh --inference` closing banner tells you to do an unneeded build | stale doc | Med | S |
+| 21 | All inference outputs dump into one flat `out/` — partition by run (datetime folder) | workflow | Med–High | S–M |
 
 ---
 
@@ -213,6 +214,28 @@ Legend: **S** ≈ minutes, **M** ≈ ~an hour, **L** ≈ days. Impact: High / Me
 - **Fix (S–M / M).** Move sidecar writing into `run_one.sh`; add
   `INFERENCE/summarize_batch.py <seeds.tsv>` printing idx/maqam/seed/cap/exit/duration/
   truncated/wav-sha and flagging truncated rows.
+
+### 21. Partition inference outputs by run — one flat `out/` is not okay *(user-requested)*
+- **Problem.** Every `run_one.sh`/batch writes into the single directory
+  `/content/audiocpp_inference/out/`, with no run scoping. It currently holds **35 WAVs**
+  from several unrelated attempts (the 2026-09-22 16-track batch, the seed-1 set, the
+  `cap*` experiments), all mixed together. `out/` can only be untangled by cross-
+  referencing a TSV by hand, and `backup_to_gcp.py --inference` mirrors that same flat
+  prefix to GCS. You cannot look at a file and know which run/batch produced it.
+- **Fix (S–M).** Give each run/batch its **own datetime-stamped folder**, e.g.
+  `out/<YYYYMMDD-HHMMSS>_<label>/` (`out/20260922-1537_random16/`), containing that
+  run's WAVs, JSON sidecars, `*.log`, `*_time.txt`, `*_gpu.csv`, its seeds TSV, and a
+  batch summary (`_runs_status.log`). Parameterize the output root in `run_one.sh` +
+  `run_batch_random.sh` (env var such as `OUT_DIR`, or a driver arg) so the driver
+  creates the folder and points every track at it; keep a tiny `out/latest` pointer
+  (symlink or one-line text file) for convenience. `backup_to_gcp.py --inference` then
+  mirrors each run folder as a self-contained unit. Filenames can keep the `<Maqam>_<seed>`
+  convention inside the folder.
+- **One-time cleanup.** The current flat `out/` mixes ~19 older renders that are not
+  needed; archive or delete them after the new layout lands (GCS keeps its copies).
+- **Pairs with** #11 (a `status` command can then report "current run folder") and #18
+  (the summary lives inside the run folder).
+- **Impact: Med–High · Effort: S–M.**
 
 ---
 
