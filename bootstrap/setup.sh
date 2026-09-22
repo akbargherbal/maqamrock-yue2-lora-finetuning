@@ -96,11 +96,21 @@ fi
 # Inference staging (--inference). yue2 needs a concrete on-disk model dir, not
 # just a warm HF cache: `audiocpp_cli --model <dir>` discovers the configs in
 # that dir (docs/models/yue2.md). Paths match what INFERENCE/run_one.sh expects.
-AUDIOCPP_TEST="/content/audiocpp_test"
-YUE2_MODEL_DIR="$AUDIOCPP_TEST/models/Yue2-3B-GGUF"
+AUDIOCPP_INFERENCE="/content/audiocpp_inference"
+YUE2_MODEL_DIR="$AUDIOCPP_INFERENCE/models/Yue2-3B-GGUF"
 LORA_LOCAL="/content/converter/out"
+# Prebuilt CUDA audiocpp_cli + the prompts/ and scripts/ trees. Staged under
+# $AUDIOCPP_INFERENCE, deliberately NOT under $AUDIO_CPP: job_audio_cpp does
+# `rm -rf "$AUDIO_CPP"` and re-clones it, which would race this job and delete
+# anything staged there.
+AUDIOCPP_BIN_LOCAL="$AUDIOCPP_INFERENCE/bin/audiocpp_cli"
+AUDIOCPP_PROMPTS_LOCAL="$AUDIOCPP_INFERENCE/prompts"
+AUDIOCPP_SCRIPTS_LOCAL="$AUDIOCPP_INFERENCE/scripts"
 if [ "$MODE" = "inference" ]; then
-  LORA_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/audiocpp_gguf_test/converter"
+  LORA_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/audiocpp_inference/converter"
+  AUDIOCPP_BIN_GCS="$GCP_BACKUP_BASE/audiocpp_inference/build/audiocpp_cli"
+  AUDIOCPP_PROMPTS_GCS="$GCP_BACKUP_BASE/audiocpp_inference/prompts"
+  AUDIOCPP_SCRIPTS_GCS="$GCP_BACKUP_BASE/audiocpp_inference/scripts"
 fi
 
 echo "=== $(date) — maqamrock-yue2 bootstrap starting (mode: $MODE) ==="
@@ -218,10 +228,31 @@ job_hf_yue2_sidecars() {
 }
 
 # Converted step-3000 adapters (unfused, for audio.cpp); 133 MiB, GCS-persisted
-# under audiocpp_gguf_test/converter/. Same rsync pattern as the dataset pull.
+# under audiocpp_inference/converter/. Same rsync pattern as the dataset pull.
 job_lora_adapters() {
   mkdir -p "$LORA_LOCAL"
   gsutil -m rsync -r "$LORA_GCS" "$LORA_LOCAL"
+}
+
+# Prebuilt CUDA audiocpp_cli (350 MiB, CUDA 12.0 / sm_75) plus the prompts/ and
+# scripts/ trees, GCS-persisted under audiocpp_inference/. Skips the ~21 min CPU
+# build entirely on a fresh VM. Marker mirrors job_dataset: the pulls are
+# idempotent either way, but then no 350 MiB copy re-runs on every bootstrap.
+job_audiocpp_binary() {
+  local marker="$AUDIOCPP_INFERENCE/.audiocpp_binary_complete"
+  if [ -f "$marker" ]; then
+    echo "audiocpp_cli already staged (marker $marker); skipping"
+    return 0
+  fi
+  mkdir -p "$(dirname "$AUDIOCPP_BIN_LOCAL")" \
+           "$AUDIOCPP_PROMPTS_LOCAL" "$AUDIOCPP_SCRIPTS_LOCAL"
+  # Single file, not a tree: plain cp, so gsutil does not hash-compare 350 MiB
+  # the way `rsync -r` would.
+  gsutil cp "$AUDIOCPP_BIN_GCS" "$AUDIOCPP_BIN_LOCAL"
+  chmod +x "$AUDIOCPP_BIN_LOCAL"
+  gsutil -m rsync -r "$AUDIOCPP_PROMPTS_GCS" "$AUDIOCPP_PROMPTS_LOCAL"
+  gsutil -m rsync -r "$AUDIOCPP_SCRIPTS_GCS" "$AUDIOCPP_SCRIPTS_LOCAL"
+  touch "$marker"
 }
 
 # --- Launch every independent, slow task in parallel ---
@@ -250,6 +281,7 @@ else
   start_job hf_yue2_gguf job_hf_yue2_gguf
   start_job hf_yue2_sidecars job_hf_yue2_sidecars
   start_job lora_adapters job_lora_adapters
+  start_job audiocpp_binary job_audiocpp_binary
 fi
 
 echo "Launched in parallel: ${names[*]}"
@@ -346,6 +378,22 @@ else
     echo "[FAIL] ccache not found after install — the --ccache build would exit 1; see /content/logs/ccache.log"
     fail=1
   fi
+
+  if [ -x "$AUDIOCPP_BIN_LOCAL" ]; then
+    echo "[ok]   $AUDIOCPP_BIN_LOCAL"
+  else
+    echo "[FAIL] $AUDIOCPP_BIN_LOCAL missing — see /content/logs/audiocpp_binary.log"
+    fail=1
+  fi
+
+  for d in "$AUDIOCPP_PROMPTS_LOCAL" "$AUDIOCPP_SCRIPTS_LOCAL"; do
+    if [ -d "$d" ] && [ -n "$(ls -A "$d" 2>/dev/null)" ]; then
+      echo "[ok]   $d ($(find "$d" -type f | wc -l) files)"
+    else
+      echo "[FAIL] $d missing or empty — see /content/logs/audiocpp_binary.log"
+      fail=1
+    fi
+  done
 
   for f in yue2-3b-bf16.gguf yue2-vae-f16.gguf \
            sidecars/yue2-model-config.json sidecars/yue2-generation-config.json \
