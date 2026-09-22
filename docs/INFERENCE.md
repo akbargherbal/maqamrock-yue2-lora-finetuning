@@ -128,6 +128,40 @@ T4, 2026-09-22: `setup.sh --inference` (all `[ok]`) then `INFERENCE/run_one.sh
 <Maqam> 1` for all four maqams — exit 0, real 48 kHz stereo WAVs 216–240 s, under
 `/content/audiocpp_inference/out/`. Full numbers in `../PROGRESS.md`.
 
+## Benchmark — wall time per track on a T4 (2026-09-22)
+
+Measured on the first **12 of 16** tracks of the random-seed batch
+(`out/batch_20260922_seeds.tsv`; batch still running when this was written).
+Wall time is `/usr/bin/time -v`'s `Elapsed (wall clock)` for the whole
+`audiocpp_cli` process — i.e. **model load + generation**, as reported in each
+`out/<Maqam>_<seed>_time.txt`.
+
+**Setup:** Tesla T4 (compute 7.5), bf16 GGUFs (`yue2-3b-bf16.gguf` +
+`yue2-vae-f16.gguf`), converted step-3000 LoRA (AR + NAR, scale 1.0),
+`yue2.attention=flash`, `cot=off`, `semantic_max_tokens` from
+`duration_cap.py` (auto).
+
+| Metric | Value |
+|---|---|
+| Tracks measured | 12 |
+| **Mean** | **386.7 s (6.45 min)** |
+| Median | 378.4 s (6.31 min) |
+| Min / Max | 336.4 / 446.9 s |
+| Total (12 tracks) | 77.3 min |
+
+Per-maqam means (each n=3) — tracks with longer lyrics get the larger auto cap,
+which dominates the difference:
+
+| Maqam | Auto cap | Mean wall |
+|---|---|---|
+| Hijaz | 6500 | 423.8 s |
+| Ajam | 5750 | 383.4 s |
+| Nahawand | 6000 | 377.1 s |
+| Kurd | 5500 | 362.6 s |
+
+Rule of thumb for planning a batch: **~6.5 min/track, ~9 tracks/hour on a T4**,
+scaling with the auto cap (larger lyrics → longer track → longer wall time).
+
 ## Known stale bits / open items
 
 - `bootstrap/setup.sh`'s **closing banner is stale**: it still says "audio.cpp
