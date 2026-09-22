@@ -155,6 +155,45 @@ total. Other flags: `--limit N` (smoke tests), `--label`, `--quantile`,
 `--allow-concurrent` (overrides the refusal when an ai-toolkit training run is
 detected).
 
+### Converting a legacy Suno `workspace_manifest.json`
+
+`INFERENCE/suno_to_songs.py` builds a `generate.py` input from one or more
+legacy Suno manifests (`manifests/workspace_manifest.json` and friends). Suno
+renders 2 takes per song (`_SONG_A` / `_SONG_B`) with identical prompt content,
+so it **deduplicates by `original_title`** and emits one song per title. No
+audio is needed — `styles` + `lyrics` carry the whole prompt.
+
+```bash
+python INFERENCE/suno_to_songs.py manifests/workspace_manifest.json \
+  -o INFERENCE/songs.ibn_zuraiq.json          # 16 entries -> 8 songs
+python INFERENCE/suno_to_songs.py manifests/workspace_manifest.json --dry-run   # summary only
+python INFERENCE/suno_to_songs.py a.json b.json -o songs.json --repeat 2        # merge manifests
+```
+
+What it does:
+
+- **Style** = `prepare_yue2_dataset.build_caption(parse_fields(styles), maqam)`
+  — byte-identical to the v2 training captions, with the trigger left off so
+  `generate.py` prepends `arabmaqamrock `. The maqam is read per track from the
+  first `Maqam <name>` in `styles.vocals` (a workspace can mix maqams).
+- **Lyrics** = the binding v2 format (`DECISIONS.md`:174-194): drop
+  `///***///`; collapse `[Section | descriptors]` to `[Section]` for `Intro`,
+  `Verse [n]`, `Chorus`, `Pre-Chorus`, `Bridge`, `Outro`, `Hook`, `Refrain`;
+  drop any other bracketed aside; wording/diacritics/trailing `...` untouched.
+- **Name** = `safe_ascii_name(workspace, maqam, index, clip_id)`, e.g.
+  `nahawand_ibn_zuraiq_20082026_001_c116f240` (same scheme as the dataset).
+- **Provenance**: alongside `<out>.json` it writes `<out>.report.json` with the
+  dropped-duplicate log (kept vs dropped clip ids), per-maqam counts, dropped
+  tags, and a `name -> {original_title, clip_id, assigned_filename, status,
+  maqam}` map — the run sidecars cannot carry the Arabic title otherwise.
+- Self-validates the result with `generate.resolve_songs` before writing.
+
+Flags: `--keep {downloaded-a,a,b,first}` (which take survives; default
+`downloaded-a`), `--keep-both` (opt out of dedup), `--maqam NAME` and
+`--status S` filters, `--repeat N` / `--quantile Q` (→ `defaults`),
+`--trigger W` (bake it in; default off), `--style-dir` / `--lyrics-dir` (emit
+`*_file` refs instead of inline), `-o/--out`, `--report`, `--dry-run`.
+
 ## Two ways to have the binary
 
 1. **Prebuilt (default, what `setup.sh` stages).** The flat GCS object

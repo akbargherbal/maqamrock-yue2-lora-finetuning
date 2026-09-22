@@ -6,25 +6,31 @@ Training runs on a rented single GPU in Google Colab, driven over the CLI rather
 
 ## Status
 
-As of the `PROGRESS.md` 2026-09-20 entries: **both training runs have finished
-(3000/3000 each); v2 is the current artifact. Nothing is training right now.**
+**Both training runs have finished (3000/3000 each); v2 is the current artifact,
+and nothing is training right now.**
 
-**v1** (`akbar_arabic_rock_lora`, style-only captions) finished **3000/3000** on a Colab A100-SXM4-80GB, with strong style/timbre fidelity but degraded Arabic pronunciation — traced to the dataset's captions carrying no lyrics at all, so the AR expert was never once rewarded for getting the words right (full root-cause in `PROGRESS.md`/`DECISIONS.md`). Its run is archived in GCS as `akbar_arabic_rock_lora_v1_nolyrics_archived` (185 objects, verified), and its dataset as `yue2_dataset_v1_style_only_obsolete` (local) / `dataset_v1_style_only_obsolete/` (GCS). An earlier, even-earlier run was killed at ~875/3000 steps on a separate scope correction (`train_window_frames`); that's archived as `akbar_arabic_rock_lora_crop60_killed`.
+**v1** (`akbar_arabic_rock_lora`, style-only captions) finished **3000/3000** on a Colab A100-SXM4-80GB, with strong style/timbre fidelity but degraded Arabic pronunciation — traced to the dataset's captions carrying no lyrics at all, so the AR expert was never once rewarded for getting the words right (full root-cause in `PROGRESS.md`/`DECISIONS.md`). Its run is archived in GCS as `akbar_arabic_rock_lora_v1_nolyrics_archived` (185 objects, verified), and its dataset as `yue2_dataset_v1_style_only_obsolete` (local) / `dataset_v1_style_only_obsolete/` (GCS). An even earlier run was killed at ~875/3000 steps on a separate scope correction (`train_window_frames`); that's archived as `akbar_arabic_rock_lora_crop60_killed`.
 
 **v2** fixes the caption gap: 267 audio/caption pairs rebuilt from scratch with real lyrics appended in YuE2's native `[Lyrics]` format, verified against the manifest and promoted to be *the* dataset under the same plain names v1 used (`./yue2_dataset` locally, `dataset/` in GCS) — no config path edits needed. It then **ran to 3000/3000** on the same A100 with captions as the only change; the lower `loss/ar_ce` there confirms the lyrics now condition the AR (see `TRAINING_ANALYSIS/ANALYSIS.md`). A held-out evaluation set (`INFERENCE/yue2_eval_heldout/`) and updated training-time sample prompts (real lyrics, `duration: 360`) are committed in `config/akbar_arabic_rock_lora.yml`.
 
 **v2 listening result:** style/timbre/arrangement match the target strongly and pronunciation is much improved over v1 (~9/10), with some letters still soft (ح drifting toward خ/ه, ع toward أ). A proposed future fix — a second, **AR-only** pronunciation LoRA (Quran-recitation donor), merged at low weight — is researched but **not scheduled**: [`docs/FUTURE_PRONUNCIATION_LORA.md`](docs/FUTURE_PRONUNCIATION_LORA.md).
+
+Since v2 finished, work has moved to **inference and evaluation**: the step-3000 LoRA runs against held-out lyrics on `0xShug0/audio.cpp` (GGUF + the converted unfused LoRA), driven by `INFERENCE/run_one.sh`, a JSON batch driver (`INFERENCE/generate.py`), a legacy-manifest converter (`INFERENCE/suno_to_songs.py`), and a GPU-free test suite (`tests/`). The end-to-end runbook is [`docs/INFERENCE.md`](docs/INFERENCE.md).
 
 ## Repo layout
 
 ```
 config/akbar_arabic_rock_lora.yml   # the training config (rank 32, EMA, cot: off, whole-song, lyric samples)
 prepare_yue2_dataset.py             # v1 build: style-only audio + .txt caption pairs (obsolete dataset)
+manifests/workspace_manifest.json   # legacy Suno manifest; input to INFERENCE/suno_to_songs.py
+INFERENCE/duration_cap.py           # canonical text->duration cap (docs/text_to_duration_formula.md)
 INFERENCE/evaluation_alharith.json  # post-run inference eval prompts (partly contaminated, see DECISIONS.md)
 INFERENCE/yue2_eval_heldout/        # v2 held-out eval set: 4 prompts, 0 shared lines with training
 INFERENCE/generate.py               # JSON-driven batch generation (bring your own lyrics/style)
+INFERENCE/suno_to_songs.py          # legacy Suno workspace_manifest.json -> generate.py input (A/B deduped)
 INFERENCE/songs.example.json        # template/example input for generate.py
 INFERENCE/run_one.sh                # one observed generation; generate.py's execution engine
+tests/ + pytest.ini                 # GPU-free unit tests (generate.py / suno_to_songs.py / duration_cap.py)
 monitor_loss.py                     # read-only loss_log.db inspector (step, metrics, ETA)
 gpu_logger.py                       # nvidia-smi poller -> CSV (AI Toolkit logs no GPU stats)
 backup_to_gcp.py                    # periodic GCS mirror of run artifacts
@@ -33,8 +39,9 @@ bootstrap/github_auth.sh            # token-based git push auth, never exposed t
 DECISIONS.md                        # source-verified decisions and non-obvious findings
 PROGRESS.md                         # milestone trail across sessions
 verification.md                     # independent dataset audit
+TRAINING_ANALYSIS/                  # v2 loss curves + final analysis (v1 archived under it)
 AGENTS.md                           # operating instructions for the coding agent
-docs/                               # runbooks (start, pause/resume, backup, monitor) + future ideas
+docs/                               # runbooks (start, pause/resume, backup, monitor, inference) + audit + future ideas
 ```
 
 ## Dataset
@@ -68,9 +75,14 @@ bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 &
 ```
 
 `--training` is the default; `bash bootstrap/setup.sh --inference` prepares a
-lean inference-only VM (clones `0xShug0/audio.cpp` — not built — and pre-warms
-the `audio-cpp/Yue2-3B-GGUF` bf16 model + VAE; it skips the dataset and the
-ai-toolkit/torch install). `--help` prints both modes.
+lean inference-only VM — it skips the dataset and the ai-toolkit/torch install
+and stages everything `INFERENCE/run_one.sh` needs: the prebuilt `audiocpp_cli`
+(sm_75/T4), the YuE2 bf16 GGUF + VAE + sidecars (from HF), the converted
+step-3000 LoRA (`ar`/`nar`) and the `prompts/`/`scripts/` trees (from GCS), plus
+`ccache` + GNU `time` and `opencode`. `0xShug0/audio.cpp` is cloned but **not
+built** (the prebuilt binary is used; build from source only for a different GPU
+arch). `--help` prints both modes; the full runbook is
+[`docs/INFERENCE.md`](docs/INFERENCE.md).
 
 The notebook cell must export `HF_TOKEN` (staged into `/root/.secrets.env`), `GCP_DATASET_PATH` (training only), and `GCP_BACKUP_BASE` first; nothing bucket- or account-specific is hardcoded in the repo. `setup.sh` is idempotent: it skips the dataset download when the completion marker is present and skips any HF asset already cached. It clones ai-toolkit (tracking `main`, deliberately not pinned) and pre-warms only the assets this config actually loads.
 
@@ -111,6 +123,24 @@ python backup_to_gcp.py --inference            # daemon
 python backup_to_gcp.py --inference --once     # single pass
 ```
 
+## Tests
+
+The GPU-free unit tests live in `tests/` and never touch the GPU or `/content`:
+
+```bash
+pip install pytest coverage
+python -m pytest
+coverage run -m pytest && coverage report -m
+```
+
+They cover `INFERENCE/generate.py` (schema validation, cap parity with
+`duration_cap.py`, seed/limit/resume logic, and the sequential batch loop via a
+fake runner), `INFERENCE/suno_to_songs.py` (lyric cleaning, A/B dedup, filters,
+report/provenance, and a round-trip into `generate.py --dry-run`), and
+`INFERENCE/duration_cap.py` (the pure fit functions plus the CLI in-process).
+Current line coverage: `duration_cap.py` 100%, `generate.py` 94%,
+`suno_to_songs.py` 94% (the remainder is real-GPU / OS-error paths).
+
 ## Docs
 
-`docs/` holds task runbooks — [start on a fresh VM](docs/START.md), [pause/resume across sessions](docs/PAUSE_RESUME.md), [backup/restore](docs/BACKUP_RESTORE.md), [monitoring](docs/MONITOR.md), [L4 vs A100 cost/time](docs/GPU_L4_VS_A100.md), and the [post-run completion/backup checklist](docs/FINAL_BACKUP.md) — plus future ideas that are researched but not scheduled ([pronunciation LoRA](docs/FUTURE_PRONUNCIATION_LORA.md)); see [`docs/README.md`](docs/README.md) for the index. `DECISIONS.md` records source-verified decisions and the reasoning behind non-obvious config fields; read it before changing anything that looks wrong. `PROGRESS.md` is the milestone trail. `TRAINING_ANALYSIS/ANALYSIS.md` is the final v2 training analysis (v1's is archived under `TRAINING_ANALYSIS/v1_nolyrics_archived/`). `verification.md` is the v1 dataset audit. `AGENTS.md` is the operating contract for the coding agent, including the run-control policy (no new or changed run without the user typing the command; auto-resume only an unchanged, already-approved run after an unplanned interruption).
+`docs/` holds task runbooks — [start on a fresh VM](docs/START.md), [pause/resume across sessions](docs/PAUSE_RESUME.md), [backup/restore](docs/BACKUP_RESTORE.md), [monitoring](docs/MONITOR.md), [inference (audio.cpp + GGUF + LoRA)](docs/INFERENCE.md), [L4 vs A100 cost/time](docs/GPU_L4_VS_A100.md), and the [post-run completion/backup checklist](docs/FINAL_BACKUP.md) — plus a [repo audit / workflow backlog](docs/IMPROVEMENTS.md) and future ideas that are researched but not scheduled ([pronunciation LoRA](docs/FUTURE_PRONUNCIATION_LORA.md)); see [`docs/README.md`](docs/README.md) for the index. `DECISIONS.md` records source-verified decisions and the reasoning behind non-obvious config fields; read it before changing anything that looks wrong. `PROGRESS.md` is the milestone trail. `TRAINING_ANALYSIS/ANALYSIS.md` is the final v2 training analysis (v1's is archived under `TRAINING_ANALYSIS/v1_nolyrics_archived/`). `verification.md` is the v1 dataset audit. `AGENTS.md` is the operating contract for the coding agent, including the run-control policy (no new or changed run without the user typing the command; auto-resume only an unchanged, already-approved run after an unplanned interruption).
