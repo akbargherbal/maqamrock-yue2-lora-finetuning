@@ -14,6 +14,7 @@ operating contract is `../AGENTS.md`.
 | Decide L4 vs A100 (cost/time) | [GPU_L4_VS_A100.md](GPU_L4_VS_A100.md) |
 | Finish a run: final backup + push checklist | [FINAL_BACKUP.md](FINAL_BACKUP.md) |
 | Build `audiocpp_cli` for a target GPU on a CPU-only runtime | [audiocpp_gpu_arch_builds.md](audiocpp_gpu_arch_builds.md) |
+| Run inference (YuE2 GGUF + LoRA) on a fresh VM | [INFERENCE.md](INFERENCE.md) |
 
 Future ideas (not runbooks, not scheduled): [FUTURE_PRONUNCIATION_LORA.md](FUTURE_PRONUNCIATION_LORA.md)
 — fixing Arabic pronunciation with a second, AR-only LoRA.

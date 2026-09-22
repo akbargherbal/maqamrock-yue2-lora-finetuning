@@ -613,3 +613,41 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `README.md` + `AGENTS.md` updated. Committed + pushed.
 - **Still open:** the clean-VM proof + cold timing (agenda 1–2), random-seed
   batch (agenda 3), and any listening pass on the four seed-1 wavs.
+
+## 2026-09-22 — Inference documented end-to-end; workspace renamed; L4 (sm_89) binary built and persisted
+
+- **Workspace renamed `audiocpp_gguf_test` -> `audiocpp_inference`** (GCS via
+  `gsutil -m mv -r`, 117 objects / 1.0 GiB, old prefix verified gone) and local
+  `/content/audiocpp_test` -> `/content/audiocpp_inference`; `setup.sh` /
+  `INFERENCE/run_one.sh` references updated (`53b8b2b`, `ffa4320`, `b3ec2ff`).
+  `bootstrap/setup.sh --inference` gained `job_audiocpp_binary`, which stages the
+  prebuilt binary to `/content/audiocpp_inference/bin/audiocpp_cli` — deliberately
+  **outside** `/content/audio.cpp`, so `job_audio_cpp`'s `rm -rf` + re-clone can't
+  delete it.
+- **Two inference docs added** (indexed in `docs/README.md`):
+  - `docs/audiocpp_gpu_arch_builds.md` — CPU-runtime CUDA cross-build methodology,
+    the `--cuda-arch` compute-capability table (T4 75 / A100 80 / L4 89), SASS-vs-PTX
+    behavior, per-arch GCS layout, verification checklist.
+  - `docs/INFERENCE.md` — the end-to-end runbook: **asset provenance** (YuE2 GGUF
+    comes from Hugging Face `audio-cpp/Yue2-3B-GGUF`, **not** GCS; LoRA/prompts/scripts
+    and the prebuilt binary come from the GCS `audiocpp_inference/` prefix),
+    fresh-VM setup, verification, and `INFERENCE/run_one.sh <Maqam> <seed>` usage.
+- **L4 (sm_89) binary built from a CPU runtime** (no GPU attached):
+  `scripts/build_linux.sh --backend cuda --cuda-arch 89 --ccache --model-set custom
+  --models yue2 --target audiocpp_cli` — exit 0, `real 18m18.468s`, **352,411,648 B**;
+  `cuobjdump` shows `.sm_89.cubin` + `.sm_89.ptx`. Persisted to
+  `audiocpp_inference/build/sm89-l4/audiocpp_cli`. The flat
+  `audiocpp_inference/build/audiocpp_cli` (**sm_75 / T4**, 350,161,824 B,
+  `real 21m20.226s`) is untouched.
+- **Correction recorded while writing the docs:** a bare `--cuda-arch N` does
+  **not** produce a SASS-only binary. CMake treats a plain integer as both real and
+  virtual — the generated `nvcc` flag is
+  `--generate-code=arch=compute_N,code=[compute_N,sm_N]` (verified in the arch-75
+  build's `flags.make`, and by `cuobjdump` listing **both** `sm_75.cubin` and
+  `sm_75.ptx`). SASS is still locked to that compute capability; the embedded PTX may
+  JIT forward but is untested, so per-GPU builds remain the rule.
+- **Open:** per-arch binary auto-selection is not designed (bootstrap pulls only the
+  flat sm_75 object); the sm89-l4 binary has not been run on an L4; `setup.sh`'s
+  closing banner still prints the stale "cloned but NOT built" build instructions
+  (predates `job_audiocpp_binary`); the clean-VM proof + cold timing (earlier agenda)
+  also remain open.
