@@ -195,13 +195,18 @@ job_hf_tokenizer_head() {
 # dir (ggufs + sidecars) is staged on disk and the converted LoRA is pulled
 # from GCS, so a fresh VM is actually runnable.
 #
-# ccache is installed here because the recommended build (scripts/build_linux.sh
-# --ccache ...) hard-fails when the binary is missing — it is not an optional
-# speedup that silently no-ops (verified in that script: `--ccache was passed
-# but ccache is not installed` + exit 1). Training has no build step, so this
-# stays inference-only.
+# Both packages here are hard requirements of the build/run path, not optional
+# speedups that silently no-op:
+#  - ccache: the recommended build (scripts/build_linux.sh --ccache ...) hard-fails
+#    when the binary is missing (verified in that script: `--ccache was passed but
+#    ccache is not installed` + exit 1).
+#  - GNU time: INFERENCE/run_one.sh wraps every generation in `/usr/bin/time -v -o`
+#    to record wall time/max RSS/CPU%. Colab ships only the bash builtin `time`, so
+#    without the package the FIRST run_one.sh invocation exits 127 before the model
+#    loads (`/usr/bin/time: No such file or directory`) — confirmed on a T4 VM.
+# Training has no build step, so this stays inference-only.
 job_ccache() {
-  apt-get install -y ccache
+  apt-get install -y ccache time
 }
 
 job_audio_cpp() {
