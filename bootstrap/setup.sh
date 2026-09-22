@@ -35,8 +35,9 @@
 # on a multi-GB download mid-run. SheetSage2 is deliberately NOT pre-warmed:
 # it only loads when model_kwargs.cot != "off", and this config has
 # cot: "off" — downloading it would just waste bandwidth and disk.
-# Inference pre-warms the audio.cpp GGUF assets into that same cache; it uses
-# `hf download` (not a custom tree) for the same reason.
+# Inference instead stages a real model dir (ggufs + sidecars) and pulls the
+# converted LoRA from GCS, because `audiocpp_cli --model <dir>` reads configs
+# from that dir rather than the HF cache.
 
 set -e
 
@@ -90,6 +91,16 @@ GGUF_REPO="audio-cpp/Yue2-3B-GGUF"
 DATASET_LOCAL="/content/yue2_dataset"
 if [ "$MODE" = "training" ]; then
   DATASET_GCS="${GCP_DATASET_PATH:?GCP_DATASET_PATH must be set (the launching notebook exports it)}"
+fi
+
+# Inference staging (--inference). yue2 needs a concrete on-disk model dir, not
+# just a warm HF cache: `audiocpp_cli --model <dir>` discovers the configs in
+# that dir (docs/models/yue2.md). Paths match what INFERENCE/run_one.sh expects.
+AUDIOCPP_TEST="/content/audiocpp_test"
+YUE2_MODEL_DIR="$AUDIOCPP_TEST/models/Yue2-3B-GGUF"
+LORA_LOCAL="/content/converter/out"
+if [ "$MODE" = "inference" ]; then
+  LORA_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/audiocpp_gguf_test/converter"
 fi
 
 echo "=== $(date) — maqamrock-yue2 bootstrap starting (mode: $MODE) ==="
@@ -170,8 +181,9 @@ job_hf_tokenizer_head() {
 
 # --- Inference (--inference) ---
 # audio.cpp is only CLONED here, never built: the build is scoped and
-# deliberate (see DECISIONS.md) and is left as a manual step. The GGUF files
-# are pre-warmed into the standard HF cache, same rationale as training.
+# deliberate (see DECISIONS.md) and is left as a manual step. The yue2 model
+# dir (ggufs + sidecars) is staged on disk and the converted LoRA is pulled
+# from GCS, so a fresh VM is actually runnable.
 #
 # ccache is installed here because the recommended build (scripts/build_linux.sh
 # --ccache ...) hard-fails when the binary is missing — it is not an optional
@@ -191,14 +203,25 @@ job_audio_cpp() {
   git -C "$AUDIO_CPP" rev-parse --short HEAD
 }
 
-# BF16, not Q8: DECISIONS.md recommends BF16 when a LoRA is merged (Q8/Q4
-# merge into dequantized weights and requantize the result).
-job_hf_gguf_main() {
-  hf download "$GGUF_REPO" yue2-3b-bf16.gguf
+# Full model dir, not just the HF cache: `audiocpp_cli --model <dir>` reads the
+# ggufs and sidecars from that dir (docs/models/yue2.md). BF16, not Q8:
+# DECISIONS.md recommends BF16 when a LoRA is merged (Q8/Q4 merge into
+# dequantized weights and requantize the result).
+job_hf_yue2_gguf() {
+  mkdir -p "$YUE2_MODEL_DIR"
+  hf download "$GGUF_REPO" yue2-3b-bf16.gguf yue2-vae-f16.gguf --local-dir "$YUE2_MODEL_DIR"
 }
 
-job_hf_gguf_vae() {
-  hf download "$GGUF_REPO" yue2-vae-f16.gguf
+job_hf_yue2_sidecars() {
+  mkdir -p "$YUE2_MODEL_DIR"
+  hf download "$GGUF_REPO" --include "sidecars/*" --local-dir "$YUE2_MODEL_DIR"
+}
+
+# Converted step-3000 adapters (unfused, for audio.cpp); 133 MiB, GCS-persisted
+# under audiocpp_gguf_test/converter/. Same rsync pattern as the dataset pull.
+job_lora_adapters() {
+  mkdir -p "$LORA_LOCAL"
+  gsutil -m rsync -r "$LORA_GCS" "$LORA_LOCAL"
 }
 
 # --- Launch every independent, slow task in parallel ---
@@ -222,8 +245,9 @@ if [ "$MODE" = "training" ]; then
 else
   start_job ccache job_ccache
   start_job audio_cpp job_audio_cpp
-  start_job hf_gguf_main job_hf_gguf_main
-  start_job hf_gguf_vae job_hf_gguf_vae
+  start_job hf_yue2_gguf job_hf_yue2_gguf
+  start_job hf_yue2_sidecars job_hf_yue2_sidecars
+  start_job lora_adapters job_lora_adapters
 fi
 
 echo "Launched in parallel: ${names[*]}"
@@ -312,8 +336,25 @@ else
     fail=1
   fi
 
-  confirm_hf "$GGUF_REPO" yue2-3b-bf16.gguf
-  confirm_hf "$GGUF_REPO" yue2-vae-f16.gguf
+  for f in yue2-3b-bf16.gguf yue2-vae-f16.gguf \
+           sidecars/yue2-model-config.json sidecars/yue2-generation-config.json \
+           sidecars/yue2-qwen.tiktoken sidecars/yue2-vae-config.json; do
+    if [ -f "$YUE2_MODEL_DIR/$f" ]; then
+      echo "[ok]   $YUE2_MODEL_DIR/$f"
+    else
+      echo "[FAIL] $YUE2_MODEL_DIR/$f missing — yue2 cannot load"
+      fail=1
+    fi
+  done
+
+  for f in akbar_arabic_rock_lora_ar.safetensors akbar_arabic_rock_lora_nar.safetensors; do
+    if [ -f "$LORA_LOCAL/$f" ]; then
+      echo "[ok]   $LORA_LOCAL/$f"
+    else
+      echo "[FAIL] $LORA_LOCAL/$f missing — see /content/logs/lora_adapters.log"
+      fail=1
+    fi
+  done
 fi
 
 if [ "$fail" -eq 1 ]; then
@@ -334,7 +375,9 @@ EOF
 else
   cat <<EOF
 === setup.sh done (inference) ===
-audio.cpp was CLONED but NOT built, on purpose. GGUF assets are in the HF cache.
+audio.cpp was CLONED but NOT built, on purpose. yue2 model dir + LoRA are staged:
+  model dir: $YUE2_MODEL_DIR
+  LoRA:      $LORA_LOCAL
 Next (in a terminal):
   # 1. build audio.cpp — BUILD PATH UNDER REVIEW: the scoped build_linux.sh
   #    command recorded 2026-09-21 may be unnecessary (the script itself may be
@@ -342,8 +385,7 @@ Next (in a terminal):
   cd $AUDIO_CPP
   scripts/build_linux.sh --backend cuda --cuda-arch 75 --ccache \\
     --model-set custom --models yue2 --target audiocpp_cli
-  # 2. pull the converted step-3000 LoRA + runner scripts from the run's GCS
-  #    prefix (see DECISIONS.md / docs), then drive audiocpp_cli with
+  # 2. drive audiocpp_cli (INFERENCE/run_one.sh) with
   #    --session-option yue2.ar_lora / yue2.nar_lora (and yue2.attention=flash on a T4).
 EOF
 fi
