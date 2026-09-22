@@ -49,6 +49,7 @@ echo "$line"; echo "$line" >> "$status"
   --session-option yue2.ar_lora_scale=1.0 \
   --session-option yue2.nar_lora=/content/converter/out/akbar_arabic_rock_lora_nar.safetensors \
   --session-option yue2.nar_lora_scale=1.0 \
+  --session-option yue2.attention=flash \
   --lyrics "$(cat "$lyrics")" \
   --request-option style="$(cat "$style")" \
   --request-option cot=off \
