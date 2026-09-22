@@ -87,7 +87,10 @@ INFERENCE/run_one.sh <Maqam> <seed> [cap|auto]
   installed** (the bootstrap does). Colab's builtin `time` alone gives
   `exit 127: /usr/bin/time: No such file or directory`.
 
-Outputs, one set per run, under `/content/audiocpp_inference/out/`:
+Outputs, one set per run, under `$OUT` — `/content/audiocpp_inference/out/` by
+default, or the folder named by the `OUT_DIR` env var when a batch driver sets
+one (e.g. `out/20260922-1337_random16/`), so each run's tracks stay
+self-contained:
 
 | File | What |
 |---|---|

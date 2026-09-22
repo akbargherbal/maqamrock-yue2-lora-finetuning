@@ -6,12 +6,14 @@
 #   cap dur_cap = 111.1 + 0.3126*N_letters, rounded to 10 s; covers 94.8%).
 #   The staged GCS scripts/duration_cap.py is a mirror -- the repo copy wins.
 #   For a more forgiving cap the doc's 97.5th percentile is dur = 122.9 + 0.3081*N.
-# Writes everything under out/ so it can be monitored from another terminal:
-#   out/<Maqam>_<seed>.wav        audio
-#   out/<Maqam>_<seed>.log        CLI --log (TRACE/TIMING, errors)
-#   out/<Maqam>_<seed>_time.txt   /usr/bin/time -v (wall, max RSS, CPU%)
-#   out/<Maqam>_<seed>_gpu.csv    1 Hz: util, mem_used, power, temp
-#   out/_runs_status.log          one START/END line per run (always)
+# Writes everything under $OUT so it can be monitored from another terminal.
+# $OUT defaults to $ROOT/out; a batch driver sets OUT_DIR to a per-run folder
+# (e.g. out/20260922-1537_random16/) so each run's tracks stay self-contained.
+#   $OUT/<Maqam>_<seed>.wav        audio
+#   $OUT/<Maqam>_<seed>.log        CLI --log (TRACE/TIMING, errors)
+#   $OUT/<Maqam>_<seed>_time.txt   /usr/bin/time -v (wall, max RSS, CPU%)
+#   $OUT/<Maqam>_<seed>_gpu.csv    1 Hz: util, mem_used, power, temp
+#   $OUT/_runs_status.log          one START/END line per run (always)
 set -u
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT=/content/audiocpp_inference
@@ -20,7 +22,7 @@ S="${2:?usage: run_one.sh <Maqam> <seed> [cap|auto]}"
 CAP_ARG="${3:-auto}"
 BIN="$ROOT/bin/audiocpp_cli"
 MODEL="$ROOT/models/Yue2-3B-GGUF"
-OUT="$ROOT/out"
+OUT="${OUT_DIR:-$ROOT/out}"
 mkdir -p "$OUT"
 
 style="$ROOT/prompts/${M}_style.txt"

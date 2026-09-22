@@ -439,17 +439,19 @@ EOF
 else
   cat <<EOF
 === setup.sh done (inference) — total ${SECONDS}s ===
-audio.cpp was CLONED but NOT built, on purpose. yue2 model dir + LoRA are staged:
+Prebuilt audiocpp_cli staged (no build needed), plus the yue2 model dir + LoRA:
+  binary:    $AUDIOCPP_BIN_LOCAL  (sm_75 / T4)
   model dir: $YUE2_MODEL_DIR
   LoRA:      $LORA_LOCAL
+  prompts:   $AUDIOCPP_PROMPTS_LOCAL
+  scripts:   $AUDIOCPP_SCRIPTS_LOCAL
 Next (in a terminal):
-  # 1. build audio.cpp — BUILD PATH UNDER REVIEW: the scoped build_linux.sh
-  #    command recorded 2026-09-21 may be unnecessary (the script itself may be
-  #    buggy/redundant); verify before trusting the exact flags below.
+  # 1. generate with the repo runner (canonical duration_cap.py, bf16, flash attn):
+  bash $REPO_ROOT/INFERENCE/run_one.sh <Maqam> <seed>
+Only rebuild audio.cpp if this GPU's arch differs from the staged binary
+(flat binary above is sm_75/T4; see docs/audiocpp_gpu_arch_builds.md):
   cd $AUDIO_CPP
-  scripts/build_linux.sh --backend cuda --cuda-arch 75 --ccache \\
+  scripts/build_linux.sh --backend cuda --cuda-arch <75|80|89> --ccache \\
     --model-set custom --models yue2 --target audiocpp_cli
-  # 2. drive audiocpp_cli (INFERENCE/run_one.sh) with
-  #    --session-option yue2.ar_lora / yue2.nar_lora (and yue2.attention=flash on a T4).
 EOF
 fi
