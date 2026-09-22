@@ -542,3 +542,24 @@ Where a claim below says "verified against source," it means the actual `ostris/
   `yue2.*` session option including weight-type and graph-arena sizing). Next session should **read this doc first**
   rather than re-deriving flag names/behavior from `audio.cpp` source reads or guesswork — it already matches and
   extends what earlier source-reading sessions found (e.g. the seed range and default agree exactly).
+
+## audiocpp_gguf_test/ renamed to audiocpp_inference/ — the prebuilt-binary path is now the main one
+
+- On 2026-09-22 the GCS prefix `$GCP_BACKUP_BASE/audiocpp_gguf_test/` and the local
+  staging dir `/content/audiocpp_test/` were renamed to `audiocpp_inference/` (GCS via
+  `gsutil -m mv -r`, 117 objects / 1.0 GiB; old prefix verified gone, not duplicated).
+- Why: the GGUF/audio.cpp CPU-build + prebuilt-binary path is no longer a side
+  experiment — it is the adopted low-cost inference path being folded into the main
+  `bootstrap/setup.sh --inference` flow. A CUDA `audiocpp_cli` built once on a
+  CPU/High-RAM runtime (CUDA 12.0, arch 75, ~21 min, exit 0) is persisted to GCS so a
+  future T4 runtime skips the build.
+- Staging location matters: the binary goes to `$AUDIOCPP_INFERENCE/bin/audiocpp_cli`,
+  deliberately NOT under `/content/audio.cpp`. `job_audio_cpp` does
+  `rm -rf "$AUDIO_CPP"` then re-clones, so anything staged under that tree races the
+  clone and can be deleted. Apply the same rule to any future inference artifact.
+- Repo refs are updated in `bootstrap/setup.sh` via the reviewed proposal diff
+  (`/content/logs/audiocpp_setup_proposed.diff`): `AUDIOCPP_TEST` -> `AUDIOCPP_INFERENCE`,
+  all `.../audiocpp_gguf_test/...` -> `.../audiocpp_inference/...`, plus new
+  `job_audiocpp_binary` (marker-skip; `gsutil cp` for the single 350 MiB file,
+  `gsutil -m rsync -r` for prompts/ and scripts/; `[ok]`/`[FAIL]` verify checks).
+  Applied and pushed in commit `53b8b2b`.
