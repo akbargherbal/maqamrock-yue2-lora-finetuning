@@ -2,7 +2,9 @@
 # One observed YuE2 generation (LoRA AR+NAR scale 1.0).
 # Usage: run_one.sh <Maqam> <seed> [semantic_max_tokens]
 #   cap defaults to "auto": derived from the lyrics via scripts/duration_cap.py
-#   (docs/text_to_duration_formula.md: dur = 92 + 0.28*N_letters, rounded to 10 s).
+#   (docs/text_to_duration_formula.md: 95th-percentile cap
+#   dur_cap = 111.1 + 0.3126*N_letters, rounded to 10 s; covers 94.8% of tracks).
+#   For a more forgiving cap the doc's 97.5th percentile is dur = 122.9 + 0.3081*N.
 # Writes everything under out/ so it can be monitored from another terminal:
 #   out/<Maqam>_<seed>.wav        audio
 #   out/<Maqam>_<seed>.log        CLI --log (TRACE/TIMING, errors)
