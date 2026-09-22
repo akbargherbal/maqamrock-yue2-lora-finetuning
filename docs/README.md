@@ -15,9 +15,15 @@ operating contract is `../AGENTS.md`.
 | Finish a run: final backup + push checklist | [FINAL_BACKUP.md](FINAL_BACKUP.md) |
 | Build `audiocpp_cli` for a target GPU on a CPU-only runtime | [audiocpp_gpu_arch_builds.md](audiocpp_gpu_arch_builds.md) |
 | Run inference (YuE2 GGUF + LoRA) on a fresh VM | [INFERENCE.md](INFERENCE.md) |
+| How the text→duration cap is derived | [text_to_duration_formula.md](text_to_duration_formula.md) |
+| Repo audit: stale docs, drift & workflow backlog | [IMPROVEMENTS.md](IMPROVEMENTS.md) |
 
 Future ideas (not runbooks, not scheduled): [FUTURE_PRONUNCIATION_LORA.md](FUTURE_PRONUNCIATION_LORA.md)
 — fixing Arabic pronunciation with a second, AR-only LoRA.
+
+Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapshot.
+`investigation.md` and `yue2-gguf-lora-findings.md` are **superseded/retracted**
+(see the banners at their tops); do not follow them.
 
 ## Constants (memorize / copy)
 
@@ -33,6 +39,11 @@ Future ideas (not runbooks, not scheduled): [FUTURE_PRONUNCIATION_LORA.md](FUTUR
 | GPU csv | `/content/logs/gpu_usage.csv` |
 | GCS base | `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning` |
 | Secrets/env | `/root/.secrets.env` (exports `HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_BACKUP_BASE`) |
+| Inference workspace | `/content/audiocpp_inference/` (GCS `<base>/audiocpp_inference/`) |
+| Inference output | `/content/audiocpp_inference/out/` (`_runs_status.log`, `*_time.txt`, `*.json`) |
+| Inference prompts | `/content/audiocpp_inference/prompts/<Maqam>_{style,lyrics}.txt` |
+| Converted LoRA | `/content/converter/out/akbar_arabic_rock_lora_{ar,nar}.safetensors` |
+| Handoff notes | `agent_notes/current.md` (git-ignored; GCS-mirrored, no pull command yet) |
 
 Env vars are staged by the launching notebook before any terminal command; a
 terminal that can't see them means the notebook cell hasn't run yet.

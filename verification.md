@@ -1,5 +1,12 @@
 # YuE2 Dataset Verification
 
+> **ARCHIVED (2026-09-22).** This audit covers the **v1 style-only** dataset. That
+> dataset was superseded by v2 (lyric-conditioned captions) and moved to
+> `yue2_dataset_v1_style_only_obsolete` / `dataset_v1_style_only_obsolete`; the live
+> `./yue2_dataset` is now v2 and **does** carry a `[Lyrics]` block. Statements below
+> such as "captions are style-only … empty lyrics" (line 44) describe v1 only. See
+> `DECISIONS.md` and `docs/IMPROVEMENTS.md` item 4.
+
 Verification of `./yue2_dataset` produced by `prepare_yue2_dataset.py` against what `ostris/ai-toolkit`'s YuE2 support actually expects.
 
 ## 1. Script run

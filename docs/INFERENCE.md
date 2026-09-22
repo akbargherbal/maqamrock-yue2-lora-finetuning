@@ -159,8 +159,14 @@ which dominates the difference:
 | Nahawand | 6000 | 377.1 s |
 | Kurd | 5500 | 362.6 s |
 
+> **Cap caveat.** The "Auto cap" values above are what the staged `duration_cap.py`
+> actually produced on 2026-09-22 — which used the **old centre-fit** formula
+> `92.0 + 0.280·N`. This runner and `text_to_duration_formula.md` specify the
+> 95th-percentile `111.1 + 0.3126·N`, so these caps were ~750–1000 tokens low and 5
+> tracks self-terminated at the cap (`truncated 1`). See `IMPROVEMENTS.md` item 1.
+
 Rule of thumb for planning a batch: **~6.5 min/track, ~9 tracks/hour on a T4**,
-scaling with the auto cap (larger lyrics → longer track → longer wall time).
+scaling with the cap (larger lyrics → longer track → longer wall time).
 
 ## Known stale bits / open items
 

@@ -1,5 +1,13 @@
 # Getting `setup.sh --inference` to "ready to run" in ≤10 min, every session
 
+> **SUPERSEDED (2026-09-22).** The recommendation below — persist `ccache`, "prefer
+> ccache over a prebuilt binary" — was **not** adopted. The shipped path is a
+> prebuilt `audiocpp_cli` staged by `bootstrap/setup.sh`'s `job_audiocpp_binary`
+> (see `docs/INFERENCE.md` and `docs/audiocpp_gpu_arch_builds.md`). The `run_one.sh`
+> path/model bugs it lists were fixed in the same commit that added this file, and
+> its `/content/audiocpp_test` paths are pre-rename. Kept for the investigation
+> record only — do not follow it. See `docs/IMPROVEMENTS.md` item 5.
+
 Investigation only — no execution beyond read-only checks; no scripts changed,
 nothing built or pushed. This document is the recommendation for review.
 

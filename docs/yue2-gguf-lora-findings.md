@@ -1,5 +1,14 @@
 # Running a LoRA on the Yue2-3B GGUF model: findings
 
+> **RETRACTED (2026-09-22) on the conversion point.** The claim below that "you
+> probably do not need to convert or merge anything" is **wrong for this LoRA**:
+> ai-toolkit saves a *fused* LoRA, and audio.cpp does exact-name lookups for
+> *unfused* per-projection adapters, so `converter/convert_aitoolkit_yue2_lora.py`
+> is required. `INFERENCE/run_one.sh` loads the converted
+> `akbar_arabic_rock_lora_{ar,nar}.safetensors`. See `DECISIONS.md`'s conversion
+> entry and `docs/IMPROVEMENTS.md` item 6. The example also uses `q8_0`, which
+> `setup.sh --inference` never stages (bf16 only).
+
 *Research date: 21 September 2026. This is a fast-moving project (releases are days apart), so details may change.*
 
 ## The short version
