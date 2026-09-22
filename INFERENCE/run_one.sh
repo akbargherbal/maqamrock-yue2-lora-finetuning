@@ -10,11 +10,11 @@
 #   out/<Maqam>_<seed>_gpu.csv    1 Hz: util, mem_used, power, temp
 #   out/_runs_status.log          one START/END line per run (always)
 set -u
-ROOT=/content/audiocpp_test
+ROOT=/content/audiocpp_inference
 M="${1:?usage: run_one.sh <Maqam> <seed> [cap|auto]}"
 S="${2:?usage: run_one.sh <Maqam> <seed> [cap|auto]}"
 CAP_ARG="${3:-auto}"
-BIN="/content/audio.cpp/build/linux-cuda-release/bin/audiocpp_cli"
+BIN="$ROOT/bin/audiocpp_cli"
 MODEL="$ROOT/models/Yue2-3B-GGUF"
 OUT="$ROOT/out"
 mkdir -p "$OUT"
