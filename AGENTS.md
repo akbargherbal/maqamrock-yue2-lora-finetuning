@@ -26,6 +26,16 @@ Read `DECISIONS.md` and `PROGRESS.md` (repo root) at the start of any task invol
 python run.py config/akbar_arabic_rock_lora.yml -l /content/logs/train.log
 ```
 
+## Handing a command to the user
+
+The user runs commands by hand in a real terminal (vscode.dev on Colab) — not in your shell tool. For any long-running, background/detached, or state-changing command, load the `command-handover` skill and follow it before presenting the command:
+
+- Say whether it runs **foreground** (Ctrl+C stops it) or **detached** (survives Ctrl+C / closing the tab).
+- For detached: give the output-log path and the exact stop command; for long jobs, also the progress check and resume command.
+- Training runs are **foreground on purpose** (so Ctrl+C works) — do not detach them.
+
+New human-terminal gotchas are appended to `docs/COMMAND_HANDOVER_GOTCHAS.md`. A short read-only one-liner needs no annotation.
+
 ## Observability & where to look
 
 Everything for this job lands under one folder, `training_folder/akbar_arabic_rock_lora/`: checkpoints, `loss_log.db`, auto-saved `config.yaml`, samples, and the `tensorboard/` subfolder.
@@ -94,4 +104,4 @@ bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 &
 - Config: `config/akbar_arabic_rock_lora.yml`. Read the inline comments before "fixing" anything that looks off — several apparent issues are already resolved in `DECISIONS.md`.
 - Metrics: `monitor_loss.py <path to loss_log.db>` — latest step, latest metric values, step-rate/ETA. GPU: `gpu_logger.py`.
 - Task runbooks (how do I start/pause/resume/back up/monitor): `docs/`. Point the user there instead of re-deriving a procedure, and keep them in sync when one changes.
-- **Skills (reusable agent procedures):** canonical in `skills/<name>/SKILL.md`, exposed via `.claude/skills/<name>` symlinks so both Claude Code and opencode discover them, and they travel with `git clone`. Three exist: `crash-diagnose-and-resume`, `inference-batch-run`, `docs-reconciler` (mechanical live-docs-vs-code drift check; frozen docs are never rewritten). Load one with the skill tool when a task matches; the runbooks in `docs/` stay the source of truth they point to.
+- **Skills (reusable agent procedures):** canonical in `skills/<name>/SKILL.md`, exposed via `.claude/skills/<name>` symlinks so both Claude Code and opencode discover them, and they travel with `git clone`. Four exist: `crash-diagnose-and-resume`, `inference-batch-run`, `command-handover` (terminal semantics for commands you hand the user; see the section above), `docs-reconciler` (mechanical live-docs-vs-code drift check; frozen docs are never rewritten). Load one with the skill tool when a task matches; the runbooks in `docs/` stay the source of truth they point to.
