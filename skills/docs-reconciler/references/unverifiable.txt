@@ -44,8 +44,14 @@ _time.txt
 _gpu.csv
 _runs_status.log
 
+# local-only v2 build script cited as provenance (deliberately not committed; see DECISIONS.md)
+prepare_yue2_dataset_v2.py
+
 # dataset track ids referenced inside one research report (doc-scoped `file :: glob`)
 INFERENCE/yue2_eval_heldout/heldout_eval_report.md :: *.txt
+
+# external repo's doc, cited in one file (doc-scoped)
+docs/FUTURE_PRONUNCIATION_LORA.md :: docs/lora.md
 
 # flags of external tools quoted in commands (git log --left-right/--count, cmake)
 --left-right

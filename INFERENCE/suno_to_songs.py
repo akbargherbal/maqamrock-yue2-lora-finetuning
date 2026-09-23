@@ -15,7 +15,7 @@ It reuses the canonical v2 code instead of re-deriving it:
     stub entries whose `styles` is a bare genre string rather than the
     `key: "value"` block, the raw text is used as-is), and its name/report use
     the `unknown` maqam label.
-  - the lyric cleaning is the binding v2 format from DECISIONS.md:174-194:
+  - the lyric cleaning is the binding v2 format from DECISIONS.md:111-119:
     drop `///***///`; collapse `[Section | descriptors]` to `[Section]` for the
     canonical names (Intro, Verse [n], Chorus, Pre-Chorus, Bridge, Outro, Hook,
     Refrain); drop any other bracketed aside; never touch the wording.

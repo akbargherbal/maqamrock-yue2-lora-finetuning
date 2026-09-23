@@ -139,7 +139,7 @@ git rev-list --left-right --count origin/main...HEAD   # expect: 0	0
 - [ ] local: 12 checkpoints + final + optimizer.pt + config + loss_log.db + 52 samples
 - [ ] GCS: dry-run rsync shows no diffs; counts/sizes match
 - [ ] GitHub: `HEAD == origin/main`, clean tree
-- [ ] `ANALYSIS.md` finalized + `PROGRESS.md` completion entry pushed
+- [ ] `TRAINING_ANALYSIS/ANALYSIS.md` finalized + `PROGRESS.md` completion entry pushed
 - [ ] sidecars stopped
 
 ## Known gotchas (from this session)

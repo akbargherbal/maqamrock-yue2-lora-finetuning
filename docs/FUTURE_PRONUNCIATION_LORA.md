@@ -55,7 +55,7 @@ Verified in source:
   combined AR+NAR adapter (why it moved both style and pronunciation).
 - The AR is trained by next-token cross-entropy (`loss/ar_ce`), computed from
   the song start so lyrics and tokens stay aligned.
-- An independent real YuE2 LoRA runtime (`vrgamegirl19/Yue2_Studio`,
+- An independent real YuE2 LoRA runtime (`vrgamegirl19/Yue2_Studio`, its
   `docs/lora.md`) classifies adapters as *acoustic/style (NAR-only)* vs
   *semantic/artist (affects semantic generation = AR)*. That is exactly the
   intended split: pronunciation = a semantic/AR adapter.

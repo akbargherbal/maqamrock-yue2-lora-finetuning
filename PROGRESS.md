@@ -70,129 +70,12 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   A v2, if any, should change one variable (steps / LR / `ar_kl_weight`) given
   the unbroken `ar_kl` rise.
 
-## 2026-09-19 — Listening evaluation + root cause: captions never carried lyrics, not an inherent style/pronunciation tradeoff
+## 2026-09-19 — Listening evaluation + root cause: captions never carried lyrics
 
-- **Listening evaluation** (user, final checkpoint against the four
-  `INFERENCE/evaluation_alharith.json` prompts, one per maqam): style/timbre/
-  arrangement fidelity to the training data is strong — clear adaptation to
-  the target sound. The base model's Arabic pronunciation was already good
-  pre-LoRA; the final checkpoint shows articulation degrading substantially:
-  - Place-of-articulation substitutions, pharyngeal ح → velar/uvular خ (e.g.
-    آذنتنا → آذتنا/آذتتنا; الناطق المرقش → الناطك المركي; حدثتموه → خدثتموه).
-  - Spurious/dropped phonemes (e.g. إخواننا → أهخواننا, extra ه inserted).
-  - Whole-word substitution errors (e.g. ضوضاء → ضواء).
-  - Localized word-level garbling (e.g. عِنْدَ عَمْرٍ → عندرن) and cross-word
-    boundary blending.
-  - Inconsistent errors on repeated lines — the same word mispronounced
-    differently each time it recurs.
-  - **Overall impression:** melisma and maqam coloring land as intended, but
-    delivery reads as a non-native approximation of Arabic (user's read: "like
-    a Jewish or Turkish singer"). Errors increase with step count — earlier
-    checkpoints have cleaner pronunciation but weaker style match to the
-    training data. Pronunciation was not a known weak point of the base model
-    going in.
-
-- **Root cause — verified against source, and against the dataset build
-  script, not inferred: the AR was never trained on real lyrics at all.**
-  `prepare_yue2_dataset.py`'s own docstring (lines 32–37) says it outright —
-  each manifest track's `styles` field is stripped down to the reusable sound
-  description (genre/vocals/production/instrumentation/mood); the Suno
-  control headers and **all lyrics are dropped, on purpose**: *"a style LoRA
-  should learn the sound, not memorize which poem starts with which line.
-  `lyrics` is never used."* `verification.md` (line 44) independently confirms
-  the result: *"Captions are style-only (no `[Lyrics]` section), so YuE2's
-  `parse_caption` treats the whole string as tags/`style` with empty lyrics —
-  intended."* `do_separation` is off and `cot` is `"off"` too, so there is no
-  other path (vocals-only stem, ABC/melody sheet) by which lyric content could
-  have entered training. Per the model's own docstring
-  (`yue2_model.py` line 12), the AR's prompt prefix is supposed to be
-  *"instruction + tags + lyrics"* — for all 267 clips, the lyrics slot was
-  empty, every step, for the entire run.
-  - **Why this produces exactly this failure mode.** The AR's `loss/ar_ce`
-    target every step was the real codec tokens of real singers singing real
-    words — but the prefix conditioning it, to predict from, carried style
-    tags only. The loss rewarded matching those tokens from style alone, and
-    never once rewarded getting the words right, because there was no lyric
-    text to get right against. The NAR flow loss (`additional_model_loss`,
-    the main rendering pathway) is caption-lyrics-independent and was never
-    affected — which is why style/timbre fidelity is strong while
-    only language-conditioned generation degraded. The `ar_kl` divergence
-    from base (0.37 → 1.50 across the run, `TRAINING_ANALYSIS/ANALYSIS.md`)
-    is the visible symptom of this: with no lyric-fidelity signal to hold it
-    in place, the AR expert's language-facing weights were free to drift
-    purely toward style, unopposed except by the generic (and, per the loss
-    curves, insufficient) `ar_kl_weight: 0.2` anchor.
-  - **This supersedes the initial framing from this same session** that
-    treated `ar_loss_weight` (absent from the config, defaulting to `1.0` per
-    `yue2_model.py:196`) and the empty `network_kwargs.ignore_if_contains`
-    (`config/akbar_arabic_rock_lora.yml` line 21, meaning LoRA is attached
-    inside `model.ar` per `toolkit/lora_special.py:524` and confirmed by the
-    `.ar.`-matching code at `yue2_model.py:598`) as an inherent style-vs-
-    pronunciation tradeoff to be dialed via `ar_kl_weight`. That mechanism
-    description is still factually correct — those are the actual knobs that
-    moved — but the tradeoff framing was wrong. There was nothing to trade
-    off: style and pronunciation are different subsystems (NAR flow vs. AR
-    language-conditioning), and only one of them was ever being trained
-    correctly. No amount of reweighting `ar_loss_weight`/`ar_kl_weight` could
-    have delivered both, because the missing ingredient was data, not a
-    hyperparameter balance.
-  - **Second, independent confirmation this was a stale decision, not a
-    one-off bug.** `DECISIONS.md`'s `cot: "off"` entry states the style-only
-    captions were explicitly "aligned with a pure style/timbre-transfer
-    goal" — the same goal that was later corrected (see the
-    `train_window_frames` entry above) to require full-song structural
-    coherence. `train_window_frames` was caught and fixed at that
-    correction; the lyrics-stripping decision, made under the same
-    superseded framing, was not — it should have been revisited at the same
-    time, for the same reason.
-
-- **Fix plan — not yet executed, pending sign-off on touching the dataset
-  (currently frozen per `AGENTS.md` line 33):**
-  1. **Verify the fix is free.** Confirm a raw `workspace_manifest.json`
-     track object actually carries a `lyrics` field with the real per-clip
-     sung text (the `prepare_yue2_dataset.py` docstring implies it exists and
-     is simply unused; `evaluation_alharith.json`'s separate `styles`/
-     `lyrics` keys support this). If confirmed, no new data collection is
-     needed — only a script change.
-  2. **Patch the caption builder** (or, preferably, a small standalone script
-     that only rewrites existing `.txt` captions, touching neither audio nor
-     the shortlist) to append the lyrics in YuE2's native format —
-     style text, then a literal `[Lyrics]` line, then the lyric block —
-     matching `parse_caption()`'s expected layout (`yue2_model.py:129-157`).
-  3. **Invalidate the cache.** `cache_latents_to_disk` (audio-derived codec
-     tokens) is caption-independent and stays valid; `cache_text_embeddings`
-     (prefix embeddings) is not — delete `_latent_cache` before the next run
-     so it rebuilds against the new captions.
-  4. **Sanity-check offline first**: run `parse_caption()` on a few of the
-     new `.txt` files locally (no GPU) to confirm the `style`/`lyrics` split
-     comes out clean before spending any compute.
-  5. **Smoke-test on the A100** for a handful of steps (VRAM/step-time should
-     be materially unchanged; captions are small) before committing the full
-     step budget.
-  6. **Leave `ar_loss_weight`, `ar_kl_weight`, and `ignore_if_contains`
-     untouched for this run.** They were compensating for a missing-signal
-     problem; with real lyric-conditioned targets, the existing
-     `ar_kl_weight: 0.2` anchor may already be sufficient, and changing them
-     at the same time would confound whether the caption fix alone worked —
-     one variable, per the project's standing discipline, and this is the
-     one that was actually wrong.
-  7. **Evaluate apples-to-apples** against the same four
-     `INFERENCE/evaluation_alharith.json` prompts. If pronunciation recovers
-     but style regresses, `do_separation: true` (an explicit lyrics-only →
-     vocals-only AR term, `yue2_model.py` lines 19–24) is the next lever —
-     as a follow-up step, not bundled into this one.
-
-- **The previously-listed "options for a v2"** (freeze the AR via
-  `ar_loss_weight: 0`, exclude it via `ignore_if_contains`, raise
-  `ar_kl_weight`, or average across checkpoints) are **downgraded to
-  fallbacks only**, not first-choice fixes: each either forfeits the
-  structural-coherence learning `train_window_frames: 0` was introduced for,
-  or re-creates the same averaging the user explicitly rejected. They remain
-  worth knowing about if the caption fix above turns out to be blocked or
-  insufficient, but are not the plan.
-- **Next:** confirm the raw manifest's lyrics field (step 1 above), then
-  decide whether to lift the dataset freeze for this specific, narrowly-
-  scoped change.
+- **Listening (user, final checkpoint, the four `INFERENCE/evaluation_alharith.json` prompts):** style/timbre/arrangement fidelity is strong, but Arabic pronunciation degraded badly — place substitutions (ح→خ), spurious/dropped phonemes, whole-word substitutions, inconsistent errors on repeated lines. Errors increase with step count; earlier checkpoints have cleaner pronunciation but weaker style.
+- **Root cause (verified against source + the build script, not inferred): the AR was never trained on real lyrics.** `prepare_yue2_dataset.py`'s docstring (lines 32–37) strips each track's `styles` to the reusable sound description and drops all lyrics on purpose; `verification.md:44` confirms the captions are style-only with empty lyrics. `do_separation` is off and `cot: "off"`, so no other path existed. For all 267 clips, every step, the AR's prompt prefix was "instruction + tags + lyrics" (`yue2_model.py:12`) with the lyrics slot empty — so `loss/ar_ce` rewarded matching real sung tokens from style alone and never rewarded getting the words right. The NAR flow loss is lyrics-independent, which is why style/timbre held while language-conditioned generation degraded; `ar_kl`'s 0.37→1.50 drift is the visible symptom.
+- **This superseded the session's earlier framing** of an inherent style-vs-pronunciation tradeoff tunable via `ar_kl_weight`: style and pronunciation are different subsystems (NAR flow vs AR language-conditioning), and only one was being trained correctly. The missing ingredient was data, not a hyperparameter balance. It was a stale decision made under the old "pure style/timbre-transfer" goal (`cot: "off"` entry) that should have been revisited when the goal changed — see `DECISIONS.md`'s goal-correction and Lesson entries.
+- **Fix plan (pending sign-off; dataset frozen):** confirm the raw manifest carries a real `lyrics` field; append lyrics in YuE2's native `[Lyrics]` format; delete the cached text embeddings (`_latent_cache` latents stay valid); sanity-check `parse_caption()` offline; smoke-test on the A100; leave loss weights untouched (one variable). The previously-listed v2 options (freeze the AR, raise `ar_kl_weight`, average checkpoints) were downgraded to fallbacks. (Implemented instead by the offline v2 rebuild — see the 2026-09-20 entry.)
 
 ## 2026-09-20 — v2 dataset built, verified, and promoted to canonical (local + GCS)
 
@@ -419,54 +302,13 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   non-Hijaz maqams, and ultimately the artifact pick (final vs. an earlier
   checkpoint) — no decision made yet on any of these.
 
-## 2026-09-21 — audio.cpp YuE2 LoRA inference on a T4: OOM was eager attention, not the LoRA — `yue2.attention=flash` fixes it
+## 2026-09-21 — audio.cpp YuE2 LoRA inference on a T4: OOM was eager attention, not the LoRA
 
-- **Scope.** Ad-hoc inference alongside training (separate work area): `0xShug0/audio.cpp` @ `e3de8e3`,
-  CUDA, driven with the converted step-3000 LoRA (`akbar_arabic_rock_lora_{ar,nar}.safetensors`, AR+NAR
-  scale 1.0; conversion details in `DECISIONS.md`) on the held-out prompts (the harness holds all four
-  maqams, but every run in this entry is **Hijaz/seed-1000**). Harness in
-  `/content/audiocpp_test/`, mirrored to GCS `.../OSTRIS_Arabic_Suno_Finetuning/audiocpp_gguf_test/`.
-  No training-side file was touched.
-- **Correction of the earlier version of this entry (`ebb3f10`).** It claimed a "≤5800-frame T4 ceiling"
-  and blamed the LoRA's ~2.6 GiB merge (2,818,572,288 bytes, `decoder_merge_values`, constant across runs).
-  **Both are withdrawn.** The ceiling was a guess, never measured: the "fix" (drop to cap 6500) OOM'd again,
-  and the raw logs show both outcomes under that cap — seed 1000 self-terminated at 6,355 frames
-  (`truncated=0`), seed 1001 hit its cap at 6,500 (`truncated=1`), and both OOM'd in the NAR graph. The
-  cited 6,536 figure belonged to a cap-9000 seed-1001 attempt whose log a later cap-6500 rerun overwrote
-  under the same filename (seed 1000's surviving `Hijaz_1000.log` is that cap-6500 run: `truncated=0` /
-  6,355). The controlled runs below show 5800/6000 succeed, and 6200 works once the attention mode is
-  forced. Do not cite ≤5800.
-- **Kept from the earlier entry** (still true): output length is `semantic_max_tokens` at 25 frames/s;
-  `--duration-seconds` is ignored by YuE2; the generic `--temperature/--top-p/--top-k/--repetition-penalty`
-  flags are no-ops for YuE2 (use the prefixed `semantic_*`/`abc_*` options); `nvidia-smi` reports 15,360 MiB,
-  but the ggml runtime logs **14,912 MiB** total VRAM (the allocator's figure) — use 14,912 when reasoning
-  about headroom; Colab High-RAM raises system RAM, not VRAM.
-- **Root cause — attention mode, not the LoRA or the cap.** Under default `yue2.attention=auto` on compute
-  capability 7.5, the NAR path selects the **eager** attention kernel (`src/framework/core/attention_fallback.cpp`:
-  eager for CC 700–799). Hijaz/seed-1000, LoRA on, eager: cap 5000 → exit 0 / 12,005 MiB; cap 5800 →
-  exit 0 / 14,033 MiB; cap 6000 → exit 0 / 14,577 MiB; **cap 6200 → OOM (exit 134,
-  `CUDA error: out of memory` at `ggml-cuda.cu:535`)**. Forcing `--session-option yue2.attention=flash`
-  (one flag added; runners otherwise unchanged): cap 6200 → exit 0 / **7,607 MiB**; cap 9000 →
-  **self-terminated at 6,355 frames** (`truncated=0`), exit 0 / **7,683 MiB**. Roughly half the VRAM, and
-  the point that OOM'd passes. The log records only `allow_flash 0`/`1`, not which kernel was selected.
-- **Memory barely grows with length under flash:** 6,200 → 6,355 frames added ~76 MiB, so there is real
-  headroom past 4:14 — but nothing longer has been tested, and this is Hijaz/seed-1000 only.
-- **Length cross-check + open quality question.** Natural length 6,355 frames = 254.2 s (4:14); the WAV is
-  254.199 s, confirming the 25 fps mapping. **Nobody has listened to a full 4-minute render** — upstream
-  checked numerics only on ~3.8 s clips. Audio quality is the key open question.
-- **State.** GCS `audiocpp_gguf_test/` holds `converter/` (the two converted `.safetensors` and the converter
-  and test scripts, all at that folder's root), `prompts/`, `scripts/`, `logs/`, 1 Hz `_gpu.csv`, and
-  `agent_notes/`. The uncapped flash artifacts (`out/Hijaz_1000_cap9000_flash.*`) were not yet mirrored at
-  report time; the next backup pass picked them up. Two caveats on the runs themselves: a live backup daemon
-  was running during the second (uncapped) run when the protocol said none — host-side only, so it cannot
-  explain the ~7 GiB VRAM drop — and the model precision (`yue2-3b-q8_0.gguf` main + `yue2-vae-f16.gguf` VAE,
-  set in `scripts/run_one.sh`) is not echoed by the CLI's own log. Per-session detail: `agent_notes/current.md`
-  and GCS `audiocpp_gguf_test/agent_notes/current.md`.
-- **Next.** (1) Listen to `out/Hijaz_1000_cap9000_flash.wav` with the listening-pass protocol, against the
-  PyTorch step-3000 Hijaz sample on the same words (seeds differ, so not a byte comparison). (2) If quality
-  holds, the other three maqams uncapped with flash. (3) User's calls: commit the converter + tests to the
-  repo; write the manual-execution workflow for inference tests into `AGENTS.md`. (No stray
-  `akbar_arabic_rock_lora.safetensors` is present in the repo root — verified 2026-09-21.)
+- Ad-hoc inference (separate work area): `0xShug0/audio.cpp` @ `e3de8e3`, CUDA, the converted step-3000 LoRA, held-out prompts; harness in `/content/audiocpp_test/` (later `/content/audiocpp_inference/`). No training-side file was touched. The full mechanism now lives in `DECISIONS.md`'s attention-kernel entry.
+- **Root cause: the attention kernel, not the LoRA or the cap.** Under `yue2.attention=auto` on CC 7.5 the NAR path selects eager attention; forcing `--session-option yue2.attention=flash` cut VRAM roughly in half and passed the OOM point (cap 6200 → 7,607 MiB; cap 9000 → self-terminated at 6,355 frames / 7,683 MiB). An earlier "≤5800-frame ceiling" claim was a guess and is **retracted**.
+- Length mechanics, VRAM figures, the seed/sidecar policy, and the LoRA-conversion requirement are recorded in `DECISIONS.md`.
+- **State:** artifacts were mirrored to GCS `audiocpp_gguf_test/` (later renamed `audiocpp_inference/`). Two caveats on the runs: a live backup daemon during the second run despite protocol (host-side only), and the GGUF precision not being echoed by the CLI's own log.
+- **Next:** listen to the uncapped flash render against the PyTorch step-3000 sample on the same words; if quality holds, the other three maqams uncapped.
 
 ## 2026-09-22 — Bootstrap split into `--training` / `--inference`; notebook gains an inference cell
 
