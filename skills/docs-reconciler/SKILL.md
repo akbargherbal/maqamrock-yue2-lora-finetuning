@@ -23,8 +23,28 @@ Frozen (read-only; never "corrected"): `DECISIONS.md`, `PROGRESS.md`,
 `docs/investigation.md`, `docs/yue2-gguf-lora-findings.md`,
 `TRAINING_ANALYSIS/v1_nolyrics_archived/`, `agent_notes/`. History stays history:
 add a dated entry, don't rewrite it. The scripts exclude these by default.
-Exception: a deliberate, user-approved consolidation pass may *compress* them
-(conclusions kept, narrative dropped, git as the archive) — never silently.
+
+### Consolidation mode (frozen docs, user-approved)
+
+The only exception, and only for `DECISIONS.md` and `PROGRESS.md` — it never
+applies to the other frozen files. Run it as its own pass, never bundled with a
+drift reconciliation:
+
+1. **Admission test per entry.** Keep only what a fresh session would otherwise
+   re-litigate or rediscover: verified source quirks, costly traps, surprising
+   results, binding rules. Mundane/obvious rationale and process narrative are
+   dropped even when the decision was real — a decision is not automatically an
+   insight. Git is the only archive; never create an archive file.
+2. **Never invent.** Compression may shorten or drop, never invert, update, or
+   "improve" a claim; preserve `<file:line>` pointers for what stays.
+3. **Record the baseline.** Put the pre-consolidation commit sha in the new
+   `DECISIONS.md` header so dropped text is one `git show <sha>:DECISIONS.md`
+   away. `PROGRESS.md` gets a light touch only (one line per milestone where the
+   narrative repeats; recent entries intact).
+4. **Checkpoint per entry** (Step 5 applies): present keep/shorten/archive
+   verdicts for the user to approve before writing anything.
+5. **Re-run Steps 1–2 afterward.** Live docs cite `DECISIONS.md:NN`; the rewrite
+   shifts every line. Fix the broken citations in a second checkpoint.
 
 Authority when two docs disagree: config YAML + code (`--help`, argparse)
 outrank `docs/` runbooks, which outrank `README.md`. `DECISIONS.md` is the
