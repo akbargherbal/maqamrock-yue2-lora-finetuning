@@ -580,3 +580,21 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 - **3. Unchanged open items** (do not lose): clean-VM proof + cold timing; re-run the
   5 truncated seeds at the corrected cap; per-arch binary auto-selection; duration-cap
   validation on `yue2_eval_heldout/`.
+
+## 2026-09-23 — Second inference batch: 21/21 exit=0; docs consolidated and pushed
+
+- `generate.py manifests/batch_songs_23092026.json` (deduped from a doubled 42-entry
+  manifest to 21 songs, random seeds) → **21/21 exit=0**, 0 failed, total wall
+  **2:54:45** (07:13–10:08 UTC), 21 WAVs / ~1004 MB in
+  `out/20260923-071255_batch_songs_23092026/`. Per-track 6:05–10:30 (median ~8.3 min).
+  Caps from the corrected 95th-percentile formula (6500–8250).
+- **One track hit its cap:** `kurd_nabigha_jaadi_21082026_011_77c73eff` ran to exactly
+  290.0 s at cap 7250 — flagged by the `generate.py` duration heuristic; the track log had
+  no `truncated=1` line, so it is "possibly truncated", not confirmed. All others
+  self-terminated under cap.
+- **Docs:** `DECISIONS.md` (565→227 lines) and `PROGRESS.md` (740→582) consolidated under the
+  user-approved frozen-doc exemption; `docs-reconciler` drift 4→0; added the `command-handover`
+  skill. Commits `be54968`, `f52db59`, `4246b22` pushed to `origin/main`.
+- **Next:** listen to the 21 tracks (quality / maqam / pronunciation, plus track 13's
+  truncation). Still open: clean-VM proof + cold timing; re-run the 2026-09-22 batch's 5
+  truncated seeds at the corrected cap; per-arch binary auto-selection.
