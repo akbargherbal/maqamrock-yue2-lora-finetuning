@@ -49,6 +49,11 @@ def sun(gen):
     return _load_module("suno_to_songs", INFERENCE_DIR / "suno_to_songs.py")
 
 
+@pytest.fixture(scope="session")
+def bak():
+    return _load_module("backup_to_gcp", REPO_ROOT / "backup_to_gcp.py")
+
+
 @pytest.fixture
 def manifest_path() -> Path:
     return REPO_ROOT / "manifests" / "workspace_manifest.json"

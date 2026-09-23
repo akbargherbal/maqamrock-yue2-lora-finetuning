@@ -36,6 +36,11 @@ Two modes, mirroring bootstrap/setup.sh's own --training/--inference split:
                       <base>/audiocpp_inference/ (out, prompts, scripts, the
                       converted LoRA) + logs + agent_notes. See INFERENCE_TARGETS.
 
+`--watch LOCAL[:SUB]` (repeatable) replaces the mode's targets with exactly the
+folders you name -- for mirroring an arbitrary location such as
+`/content/my_songs`. Every watch lands under `<base>/<run-name>/`, with `SUB`
+(or the prefix root for a single watch) as the remote subfolder.
+
 Usage:
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora --interval-minutes 15
@@ -43,6 +48,10 @@ Usage:
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora --dry-run
     python backup_to_gcp.py --inference
     python backup_to_gcp.py --inference --once
+
+    # watch a specific folder instead of the mode's default targets
+    python backup_to_gcp.py --watch /content/my_songs --run-name my_songs
+    python backup_to_gcp.py --watch /content/my_songs:wavs --watch /content/notes:misc
 """
 
 from __future__ import annotations
@@ -52,6 +61,7 @@ import datetime as dt
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -119,6 +129,25 @@ DEFAULT_EXCLUDES = [r".*\.tmp$"]
 SETTLE_IGNORE_NAMES = {"loss_log.db", "loss_log.db-wal", "loss_log.db-shm"}
 
 
+def parse_watch_specs(specs: list[str]) -> list[tuple[Path, str]]:
+    """`LOCAL` or `LOCAL:SUB` -> (expanded local path, remote subfolder).
+
+    SUB defaults to "" (the run prefix root). A local path containing ':' is
+    pathological on Linux, so a single split is unambiguous here.
+    """
+    out: list[tuple[Path, str]] = []
+    for spec in specs:
+        local, sub = spec.split(":", 1) if ":" in spec else (spec, "")
+        out.append((Path(local).expanduser(), sub.strip("/")))
+    return out
+
+
+def run_name_from_path(path: Path) -> str:
+    """A GCS-safe run name derived from a watched folder's basename."""
+    name = re.sub(r"[^A-Za-z0-9._-]+", "-", path.name).strip("-")
+    return name or "watch"
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -135,6 +164,17 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Back up the audio.cpp inference workspace instead of the training "
              "run (targets INFERENCE_TARGETS).",
+    )
+    p.add_argument(
+        "--watch",
+        action="append",
+        default=None,
+        metavar="LOCAL[:SUB]",
+        help="Mirror this local folder (repeatable) INSTEAD of the mode's default "
+             "targets. LOCAL is ~-expanded; SUB is the remote subfolder under "
+             "<base>/<run-name>/ and defaults to the prefix root for a single "
+             "--watch (give an explicit :SUB for each when watching several). "
+             "With no --run-name the run name is derived from the first folder.",
     )
     p.add_argument(
         "--base",
@@ -343,8 +383,24 @@ def main() -> int:
         )
         return 3
 
+    watch = parse_watch_specs(args.watch) if args.watch else None
+    if watch:
+        missing = [str(path) for path, _ in watch if not path.is_dir()]
+        if missing:
+            logger.error("--watch path is not a directory: %s", ", ".join(missing))
+            return 3
+        if sum(1 for _, sub in watch if not sub) > 1:
+            logger.error(
+                "multiple --watch targets need an explicit :SUB "
+                "(only one may sync to the prefix root)"
+            )
+            return 3
+
     if not args.run_name:
-        args.run_name = INFERENCE_RUN_NAME if args.inference else JOB_NAME
+        if watch and not args.inference:
+            args.run_name = run_name_from_path(watch[0][0])
+        else:
+            args.run_name = INFERENCE_RUN_NAME if args.inference else JOB_NAME
 
     if args.run_name in RESERVED_SUBFOLDERS:
         logger.error(
@@ -356,12 +412,13 @@ def main() -> int:
 
     prefix = f"{args.base}/{args.run_name}"
 
-    targets = list(INFERENCE_TARGETS if args.inference else TRAINING_TARGETS)
+    targets = ([(path, sub, False) for path, sub in watch] if watch
+               else list(INFERENCE_TARGETS if args.inference else TRAINING_TARGETS))
 
     logger.info(
         "backup run %r (%s) to %s/%s every %.0f min (once=%s, dry-run=%s)",
         args.run_name,
-        "inference" if args.inference else "training",
+        "watch" if watch else ("inference" if args.inference else "training"),
         args.base,
         args.run_name,
         args.interval_minutes,
@@ -376,19 +433,17 @@ def main() -> int:
 
     try:
         while True:
-            failures = 0
+            synced = 0
             for src, sub, settle in targets:
                 if not src.is_dir():
                     logger.warning("skipping missing folder %s", src)
                     continue
                 if settle:
                     wait_for_settle(src, args.settle_seconds, logger)
-                if not sync(src, f"{prefix}/{sub}", args, logger):
-                    failures += 1
+                if sync(src, f"{prefix}/{sub}", args, logger):
+                    synced += 1
             logger.info(
-                "pass complete: %d/%d folders synced",
-                len(targets) - failures,
-                len(targets),
+                "pass complete: %d/%d folders synced", synced, len(targets)
             )
             if args.once:
                 break

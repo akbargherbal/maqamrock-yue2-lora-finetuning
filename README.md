@@ -123,6 +123,13 @@ python backup_to_gcp.py --inference            # daemon
 python backup_to_gcp.py --inference --once     # single pass
 ```
 
+To mirror an arbitrary folder (not the training/inference layouts), use `--watch LOCAL[:SUB]` (repeatable) — it replaces the default targets with just the folders you name. Each lands under `gs://<base>/<run-name>/`, at the prefix root for a single watch or in the given `SUB` subfolder. With no `--run-name`, the run name is derived from the first folder.
+
+```bash
+python backup_to_gcp.py --watch /content/my_songs --run-name my_songs       # -> <base>/my_songs/
+python backup_to_gcp.py --watch /content/a:wavs --watch /content/b:notes    # two targets, explicit SUBs
+```
+
 ## Tests
 
 The GPU-free unit tests live in `tests/` and never touch the GPU or `/content`:
@@ -136,10 +143,14 @@ coverage run -m pytest && coverage report -m
 They cover `INFERENCE/generate.py` (schema validation, cap parity with
 `duration_cap.py`, seed/limit/resume logic, and the sequential batch loop via a
 fake runner), `INFERENCE/suno_to_songs.py` (lyric cleaning, A/B dedup, filters,
-report/provenance, and a round-trip into `generate.py --dry-run`), and
-`INFERENCE/duration_cap.py` (the pure fit functions plus the CLI in-process).
-Current line coverage: `duration_cap.py` 100%, `generate.py` 94%,
-`suno_to_songs.py` 94% (the remainder is real-GPU / OS-error paths).
+report/provenance, and a round-trip into `generate.py --dry-run`),
+`INFERENCE/duration_cap.py` (the pure fit functions plus the CLI in-process), and
+`backup_to_gcp.py` (the `--watch` mapping, settle wait, sync/manifest
+success+failure branches, and `main()` across training/inference/watch/dry-run,
+all via a fake `gsutil`).
+Current line coverage: `backup_to_gcp.py` 100%, `duration_cap.py` 100%,
+`generate.py` 95%, `suno_to_songs.py` 94% (the remainder is real-GPU /
+OS-error paths).
 
 ## Docs
 
