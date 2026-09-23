@@ -16,7 +16,7 @@ Schema (strict: unknown keys are an error)
       },
       "songs": [
         {
-          "name":    "my_song",            # required, ASCII slug, unique
+          "name":    "my_song",            # required, ASCII slug; duplicates get _2/_3...
           "style":   "arabmaqamrock ...",  # inline  xor style_file
           "style_file": "prompts/Hijaz_style.txt",
           "lyrics":  "[Verse 1]\n...",     # inline  xor lyrics_file
@@ -339,7 +339,13 @@ def resolve_songs(data: dict, base_dir: Path, cli_quantile: float | None = None,
         name = raw.get("name")
         check(isinstance(name, str) and NAME_RE.match(name),
               f"{where}.name: required ASCII slug matching {NAME_RE.pattern}")
-        check(name not in seen, f"{where}.name: duplicate name '{name}'")
+        base = name
+        n = 2
+        while name in seen:
+            name = f"{base}_{n}"
+            n += 1
+        if name != base:
+            warn(f"{where}.name: '{base}' already used; renamed to '{name}'")
         seen.add(name)
 
         style_text = _style_text(raw, defaults, base_dir, where, trigger)

@@ -40,6 +40,21 @@ def test_resolve_inline_defaults_trigger(gen, tmp_path, lyrics_ar):
     assert songs[0].cap > 0 and songs[0].n_letters > 0
 
 
+def test_resolve_duplicate_names_get_suffix(gen, tmp_path, capsys):
+    data = {"songs": [
+        {"name": "x", "style": "s", "lyrics": "y"},
+        {"name": "x", "style": "s2", "lyrics": "y2"},
+        {"name": "x_2", "style": "s3", "lyrics": "y3"},
+        {"name": "x", "style": "s4", "lyrics": "y4"},
+    ]}
+    songs = gen.resolve_songs(data, tmp_path)
+    assert [s.name for s in songs] == ["x", "x_2", "x_2_2", "x_3"]
+    err = capsys.readouterr().err
+    assert "already used; renamed to 'x_2'" in err
+    assert "already used; renamed to 'x_2_2'" in err
+    assert "already used; renamed to 'x_3'" in err
+
+
 def test_resolve_file_refs_and_no_trigger(gen, tmp_path, lyrics_ar):
     (tmp_path / "my_style.txt").write_text("dark rock ballad", encoding="utf-8")
     (tmp_path / "my_lyrics.txt").write_text(lyrics_ar, encoding="utf-8")
@@ -88,7 +103,6 @@ VALID = {"name": "x", "style": "s", "lyrics": "y"}
     ({"songs": []}, "non-empty array"),
     ({"songs": [{"name": "has space", "style": "s", "lyrics": "y"}]}, "ASCII slug"),
     ({"songs": [{"style": "s", "lyrics": "y"}]}, "ASCII slug"),
-    ({"songs": [VALID, VALID]}, "duplicate name"),
     ({"songs": [{"name": "x", "style": "s", "style_file": "f", "lyrics": "y"}]},
      "mutually exclusive"),
     ({"songs": [{"name": "x", "lyrics": "y"}]}, "needs 'style'"),
