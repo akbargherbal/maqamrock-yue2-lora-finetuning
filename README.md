@@ -123,11 +123,12 @@ python backup_to_gcp.py --inference            # daemon
 python backup_to_gcp.py --inference --once     # single pass
 ```
 
-To mirror an arbitrary folder (not the training/inference layouts), use `--watch LOCAL[:SUB]` (repeatable) — it replaces the default targets with just the folders you name. Each lands under `gs://<base>/<run-name>/`, at the prefix root for a single watch or in the given `SUB` subfolder. With no `--run-name`, the run name is derived from the first folder.
+To mirror an arbitrary folder (not the training/inference layouts), use `--watch LOCAL[:SUB]` (repeatable) — it **replaces** the default targets with just the folders you name. **Careful: `--watch` drops the defaults entirely** (no checkpoints/logs/`agent_notes`), so use it only when you want an arbitrary set *instead of* them. Each watched folder lands under `gs://<base>/<run-name>/`, at the prefix root for a single watch or in the given `SUB` subfolder; with no `--run-name`, the run name is derived from the first folder. To **keep** the defaults and add one more folder, use `--extra LOCAL[:SUB]` instead (SUB defaults to the folder's basename).
 
 ```bash
-python backup_to_gcp.py --watch /content/my_songs --run-name my_songs       # -> <base>/my_songs/
+python backup_to_gcp.py --watch /content/my_songs --run-name my_songs       # -> <base>/my_songs/ (defaults dropped)
 python backup_to_gcp.py --watch /content/a:wavs --watch /content/b:notes    # two targets, explicit SUBs
+python backup_to_gcp.py --inference --extra /content/my_songs               # inference targets PLUS -> <base>/audiocpp_inference/my_songs/
 ```
 
 ## Tests

@@ -94,6 +94,14 @@ def test_run_name_from_path(bak):
     assert bak.run_name_from_path(Path("/")) == "watch"
 
 
+def test_parse_extra_specs(bak):
+    got = bak.parse_extra_specs(["/a/b", "/c/My Songs", "/d/e:wavs", "/f/g:"])
+    assert got[0] == (Path("/a/b"), "b")                 # basename default
+    assert got[1] == (Path("/c/My Songs"), "My-Songs")   # slugified basename
+    assert got[2] == (Path("/d/e"), "wavs")              # explicit SUB
+    assert got[3] == (Path("/f/g"), "")                  # explicit empty -> root
+
+
 # --- setup_logging ----------------------------------------------------------
 
 def test_setup_logging_writes_file_and_is_idempotent(bak, tmp_path):
@@ -365,6 +373,104 @@ def test_main_reserved_run_name(bak, monkeypatch, tmp_path, capsys):
                   "--log-file", str(tmp_path / "m.log")])
     assert rc == 3
     assert "reserved non-run folder" in capsys.readouterr().out
+
+
+def test_main_extra_keeps_defaults_and_adds(bak, monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(bak, "TRAINING_TARGETS", _dirs(tmp_path, ["out", "logs"]))
+    extra = tmp_path / "My Songs"
+    extra.mkdir()
+    fake = FakeGsutil()
+    _patch(bak, monkeypatch, fake)
+    rc = _invoke(bak, monkeypatch,
+                 ["--base", "gs://b/p", "--once", "--extra", str(extra),
+                  "--log-file", str(tmp_path / "m.log")])
+    assert rc == 0
+    dsts = [c[0][-1].rstrip("/") for c in fake.calls if "rsync" in c[0]]
+    # defaults are KEPT and the extra is ADDED (basename slugified)
+    assert "gs://b/p/akbar_arabic_rock_lora/out" in dsts
+    assert "gs://b/p/akbar_arabic_rock_lora/logs" in dsts
+    assert "gs://b/p/akbar_arabic_rock_lora/My-Songs" in dsts
+    assert len(dsts) == 3
+
+
+def test_main_extra_with_explicit_sub(bak, monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(bak, "TRAINING_TARGETS", _dirs(tmp_path, ["out"]))
+    extra = tmp_path / "songs"
+    extra.mkdir()
+    fake = FakeGsutil()
+    _patch(bak, monkeypatch, fake)
+    rc = _invoke(bak, monkeypatch,
+                 ["--base", "gs://b/p", "--once", "--extra", f"{extra}:wavs",
+                  "--log-file", str(tmp_path / "m.log")])
+    assert rc == 0
+    dsts = [c[0][-1].rstrip("/") for c in fake.calls if "rsync" in c[0]]
+    assert "gs://b/p/akbar_arabic_rock_lora/wavs" in dsts
+
+
+def test_main_extra_with_inference(bak, monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(bak, "INFERENCE_TARGETS", _dirs(tmp_path, ["out", "prompts"]))
+    extra = tmp_path / "notes"
+    extra.mkdir()
+    fake = FakeGsutil()
+    _patch(bak, monkeypatch, fake)
+    rc = _invoke(bak, monkeypatch,
+                 ["--inference", "--base", "gs://b/p", "--once",
+                  "--extra", str(extra), "--log-file", str(tmp_path / "m.log")])
+    assert rc == 0
+    dsts = [c[0][-1].rstrip("/") for c in fake.calls if "rsync" in c[0]]
+    assert "gs://b/p/audiocpp_inference/out" in dsts
+    assert "gs://b/p/audiocpp_inference/notes" in dsts
+
+
+def test_main_watch_plus_extra_still_replaces_defaults(bak, monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(bak, "TRAINING_TARGETS", _dirs(tmp_path, ["out"]))
+    watched, added = tmp_path / "watched", tmp_path / "added"
+    watched.mkdir()
+    added.mkdir()
+    fake = FakeGsutil()
+    _patch(bak, monkeypatch, fake)
+    rc = _invoke(bak, monkeypatch,
+                 ["--watch", str(watched), "--extra", str(added), "--base", "gs://b/p",
+                  "--once", "--log-file", str(tmp_path / "m.log")])
+    assert rc == 0
+    dsts = [c[0][-1].rstrip("/") for c in fake.calls if "rsync" in c[0]]
+    assert "gs://b/p/watched" in dsts          # watch maps to the prefix root
+    assert "gs://b/p/watched/added" in dsts    # extra added on top
+    assert "gs://b/p/watched/out" not in dsts  # default still dropped by --watch
+
+
+def test_main_extra_missing_dir(bak, monkeypatch, tmp_path, capsys):
+    _patch(bak, monkeypatch, FakeGsutil())
+    rc = _invoke(bak, monkeypatch,
+                 ["--base", "gs://b/p", "--once", "--extra", str(tmp_path / "nope"),
+                  "--log-file", str(tmp_path / "m.log")])
+    assert rc == 3
+    assert "not a directory" in capsys.readouterr().out
+
+
+def test_main_extra_sub_collides_with_default(bak, monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(bak, "TRAINING_TARGETS", _dirs(tmp_path, ["out", "logs"]))
+    extra = tmp_path / "x"
+    extra.mkdir()
+    _patch(bak, monkeypatch, FakeGsutil())
+    rc = _invoke(bak, monkeypatch,
+                 ["--base", "gs://b/p", "--once", "--extra", f"{extra}:logs",
+                  "--log-file", str(tmp_path / "m.log")])
+    assert rc == 3
+    assert "duplicate remote subfolder" in capsys.readouterr().out
+
+
+def test_main_extra_same_basename_collides(bak, monkeypatch, tmp_path, capsys):
+    (tmp_path / "a" / "songs").mkdir(parents=True)
+    (tmp_path / "b" / "songs").mkdir(parents=True)
+    _patch(bak, monkeypatch, FakeGsutil())
+    rc = _invoke(bak, monkeypatch,
+                 ["--base", "gs://b/p", "--once",
+                  "--extra", str(tmp_path / "a" / "songs"),
+                  "--extra", str(tmp_path / "b" / "songs"),
+                  "--log-file", str(tmp_path / "m.log")])
+    assert rc == 3
+    assert "duplicate remote subfolder" in capsys.readouterr().out
 
 
 def test_main_dry_run_uploads_nothing(bak, monkeypatch, tmp_path, capsys):

@@ -41,6 +41,10 @@ folders you name -- for mirroring an arbitrary location such as
 `/content/my_songs`. Every watch lands under `<base>/<run-name>/`, with `SUB`
 (or the prefix root for a single watch) as the remote subfolder.
 
+`--extra LOCAL[:SUB]` (repeatable) ADDS folders on top of whatever the target
+set already is (the mode's defaults, or the `--watch` list). Its remote
+subfolder defaults to the folder's basename.
+
 Usage:
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora --interval-minutes 15
@@ -52,6 +56,9 @@ Usage:
     # watch a specific folder instead of the mode's default targets
     python backup_to_gcp.py --watch /content/my_songs --run-name my_songs
     python backup_to_gcp.py --watch /content/my_songs:wavs --watch /content/notes:misc
+
+    # keep the default targets AND add one folder
+    python backup_to_gcp.py --run-name akbar_arabic_rock_lora --extra /content/my_songs
 """
 
 from __future__ import annotations
@@ -148,6 +155,18 @@ def run_name_from_path(path: Path) -> str:
     return name or "watch"
 
 
+def parse_extra_specs(specs: list[str]) -> list[tuple[Path, str]]:
+    """`LOCAL` or `LOCAL:SUB` -> (expanded path, subfolder) for targets ADDED
+    on top of the current set. With no `:SUB` the folder's basename is used;
+    `LOCAL:` (explicit empty SUB) mirrors at the prefix root."""
+    out: list[tuple[Path, str]] = []
+    for spec in specs:
+        local, sub = spec.split(":", 1) if ":" in spec else (spec, None)
+        path = Path(local).expanduser()
+        out.append((path, run_name_from_path(path) if sub is None else sub.strip("/")))
+    return out
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -171,10 +190,22 @@ def parse_args() -> argparse.Namespace:
         default=None,
         metavar="LOCAL[:SUB]",
         help="Mirror this local folder (repeatable) INSTEAD of the mode's default "
-             "targets. LOCAL is ~-expanded; SUB is the remote subfolder under "
-             "<base>/<run-name>/ and defaults to the prefix root for a single "
-             "--watch (give an explicit :SUB for each when watching several). "
-             "With no --run-name the run name is derived from the first folder.",
+             "targets -- DROPS the defaults (checkpoints/logs/agent_notes); use "
+             "--extra to keep them. LOCAL is ~-expanded; SUB is the remote "
+             "subfolder under <base>/<run-name>/ and defaults to the prefix root "
+             "for a single --watch (give an explicit :SUB for each when watching "
+             "several). With no --run-name the run name is derived from the "
+             "first folder.",
+    )
+    p.add_argument(
+        "--extra",
+        action="append",
+        default=None,
+        metavar="LOCAL[:SUB]",
+        help="ADD this local folder (repeatable) on top of the current targets "
+             "(the mode's defaults, or the --watch list) -- unlike --watch, the "
+             "defaults are kept. SUB defaults to the folder's basename; LOCAL: "
+             "(empty SUB) mirrors at the prefix root.",
     )
     p.add_argument(
         "--base",
@@ -384,17 +415,18 @@ def main() -> int:
         return 3
 
     watch = parse_watch_specs(args.watch) if args.watch else None
-    if watch:
-        missing = [str(path) for path, _ in watch if not path.is_dir()]
-        if missing:
-            logger.error("--watch path is not a directory: %s", ", ".join(missing))
-            return 3
-        if sum(1 for _, sub in watch if not sub) > 1:
-            logger.error(
-                "multiple --watch targets need an explicit :SUB "
-                "(only one may sync to the prefix root)"
-            )
-            return 3
+    extra = parse_extra_specs(args.extra) if args.extra else None
+    missing = [str(path) for path, _ in (watch or []) + (extra or [])
+               if not path.is_dir()]
+    if missing:
+        logger.error("target path is not a directory: %s", ", ".join(missing))
+        return 3
+    if watch and sum(1 for _, sub in watch if not sub) > 1:
+        logger.error(
+            "multiple --watch targets need an explicit :SUB "
+            "(only one may sync to the prefix root)"
+        )
+        return 3
 
     if not args.run_name:
         if watch and not args.inference:
@@ -412,8 +444,19 @@ def main() -> int:
 
     prefix = f"{args.base}/{args.run_name}"
 
-    targets = ([(path, sub, False) for path, sub in watch] if watch
-               else list(INFERENCE_TARGETS if args.inference else TRAINING_TARGETS))
+    base_targets = ([(path, sub, False) for path, sub in watch] if watch
+                    else list(INFERENCE_TARGETS if args.inference else TRAINING_TARGETS))
+    targets = base_targets + [(path, sub, False) for path, sub in (extra or [])]
+
+    subs = [sub for _, sub, _ in targets]
+    collisions = sorted({s for s in subs if subs.count(s) > 1})
+    if collisions:
+        logger.error(
+            "duplicate remote subfolder(s) among targets: %s; give a distinct "
+            ":SUB for the extra/watch target(s)",
+            ", ".join(repr(s) for s in collisions),
+        )
+        return 3
 
     logger.info(
         "backup run %r (%s) to %s/%s every %.0f min (once=%s, dry-run=%s)",

@@ -25,6 +25,15 @@ is written there that refuses to let two different runs share a prefix.
 | | `/content/converter/out/` (the converted LoRA) | `converter/` |
 | | `/content/logs/`, `agent_notes/` | `logs/`, `agent_notes/` |
 | **watch** `--watch LOCAL[:SUB]` | exactly the folders you name | prefix root, or the given `SUB` |
+| **extra** `--extra LOCAL[:SUB]` | the mode's targets **plus** these folders | each at `<base>/<run-name>/<SUB>` (SUB defaults to the folder's basename) |
+
+> **Caution — `--watch` replaces, `--extra` adds.** `--watch` throws away the
+> mode's normal targets (checkpoints, `loss_log.db`, `logs/`, `agent_notes/`)
+> and mirrors **only** the folders you name, so it's easy to silently stop
+> backing up your run by adding a `--watch`. To keep everything and include one
+> more folder, use `--extra`. Reach for `--watch` only when you deliberately
+> want an arbitrary set *instead of* the defaults. `--watch` and `--extra`
+> together mirror the `--watch` set **plus** the extras — still no defaults.
 
 In training mode the `output/` target waits until its newest file has been
 untouched for `--settle-seconds` (default 60) before syncing — except
@@ -97,6 +106,31 @@ python backup_to_gcp.py --watch /content/my_songs:wavs --run-name my_songs
 python backup_to_gcp.py --watch /content/a:wavs --watch /content/b:notes --once
 ```
 
+> **`--watch` = *instead of* the defaults.** Every command in this section
+> stops the default targets from being backed up. If you actually want to *keep*
+> the defaults and add a folder, use `--extra` (next section) **without**
+> `--watch` — or `--watch` + `--extra` will still mirror only the watch set plus
+> the extras.
+
+## Adding a folder on top of the defaults (`--extra`)
+
+`--extra LOCAL[:SUB]` (repeatable) **adds** folders instead of replacing, so the
+mode's normal targets are still covered — the safe way to include one extra
+location:
+
+```bash
+# training targets PLUS /content/my_songs -> <base>/akbar_arabic_rock_lora/my_songs/
+python backup_to_gcp.py --run-name akbar_arabic_rock_lora --extra /content/my_songs
+
+# as a background sidecar
+setsid nohup python backup_to_gcp.py --inference --extra /content/my_songs \
+  > /content/logs/gcp_backup_stdout.log 2>&1 & disown
+```
+
+`SUB` defaults to the folder's basename (so `--extra /content/My Songs` →
+`My-Songs/`); use `LOCAL:` to mirror at the prefix root. Two targets that would
+land in the same remote subfolder are rejected (exit 3) rather than interleaved.
+
 ## Flags
 
 | Flag | Meaning |
@@ -104,6 +138,7 @@ python backup_to_gcp.py --watch /content/a:wavs --watch /content/b:notes --once
 | `--run-name NAME` | This run's prefix under `<base>`. Defaults to `akbar_arabic_rock_lora` (training) / `audiocpp_inference` (`--inference`) / the first watched folder (`--watch`). `dataset` is reserved. |
 | `--inference` | Use the inference target set instead of training. |
 | `--watch LOCAL[:SUB]` | Mirror these folders instead of the mode's targets (repeatable). |
+| `--extra LOCAL[:SUB]` | ADD these folders on top of the mode's targets (repeatable); SUB defaults to the folder's basename, `LOCAL:` = prefix root. |
 | `--base gs://…` | GCS root; defaults to `$GCP_BACKUP_BASE`. |
 | `--interval-minutes N` | Minutes between passes (default 15). |
 | `--once` | Run one pass and exit. |
