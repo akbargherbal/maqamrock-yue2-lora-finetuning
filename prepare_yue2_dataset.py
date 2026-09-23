@@ -83,12 +83,13 @@ def parse_fields(styles: str) -> dict:
     return fields
 
 
-def build_caption(fields: dict, maqam: str, trigger: str | None) -> str:
+def build_caption(fields: dict, maqam: str | None, trigger: str | None) -> str:
     parts = []
     if trigger:
         parts.append(trigger + ",")
     parts.append(fields.get("genre", "Full Instrumental."))
-    parts.append(f"Maqam {maqam}.")
+    if maqam:
+        parts.append(f"Maqam {maqam}.")
     if "vocals" in fields:
         parts.append(fields["vocals"])
     if "production" in fields:

@@ -10,7 +10,11 @@ manifest (`styles` + `lyrics`).
 It reuses the canonical v2 code instead of re-deriving it:
   - `prepare_yue2_dataset.parse_fields` / `build_caption` build the style text
     byte-identically to the training captions (trigger left off — `generate.py`
-    prepends `arabmaqamrock `).
+    prepends `arabmaqamrock `). A track with no `Maqam <name>` in `styles.vocals`
+    is kept, not rejected: its style omits the maqam sentence (and, for legacy
+    stub entries whose `styles` is a bare genre string rather than the
+    `key: "value"` block, the raw text is used as-is), and its name/report use
+    the `unknown` maqam label.
   - the lyric cleaning is the binding v2 format from DECISIONS.md:174-194:
     drop `///***///`; collapse `[Section | descriptors]` to `[Section]` for the
     canonical names (Intro, Verse [n], Chorus, Pre-Chorus, Bridge, Outro, Hook,
@@ -56,6 +60,7 @@ SECTION_RE = re.compile(
     re.IGNORECASE,
 )
 KEEP_MODES = ("downloaded-a", "a", "b", "first")
+NO_MAQAM = "unknown"
 
 
 # --- lyrics -----------------------------------------------------------------
@@ -114,9 +119,14 @@ def extract_maqam(track: dict) -> str | None:
     return m.group(1) if m else None
 
 
-def build_style(track: dict, maqam: str, trigger: str | None) -> str:
+def build_style(track: dict, maqam: str | None, trigger: str | None) -> str:
     fields = pyd.parse_fields(track.get("styles", ""))
-    style = pyd.build_caption(fields, maqam, None)
+    if fields:
+        style = pyd.build_caption(fields, maqam, None)
+    else:
+        # Legacy/stub entries carry a bare genre string, not the key: "value"
+        # block parse_fields expects; keep it verbatim rather than dropping it.
+        style = str(track.get("styles", "")).strip()
     if trigger:
         style = f"{trigger} {style}"
     return style
@@ -149,13 +159,15 @@ def collect_entries(path: Path, trigger: str | None) -> list[dict]:
             gen.warn(f"{path}: tracks[{i}] has no original_title/assigned_filename; skipping")
             continue
         maqam = extract_maqam(track)
-        gen.check(maqam is not None,
-                  f"{path}: tracks[{i}] ({title[:40]}) has no 'Maqam <name>' in styles.vocals; "
-                  f"cannot derive the maqam")
+        if maqam is None:
+            gen.warn(f"{path}: tracks[{i}] ({title[:40]}) has no 'Maqam <name>' "
+                     f"in styles.vocals; keeping it with the {NO_MAQAM!r} label")
         style = build_style(track, maqam, trigger)
+        gen.check(style.strip(), f"{path}: tracks[{i}] ({title[:40]}) has no usable style text")
         lyrics, dropped = clean_lyrics(track.get("lyrics", ""))
         gen.check(lyrics.strip(), f"{path}: tracks[{i}] ({title[:40]}) has no usable lyrics")
-        name = pyd.safe_ascii_name(workspace, maqam, i, str(track.get("clip_id", "noid")))
+        name = pyd.safe_ascii_name(workspace, maqam or NO_MAQAM, i,
+                                   str(track.get("clip_id", "noid")))
         entries.append({
             "manifest": str(path),
             "workspace": workspace,
@@ -178,7 +190,7 @@ def filter_entries(entries: list[dict], maqams: list[str] | None,
     out = entries
     if maqams:
         wanted = {m.lower() for m in maqams}
-        out = [e for e in out if e["maqam"].lower() in wanted]
+        out = [e for e in out if (e["maqam"] or "").lower() in wanted]
     if statuses:
         wanted = {s.lower() for s in statuses}
         out = [e for e in out if e["status"].lower() in wanted]
@@ -250,7 +262,8 @@ def build_report(entries: list[dict], kept: list[dict], dropped: list[dict],
     provenance: dict[str, dict] = {}
     dropped_tags: dict[str, int] = {}
     for e in kept:
-        per_maqam[e["maqam"]] = per_maqam.get(e["maqam"], 0) + 1
+        label = e["maqam"] or NO_MAQAM
+        per_maqam[label] = per_maqam.get(label, 0) + 1
         provenance[e["name"]] = {
             "workspace": e["workspace"], "original_title": e["title"],
             "assigned_filename": e["assigned_filename"], "clip_id": e["clip_id"],

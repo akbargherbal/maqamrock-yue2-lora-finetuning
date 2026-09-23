@@ -175,7 +175,11 @@ What it does:
 - **Style** = `prepare_yue2_dataset.build_caption(parse_fields(styles), maqam)`
   — byte-identical to the v2 training captions, with the trigger left off so
   `generate.py` prepends `arabmaqamrock `. The maqam is read per track from the
-  first `Maqam <name>` in `styles.vocals` (a workspace can mix maqams).
+  first `Maqam <name>` in `styles.vocals` (a workspace can mix maqams). A track
+  with no maqam is kept, not rejected: the maqam sentence is omitted, and if
+  `styles` is a bare genre string (legacy stub, no `key: "value"` block) the raw
+  text is used as the style; such songs get the `unknown` label in the name and
+  report.
 - **Lyrics** = the binding v2 format (`DECISIONS.md`:174-194): drop
   `///***///`; collapse `[Section | descriptors]` to `[Section]` for `Intro`,
   `Verse [n]`, `Chorus`, `Pre-Chorus`, `Bridge`, `Outro`, `Hook`, `Refrain`;

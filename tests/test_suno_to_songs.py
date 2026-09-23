@@ -143,8 +143,8 @@ def _write(path, obj):
 
 
 @pytest.mark.parametrize("obj,frag", [
-    ({"tracks": [{"original_title": "t", "styles": 'genre: "x"',
-                  "lyrics": "///***///\nسطر", "clip_id": "c"}]}, "no 'Maqam"),
+    ({"tracks": [{"original_title": "t", "styles": "",
+                  "lyrics": "///***///\nسطر", "clip_id": "c"}]}, "no usable style text"),
     ({"tracks": [{"original_title": "t", "styles": 'genre: "x"\nvocals: "Maqam Hijaz"',
                   "lyrics": "///***///", "clip_id": "c"}]}, "no usable lyrics"),
     ({"tracks": []}, "no usable tracks"),
@@ -163,3 +163,26 @@ def test_invalid_json_and_missing_manifest(sun, tmp_path, capsys):
 
     assert sun.main([str(tmp_path / "nope.json"), "--dry-run"]) == 1
     assert "manifest not found" in capsys.readouterr().err
+
+
+# --- tracks with no maqam ---------------------------------------------------
+
+def test_track_without_maqam_uses_raw_style(sun, tmp_path):
+    # legacy stub: bare genre string, no key: "value" fields, no Maqam mention
+    p = _write(tmp_path / "m.json", {"tracks": [
+        {"original_title": "t", "styles": "Symphonic cinematic orchestral ballad, heavy rock",
+         "lyrics": "///***///\n[Intro]\nسطر", "clip_id": "c123456789"}]})
+    doc, report = _convert(sun, p, tmp_path / "songs.json")
+    assert len(doc["songs"]) == 1
+    assert doc["songs"][0]["style"] == "Symphonic cinematic orchestral ballad, heavy rock"
+    assert report["per_maqam"] == {"unknown": 1}
+    assert report["provenance"]["unknown_m_000_c1234567"]["maqam"] is None
+
+
+def test_track_with_fields_but_no_maqam_omits_maqam_sentence(sun, tmp_path):
+    p = _write(tmp_path / "m.json", {"tracks": [
+        {"original_title": "t",
+         "styles": 'genre: "Rock"\nvocals: "deep male vocals"\nmood: "dark"',
+         "lyrics": "///***///\n[Verse 1]\nسطر", "clip_id": "c1"}]})
+    doc, _ = _convert(sun, p, tmp_path / "songs.json")
+    assert doc["songs"][0]["style"] == "Rock deep male vocals Mood: dark."
