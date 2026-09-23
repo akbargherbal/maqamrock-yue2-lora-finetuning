@@ -708,3 +708,33 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 - **Supersedes agenda item 3** (random-seed batch): it ran; the sidecar wrapper now
   exists, though the same-seed-twice bit-identity test was not done. Clean-VM proof +
   cold timing (items 1–2) remain open.
+
+## 2026-09-23 — NEXT SESSION AGENDA (Colab: background batch + docs consolidation)
+
+- **Two workstreams in parallel** on the next Colab VM: a generation batch runs in
+  the background (user launches per the manual-execution policy; the agent monitors
+  from `out/*.log`, `_runs_status.log`, `_gpu.csv`), while the agent does docs work.
+- **1. Docs consolidation (headline) — curate, never hack.** `DECISIONS.md` (~550
+  lines) and `PROGRESS.md` (~710 lines) are accumulated narrative. `DECISIONS.md`'s
+  own header — "One short entry per decision. This is not a log" — already prescribes
+  the consolidated form, so this enforces the file's charter, not a new policy.
+  Consolidate them:
+  - `DECISIONS.md` → admission test per entry: would a fresh session otherwise
+    **re-litigate or rediscover** something non-obvious — a verified source quirk, a
+    costly trap, a surprising result? Keep those (intact, or conclusion + `<file:line>`
+    pointer). Mundane/obvious rationale and process narrative go to git even when the
+    decision was real; a decision is not automatically an insight. Git is the archive
+    (no separate archive file); record the pre-debloat commit sha in the new header.
+  - `PROGRESS.md` → light touch: one line per milestone where the narrative is
+    repetitive; recent entries + this agenda kept intact.
+  - The docs-reconciler treats both as **frozen** by default; this is a deliberate,
+    user-approved one-time unfreeze (compress, never rewrite facts).
+  - **Citation hazard:** live docs cite `DECISIONS.md` by line number
+    (`docs/INFERENCE.md`, `docs/yue2-gguf-lora-findings.md`, …). Rewriting shifts
+    every line — after the debloat, run the reconciler to catch broken citations.
+- **2. Docs reconciliation.** Run `docs-reconciler` on the live docs; first batch is
+  the 2026-09-23 findings: `prepare_yue2_dataset_v2.py` (README + heldout report),
+  `ANALYSIS.md` in `docs/FINAL_BACKUP.md`, `docs/lora.md` in the pronunciation doc.
+- **3. Unchanged open items** (do not lose): clean-VM proof + cold timing; re-run the
+  5 truncated seeds at the corrected cap; per-arch binary auto-selection; duration-cap
+  validation on `yue2_eval_heldout/`.

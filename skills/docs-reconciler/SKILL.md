@@ -23,6 +23,8 @@ Frozen (read-only; never "corrected"): `DECISIONS.md`, `PROGRESS.md`,
 `docs/investigation.md`, `docs/yue2-gguf-lora-findings.md`,
 `TRAINING_ANALYSIS/v1_nolyrics_archived/`, `agent_notes/`. History stays history:
 add a dated entry, don't rewrite it. The scripts exclude these by default.
+Exception: a deliberate, user-approved consolidation pass may *compress* them
+(conclusions kept, narrative dropped, git as the archive) — never silently.
 
 Authority when two docs disagree: config YAML + code (`--help`, argparse)
 outrank `docs/` runbooks, which outrank `README.md`. `DECISIONS.md` is the
