@@ -1,15 +1,25 @@
 #!/usr/bin/env python3
-"""Generate training-progress charts for the akbar_arabic_rock_lora run.
+"""Generate training-progress charts for a YuE2 LoRA run.
 
 Reads the run's `loss_log.db` (WAL mode -- opened read-only, safe while the
 run is writing) and `gpu_usage.csv`, and writes PNGs next to this script.
 
+    # default: the v2 akbar_arabic_rock_lora run (3000 steps, save every 250)
     python TRAINING_ANALYSIS/generate_plots.py
+
+    # a different run / cadence, writing into its own subdirectory
+    python TRAINING_ANALYSIS/generate_plots.py \
+        --db /content/ai-toolkit/output/pron_lora_ar_only_r8/loss_log.db \
+        --total-steps 6100 --save-every 1525 \
+        --outdir TRAINING_ANALYSIS/pron_lora_ar_only_r8 \
+        --title "pron_lora_ar_only_r8 (AR-only pronunciation LoRA)" \
+        --event-label "checkpoint save"
 
 Pure analysis tooling: it only reads, never touches the run.
 """
 from __future__ import annotations
 
+import argparse
 import csv
 import datetime as dt
 import sqlite3
@@ -22,10 +32,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
+
+# Defaults describe the v2 akbar_arabic_rock_lora run; overridden by argparse.
 DB = Path("/content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db")
 GPU_CSV = Path("/content/logs/gpu_usage.csv")
 TOTAL_STEPS = 3000
 SAVE_EVERY = 250
+OUTDIR = HERE
+TITLE = "akbar_arabic_rock_lora"
+EVENT_LABEL = "sample/eval"
 
 plt.rcParams.update(
     {
@@ -80,33 +95,32 @@ def plot_loss_curves(m: dict):
     axes = axes.ravel()
     order = ["loss/loss", "loss/ar_ce", "loss/ar_kl", "additional_model_loss"]
     for ax, key in zip(axes, order):
-        if key not in m["data"]:
+        if key not in m["data"] or len(m["data"][key]) == 0:
             ax.set_visible(False)
             continue
         x, y = series(m["data"][key])
         ysm = rolling(y, 25)
         ax.plot(x, y, color="#9ecae1", lw=0.7, alpha=0.8, label="raw")
         ax.plot(x, ysm, color="#08519c", lw=1.8, label="25-step mean")
-        ax.axvline(SAVE_EVERY, color="#bbb", lw=0.5, zorder=0)
         for s in range(SAVE_EVERY, int(x.max()) + 1, SAVE_EVERY):
-            ax.axvline(s, color="#e0e0e0", lw=0.5, zorder=0)
+            ax.axvline(s, color="#bbb", lw=0.5, zorder=0)
         ax.set_title(key)
         ax.set_ylabel("loss")
         ax.legend(fontsize=7, loc="upper right")
     for ax in axes[-2:]:
         ax.set_xlabel("step")
     fig.suptitle(
-        "akbar_arabic_rock_lora — per-step loss (grey verticals = sample/eval every 250 steps)",
+        f"{TITLE} — per-step loss (grey verticals = {EVENT_LABEL} every {SAVE_EVERY} steps)",
         fontsize=11,
     )
     fig.tight_layout(rect=(0, 0, 1, 0.96))
-    fig.savefig(HERE / "01_loss_curves.png")
+    fig.savefig(OUTDIR / "01_loss_curves.png")
     plt.close(fig)
 
 
 def plot_loss_main(m: dict):
     fig, ax = plt.subplots(figsize=(11, 4.5))
-    if "loss/loss" in m["data"]:
+    if "loss/loss" in m["data"] and len(m["data"]["loss/loss"]) > 0:
         x, y = series(m["data"]["loss/loss"])
         ax.plot(x, y, color="#9ecae1", lw=0.7, alpha=0.85, label="raw")
         ax.plot(x, rolling(y, 50), color="#08519c", lw=2.0, label="50-step mean")
@@ -120,22 +134,22 @@ def plot_loss_main(m: dict):
         ax.set_xlabel("step")
         ax.set_ylabel("loss/loss")
         ax.legend()
-    ax.set_title("Primary loss (loss/loss) — lower is better; early noise is normal")
+    ax.set_title(f"{TITLE} — primary loss (loss/loss); lower is better, early noise is normal")
     fig.tight_layout()
-    fig.savefig(HERE / "02_loss_main.png")
+    fig.savefig(OUTDIR / "02_loss_main.png")
     plt.close(fig)
 
 
 def plot_lr(m: dict):
     fig, ax = plt.subplots(figsize=(11, 3.5))
-    if "learning_rate" in m["data"]:
+    if "learning_rate" in m["data"] and len(m["data"]["learning_rate"]) > 0:
         x, y = series(m["data"]["learning_rate"])
         ax.plot(x, y, color="#31a354", lw=1.6)
         ax.set_xlabel("step")
         ax.set_ylabel("learning rate")
-    ax.set_title("Learning rate schedule")
+    ax.set_title(f"{TITLE} — learning rate schedule")
     fig.tight_layout()
-    fig.savefig(HERE / "03_learning_rate.png")
+    fig.savefig(OUTDIR / "03_learning_rate.png")
     plt.close(fig)
 
 
@@ -155,7 +169,7 @@ def plot_throughput(m: dict):
         ax1.axvline(s, color="#e0e0e0", lw=0.6, zorder=0)
     ax1.set_xlabel("step")
     ax1.set_ylabel("seconds / step")
-    ax1.set_title("Throughput (spikes = sample/eval pauses every 250)")
+    ax1.set_title(f"Throughput (spikes = {EVENT_LABEL} every {SAVE_EVERY})")
     ax1.legend(fontsize=8)
 
     ax2.plot(elapsed_h, st, color="#08519c", lw=1.8)
@@ -163,7 +177,7 @@ def plot_throughput(m: dict):
     ax2.set_ylabel("step")
     ax2.set_title("Progress vs wall-clock (slope = sustained rate)")
     fig.tight_layout()
-    fig.savefig(HERE / "04_throughput.png")
+    fig.savefig(OUTDIR / "04_throughput.png")
     plt.close(fig)
 
 
@@ -209,9 +223,12 @@ def plot_gpu(g):
         ax.plot(g["t"], g[k], color=color, lw=1.2)
         ax.set_ylabel(label)
     axes[-1].set_xlabel("hours since GPU logger start")
-    fig.suptitle("GPU telemetry (gpu_logger.py, 10 s samples) — flat regions = caching/eval/idle", fontsize=11)
+    fig.suptitle(
+        f"{TITLE} — GPU telemetry (gpu_logger.py, 10 s samples); flat regions = caching/eval/idle",
+        fontsize=11,
+    )
     fig.tight_layout(rect=(0, 0, 1, 0.96))
-    fig.savefig(HERE / "05_gpu_usage.png")
+    fig.savefig(OUTDIR / "05_gpu_usage.png")
     plt.close(fig)
 
 
@@ -250,7 +267,37 @@ def summary(m: dict) -> str:
     return "\n".join(lines)
 
 
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--db", default=str(DB), help="path to the run's loss_log.db")
+    p.add_argument("--gpu-csv", default=str(GPU_CSV), help="path to gpu_usage.csv")
+    p.add_argument("--total-steps", type=int, default=TOTAL_STEPS,
+                   help="planned total steps (for the progress/ETA summary)")
+    p.add_argument("--save-every", type=int, default=SAVE_EVERY,
+                   help="checkpoint cadence (vertical lines / spacing)")
+    p.add_argument("--outdir", default=str(OUTDIR),
+                   help="directory for the PNGs (created if missing)")
+    p.add_argument("--title", default=TITLE, help="run name / chart title prefix")
+    p.add_argument("--event-label", default=EVENT_LABEL,
+                   help="what the grey verticals mark (e.g. 'sample/eval', 'checkpoint save')")
+    return p.parse_args()
+
+
 def main():
+    global DB, GPU_CSV, TOTAL_STEPS, SAVE_EVERY, OUTDIR, TITLE, EVENT_LABEL
+    args = parse_args()
+    DB = Path(args.db)
+    GPU_CSV = Path(args.gpu_csv)
+    TOTAL_STEPS = args.total_steps
+    SAVE_EVERY = args.save_every
+    OUTDIR = Path(args.outdir)
+    if not OUTDIR.is_absolute():
+        OUTDIR = Path.cwd() / OUTDIR
+    OUTDIR.mkdir(parents=True, exist_ok=True)
+    TITLE = args.title
+    EVENT_LABEL = args.event_label
+
     m = read_metrics()
     plot_loss_curves(m)
     plot_loss_main(m)
@@ -258,7 +305,7 @@ def main():
     plot_throughput(m)
     plot_gpu(read_gpu())
     print(summary(m))
-    print("\nwrote PNGs to", HERE)
+    print("\nwrote PNGs to", OUTDIR)
 
 
 if __name__ == "__main__":
