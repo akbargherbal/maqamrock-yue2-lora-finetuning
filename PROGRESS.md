@@ -599,6 +599,25 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   truncation). Still open: clean-VM proof + cold timing; re-run the 2026-09-22 batch's 5
   truncated seeds at the corrected cap; per-arch binary auto-selection.
 
+## 2026-09-24 — Task 14b: AR-only pron LoRA smoke test PASSES on an L4
+
+- `config/pron_lora_ar_only_smoke.yml` ran **10/10** steps cleanly on a Colab **L4**
+  (user-typed, foreground), no OOM/crash. Saved adapter is AR-only and rank 8: **224**
+  tensors, all under `text_encoders.*`, `diffusion_model.*` == 0, literal `transformer.*`
+  == 0, all BF16, file 14,709,672 B (14.03 MiB). All losses finite (`ar_ce` 5.64→5.93,
+  `ar_kl` 0.0011→0.0019). L4 numbers, warmup-inflated: ~1.0 s/step steady (first step
+  5.29 s), peak VRAM 8,060 MiB of 23,034 MiB. Latent cache at
+  `/content/pron_dataset/smoke/_latent_cache`. Verdict: **PASS**.
+- **Preflight caught a notebook env bug:** the launching notebook exported
+  `GCP_DATASET_PATH=.../pron_dataset` and omitted `GCP_PRON_DATASET_PATH`, so
+  `job_dataset` pulled the pron set into `/content/yue2_dataset` and
+  `/content/pron_dataset` was never created. Restored the pron set from GCS and corrected
+  the notebook (both vars + `git checkout pron-lora-ar-only`). `setup.sh`'s two `[FAIL]`
+  verify lines were false negatives (v2-layout glob on nested data); torch is fine. See
+  `docs/PRON_LORA_VERIFICATION.md` A7.
+- The real 6,100-step run is **not** launched here — separate A100 VM, user-typed.
+  Full results: `docs/PRON_LORA_VERIFICATION.md`.
+
 ## 2026-09-24 — AR-only pronunciation LoRA (Task 14) prepared, not yet trained
 
 - Added `config/pron_lora_ar_only.yml` (6,100 steps = 1 epoch) + `config/pron_lora_ar_only_smoke.yml`, `docs/PRON_LORA.md` (runbook), `docs/PRON_LORA_VERIFICATION.md` (A0–A6, source-cited), opt-in `job_pron_dataset()` in `bootstrap/setup.sh`, and run-name-aware `backup_to_gcp.py`; Task 13's set exposed at `/content/pron_dataset/{train,val,smoke}`. Runbook: `docs/PRON_LORA.md`.

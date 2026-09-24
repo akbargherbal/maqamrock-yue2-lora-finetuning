@@ -147,17 +147,82 @@ same file cannot silently reuse a stale cache. No action needed.
   so `conv`/`conv_alpha` create no modules and have no effect. They are kept at
   v2's `16/16` so the only differences are the intended ones.
 
-## Smoke checkpoint inspection (pending)
+## A7 — training-mode `setup.sh` always downloads the v2 dataset too
 
-To be appended after the user runs the smoke command (step C):
+- `bootstrap/setup.sh:93` hard-requires `GCP_DATASET_PATH` in training mode
+  (`DATASET_GCS="${GCP_DATASET_PATH:?…}"`), and `start_job dataset job_dataset`
+  (`:302`) runs unconditionally in training mode. So a VM used only for the pron
+  run still downloads the v2 dataset into `/content/yue2_dataset` in the
+  background.
+- This is **harmless** for the pron run: it is a separate directory, the pron
+  adapter reads only `/content/pron_dataset/*`, and the two GCS prefixes are
+  siblings (`dataset/` vs `pron_dataset/`), so `job_dataset`'s recursive rsync
+  can never pull pron files into `/content/yue2_dataset` (or vice versa) —
+  provided `GCP_DATASET_PATH` actually points at `.../dataset`.
+- **Not modified on purpose.** Making `job_dataset`/line 93 conditional was
+  deliberately avoided; the fix belongs in the launching notebook, which must
+  export `GCP_DATASET_PATH=.../dataset` **and** `GCP_PRON_DATASET_PATH=.../pron_dataset`
+  (see `docs/PRON_LORA.md`).
+- Failure mode actually observed on the 2026-09-24 L4 smoke VM: the notebook set
+  `GCP_DATASET_PATH=.../pron_dataset` and omitted `GCP_PRON_DATASET_PATH`. Then
+  `job_dataset` downloaded the pron set into `/content/yue2_dataset` and
+  `job_pron_dataset` was skipped, so `/content/pron_dataset` did not exist. The
+  smoke was blocked until the pron set was re-pulled from GCS; the notebook was
+  then corrected (both variables, plus the branch checkout).
+
+## Smoke checkpoint inspection (PASS) — L4, 2026-09-24
+
+Command (user-typed, foreground):
 
 ```
 cd /content/ai-toolkit
 python run.py /content/maqamrock-yue2-lora-finetuning/config/pron_lora_ar_only_smoke.yml -l /content/logs/train_smoke.log
 ```
 
-Expected: total tensors > 0; `diffusion_model.*` == 0; `text_encoders.*` == 224
-(28 layers × 4 fused projections × 2 for A/B); literal `transformer.ar.*` and
-`transformer.nar.*` == 0 (post-save prefix rewrite, see A1); LoRA rank decoded
-from `text_encoders.*.lora_A` shape == 8. Per-step time and peak VRAM from
-`/content/logs/train_smoke.log`.
+Result: 10/10 steps, clean exit, checkpoint + optimizer written, no traceback
+and no OOM. One preflight issue (the notebook env misconfiguration above) was
+corrected before the run; `setup.sh`'s two `[FAIL]` verify lines on this VM were
+false negatives (the v2-layout verify globbed `/content/yue2_dataset/*.mp3`,
+which is empty because the data that landed is nested; torch itself is fine:
+`torch 2.13.0+cu130`, `cuda 13.0`, real mp3 decode OK).
+
+Artifact `output/pron_lora_ar_only_smoke/pron_lora_ar_only_smoke.safetensors`:
+
+- total tensors: **224**
+- by prefix: `text_encoders.*` **224**, `diffusion_model.*` **0**, literal
+  `transformer.*` **0**, any other prefix **0** (the post-save rewrite in A1
+  moved every AR key to `text_encoders.*`; nothing landed under
+  `diffusion_model.*`)
+- structure: **28 layers** × 4 fused projections (down_proj, gate_up_proj,
+  o_proj, qkv_proj) × 2 (A/B) = 224
+- LoRA rank: **{8}** — every `lora_A` first dim == 8 and every `lora_B` second
+  dim == 8
+- dtype: **BF16** (all 224 tensors); file size **14,709,672 bytes (14.03 MiB)**
+
+Losses (all finite, no NaN/inf):
+
+- `loss/loss` 6.8851 → 7.0047, `loss/ar_ce` 5.6370 → 5.9339,
+  `additional_model_loss` 5.6372 → 5.9343, `loss/ar_kl` 0.0011 → 0.0019.
+- `loss_log.db` records steps 1–9 (9 rows); the 10-step tqdm prints 10 distinct
+  finite `loss:` values. `ar_kl` is tiny because this is a 10-step AR-only run
+  and the KL anchor starts near zero — not comparable to a full run's drift.
+
+Step time / VRAM — **L4 numbers, warmup-inflated, NOT an A100 estimate**:
+
+- tqdm: 10 steps in ~14 s; first step **5.29 s** (warmup), steady-state
+  **~1.0 s/step**; `monitor_loss.py` reports ~0.943 steps/s. Latent cache for
+  the 16 smoke clips built in ~21 s.
+- Peak VRAM from `gpu_usage.csv`: **8,060 MiB** of 23,034 MiB (max util 40 %,
+  peak power 50.4 W, max temp 46 °C). The 10 s CSV sampling can miss a transient
+  peak — treat 8,060 MiB as a lower bound. Far below the whole-song music peak
+  (~15.8 GB) because the smoke set is short recitation clips.
+
+Latent cache: written to **`/content/pron_dataset/smoke/_latent_cache`** (16
+files), alongside `/content/pron_dataset/smoke/_t_e_cache`. `/content/yue2_dataset`
+was **not modified** (mtime unchanged; no cache written under it).
+
+### Verdict: **PASS**
+
+All criteria hold: `text_encoders.*` count > 0 (224), `diffusion_model.*` count
+== 0, no unexpected prefixes, every LoRA rank == 8, all losses finite, run
+completed with no OOM or crash.

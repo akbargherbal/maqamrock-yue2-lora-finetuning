@@ -31,11 +31,19 @@ exported (opt-in; v2-only bootstraps are unchanged). The launching notebook (or
 export GCP_PRON_DATASET_PATH=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/pron_dataset
 ```
 
+`GCP_DATASET_PATH` must point at the **v2** dataset
+(`.../OSTRIS_Arabic_Suno_Finetuning/dataset`), **not** at `.../pron_dataset`.
+Training-mode `setup.sh` hard-requires it (`bootstrap/setup.sh:93`) and always
+runs `job_dataset`, which otherwise downloads the pron set into
+`/content/yue2_dataset` while `job_pron_dataset()` is silently skipped — see
+`docs/PRON_LORA_VERIFICATION.md` A7. The launching notebook exports both paths.
+
 Then, as usual:
 
 ```bash
 git clone <this repo's URL>
 cd maqamrock-yue2-lora-finetuning
+git checkout pron-lora-ar-only     # the pron configs/docs live on this branch, not main
 bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 &
 # authenticate vscode.dev in the foreground while setup runs
 ```
@@ -57,10 +65,15 @@ python run.py /content/maqamrock-yue2-lora-finetuning/config/pron_lora_ar_only_s
 ```
 
 - Foreground on purpose (Ctrl+C stops it).
-- After it finishes, inspect `output/pron_lora_ar_only_smoke/*.safetensors`
-  (key counts + rank) and append the result to
+- After it finishes, inspect `output/pron_lora_ar_only_smoke/*.safetensors`.
+  As saved, the AR (trainable) adapter is under **`text_encoders.*`** and the
+  ignored NAR would be under **`diffusion_model.*`** (post-save prefix rewrite —
+  see `docs/PRON_LORA_VERIFICATION.md` A1). Expect `text_encoders.*` > 0,
+  `diffusion_model.*` == 0, and rank 8. Append the result to
   `docs/PRON_LORA_VERIFICATION.md`.
-- Per-step time and peak VRAM are in `/content/logs/train_smoke.log`.
+- Per-step time is in `/content/logs/train_smoke.log`; peak VRAM is in
+  `/content/logs/gpu_usage.csv` (AI Toolkit logs no GPU stats — `gpu_logger.py`
+  must be running).
 
 ## Real run (foreground; user-typed only)
 
