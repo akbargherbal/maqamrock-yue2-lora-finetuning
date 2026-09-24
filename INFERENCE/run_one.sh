@@ -10,6 +10,9 @@
 #   OUT_DIR     output folder for this run's files (default: $ROOT/out)
 #   STYLE_FILE  style text file (default: $ROOT/prompts/<Maqam>_style.txt)
 #   LYRICS_FILE lyrics text file (default: $ROOT/prompts/<Maqam>_lyrics.txt)
+#   LORA_AR     AR adapter file (default: /content/converter/out/akbar_arabic_rock_lora_ar.safetensors)
+#   LORA_NAR    NAR adapter file (default: /content/converter/out/akbar_arabic_rock_lora_nar.safetensors)
+#               (override both to sweep offline-merged adapters; defaults = live v2)
 # Writes everything under $OUT so it can be monitored from another terminal.
 # $OUT defaults to $ROOT/out; a batch driver sets OUT_DIR to a per-run folder
 # (e.g. out/20260922-1537_random16/) so each run's tracks stay self-contained.
@@ -31,6 +34,10 @@ mkdir -p "$OUT"
 
 style="${STYLE_FILE:-$ROOT/prompts/${M}_style.txt}"
 lyrics="${LYRICS_FILE:-$ROOT/prompts/${M}_lyrics.txt}"
+# AR/NAR adapters: override to sweep offline-merged configs; defaults are the live
+# converted v2 pair, so an unset invocation is byte-for-byte the previous behavior.
+LORA_AR="${LORA_AR:-/content/converter/out/akbar_arabic_rock_lora_ar.safetensors}"
+LORA_NAR="${LORA_NAR:-/content/converter/out/akbar_arabic_rock_lora_nar.safetensors}"
 wav="$OUT/${M}_${S}.wav"
 log="$OUT/${M}_${S}.log"
 tfile="$OUT/${M}_${S}_time.txt"
@@ -48,16 +55,16 @@ fi
     --format=csv,noheader,nounits >> "$csv" 2>/dev/null; sleep 1; done ) &
 SM=$!
 
-line="=== START ${M} seed=${S} cap=${CAP} (${CAP_ARG}) $(date -u +%FT%TZ) ==="
+line="=== START ${M} seed=${S} cap=${CAP} (${CAP_ARG}) ar_lora=${LORA_AR} nar_lora=${LORA_NAR} $(date -u +%FT%TZ) ==="
 echo "$line"; echo "$line" >> "$status"
 
 /usr/bin/time -v -o "$tfile" \
   "$BIN" --task gen --family yue2 --model "$MODEL" --backend cuda --threads 8 \
   --session-option yue2.model_gguf=yue2-3b-bf16.gguf \
   --session-option yue2.vae_gguf=yue2-vae-f16.gguf \
-  --session-option yue2.ar_lora=/content/converter/out/akbar_arabic_rock_lora_ar.safetensors \
+  --session-option yue2.ar_lora="$LORA_AR" \
   --session-option yue2.ar_lora_scale=1.0 \
-  --session-option yue2.nar_lora=/content/converter/out/akbar_arabic_rock_lora_nar.safetensors \
+  --session-option yue2.nar_lora="$LORA_NAR" \
   --session-option yue2.nar_lora_scale=1.0 \
   --session-option yue2.attention=flash \
   --lyrics "$(cat "$lyrics")" \
