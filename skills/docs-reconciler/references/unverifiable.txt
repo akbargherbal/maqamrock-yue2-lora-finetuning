@@ -11,6 +11,7 @@ run.py
 jobs/process/BaseSDTrainProcess.py
 toolkit/*.py
 yue2_model.py
+extensions_built_in/audio_models/yue2/yue2_model.py
 
 # audio.cpp clone (/content/audio.cpp)
 CMakeLists.txt
@@ -24,8 +25,13 @@ config.yaml
 aitk_db.db
 gpu_usage.csv
 run_manifest.json
+gcp_backup.log
 *.safetensors
 *.gguf
+
+# converter script (GCS audiocpp_inference/converter, local /content/converter/out)
+converter/convert_aitoolkit_yue2_lora.py
+convert_aitoolkit_yue2_lora.py
 
 # example / user-supplied files in docs (inputs and command outputs)
 my_songs.json
@@ -53,10 +59,21 @@ INFERENCE/yue2_eval_heldout/heldout_eval_report.md :: *.txt
 # external repo's doc, cited in one file (doc-scoped)
 docs/FUTURE_PRONUNCIATION_LORA.md :: docs/lora.md
 
+# sweep review artifacts: live in the downloaded/GCS dir or created by Task 17 step 6
+docs/PRON_LORA_SWEEP.md :: sweep_manifest.json
+docs/PRON_LORA_SWEEP.md :: KEY_open_after_listening.txt
+docs/PRON_LORA_SWEEP.md :: KEY.json
+docs/PRON_LORA_SWEEP.md :: results/pron_sweep/KEY.json
+
 # flags of external tools quoted in commands (git log --left-right/--count, cmake)
 --left-right
 --count
 --generate-code
+--porcelain
+
+# historical quotes inside the reconciliation log (old wrong values, kept as history)
+RECONCILIATION_LOG.md :: ANALYSIS.md
+RECONCILIATION_LOG.md :: docs/lora.md
 
 # prose slash-phrases and placeholders in this skill's own docs
 config/hyperparameter

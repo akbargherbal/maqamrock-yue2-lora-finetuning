@@ -15,6 +15,10 @@ operating contract is `../AGENTS.md`.
 | Finish a run: final backup + push checklist | [FINAL_BACKUP.md](FINAL_BACKUP.md) |
 | Build `audiocpp_cli` for a target GPU on a CPU-only runtime | [audiocpp_gpu_arch_builds.md](audiocpp_gpu_arch_builds.md) |
 | Run inference (YuE2 GGUF + LoRA) on a fresh VM | [INFERENCE.md](INFERENCE.md) |
+| Train the AR-only pronunciation LoRA | [PRON_LORA.md](PRON_LORA.md) |
+| Verify / offline-eval the pronunciation LoRA (source + AR-loss replay) | [PRON_LORA_VERIFICATION.md](PRON_LORA_VERIFICATION.md) |
+| Merge v2 + pron at a chosen alpha | [PRON_LORA_MERGE.md](PRON_LORA_MERGE.md) |
+| Alpha sweep + blinded listening review | [PRON_LORA_SWEEP.md](PRON_LORA_SWEEP.md) |
 | Hand the user a command to run (terminal reality check) | [COMMAND_HANDOVER_GOTCHAS.md](COMMAND_HANDOVER_GOTCHAS.md) |
 | How the text→duration cap is derived | [text_to_duration_formula.md](text_to_duration_formula.md) |
 | Repo audit: stale docs, drift & workflow backlog | [IMPROVEMENTS.md](IMPROVEMENTS.md) |
