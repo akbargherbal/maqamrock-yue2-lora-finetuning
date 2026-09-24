@@ -64,6 +64,8 @@ docs/PRON_LORA_SWEEP.md :: sweep_manifest.json
 docs/PRON_LORA_SWEEP.md :: KEY_open_after_listening.txt
 docs/PRON_LORA_SWEEP.md :: KEY.json
 docs/PRON_LORA_SWEEP.md :: results/pron_sweep/KEY.json
+results/pron_sweep/README.md :: KEY_open_after_listening.txt
+RECONCILIATION_LOG.md :: KEY_open_after_listening.txt
 
 # flags of external tools quoted in commands (git log --left-right/--count, cmake)
 --left-right

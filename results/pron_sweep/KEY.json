@@ -1,0 +1,54 @@
+{
+  "seed": 20260924,
+  "algorithm": "one random.Random(20260924); for each maqam in ['Hijaz', 'Kurd', 'Nahawand', 'Ajam']: shuffle(['a0', 'c3050_a0.5', 'c3050_a1.0', 'cfinal_a0.5', 'cfinal_a1.0']); labels A..E in shuffled order",
+  "maqam_order": [
+    "Hijaz",
+    "Kurd",
+    "Nahawand",
+    "Ajam"
+  ],
+  "config_order": [
+    "a0",
+    "c3050_a0.5",
+    "c3050_a1.0",
+    "cfinal_a0.5",
+    "cfinal_a1.0"
+  ],
+  "labels": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+  ],
+  "mapping": {
+    "Hijaz": {
+      "A": "cfinal_a0.5",
+      "B": "cfinal_a1.0",
+      "C": "c3050_a1.0",
+      "D": "c3050_a0.5",
+      "E": "a0"
+    },
+    "Kurd": {
+      "A": "a0",
+      "B": "cfinal_a1.0",
+      "C": "c3050_a0.5",
+      "D": "c3050_a1.0",
+      "E": "cfinal_a0.5"
+    },
+    "Nahawand": {
+      "A": "a0",
+      "B": "cfinal_a0.5",
+      "C": "c3050_a0.5",
+      "D": "c3050_a1.0",
+      "E": "cfinal_a1.0"
+    },
+    "Ajam": {
+      "A": "cfinal_a0.5",
+      "B": "a0",
+      "C": "c3050_a1.0",
+      "D": "c3050_a0.5",
+      "E": "cfinal_a1.0"
+    }
+  }
+}

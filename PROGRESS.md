@@ -702,3 +702,32 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 - **Next (not this task):** choose checkpoint + `alpha` from these numbers, merge with the
   frozen v2 style LoRA, run the alpha sweep against held-out lyrics, then the
   letter-substitution scorecard. No merge/inference done here.
+
+## 2026-09-24 — Task 17: pron alpha sweep generated on L4 (20/20) + blinded review package
+
+- **Grid:** 5 merged-LoRA configs (`a0`, `c3050_a0.5`, `c3050_a1.0`, `cfinal_a0.5`,
+  `cfinal_a1.0`) × 4 held-out maqams, one seed (`20260924`), auto cap, **strictly
+  sequential** (maqam-major). **20/20 exit 0, zero failures, zero cap-truncations**,
+  ~58 min total (13:47–14:45 UTC) on a Colab **L4**.
+- **Tooling:** `INFERENCE/run_one.sh` gained `LORA_AR`/`LORA_NAR` env overrides (defaults
+  unchanged → prior behavior byte-identical); new `INFERENCE/pron_alpha_sweep.sh` driver
+  (resumable: skips WAV + `Exit status: 0`; failures → `_failed.log`). Commit `d4c5592`.
+- **Adapters (CPU):** all 5 built + converted; checks passed — `a0` AR `747d5cfe…` / NAR
+  `ad2c8d86…` (v2 verbatim), the 5 AR hashes distinct, the 4 non-zero configs AR rank 40.
+  `sweep_manifest.json` written before generation. Smokes (`a0`, `c3050_a1.0` at cap 750)
+  passed first.
+- **L4 benchmark:** mean wall **174.6 s**, median 199.2, min/max 71.2/257.9, total 3495 s,
+  ~20.6 tracks/hour — vs the T4's 389.6 s (setup-specific: the merged adapters'
+  renders self-terminate early more often). The **sm89-l4 binary ran on an L4 for the
+  first time** here.
+- **Blinded review package:** `results/pron_sweep/{sweep_manifest.json, README.md,
+  KEY.json}` (committed); `/content/pron_sweep_listen.zip` (20 mp3 @192k, no
+  trim/normalize, + `KEY_open_after_listening.txt`); WAVs + logs + manifests + zip in
+  GCS `.../pron_alpha_sweep/` (107 objects). Blinding: single `random.Random(20260924)`,
+  shuffle per maqam.
+- **Docs:** new `docs/PRON_LORA_SWEEP.md` runbook; all four pron docs indexed in
+  `docs/README.md`; `SOURCE_OF_TRUTH.md` created; reconciler 10→0. `docs/INFERENCE.md`
+  gained the L4 benchmark and its sm89/"not run on an L4" stale line is fixed. Commit
+  `ca2d2fa`.
+- **Next (user's):** listen to the blinded package, pick checkpoint + `alpha`, then the
+  merge at that setting and the letter-substitution scorecard. No quality verdict made.

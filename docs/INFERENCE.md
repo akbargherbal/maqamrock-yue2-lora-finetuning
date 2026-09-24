@@ -275,6 +275,26 @@ which dominates the difference:
 Rule of thumb for planning a batch: **~6.5 min/track, ~9 tracks/hour on a T4**,
 scaling with the cap (larger lyrics → longer track → longer wall time).
 
+### L4 benchmark (2026-09-24, Task 17 alpha sweep)
+
+Same setup (bf16 GGUFs, `yue2.attention=flash`, `cot=off`, auto cap) on an
+**NVIDIA L4 (sm_89)**, using the manually-staged sm89 binary. Caveat: the
+adapters were the merged v2+pron 5-config sweep, whose renders self-terminate
+early more often than the T4's step-3000 run, so the ratio is setup-specific.
+
+| Metric | Value |
+|---|---|
+| Tracks measured | 20 (5 configs × 4 maqams) |
+| **Mean** | **174.6 s (2.91 min)** |
+| Median | 199.2 s |
+| Min / Max | 71.2 / 257.9 s |
+| Total (driver span) | 3495 s (58.2 min) |
+| Throughput | ~20.6 tracks/hour |
+
+Per config (mean wall): `a0` 235 s, `c3050_a0.5` 215 s, `cfinal_a0.5` 209 s,
+`c3050_a1.0` 107 s, `cfinal_a1.0` 107 s; per maqam 163–187 s (tracks the cap).
+Full table in the repo: `results/pron_sweep/README.md`.
+
 ## Known stale bits / open items
 
 - `bootstrap/setup.sh`'s **closing banner is stale**: it still says "audio.cpp
@@ -282,5 +302,9 @@ scaling with the cap (larger lyrics → longer track → longer wall time).
   which predates `job_audiocpp_binary` staging the prebuilt binary. The binary is
   in fact staged; the banner was not updated. (Flagged, not silently changed.)
 - Auto-selecting the per-arch GCS binary from the live GPU's compute capability
-  is not implemented; the flat path (sm_75) is what gets pulled.
-- The `sm89-l4` binary is verified to *compile*; it has not been run on an L4.
+  is not implemented; the flat path (sm_75) is what `setup.sh` pulls. On an L4 you
+  must still overwrite `bin/audiocpp_cli` with `build/sm89-l4/audiocpp_cli` by hand
+  (keep the sm_75 file; e.g. as `audiocpp_cli.sm75`).
+- The `sm89-l4` binary **has now been run on an L4** (2026-09-24, Task 17): it
+  generated all 20 sweep tracks cleanly (rank-40 merged adapters load; see the L4
+  benchmark above). It was previously only verified to *compile*.

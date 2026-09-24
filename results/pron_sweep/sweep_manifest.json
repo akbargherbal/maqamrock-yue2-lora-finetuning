@@ -1,0 +1,90 @@
+{
+  "task": "Task 17 - pronunciation alpha sweep",
+  "generated_utc": "2026-09-24T13:40:18Z",
+  "seed": 20260924,
+  "cap_mode": "auto",
+  "magams": [
+    "Hijaz",
+    "Kurd",
+    "Nahawand",
+    "Ajam"
+  ],
+  "binary": {
+    "path": "/content/audiocpp_inference/bin/audiocpp_cli",
+    "sha256": "97028a71fd4d86378161162364dc6cdc85a569461d3afb6bf78f83ea572ad3d4"
+  },
+  "gpu": {
+    "name": "NVIDIA L4",
+    "compute_cap": "8.9"
+  },
+  "inputs": {
+    "v2_raw_path": "/content/ai-toolkit/output/akbar_arabic_rock_lora/akbar_arabic_rock_lora.safetensors",
+    "v2_raw_sha256": "b1d090987355303129a3765d257e61c983b91d48cecb8a30aa424e09cdd24cd4",
+    "pron_dir": "/content/ai-toolkit/output/pron_lora_ar_only_r8",
+    "pron_final_sha256": "0d506719af3b8d5fc7af8dc211baf2767b169d7596d9239f4a2850a4d2d37bf5",
+    "pron_3050_sha256": "ead30d5202dec368838304546d5400ce46e4a2da713a19a9236781f575178a21",
+    "converter_script": "/content/converter/out/convert_aitoolkit_yue2_lora.py"
+  },
+  "prompts": {
+    "Ajam_style.txt": "f5d8b11e574103c52b490e0bd45ceb8bc6464bc34b65951322a7ad3f2d016165",
+    "Hijaz_style.txt": "9e201bfbfcae2987e117c62ea781056923b23c8c5c570702d9f8e3b3fff4bd16",
+    "Kurd_style.txt": "0e789bfd7c9b496a115d7bd48802a860e49442e15cf6ff25394f79206a94a98c",
+    "Nahawand_style.txt": "c56e528c6826dd01d2c3334228c20f869d7b632147cfd334eff1f945ebb1643f",
+    "Ajam_lyrics.txt": "5d18e076fe376c0bb60db494bb4f03620d81b28752caa019a554c227ace0e367",
+    "Hijaz_lyrics.txt": "1b8dc015eca8f0e7694b9f382eaf70d0419ac9876486b1c75a896e0b29705af9",
+    "Kurd_lyrics.txt": "ac29850aea7f553c5bfa3d78b3d696a5761cc42f6595d141595db6838ea4ce0d",
+    "Nahawand_lyrics.txt": "12bfa9ea09954b98e4019131ceca5099d4bb6c33a3b9d8790ed3f4d62d959d22"
+  },
+  "configs": {
+    "a0": {
+      "alpha": 0.0,
+      "pron_checkpoint": "final",
+      "merged_path": "/content/pron_sweep/merged/a0/akbar_arabic_rock_lora.safetensors",
+      "merged_sha256": "8b431ada74a7db8acbb1a80d32ecaf52e1a373ce07c783ba9717c0258860e93b",
+      "converted_ar_path": "/content/converter/out/a0/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "747d5cfe2224b1bae6e582ccf5f2ee2a57e3f030c53d54e134f34a85960426fa",
+      "converted_nar_path": "/content/converter/out/a0/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "ad2c8d8690640e8fd8fea779b57bc2c7c887b93f2bb103bbcbfea056536d7ac9"
+    },
+    "c3050_a0.5": {
+      "alpha": 0.5,
+      "pron_checkpoint": "3050",
+      "merged_path": "/content/pron_sweep/merged/c3050_a0.5/akbar_arabic_rock_lora.safetensors",
+      "merged_sha256": "8a3dbdbddf11e63143fd8b1dfa02db853992d84d12956d2ef7922c0d828883f8",
+      "converted_ar_path": "/content/converter/out/c3050_a0.5/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "33e824f24f1eec1ab06a45365e93a19b078a2a7cfbea724eba1b908d27360509",
+      "converted_nar_path": "/content/converter/out/c3050_a0.5/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    },
+    "c3050_a1.0": {
+      "alpha": 1.0,
+      "pron_checkpoint": "3050",
+      "merged_path": "/content/pron_sweep/merged/c3050_a1.0/akbar_arabic_rock_lora.safetensors",
+      "merged_sha256": "bfa99ccada0185bf9e938a3fe68357b2209ff6869ae70121a66a946738955990",
+      "converted_ar_path": "/content/converter/out/c3050_a1.0/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "b4868133ad8094f898002aa28b311f9965f44ef37ffb84afa74000f8ef90b781",
+      "converted_nar_path": "/content/converter/out/c3050_a1.0/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    },
+    "cfinal_a0.5": {
+      "alpha": 0.5,
+      "pron_checkpoint": "final",
+      "merged_path": "/content/pron_sweep/merged/cfinal_a0.5/akbar_arabic_rock_lora.safetensors",
+      "merged_sha256": "648ef013c4d42b13f8aac0280b45911c93849b375e078f3e91a15d682a53a0af",
+      "converted_ar_path": "/content/converter/out/cfinal_a0.5/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "525d3af25dfcddabbd587673c36dfaecd148cf97a0dfc6d90cbede15ed700ada",
+      "converted_nar_path": "/content/converter/out/cfinal_a0.5/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    },
+    "cfinal_a1.0": {
+      "alpha": 1.0,
+      "pron_checkpoint": "final",
+      "merged_path": "/content/pron_sweep/merged/cfinal_a1.0/akbar_arabic_rock_lora.safetensors",
+      "merged_sha256": "512052b4e67570b311c920b86526251484455b44a50ea475435838396ded5af3",
+      "converted_ar_path": "/content/converter/out/cfinal_a1.0/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "394ff2ca8dc65f464a88217eada72353400d51563a9fdbe258622cda7006f0f2",
+      "converted_nar_path": "/content/converter/out/cfinal_a1.0/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    }
+  }
+}
