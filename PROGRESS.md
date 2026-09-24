@@ -650,3 +650,27 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 - **Next (L4):** build + run the offline AR-loss replay over the 180 `val` pairs per
   checkpoint (`PRON_LORA_VERIFICATION.md` A3), then merge with the frozen v2 style
   LoRA. **No merge / inference / sweep done.**
+
+## 2026-09-24 — Task 15: offline v2+pron merge tool; no-regression invariant PASSES
+
+- Added `merge_pron_lora.py` (repo root), `tests/test_merge_pron_lora.py` (11 CPU
+  tests), `docs/PRON_LORA_MERGE.md`. Method: rank concatenation on the AR branch
+  (v2 rank 32 + pron rank 8 → 40), NAR copied from v2; the user `--alpha` dial is
+  folded into `B_pron` per ai-toolkit's `(alpha/rank)·(B@A)` convention (quoted
+  with file:line in the doc). No dense weight delta is materialized. Supports
+  `--pron-checkpoint {1525,3050,4575,final}`.
+- **alpha=0 invariant (no regression) — PASS.** Inputs pulled fresh from GCS and
+  hashed (v2 `b1d09098…`, pron final `0d506719…`). Merged atomically to v2, then
+  converted: the `_ar`/`_nar` outputs match the live converted v2 adapters
+  byte-for-byte (sha256 `747d5cfe…` / `ad2c8d86…`) — exactly when the merged input
+  keeps v2's basename (the converter stamps its input filename into metadata; a
+  different name differs only there, all 392 tensors identical).
+- **alpha=1.0 — PASS**: all 224 AR tensors rank 40 with expected shapes; NAR
+  zero-padded to rank 40; `B@A == B_style@A_style + 1.0·B_pron@A_pron` on sampled
+  keys; converter accepts. alpha=0.5/ckpt-4575 also runs end-to-end.
+- **Finding:** the converter's single-rank guard (`convert_aitoolkit_yue2_lora.py:207`)
+  forces the NAR zero-padding at alpha>0 — recorded in `DECISIONS.md`. Counts:
+  224 AR tensors merged, 224 NAR passed through. Merge+convert ≈ **3.4 s** → an
+  alpha sweep is cheap, no batching. Output dir `output/` is git-ignored.
+- **Not done (next):** AR-loss replay over the 180 `val` pairs, the alpha sweep
+  against held-out lyrics, and any audio.cpp inference. No GPU used here.

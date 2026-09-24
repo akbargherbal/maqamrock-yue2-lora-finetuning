@@ -212,6 +212,13 @@ Where a claim below says "verified against source," it means the actual `ostris/
 - `cot=off` matches this LoRA (trained `cot: "off"`), regardless of upstream docs recommending `cot=full` for a different adapter.
 - **Use BF16 main GGUF when a LoRA is loaded** — merging into Q8/Q4 dequantizes and requantizes, not equivalent to merging into BF16 first.
 
+## Merging two YuE2 LoRAs: rank-concat, and the converter wants one rank
+
+- Neither ai-toolkit nor audio.cpp loads two adapters at once (`yue2.ar_lora`/`yue2.nar_lora`, one file + one scalar scale each). Combining v2 (AR+NAR) with the AR-only pron adapter is an **offline file merge**: `merge_pron_lora.py`, doc `docs/PRON_LORA_MERGE.md`.
+- ai-toolkit's delta is `(alpha/rank) * (B @ A)` (`toolkit/network_mixins.py:419,434`; `toolkit/lora_special.py:115-116`; `toolkit/kohya_lora.py:237`; clone `460c29b`). Both inputs trained alpha==rank (v2 32/32, pron 8/8), so each saved file is exactly `B@A`. The user dial is folded into `B_pron` (the up-projection side the scale applies to). Method is rank concatenation (32+8→40); the dense delta is never materialized.
+- **Non-obvious trap:** the converter enforces a *single* rank across both branches (`converter/convert_aitoolkit_yue2_lora.py:207-208`). So at alpha>0 the rank-32 NAR branch must be zero-padded to rank 40 or conversion fails with "mixed LoRA ranks found"; zero padding is a no-op on the delta. At alpha=0 the pron block is dropped, both branches stay rank 32, and no padding happens.
+- **alpha=0 reproduces the live converted v2 adapters byte-for-byte** (`747d5cfe…` / `ad2c8d86…`) — but only when the merged input keeps v2's basename `akbar_arabic_rock_lora.safetensors`, because the converter stamps its **input filename** into the output `source_file` metadata. A different name yields identical tensors and headers but a different whole-file sha256.
+
 ## `docs/models/yue2.md` is the source of truth for yue2 CLI flags
 
 - It holds the full request/session/sampling option tables (seed range `[0, 2^63)` default 1234; `cot`/`abc`/`abc_file`/`guidance_scale`/`num_inference_steps`; the `semantic_*`/`abc_*` knobs; every `yue2.*` session option including weight type and graph-arena sizing). **Read it first**, not the source or guesswork — it already matches and extends earlier source reads.

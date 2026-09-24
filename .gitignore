@@ -3,3 +3,5 @@ arabic_user.txt
 *.pyc
 __pycache__/
 .reconcile/
+# merge_pron_lora.py output: large regenerable merged fused LoRAs
+/output/
