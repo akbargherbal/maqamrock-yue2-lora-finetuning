@@ -91,6 +91,44 @@ adapter through `convert_lora_weights_before_load`
 and reports `loss/ar_ce` (and `loss/ar_kl`). That reuses the exact loss code
 path without touching the trainer.
 
+## A3b — offline AR-loss replay built + CPU benchmark (Task 16B, 2026-09-24)
+
+Built: `offline_ar_loss_replay.py` (repo root) + `tests/test_offline_ar_loss_replay.py`
+(9 tests, no model load). It builds the same `LoRASpecialNetwork` the trainer builds,
+loads the saved adapter through `sd.convert_lora_weights_before_load`, and calls
+`_prefix_segment` / `_item_prefix_and_abc` / `_ar_inputs` / `_ar_losses` directly.
+Forward passes only: no trainer, no backward, no optimizer, no NAR flow forward (the
+NAR contributes to neither `ar_ce` nor `ar_kl`).
+
+- **Assets** (resolved from the HF cache already pre-warmed by `bootstrap/setup.sh
+  --training`; auto-materialized on load into `/content/ai-toolkit/models/`):
+  `Comfy-Org/YuE2/checkpoints/yue2_3b_int8_convrot.safetensors`, `m-a-p/MERT-v2-FullSong`,
+  `Mothersuperior/yue2-mothersuperior-realaudio-tokenizer-v4/tokenizer_head_joint_v4.pt`.
+  **Val path: `/content/pron_dataset/val`** (180 mp3 + 180 txt; audio is 44.1 kHz and is
+  resampled to MERT's 24 kHz inside `SemanticTokenizer.tokenize`).
+- **CPU works, with a numeric caveat.** On the CPU-only benchmark VM, ai-toolkit prints
+  `ConvRot: int8 matmul (torch._int_mm) is not usable on this device (cpu). Inference
+  falls back to dequantized bf16 matmuls ... W8A16 numerics instead of W8A8`. Nothing
+  blocked the run; the fallback is correct output but slower, and its numerics are not
+  bit-identical to training's W8A8 path.
+- **Benchmark — `python offline_ar_loss_replay.py --checkpoint final --limit 8` (CPU),
+  38.2 min wall incl. 72.6 s model load.** Per-item mean **tokenize 3.70 s, AR-loss
+  forward 272.79 s, total 276.49 s**. Loss scales with target-token count (~0.69 s/token:
+  594 tok → 409 s, 442 → 298 s, 276 → 198 s). Mean over the 8 items: **`loss/ar_ce`
+  4.0652, `loss/ar_kl` 1.3636** (range `ar_ce` 3.75–4.31, `ar_kl` 1.25–1.53) — the same
+  neighborhood as the training last-50 means (`ar_ce` 4.397, `ar_kl` 1.533), finite, not
+  NaN.
+- **Extrapolation:** 900 forward passes (180 pairs × 5 checkpoints) × 272.79 s
+  = 245,511 s ≈ **68.2 h** on this CPU box, plus tokenization (~0.9 h per full pass if
+  recomputed; cacheable to ~0.2 h once).
+- **STOP (deliberate):** the 900-pass sweep was **not** run, checkpoints were **not**
+  compared, and no pronunciation conclusion is drawn. Whether to run the full sweep on
+  CPU or wait for an L4 is the user's call.
+- **Gotcha:** on a CPU-only host `toolkit.util.get_model.get_model_class()` raises
+  `RuntimeError: Found no NVIDIA driver` — an unrelated extension (omnigen2) calls
+  `torch.cuda.current_device()` at import time and `get_all_models()` only catches
+  `ImportError`. The replay imports `YuE2AudioModel` directly to avoid this.
+
 ## A4 — what `loss/ar_kl` measures; what changes when only AR is trainable
 
 - `ar_loss_weight` defaults to `1.0` (`yue2_model.py:200`); the added loss is
