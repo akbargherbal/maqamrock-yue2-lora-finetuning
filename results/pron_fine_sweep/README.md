@@ -55,8 +55,8 @@ whole `audiocpp_cli` process, from `*_time.txt`.
 
 Mean wall **218.5 s**, total **1747.7 s (29.1 min)** — 8 tracks, one L4. Every render is
 full-length; none shows the short collapse `alpha=1.0` produced in Task 17. Per-track WAV
-sha256 + sidecars live under `/content/pron_fine_sweep/<cfg>/` (GCS-mirrored); the mp3
-review copies' sha256 are in `KEY_open_after_listening.txt`'s folder listing / commit.
+sha256 + sidecars live under `/content/pron_fine_sweep/<cfg>/` (GCS-mirrored); the WAVs are
+the untouched originals, the mp3s are 192k review copies made with no trim/normalize/fade.
 
 ## L4 arch / kernel check
 
