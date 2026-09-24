@@ -226,3 +226,41 @@ was **not modified** (mtime unchanged; no cache written under it).
 All criteria hold: `text_encoders.*` count > 0 (224), `diffusion_model.*` count
 == 0, no unexpected prefixes, every LoRA rank == 8, all losses finite, run
 completed with no OOM or crash.
+
+## A100 preflight — 2026-09-24 (fresh A100 VM, real run)
+
+Target: `config/pron_lora_ar_only.yml`, run name `pron_lora_ar_only_r8`, 6,100
+steps (1 epoch over 6,100 train pairs), `save.save_every: 1525`.
+
+- **(a) setup.sh** finished cleanly: `/content/logs/setup.log` ends
+  `=== setup.sh done (training) — total 225s ===` (exit 0). All verify lines are
+  `[ok]` — **no `[FAIL]` lines** (unlike the L4 smoke VM, whose two `[FAIL]`s
+  were confirmed false negatives). Parallel jobs all `[ok]` (`ai_toolkit`,
+  `dataset`, `pron_dataset`, HF caches).
+- **(b) dataset** `/content/pron_dataset/`: `train` has **12,200** entries
+  (**6,100** `.mp3` + **6,100** `.txt`, every mp3 has a matching txt), `val`
+  **360**, `smoke` **32**; `.bootstrap_complete` present. All entries are **real
+  files** (0 symlinks in any split — this is a fresh VM pulling from GCS, not the
+  old same-VM symlink exposure). **No `_latent_cache`** exists under any split
+  (fresh VM). The first minutes of the real run (before step 1) are latent
+  caching, not a hang.
+- **(c) runtime**: `/content/ai-toolkit` exists at `460c29b`. `nvidia-smi`:
+  **NVIDIA A100-SXM4-80GB**, **81,920 MiB** total VRAM, **0 MiB used**, 0 %
+  util, no running processes — **GPU free**. No `run.py` process.
+- **(d) sidecars**: neither `backup_to_gcp.py` nor `gpu_logger.py` was running;
+  both start commands were handed to the user (see below). `GCP_BACKUP_BASE` is
+  exported: `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`
+  (printed by `echo`). `backup_to_gcp.py`'s `training_targets("pron_lora_ar_only_r8")`
+  maps `/content/ai-toolkit/output/pron_lora_ar_only_r8 -> <base>/pron_lora_ar_only_r8/output`,
+  so the new output folder **is** covered by `TARGETS` — no script change needed.
+  (`gcp_backup.log` is absent until the daemon is launched; not a failure.)
+- **(e) config on disk == branch tip**: `git status --porcelain config/` empty;
+  `sha256sum config/pron_lora_ar_only.yml` =
+  `15a27a4d204438398787a4c71f547e30c7e15a272fa331b106951e235d04c3bc`, identical
+  to `git show HEAD:config/pron_lora_ar_only.yml`.
+
+**A100 preflight verdict: PASS.** Real-run command handed to the user
+(foreground, `Ctrl+C` stops). No A100 step-time estimate is given up front:
+the L4 smoke number does not transfer to the short pron clips, and the old
+~3.10 s/step A100 figure is for whole songs. Measure via `monitor_loss.py`
+after ~50 steps.
