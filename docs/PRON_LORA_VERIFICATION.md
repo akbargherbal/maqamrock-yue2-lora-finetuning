@@ -264,3 +264,39 @@ steps (1 epoch over 6,100 train pairs), `save.save_every: 1525`.
 the L4 smoke number does not transfer to the short pron clips, and the old
 ~3.10 s/step A100 figure is for whole songs. Measure via `monitor_loss.py`
 after ~50 steps.
+
+## Real run results (A100) — COMPLETE, 2026-09-24
+
+`pron_lora_ar_only_r8` finished **6100/6100 (1 epoch)** at ~07:27 UTC. Clean
+exit: final adapter + optimizer written, **no traceback, no OOM**. Final
+adapter metadata `training_info = {"step": 6100, "epoch": 1}`.
+
+Artifacts (local `/content/ai-toolkit/output/pron_lora_ar_only_r8/` **and** GCS
+`gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/pron_lora_ar_only_r8/output/`,
+9 objects / 73.27 MiB total, verified with `gcloud storage ls -l`):
+
+| file | bytes |
+|---|---|
+| `pron_lora_ar_only_r8_000001525.safetensors` | 14,709,664 |
+| `pron_lora_ar_only_r8_000003050.safetensors` | 14,709,664 |
+| `pron_lora_ar_only_r8_000004575.safetensors` | 14,709,664 |
+| `pron_lora_ar_only_r8.safetensors` (final, step 6100) | 14,709,664 |
+| `optimizer.pt` | 15,174,731 |
+| `loss_log.db` (+`-shm`/`-wal`) | 2,785,280 |
+| `config.yaml`, `tensorboard/` | present |
+
+**Note:** there is **no `_000006100` numbered file** — numbered saves occur at
+1525/3050/4575 (the loop runs steps 0–6099); the post-loop no-step save *is* the
+step-6100 artifact (metadata-verified). Four trainable artifacts total, not five.
+
+Losses at the end (step 6099): `loss/loss` **5.412**, `loss/ar_ce` **4.163**,
+`loss/ar_kl` **1.531**. Last-50 means: `loss/loss` 5.815, `loss/ar_ce` 4.397,
+`loss/ar_kl` 1.533. First-50 → last-50: `ar_ce` 6.13 → 4.40 (−1.73). `ar_kl`
+rose monotonically all run (0.21 → 1.53, bounded, max 2.19) — same shape as the
+v1/v2 whole-song runs. Median step time **0.886 s**; 1.52 h logged. GPU peak
+10.5 GB / 80 GB, util p50 22 % (data/CPU-bound, not compute-bound). Full charts
+and discussion: `TRAINING_ANALYSIS/pron_lora_ar_only_r8/ANALYSIS.md`.
+
+No in-training validation and no samples (`disable_sampling: true`), so this is
+a loss report only; articulation quality needs the offline `val`-replay audit
+(A3) before any merge.
