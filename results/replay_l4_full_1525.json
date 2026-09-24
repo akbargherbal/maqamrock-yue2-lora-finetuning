@@ -1,0 +1,1635 @@
+{
+  "checkpoint": "1525",
+  "adapter": "/content/ai-toolkit/output/pron_lora_ar_only_r8/pron_lora_ar_only_r8_000001525.safetensors",
+  "val_dir": "/content/pron_dataset/val",
+  "device": "cuda",
+  "n_items": 180,
+  "mean_ar_ce": 5.115705256991916,
+  "mean_ar_kl": 0.7180021580722596,
+  "mean_tokenize_s": 1.302624064516657,
+  "mean_loss_s": 0.24558617790555545,
+  "mean_total_s": 1.5482102424222124,
+  "model_load_s": 46.432877441999835,
+  "items": [
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_006042_simple",
+      "ar_ce": 4.264283180236816,
+      "ar_kl": 0.5575863718986511,
+      "caption_tokens": 144,
+      "ar_target_tokens": 594,
+      "tokenize_s": 3.2148587279998537,
+      "loss_s": 2.0569262369999706
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_006042_uthmani",
+      "ar_ce": 4.277325630187988,
+      "ar_kl": 0.5714714527130127,
+      "caption_tokens": 154,
+      "ar_target_tokens": 594,
+      "tokenize_s": 2.3790547359999437,
+      "loss_s": 0.22631765799997083
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_007052_simple",
+      "ar_ce": 4.700713157653809,
+      "ar_kl": 0.5172908902168274,
+      "caption_tokens": 126,
+      "ar_target_tokens": 442,
+      "tokenize_s": 1.7301308710000285,
+      "loss_s": 0.22626365800010717
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_007052_uthmani",
+      "ar_ce": 4.700967311859131,
+      "ar_kl": 0.5313130021095276,
+      "caption_tokens": 135,
+      "ar_target_tokens": 442,
+      "tokenize_s": 1.708219482000004,
+      "loss_s": 0.22525655500021458
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_007078_simple",
+      "ar_ce": 4.8928914070129395,
+      "ar_kl": 0.5073903203010559,
+      "caption_tokens": 93,
+      "ar_target_tokens": 276,
+      "tokenize_s": 1.4677178189999722,
+      "loss_s": 0.23584409699992648
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_007078_uthmani",
+      "ar_ce": 4.87833833694458,
+      "ar_kl": 0.5472022891044617,
+      "caption_tokens": 101,
+      "ar_target_tokens": 276,
+      "tokenize_s": 1.3913509740000336,
+      "loss_s": 0.25070226099978754
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_012039_simple",
+      "ar_ce": 4.772408962249756,
+      "ar_kl": 0.6757695078849792,
+      "caption_tokens": 115,
+      "ar_target_tokens": 286,
+      "tokenize_s": 1.7640753289999793,
+      "loss_s": 0.2239389010001105
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_012039_uthmani",
+      "ar_ce": 4.797305583953857,
+      "ar_kl": 0.6706623435020447,
+      "caption_tokens": 132,
+      "ar_target_tokens": 286,
+      "tokenize_s": 1.4773572429999149,
+      "loss_s": 0.2558403590001035
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_020005_simple",
+      "ar_ce": 5.614412784576416,
+      "ar_kl": 0.9268560409545898,
+      "caption_tokens": 76,
+      "ar_target_tokens": 134,
+      "tokenize_s": 0.8016432719998647,
+      "loss_s": 0.24804420899999968
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_020005_uthmani",
+      "ar_ce": 5.63764762878418,
+      "ar_kl": 0.9202532768249512,
+      "caption_tokens": 80,
+      "ar_target_tokens": 134,
+      "tokenize_s": 1.0085778769998797,
+      "loss_s": 0.22728122800003803
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_030017_simple",
+      "ar_ce": 4.81813383102417,
+      "ar_kl": 0.7688710689544678,
+      "caption_tokens": 83,
+      "ar_target_tokens": 213,
+      "tokenize_s": 1.0250269610000942,
+      "loss_s": 0.22343221599999197
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_030017_uthmani",
+      "ar_ce": 4.820199012756348,
+      "ar_kl": 0.8104747533798218,
+      "caption_tokens": 88,
+      "ar_target_tokens": 213,
+      "tokenize_s": 0.9953754559999197,
+      "loss_s": 0.2271247900000617
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_037061_simple",
+      "ar_ce": 5.960980415344238,
+      "ar_kl": 0.776240885257721,
+      "caption_tokens": 77,
+      "ar_target_tokens": 129,
+      "tokenize_s": 0.7465256969999245,
+      "loss_s": 0.24352719800003797
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_037061_uthmani",
+      "ar_ce": 5.963596343994141,
+      "ar_kl": 0.7594861388206482,
+      "caption_tokens": 82,
+      "ar_target_tokens": 129,
+      "tokenize_s": 1.0437041140000929,
+      "loss_s": 0.23986672000000908
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_043067_simple",
+      "ar_ce": 4.755228519439697,
+      "ar_kl": 0.5772932767868042,
+      "caption_tokens": 106,
+      "ar_target_tokens": 328,
+      "tokenize_s": 1.350606672999902,
+      "loss_s": 0.24709514200003468
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_043067_uthmani",
+      "ar_ce": 4.749873161315918,
+      "ar_kl": 0.5765464305877686,
+      "caption_tokens": 112,
+      "ar_target_tokens": 328,
+      "tokenize_s": 1.478141542000003,
+      "loss_s": 0.22557968999990408
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_069046_simple",
+      "ar_ce": 4.973178863525391,
+      "ar_kl": 0.9021340012550354,
+      "caption_tokens": 69,
+      "ar_target_tokens": 150,
+      "tokenize_s": 1.17034229900014,
+      "loss_s": 0.23200405299985505
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_069046_uthmani",
+      "ar_ce": 4.967830181121826,
+      "ar_kl": 0.8965122699737549,
+      "caption_tokens": 71,
+      "ar_target_tokens": 150,
+      "tokenize_s": 1.0922942140000487,
+      "loss_s": 0.25198306200013576
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_079025_simple",
+      "ar_ce": 5.342921257019043,
+      "ar_kl": 1.0907108783721924,
+      "caption_tokens": 81,
+      "ar_target_tokens": 166,
+      "tokenize_s": 1.220163002999925,
+      "loss_s": 0.25011712800005625
+    },
+    {
+      "stem": "Abdul_Basit_Murattal_192kbps_079025_uthmani",
+      "ar_ce": 5.3781280517578125,
+      "ar_kl": 1.1151589155197144,
+      "caption_tokens": 91,
+      "ar_target_tokens": 166,
+      "tokenize_s": 0.8939043830000628,
+      "loss_s": 0.23985668700015594
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_006042_simple",
+      "ar_ce": 4.513736248016357,
+      "ar_kl": 0.5565864443778992,
+      "caption_tokens": 144,
+      "ar_target_tokens": 514,
+      "tokenize_s": 1.9538649060000353,
+      "loss_s": 0.6822918549999031
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_006042_uthmani",
+      "ar_ce": 4.522139072418213,
+      "ar_kl": 0.5768998861312866,
+      "caption_tokens": 154,
+      "ar_target_tokens": 514,
+      "tokenize_s": 1.9356784099998094,
+      "loss_s": 0.236506615000053
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_007052_simple",
+      "ar_ce": 4.527266025543213,
+      "ar_kl": 0.5566039681434631,
+      "caption_tokens": 126,
+      "ar_target_tokens": 337,
+      "tokenize_s": 1.3727752970000893,
+      "loss_s": 0.2526686820001487
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_007052_uthmani",
+      "ar_ce": 4.530616760253906,
+      "ar_kl": 0.5650672912597656,
+      "caption_tokens": 135,
+      "ar_target_tokens": 337,
+      "tokenize_s": 1.4404351470000165,
+      "loss_s": 0.24503365100008523
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_007078_simple",
+      "ar_ce": 5.266129493713379,
+      "ar_kl": 0.8997828364372253,
+      "caption_tokens": 93,
+      "ar_target_tokens": 224,
+      "tokenize_s": 1.210178790999862,
+      "loss_s": 0.24278974599997127
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_007078_uthmani",
+      "ar_ce": 5.263297080993652,
+      "ar_kl": 0.9264904856681824,
+      "caption_tokens": 101,
+      "ar_target_tokens": 224,
+      "tokenize_s": 1.4856216000000586,
+      "loss_s": 0.2381504689999474
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_012039_simple",
+      "ar_ce": 5.1686272621154785,
+      "ar_kl": 0.5879195332527161,
+      "caption_tokens": 115,
+      "ar_target_tokens": 332,
+      "tokenize_s": 1.9857667950000177,
+      "loss_s": 0.23451126899999508
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_012039_uthmani",
+      "ar_ce": 5.16733980178833,
+      "ar_kl": 0.5714225172996521,
+      "caption_tokens": 132,
+      "ar_target_tokens": 332,
+      "tokenize_s": 1.5962724409998827,
+      "loss_s": 0.23119478200010235
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_020005_simple",
+      "ar_ce": 4.826852321624756,
+      "ar_kl": 0.6602460145950317,
+      "caption_tokens": 76,
+      "ar_target_tokens": 169,
+      "tokenize_s": 0.8908832600000096,
+      "loss_s": 0.23268107000012606
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_020005_uthmani",
+      "ar_ce": 4.844178199768066,
+      "ar_kl": 0.6722644567489624,
+      "caption_tokens": 80,
+      "ar_target_tokens": 169,
+      "tokenize_s": 0.9940841320001255,
+      "loss_s": 0.2342945079999481
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_030017_simple",
+      "ar_ce": 5.1994709968566895,
+      "ar_kl": 0.6866127848625183,
+      "caption_tokens": 83,
+      "ar_target_tokens": 194,
+      "tokenize_s": 0.9567355609999595,
+      "loss_s": 0.25110021399996185
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_030017_uthmani",
+      "ar_ce": 5.185095310211182,
+      "ar_kl": 0.7066953778266907,
+      "caption_tokens": 88,
+      "ar_target_tokens": 194,
+      "tokenize_s": 0.9706779989999177,
+      "loss_s": 0.23063648199990894
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_037061_simple",
+      "ar_ce": 5.560244083404541,
+      "ar_kl": 0.74217289686203,
+      "caption_tokens": 77,
+      "ar_target_tokens": 160,
+      "tokenize_s": 0.8673793870000281,
+      "loss_s": 0.23585371300009683
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_037061_uthmani",
+      "ar_ce": 5.557956695556641,
+      "ar_kl": 0.7493629455566406,
+      "caption_tokens": 82,
+      "ar_target_tokens": 160,
+      "tokenize_s": 0.8569958129999122,
+      "loss_s": 0.24230681800008824
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_043067_simple",
+      "ar_ce": 5.191744327545166,
+      "ar_kl": 0.8524446487426758,
+      "caption_tokens": 106,
+      "ar_target_tokens": 279,
+      "tokenize_s": 1.2300789200000963,
+      "loss_s": 0.23411897800019688
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_043067_uthmani",
+      "ar_ce": 5.162900924682617,
+      "ar_kl": 0.8481146097183228,
+      "caption_tokens": 112,
+      "ar_target_tokens": 279,
+      "tokenize_s": 1.3427939460000289,
+      "loss_s": 0.2366742700000941
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_069046_simple",
+      "ar_ce": 5.479400157928467,
+      "ar_kl": 0.7704077959060669,
+      "caption_tokens": 69,
+      "ar_target_tokens": 143,
+      "tokenize_s": 0.9075536620000548,
+      "loss_s": 0.2465980340000442
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_069046_uthmani",
+      "ar_ce": 5.490057945251465,
+      "ar_kl": 0.784511148929596,
+      "caption_tokens": 71,
+      "ar_target_tokens": 143,
+      "tokenize_s": 1.048088966999785,
+      "loss_s": 0.25175132100002884
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_079025_simple",
+      "ar_ce": 5.572976589202881,
+      "ar_kl": 0.9237399101257324,
+      "caption_tokens": 81,
+      "ar_target_tokens": 189,
+      "tokenize_s": 1.32101605999992,
+      "loss_s": 0.23484407399996599
+    },
+    {
+      "stem": "Abdullah_Basfar_192kbps_079025_uthmani",
+      "ar_ce": 5.609482765197754,
+      "ar_kl": 0.9502332210540771,
+      "caption_tokens": 91,
+      "ar_target_tokens": 189,
+      "tokenize_s": 1.1593310709999969,
+      "loss_s": 0.23018595300004563
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_006042_simple",
+      "ar_ce": 5.007292747497559,
+      "ar_kl": 0.5412001609802246,
+      "caption_tokens": 144,
+      "ar_target_tokens": 432,
+      "tokenize_s": 1.7069713839998713,
+      "loss_s": 0.2220721080000203
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_006042_uthmani",
+      "ar_ce": 5.006372451782227,
+      "ar_kl": 0.5444273352622986,
+      "caption_tokens": 154,
+      "ar_target_tokens": 432,
+      "tokenize_s": 1.722866366000062,
+      "loss_s": 0.23338858199986134
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_007052_simple",
+      "ar_ce": 5.171781063079834,
+      "ar_kl": 0.44097650051116943,
+      "caption_tokens": 126,
+      "ar_target_tokens": 316,
+      "tokenize_s": 1.3083863470001234,
+      "loss_s": 0.22827008600006593
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_007052_uthmani",
+      "ar_ce": 5.172028541564941,
+      "ar_kl": 0.4452710747718811,
+      "caption_tokens": 135,
+      "ar_target_tokens": 316,
+      "tokenize_s": 1.3287854139998672,
+      "loss_s": 0.2377211019997958
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_007078_simple",
+      "ar_ce": 5.186834335327148,
+      "ar_kl": 0.6586832404136658,
+      "caption_tokens": 93,
+      "ar_target_tokens": 174,
+      "tokenize_s": 0.9054698400000234,
+      "loss_s": 0.2277054290000251
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_007078_uthmani",
+      "ar_ce": 5.180950164794922,
+      "ar_kl": 0.6610803604125977,
+      "caption_tokens": 101,
+      "ar_target_tokens": 174,
+      "tokenize_s": 1.0162849860000733,
+      "loss_s": 0.2324567329999354
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_012039_simple",
+      "ar_ce": 5.294785022735596,
+      "ar_kl": 0.5552688837051392,
+      "caption_tokens": 115,
+      "ar_target_tokens": 342,
+      "tokenize_s": 1.8908542460001172,
+      "loss_s": 0.22966062699993017
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_012039_uthmani",
+      "ar_ce": 5.303603172302246,
+      "ar_kl": 0.5520937442779541,
+      "caption_tokens": 132,
+      "ar_target_tokens": 342,
+      "tokenize_s": 2.045219662000136,
+      "loss_s": 0.22902504100011356
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_020005_simple",
+      "ar_ce": 6.073202133178711,
+      "ar_kl": 0.6210319399833679,
+      "caption_tokens": 76,
+      "ar_target_tokens": 99,
+      "tokenize_s": 0.8295288510000773,
+      "loss_s": 0.23387602299999344
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_020005_uthmani",
+      "ar_ce": 6.093838691711426,
+      "ar_kl": 0.6122491359710693,
+      "caption_tokens": 80,
+      "ar_target_tokens": 99,
+      "tokenize_s": 0.6400870719999148,
+      "loss_s": 0.2342841709998993
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_030017_simple",
+      "ar_ce": 5.911077976226807,
+      "ar_kl": 1.0202325582504272,
+      "caption_tokens": 83,
+      "ar_target_tokens": 158,
+      "tokenize_s": 0.8787110519999715,
+      "loss_s": 0.2389341760001571
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_030017_uthmani",
+      "ar_ce": 5.9244890213012695,
+      "ar_kl": 1.0273678302764893,
+      "caption_tokens": 88,
+      "ar_target_tokens": 158,
+      "tokenize_s": 0.854670963999979,
+      "loss_s": 0.23894678900001054
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_037061_simple",
+      "ar_ce": 4.518913269042969,
+      "ar_kl": 0.453928679227829,
+      "caption_tokens": 77,
+      "ar_target_tokens": 337,
+      "tokenize_s": 1.4313353719999213,
+      "loss_s": 0.2515700670001024
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_037061_uthmani",
+      "ar_ce": 4.522522449493408,
+      "ar_kl": 0.45056405663490295,
+      "caption_tokens": 82,
+      "ar_target_tokens": 337,
+      "tokenize_s": 1.3962472420000722,
+      "loss_s": 0.2505730750001476
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_043067_simple",
+      "ar_ce": 5.349941730499268,
+      "ar_kl": 0.6462171673774719,
+      "caption_tokens": 106,
+      "ar_target_tokens": 247,
+      "tokenize_s": 1.1217244540000593,
+      "loss_s": 0.24033731300005456
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_043067_uthmani",
+      "ar_ce": 5.348058700561523,
+      "ar_kl": 0.6371357440948486,
+      "caption_tokens": 112,
+      "ar_target_tokens": 247,
+      "tokenize_s": 1.100405880999915,
+      "loss_s": 0.23418016100004024
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_069046_simple",
+      "ar_ce": 6.0174479484558105,
+      "ar_kl": 1.0382106304168701,
+      "caption_tokens": 69,
+      "ar_target_tokens": 123,
+      "tokenize_s": 0.8021162860000004,
+      "loss_s": 0.22060559099986676
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_069046_uthmani",
+      "ar_ce": 6.010839939117432,
+      "ar_kl": 1.0262638330459595,
+      "caption_tokens": 71,
+      "ar_target_tokens": 123,
+      "tokenize_s": 0.9694983710000997,
+      "loss_s": 0.23154648699983227
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_079025_simple",
+      "ar_ce": 6.060812473297119,
+      "ar_kl": 0.8272351026535034,
+      "caption_tokens": 81,
+      "ar_target_tokens": 167,
+      "tokenize_s": 1.224821719999909,
+      "loss_s": 0.24140482600000723
+    },
+    {
+      "stem": "Abu_Bakr_Ash-Shaatree_128kbps_079025_uthmani",
+      "ar_ce": 6.071804046630859,
+      "ar_kl": 0.8671968579292297,
+      "caption_tokens": 91,
+      "ar_target_tokens": 167,
+      "tokenize_s": 1.2039588130000993,
+      "loss_s": 0.23052211999993233
+    },
+    {
+      "stem": "Hudhaify_128kbps_006042_simple",
+      "ar_ce": 4.546234130859375,
+      "ar_kl": 0.47027796506881714,
+      "caption_tokens": 144,
+      "ar_target_tokens": 627,
+      "tokenize_s": 2.776723994999884,
+      "loss_s": 0.24008243599996604
+    },
+    {
+      "stem": "Hudhaify_128kbps_006042_uthmani",
+      "ar_ce": 4.549157619476318,
+      "ar_kl": 0.4774678945541382,
+      "caption_tokens": 154,
+      "ar_target_tokens": 627,
+      "tokenize_s": 2.440414318999956,
+      "loss_s": 0.24733136800000466
+    },
+    {
+      "stem": "Hudhaify_128kbps_007052_simple",
+      "ar_ce": 5.215041637420654,
+      "ar_kl": 0.6830613613128662,
+      "caption_tokens": 126,
+      "ar_target_tokens": 359,
+      "tokenize_s": 1.7665369259998442,
+      "loss_s": 0.23555383999996593
+    },
+    {
+      "stem": "Hudhaify_128kbps_007052_uthmani",
+      "ar_ce": 5.230518341064453,
+      "ar_kl": 0.7020022869110107,
+      "caption_tokens": 135,
+      "ar_target_tokens": 359,
+      "tokenize_s": 1.4654110440001205,
+      "loss_s": 0.23534227999994073
+    },
+    {
+      "stem": "Hudhaify_128kbps_007078_simple",
+      "ar_ce": 4.772830486297607,
+      "ar_kl": 0.8381751775741577,
+      "caption_tokens": 93,
+      "ar_target_tokens": 223,
+      "tokenize_s": 1.0651846609998756,
+      "loss_s": 0.23644106600022496
+    },
+    {
+      "stem": "Hudhaify_128kbps_007078_uthmani",
+      "ar_ce": 4.773492813110352,
+      "ar_kl": 0.8452630639076233,
+      "caption_tokens": 101,
+      "ar_target_tokens": 223,
+      "tokenize_s": 1.4849894799999674,
+      "loss_s": 0.23275833399998191
+    },
+    {
+      "stem": "Hudhaify_128kbps_012039_simple",
+      "ar_ce": 5.020534038543701,
+      "ar_kl": 0.5604150295257568,
+      "caption_tokens": 115,
+      "ar_target_tokens": 301,
+      "tokenize_s": 1.8509018429999742,
+      "loss_s": 0.21973003400012203
+    },
+    {
+      "stem": "Hudhaify_128kbps_012039_uthmani",
+      "ar_ce": 5.019927024841309,
+      "ar_kl": 0.5697222352027893,
+      "caption_tokens": 132,
+      "ar_target_tokens": 301,
+      "tokenize_s": 1.7513707970001633,
+      "loss_s": 0.2303819780001959
+    },
+    {
+      "stem": "Hudhaify_128kbps_020005_simple",
+      "ar_ce": 5.637149333953857,
+      "ar_kl": 0.9899803400039673,
+      "caption_tokens": 76,
+      "ar_target_tokens": 119,
+      "tokenize_s": 0.7151539240001057,
+      "loss_s": 0.2369448630001898
+    },
+    {
+      "stem": "Hudhaify_128kbps_020005_uthmani",
+      "ar_ce": 5.6512298583984375,
+      "ar_kl": 0.9972812533378601,
+      "caption_tokens": 80,
+      "ar_target_tokens": 119,
+      "tokenize_s": 0.7239286980000088,
+      "loss_s": 0.23322557100004815
+    },
+    {
+      "stem": "Hudhaify_128kbps_030017_simple",
+      "ar_ce": 4.630161762237549,
+      "ar_kl": 0.7463482022285461,
+      "caption_tokens": 83,
+      "ar_target_tokens": 190,
+      "tokenize_s": 0.9807845400000588,
+      "loss_s": 0.23116581800013591
+    },
+    {
+      "stem": "Hudhaify_128kbps_030017_uthmani",
+      "ar_ce": 4.620078086853027,
+      "ar_kl": 0.7549501657485962,
+      "caption_tokens": 88,
+      "ar_target_tokens": 190,
+      "tokenize_s": 0.955599735000078,
+      "loss_s": 0.24758517199984453
+    },
+    {
+      "stem": "Hudhaify_128kbps_037061_simple",
+      "ar_ce": 5.577650547027588,
+      "ar_kl": 0.8046000003814697,
+      "caption_tokens": 77,
+      "ar_target_tokens": 165,
+      "tokenize_s": 0.9552879140001096,
+      "loss_s": 0.23879166200003965
+    },
+    {
+      "stem": "Hudhaify_128kbps_037061_uthmani",
+      "ar_ce": 5.576168060302734,
+      "ar_kl": 0.8107053637504578,
+      "caption_tokens": 82,
+      "ar_target_tokens": 165,
+      "tokenize_s": 0.9008061199999702,
+      "loss_s": 0.23092181800006983
+    },
+    {
+      "stem": "Hudhaify_128kbps_043067_simple",
+      "ar_ce": 5.2073140144348145,
+      "ar_kl": 0.7174133658409119,
+      "caption_tokens": 106,
+      "ar_target_tokens": 329,
+      "tokenize_s": 1.386672297999894,
+      "loss_s": 0.2317382159999397
+    },
+    {
+      "stem": "Hudhaify_128kbps_043067_uthmani",
+      "ar_ce": 5.199567794799805,
+      "ar_kl": 0.7399601936340332,
+      "caption_tokens": 112,
+      "ar_target_tokens": 329,
+      "tokenize_s": 1.5172513529998923,
+      "loss_s": 0.22448108200001116
+    },
+    {
+      "stem": "Hudhaify_128kbps_069046_simple",
+      "ar_ce": 4.754549980163574,
+      "ar_kl": 0.8260063529014587,
+      "caption_tokens": 69,
+      "ar_target_tokens": 160,
+      "tokenize_s": 1.0748543219999647,
+      "loss_s": 0.23704674099985823
+    },
+    {
+      "stem": "Hudhaify_128kbps_069046_uthmani",
+      "ar_ce": 4.7541327476501465,
+      "ar_kl": 0.8243768811225891,
+      "caption_tokens": 71,
+      "ar_target_tokens": 160,
+      "tokenize_s": 1.1933789359998173,
+      "loss_s": 0.23250591999999415
+    },
+    {
+      "stem": "Hudhaify_128kbps_079025_simple",
+      "ar_ce": 5.616660118103027,
+      "ar_kl": 0.8523657321929932,
+      "caption_tokens": 81,
+      "ar_target_tokens": 158,
+      "tokenize_s": 1.2041040309998152,
+      "loss_s": 0.22128182300002663
+    },
+    {
+      "stem": "Hudhaify_128kbps_079025_uthmani",
+      "ar_ce": 5.65809440612793,
+      "ar_kl": 0.8203681707382202,
+      "caption_tokens": 91,
+      "ar_target_tokens": 158,
+      "tokenize_s": 1.069775479999862,
+      "loss_s": 0.22879334399999607
+    },
+    {
+      "stem": "Husary_128kbps_006042_simple",
+      "ar_ce": 4.182392597198486,
+      "ar_kl": 0.4840284585952759,
+      "caption_tokens": 144,
+      "ar_target_tokens": 721,
+      "tokenize_s": 2.7741816309999194,
+      "loss_s": 0.23866181699986555
+    },
+    {
+      "stem": "Husary_128kbps_006042_uthmani",
+      "ar_ce": 4.185849189758301,
+      "ar_kl": 0.49515509605407715,
+      "caption_tokens": 154,
+      "ar_target_tokens": 721,
+      "tokenize_s": 2.7729373399999986,
+      "loss_s": 0.23849793299996236
+    },
+    {
+      "stem": "Husary_128kbps_007052_simple",
+      "ar_ce": 4.541029453277588,
+      "ar_kl": 0.4427737891674042,
+      "caption_tokens": 126,
+      "ar_target_tokens": 571,
+      "tokenize_s": 2.324819583000135,
+      "loss_s": 0.23149630000011712
+    },
+    {
+      "stem": "Husary_128kbps_007052_uthmani",
+      "ar_ce": 4.5398993492126465,
+      "ar_kl": 0.4415205717086792,
+      "caption_tokens": 135,
+      "ar_target_tokens": 571,
+      "tokenize_s": 2.575465151999879,
+      "loss_s": 0.24219306800000595
+    },
+    {
+      "stem": "Husary_128kbps_007078_simple",
+      "ar_ce": 4.303594589233398,
+      "ar_kl": 0.5562146306037903,
+      "caption_tokens": 93,
+      "ar_target_tokens": 342,
+      "tokenize_s": 2.006754403000059,
+      "loss_s": 0.2338008249998893
+    },
+    {
+      "stem": "Husary_128kbps_007078_uthmani",
+      "ar_ce": 4.30147123336792,
+      "ar_kl": 0.579064130783081,
+      "caption_tokens": 101,
+      "ar_target_tokens": 342,
+      "tokenize_s": 1.9248975749999317,
+      "loss_s": 0.23409770099988236
+    },
+    {
+      "stem": "Husary_128kbps_012039_simple",
+      "ar_ce": 4.42063570022583,
+      "ar_kl": 0.4532744586467743,
+      "caption_tokens": 115,
+      "ar_target_tokens": 510,
+      "tokenize_s": 1.952670162000004,
+      "loss_s": 0.2323446210000384
+    },
+    {
+      "stem": "Husary_128kbps_012039_uthmani",
+      "ar_ce": 4.412411212921143,
+      "ar_kl": 0.44289737939834595,
+      "caption_tokens": 132,
+      "ar_target_tokens": 510,
+      "tokenize_s": 2.0328270269999393,
+      "loss_s": 0.2365862469998774
+    },
+    {
+      "stem": "Husary_128kbps_020005_simple",
+      "ar_ce": 4.639048099517822,
+      "ar_kl": 0.5278310775756836,
+      "caption_tokens": 76,
+      "ar_target_tokens": 183,
+      "tokenize_s": 0.9074559970001701,
+      "loss_s": 0.2282134520000909
+    },
+    {
+      "stem": "Husary_128kbps_020005_uthmani",
+      "ar_ce": 4.628285884857178,
+      "ar_kl": 0.528234601020813,
+      "caption_tokens": 80,
+      "ar_target_tokens": 183,
+      "tokenize_s": 0.9172110409999732,
+      "loss_s": 0.229124807000062
+    },
+    {
+      "stem": "Husary_128kbps_030017_simple",
+      "ar_ce": 4.558859825134277,
+      "ar_kl": 0.547359049320221,
+      "caption_tokens": 83,
+      "ar_target_tokens": 316,
+      "tokenize_s": 1.3023557799999708,
+      "loss_s": 0.22914311099998486
+    },
+    {
+      "stem": "Husary_128kbps_030017_uthmani",
+      "ar_ce": 4.564116954803467,
+      "ar_kl": 0.5520902276039124,
+      "caption_tokens": 88,
+      "ar_target_tokens": 316,
+      "tokenize_s": 1.390668341999799,
+      "loss_s": 0.23323748999996496
+    },
+    {
+      "stem": "Husary_128kbps_037061_simple",
+      "ar_ce": 5.018001556396484,
+      "ar_kl": 0.785398542881012,
+      "caption_tokens": 77,
+      "ar_target_tokens": 195,
+      "tokenize_s": 1.035815785000068,
+      "loss_s": 0.23804210699995565
+    },
+    {
+      "stem": "Husary_128kbps_037061_uthmani",
+      "ar_ce": 5.019958972930908,
+      "ar_kl": 0.7914837598800659,
+      "caption_tokens": 82,
+      "ar_target_tokens": 195,
+      "tokenize_s": 1.1177046239999981,
+      "loss_s": 0.23737607299995034
+    },
+    {
+      "stem": "Husary_128kbps_043067_simple",
+      "ar_ce": 4.36271333694458,
+      "ar_kl": 0.542064905166626,
+      "caption_tokens": 106,
+      "ar_target_tokens": 377,
+      "tokenize_s": 1.6941437519999454,
+      "loss_s": 0.22605458899988662
+    },
+    {
+      "stem": "Husary_128kbps_043067_uthmani",
+      "ar_ce": 4.365627288818359,
+      "ar_kl": 0.5365091562271118,
+      "caption_tokens": 112,
+      "ar_target_tokens": 377,
+      "tokenize_s": 1.9615307149999808,
+      "loss_s": 0.24090651200003776
+    },
+    {
+      "stem": "Husary_128kbps_069046_simple",
+      "ar_ce": 5.088028907775879,
+      "ar_kl": 0.5969741344451904,
+      "caption_tokens": 69,
+      "ar_target_tokens": 197,
+      "tokenize_s": 0.9892832640000506,
+      "loss_s": 0.22473847199989905
+    },
+    {
+      "stem": "Husary_128kbps_069046_uthmani",
+      "ar_ce": 5.086960315704346,
+      "ar_kl": 0.6014308929443359,
+      "caption_tokens": 71,
+      "ar_target_tokens": 197,
+      "tokenize_s": 0.9642771070000435,
+      "loss_s": 0.23278833799986387
+    },
+    {
+      "stem": "Husary_128kbps_079025_simple",
+      "ar_ce": 4.881781578063965,
+      "ar_kl": 0.479282021522522,
+      "caption_tokens": 81,
+      "ar_target_tokens": 273,
+      "tokenize_s": 1.1917542959999992,
+      "loss_s": 0.23439708599994447
+    },
+    {
+      "stem": "Husary_128kbps_079025_uthmani",
+      "ar_ce": 4.85670280456543,
+      "ar_kl": 0.5311062932014465,
+      "caption_tokens": 91,
+      "ar_target_tokens": 273,
+      "tokenize_s": 1.1707393130000128,
+      "loss_s": 0.23762065500000062
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_006042_simple",
+      "ar_ce": 4.455897331237793,
+      "ar_kl": 0.5311964750289917,
+      "caption_tokens": 144,
+      "ar_target_tokens": 510,
+      "tokenize_s": 1.9454819840000255,
+      "loss_s": 0.2348745599999802
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_006042_uthmani",
+      "ar_ce": 4.450078964233398,
+      "ar_kl": 0.5299396514892578,
+      "caption_tokens": 154,
+      "ar_target_tokens": 510,
+      "tokenize_s": 1.979935363000095,
+      "loss_s": 0.23312258800001473
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_007052_simple",
+      "ar_ce": 4.647618293762207,
+      "ar_kl": 0.7509501576423645,
+      "caption_tokens": 126,
+      "ar_target_tokens": 377,
+      "tokenize_s": 1.7034636820001197,
+      "loss_s": 0.232276506000062
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_007052_uthmani",
+      "ar_ce": 4.659378528594971,
+      "ar_kl": 0.7630127668380737,
+      "caption_tokens": 135,
+      "ar_target_tokens": 377,
+      "tokenize_s": 1.7138448949999656,
+      "loss_s": 0.22108785799991892
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_007078_simple",
+      "ar_ce": 4.539088249206543,
+      "ar_kl": 0.7333171963691711,
+      "caption_tokens": 93,
+      "ar_target_tokens": 215,
+      "tokenize_s": 1.4374995179998677,
+      "loss_s": 0.24171354099985365
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_007078_uthmani",
+      "ar_ce": 4.556489944458008,
+      "ar_kl": 0.7465116381645203,
+      "caption_tokens": 101,
+      "ar_target_tokens": 215,
+      "tokenize_s": 1.131633266000108,
+      "loss_s": 0.22588426399988748
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_012039_simple",
+      "ar_ce": 5.0745978355407715,
+      "ar_kl": 0.6636722087860107,
+      "caption_tokens": 115,
+      "ar_target_tokens": 352,
+      "tokenize_s": 1.4187495869998656,
+      "loss_s": 0.24075101899984475
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_012039_uthmani",
+      "ar_ce": 5.0706586837768555,
+      "ar_kl": 0.6725581884384155,
+      "caption_tokens": 132,
+      "ar_target_tokens": 352,
+      "tokenize_s": 1.4433998019999308,
+      "loss_s": 0.2319115369998599
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_020005_simple",
+      "ar_ce": 5.99230432510376,
+      "ar_kl": 0.9648371338844299,
+      "caption_tokens": 76,
+      "ar_target_tokens": 123,
+      "tokenize_s": 0.7392598299998099,
+      "loss_s": 0.2278989090000323
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_020005_uthmani",
+      "ar_ce": 5.992645740509033,
+      "ar_kl": 0.942143976688385,
+      "caption_tokens": 80,
+      "ar_target_tokens": 123,
+      "tokenize_s": 0.7242728100000022,
+      "loss_s": 0.22648477000007006
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_030017_simple",
+      "ar_ce": 5.303019046783447,
+      "ar_kl": 0.7611729502677917,
+      "caption_tokens": 83,
+      "ar_target_tokens": 173,
+      "tokenize_s": 0.9539611689999674,
+      "loss_s": 0.22300077099998816
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_030017_uthmani",
+      "ar_ce": 5.3184919357299805,
+      "ar_kl": 0.7541219592094421,
+      "caption_tokens": 88,
+      "ar_target_tokens": 173,
+      "tokenize_s": 0.8947113109998099,
+      "loss_s": 0.23200784300001942
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_037061_simple",
+      "ar_ce": 5.754502296447754,
+      "ar_kl": 0.7685190439224243,
+      "caption_tokens": 77,
+      "ar_target_tokens": 145,
+      "tokenize_s": 0.9583858140001666,
+      "loss_s": 0.22869932799994785
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_037061_uthmani",
+      "ar_ce": 5.770952224731445,
+      "ar_kl": 0.7466214895248413,
+      "caption_tokens": 82,
+      "ar_target_tokens": 145,
+      "tokenize_s": 0.9156094259999463,
+      "loss_s": 0.23337322099996527
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_043067_simple",
+      "ar_ce": 5.236526012420654,
+      "ar_kl": 0.9298236966133118,
+      "caption_tokens": 106,
+      "ar_target_tokens": 274,
+      "tokenize_s": 1.7247327070001575,
+      "loss_s": 0.23863701299978857
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_043067_uthmani",
+      "ar_ce": 5.229823589324951,
+      "ar_kl": 0.96668940782547,
+      "caption_tokens": 112,
+      "ar_target_tokens": 274,
+      "tokenize_s": 1.5709535010000764,
+      "loss_s": 0.24948909699992328
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_069046_simple",
+      "ar_ce": 5.235686302185059,
+      "ar_kl": 0.663453221321106,
+      "caption_tokens": 69,
+      "ar_target_tokens": 141,
+      "tokenize_s": 0.8961438049998378,
+      "loss_s": 0.23500227299996368
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_069046_uthmani",
+      "ar_ce": 5.233888626098633,
+      "ar_kl": 0.6703498363494873,
+      "caption_tokens": 71,
+      "ar_target_tokens": 141,
+      "tokenize_s": 0.9277312789999996,
+      "loss_s": 0.24999430299999403
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_079025_simple",
+      "ar_ce": 5.133602619171143,
+      "ar_kl": 0.9260498881340027,
+      "caption_tokens": 81,
+      "ar_target_tokens": 212,
+      "tokenize_s": 1.0165179709999848,
+      "loss_s": 0.23312912999995206
+    },
+    {
+      "stem": "Minshawy_Murattal_128kbps_079025_uthmani",
+      "ar_ce": 5.148759841918945,
+      "ar_kl": 1.039368987083435,
+      "caption_tokens": 91,
+      "ar_target_tokens": 212,
+      "tokenize_s": 1.0844916920000287,
+      "loss_s": 0.2342363089999253
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_006042_simple",
+      "ar_ce": 4.55505895614624,
+      "ar_kl": 0.49575865268707275,
+      "caption_tokens": 144,
+      "ar_target_tokens": 860,
+      "tokenize_s": 3.5394158070000685,
+      "loss_s": 0.2394481240000914
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_006042_uthmani",
+      "ar_ce": 4.553829193115234,
+      "ar_kl": 0.4863291084766388,
+      "caption_tokens": 154,
+      "ar_target_tokens": 860,
+      "tokenize_s": 3.7457723649999934,
+      "loss_s": 0.23887147300001743
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_007052_simple",
+      "ar_ce": 4.659056186676025,
+      "ar_kl": 0.4712345004081726,
+      "caption_tokens": 126,
+      "ar_target_tokens": 392,
+      "tokenize_s": 2.248085772999957,
+      "loss_s": 0.2333433359999617
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_007052_uthmani",
+      "ar_ce": 4.659940719604492,
+      "ar_kl": 0.4734610617160797,
+      "caption_tokens": 135,
+      "ar_target_tokens": 392,
+      "tokenize_s": 1.7348469390001355,
+      "loss_s": 0.24608587399984572
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_007078_simple",
+      "ar_ce": 4.865917205810547,
+      "ar_kl": 0.8817073702812195,
+      "caption_tokens": 93,
+      "ar_target_tokens": 217,
+      "tokenize_s": 1.3715009700001701,
+      "loss_s": 0.23245828700009952
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_007078_uthmani",
+      "ar_ce": 4.867600440979004,
+      "ar_kl": 0.922673225402832,
+      "caption_tokens": 101,
+      "ar_target_tokens": 217,
+      "tokenize_s": 1.0214486379998107,
+      "loss_s": 0.23679181499983315
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_012039_simple",
+      "ar_ce": 4.833309650421143,
+      "ar_kl": 0.5287004709243774,
+      "caption_tokens": 115,
+      "ar_target_tokens": 352,
+      "tokenize_s": 1.4896998149999945,
+      "loss_s": 0.23255201100005252
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_012039_uthmani",
+      "ar_ce": 4.838779926300049,
+      "ar_kl": 0.5077322125434875,
+      "caption_tokens": 132,
+      "ar_target_tokens": 352,
+      "tokenize_s": 1.42177400699984,
+      "loss_s": 0.2322268019997864
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_020005_simple",
+      "ar_ce": 5.429764747619629,
+      "ar_kl": 1.286391019821167,
+      "caption_tokens": 76,
+      "ar_target_tokens": 113,
+      "tokenize_s": 0.7002853550000054,
+      "loss_s": 0.23709407499995905
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_020005_uthmani",
+      "ar_ce": 5.4328203201293945,
+      "ar_kl": 1.2451428174972534,
+      "caption_tokens": 80,
+      "ar_target_tokens": 113,
+      "tokenize_s": 0.5843278780000674,
+      "loss_s": 0.22077348100015115
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_030017_simple",
+      "ar_ce": 4.540884494781494,
+      "ar_kl": 0.7701601982116699,
+      "caption_tokens": 83,
+      "ar_target_tokens": 200,
+      "tokenize_s": 0.86476031899997,
+      "loss_s": 0.22249018000002252
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_030017_uthmani",
+      "ar_ce": 4.540652751922607,
+      "ar_kl": 0.7811230421066284,
+      "caption_tokens": 88,
+      "ar_target_tokens": 200,
+      "tokenize_s": 0.8610025350001251,
+      "loss_s": 0.21723414400003094
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_037061_simple",
+      "ar_ce": 6.067419528961182,
+      "ar_kl": 0.7864121794700623,
+      "caption_tokens": 77,
+      "ar_target_tokens": 170,
+      "tokenize_s": 0.9645229620000464,
+      "loss_s": 0.22776047199999994
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_037061_uthmani",
+      "ar_ce": 6.083204746246338,
+      "ar_kl": 0.7742182016372681,
+      "caption_tokens": 82,
+      "ar_target_tokens": 170,
+      "tokenize_s": 0.9278741840000748,
+      "loss_s": 0.22637522100012575
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_043067_simple",
+      "ar_ce": 4.797507286071777,
+      "ar_kl": 0.7266671657562256,
+      "caption_tokens": 106,
+      "ar_target_tokens": 300,
+      "tokenize_s": 1.8104685200000858,
+      "loss_s": 0.2231912109998575
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_043067_uthmani",
+      "ar_ce": 4.792952537536621,
+      "ar_kl": 0.716460108757019,
+      "caption_tokens": 112,
+      "ar_target_tokens": 300,
+      "tokenize_s": 1.4805267490000915,
+      "loss_s": 0.22274078999998892
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_069046_simple",
+      "ar_ce": 4.734820365905762,
+      "ar_kl": 0.8336095809936523,
+      "caption_tokens": 69,
+      "ar_target_tokens": 161,
+      "tokenize_s": 0.778518632999976,
+      "loss_s": 0.2342632339998545
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_069046_uthmani",
+      "ar_ce": 4.73772668838501,
+      "ar_kl": 0.8388128280639648,
+      "caption_tokens": 71,
+      "ar_target_tokens": 161,
+      "tokenize_s": 0.7696760190001442,
+      "loss_s": 0.22215788499988776
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_079025_simple",
+      "ar_ce": 5.300863742828369,
+      "ar_kl": 1.3529096841812134,
+      "caption_tokens": 81,
+      "ar_target_tokens": 180,
+      "tokenize_s": 0.8109185920000073,
+      "loss_s": 0.23230556299995442
+    },
+    {
+      "stem": "Muhammad_Ayyoub_128kbps_079025_uthmani",
+      "ar_ce": 5.32628870010376,
+      "ar_kl": 1.3486382961273193,
+      "caption_tokens": 91,
+      "ar_target_tokens": 180,
+      "tokenize_s": 0.7998132269999587,
+      "loss_s": 0.22400384000002305
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_006042_simple",
+      "ar_ce": 4.635756015777588,
+      "ar_kl": 0.486402690410614,
+      "caption_tokens": 144,
+      "ar_target_tokens": 462,
+      "tokenize_s": 1.544991213000003,
+      "loss_s": 0.2221163050000996
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_006042_uthmani",
+      "ar_ce": 4.645957946777344,
+      "ar_kl": 0.48365211486816406,
+      "caption_tokens": 154,
+      "ar_target_tokens": 462,
+      "tokenize_s": 1.5298785739998948,
+      "loss_s": 0.221357861000115
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_007052_simple",
+      "ar_ce": 5.008952617645264,
+      "ar_kl": 0.5190062522888184,
+      "caption_tokens": 126,
+      "ar_target_tokens": 330,
+      "tokenize_s": 1.1895222390000981,
+      "loss_s": 0.2282635300000493
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_007052_uthmani",
+      "ar_ce": 5.010034084320068,
+      "ar_kl": 0.5219300389289856,
+      "caption_tokens": 135,
+      "ar_target_tokens": 330,
+      "tokenize_s": 1.4759632480001983,
+      "loss_s": 0.22388696299981348
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_007078_simple",
+      "ar_ce": 5.1650872230529785,
+      "ar_kl": 0.4779873490333557,
+      "caption_tokens": 93,
+      "ar_target_tokens": 224,
+      "tokenize_s": 1.1361980279998534,
+      "loss_s": 0.2273421940001299
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_007078_uthmani",
+      "ar_ce": 5.156679630279541,
+      "ar_kl": 0.5386996269226074,
+      "caption_tokens": 101,
+      "ar_target_tokens": 224,
+      "tokenize_s": 1.1342347709999103,
+      "loss_s": 0.2290356559999509
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_012039_simple",
+      "ar_ce": 5.301947116851807,
+      "ar_kl": 0.8721025586128235,
+      "caption_tokens": 115,
+      "ar_target_tokens": 336,
+      "tokenize_s": 1.9883748219999688,
+      "loss_s": 0.2195113800000854
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_012039_uthmani",
+      "ar_ce": 5.322434425354004,
+      "ar_kl": 0.8324938416481018,
+      "caption_tokens": 132,
+      "ar_target_tokens": 336,
+      "tokenize_s": 1.197923395999851,
+      "loss_s": 0.2199778179999612
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_020005_simple",
+      "ar_ce": 6.0861639976501465,
+      "ar_kl": 0.8890218734741211,
+      "caption_tokens": 76,
+      "ar_target_tokens": 111,
+      "tokenize_s": 0.5723743080000077,
+      "loss_s": 0.2225217770001109
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_020005_uthmani",
+      "ar_ce": 6.073175430297852,
+      "ar_kl": 0.8869987726211548,
+      "caption_tokens": 80,
+      "ar_target_tokens": 111,
+      "tokenize_s": 0.5775773069999559,
+      "loss_s": 0.22470074800003204
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_030017_simple",
+      "ar_ce": 5.603870391845703,
+      "ar_kl": 0.6822203397750854,
+      "caption_tokens": 83,
+      "ar_target_tokens": 183,
+      "tokenize_s": 0.8272722849999354,
+      "loss_s": 0.22052227500012123
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_030017_uthmani",
+      "ar_ce": 5.6065239906311035,
+      "ar_kl": 0.6870407462120056,
+      "caption_tokens": 88,
+      "ar_target_tokens": 183,
+      "tokenize_s": 0.8074416639999527,
+      "loss_s": 0.2242835520000881
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_037061_simple",
+      "ar_ce": 5.035648822784424,
+      "ar_kl": 0.7841046452522278,
+      "caption_tokens": 77,
+      "ar_target_tokens": 200,
+      "tokenize_s": 0.8668532499998491,
+      "loss_s": 0.21943889700014552
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_037061_uthmani",
+      "ar_ce": 5.036735534667969,
+      "ar_kl": 0.7676535844802856,
+      "caption_tokens": 82,
+      "ar_target_tokens": 200,
+      "tokenize_s": 0.8432119759997931,
+      "loss_s": 0.21779715200000282
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_043067_simple",
+      "ar_ce": 5.019333839416504,
+      "ar_kl": 0.5330920219421387,
+      "caption_tokens": 106,
+      "ar_target_tokens": 326,
+      "tokenize_s": 1.1866789489999974,
+      "loss_s": 0.22073153299993464
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_043067_uthmani",
+      "ar_ce": 5.018221378326416,
+      "ar_kl": 0.5316261053085327,
+      "caption_tokens": 112,
+      "ar_target_tokens": 326,
+      "tokenize_s": 1.2200996379999651,
+      "loss_s": 0.22326431700003013
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_069046_simple",
+      "ar_ce": 4.6357927322387695,
+      "ar_kl": 0.7377926111221313,
+      "caption_tokens": 69,
+      "ar_target_tokens": 141,
+      "tokenize_s": 0.857744786000012,
+      "loss_s": 0.227708008000036
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_069046_uthmani",
+      "ar_ce": 4.628070831298828,
+      "ar_kl": 0.7369127869606018,
+      "caption_tokens": 71,
+      "ar_target_tokens": 141,
+      "tokenize_s": 1.0727501169999414,
+      "loss_s": 0.2160703790000298
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_079025_simple",
+      "ar_ce": 5.965595722198486,
+      "ar_kl": 1.0786787271499634,
+      "caption_tokens": 81,
+      "ar_target_tokens": 168,
+      "tokenize_s": 1.187923827000077,
+      "loss_s": 0.2356973140001628
+    },
+    {
+      "stem": "Yaser_Salamah_128kbps_079025_uthmani",
+      "ar_ce": 5.993182182312012,
+      "ar_kl": 1.0806128978729248,
+      "caption_tokens": 91,
+      "ar_target_tokens": 168,
+      "tokenize_s": 1.235772205000103,
+      "loss_s": 0.23607915399998092
+    },
+    {
+      "stem": "aziz_alili_128kbps_006042_simple",
+      "ar_ce": 4.620975017547607,
+      "ar_kl": 0.5247329473495483,
+      "caption_tokens": 144,
+      "ar_target_tokens": 439,
+      "tokenize_s": 1.933510264000006,
+      "loss_s": 0.23932414099999733
+    },
+    {
+      "stem": "aziz_alili_128kbps_006042_uthmani",
+      "ar_ce": 4.625141620635986,
+      "ar_kl": 0.5350793600082397,
+      "caption_tokens": 154,
+      "ar_target_tokens": 439,
+      "tokenize_s": 1.8143679679999423,
+      "loss_s": 0.23414705900017907
+    },
+    {
+      "stem": "aziz_alili_128kbps_007052_simple",
+      "ar_ce": 4.7922444343566895,
+      "ar_kl": 0.5445839762687683,
+      "caption_tokens": 126,
+      "ar_target_tokens": 305,
+      "tokenize_s": 1.3066112020001128,
+      "loss_s": 0.23634406700011823
+    },
+    {
+      "stem": "aziz_alili_128kbps_007052_uthmani",
+      "ar_ce": 4.798814296722412,
+      "ar_kl": 0.5536834597587585,
+      "caption_tokens": 135,
+      "ar_target_tokens": 305,
+      "tokenize_s": 1.300583534999987,
+      "loss_s": 0.23456533400008084
+    },
+    {
+      "stem": "aziz_alili_128kbps_007078_simple",
+      "ar_ce": 5.4283294677734375,
+      "ar_kl": 0.6974923014640808,
+      "caption_tokens": 93,
+      "ar_target_tokens": 194,
+      "tokenize_s": 0.9739728499998819,
+      "loss_s": 0.2363786020000589
+    },
+    {
+      "stem": "aziz_alili_128kbps_007078_uthmani",
+      "ar_ce": 5.437553405761719,
+      "ar_kl": 0.7123022675514221,
+      "caption_tokens": 101,
+      "ar_target_tokens": 194,
+      "tokenize_s": 0.9967722559999856,
+      "loss_s": 0.24015637399998013
+    },
+    {
+      "stem": "aziz_alili_128kbps_012039_simple",
+      "ar_ce": 5.278847694396973,
+      "ar_kl": 0.6976752877235413,
+      "caption_tokens": 115,
+      "ar_target_tokens": 281,
+      "tokenize_s": 1.6585758850001184,
+      "loss_s": 0.24209100600000966
+    },
+    {
+      "stem": "aziz_alili_128kbps_012039_uthmani",
+      "ar_ce": 5.280245780944824,
+      "ar_kl": 0.6874502301216125,
+      "caption_tokens": 132,
+      "ar_target_tokens": 281,
+      "tokenize_s": 1.4018100599998888,
+      "loss_s": 0.2406104909998703
+    },
+    {
+      "stem": "aziz_alili_128kbps_020005_simple",
+      "ar_ce": 6.37700891494751,
+      "ar_kl": 0.5554540753364563,
+      "caption_tokens": 76,
+      "ar_target_tokens": 98,
+      "tokenize_s": 0.730530619999854,
+      "loss_s": 0.2323287420001634
+    },
+    {
+      "stem": "aziz_alili_128kbps_020005_uthmani",
+      "ar_ce": 6.370866775512695,
+      "ar_kl": 0.5706778168678284,
+      "caption_tokens": 80,
+      "ar_target_tokens": 98,
+      "tokenize_s": 0.7084607409999535,
+      "loss_s": 0.2565541439998924
+    },
+    {
+      "stem": "aziz_alili_128kbps_030017_simple",
+      "ar_ce": 4.809331893920898,
+      "ar_kl": 0.8596161603927612,
+      "caption_tokens": 83,
+      "ar_target_tokens": 175,
+      "tokenize_s": 0.9863737919999949,
+      "loss_s": 0.2283120920001238
+    },
+    {
+      "stem": "aziz_alili_128kbps_030017_uthmani",
+      "ar_ce": 4.81776762008667,
+      "ar_kl": 0.8708537817001343,
+      "caption_tokens": 88,
+      "ar_target_tokens": 175,
+      "tokenize_s": 0.8006935500000054,
+      "loss_s": 0.22216883300006884
+    },
+    {
+      "stem": "aziz_alili_128kbps_037061_simple",
+      "ar_ce": 6.0235185623168945,
+      "ar_kl": 0.7203221321105957,
+      "caption_tokens": 77,
+      "ar_target_tokens": 128,
+      "tokenize_s": 0.6354467399999066,
+      "loss_s": 0.21982321999985288
+    },
+    {
+      "stem": "aziz_alili_128kbps_037061_uthmani",
+      "ar_ce": 6.044816017150879,
+      "ar_kl": 0.7001863718032837,
+      "caption_tokens": 82,
+      "ar_target_tokens": 128,
+      "tokenize_s": 0.6444420949999312,
+      "loss_s": 0.21807686299985107
+    },
+    {
+      "stem": "aziz_alili_128kbps_043067_simple",
+      "ar_ce": 5.255903244018555,
+      "ar_kl": 0.8425557613372803,
+      "caption_tokens": 106,
+      "ar_target_tokens": 277,
+      "tokenize_s": 1.0526227950001612,
+      "loss_s": 0.22475091399996927
+    },
+    {
+      "stem": "aziz_alili_128kbps_043067_uthmani",
+      "ar_ce": 5.261515140533447,
+      "ar_kl": 0.8259415626525879,
+      "caption_tokens": 112,
+      "ar_target_tokens": 277,
+      "tokenize_s": 1.041820257999916,
+      "loss_s": 0.2197091589998763
+    },
+    {
+      "stem": "aziz_alili_128kbps_069046_simple",
+      "ar_ce": 5.737301826477051,
+      "ar_kl": 0.8730026483535767,
+      "caption_tokens": 69,
+      "ar_target_tokens": 128,
+      "tokenize_s": 0.6226891400001477,
+      "loss_s": 0.22854135099987616
+    },
+    {
+      "stem": "aziz_alili_128kbps_069046_uthmani",
+      "ar_ce": 5.725588321685791,
+      "ar_kl": 0.883561372756958,
+      "caption_tokens": 71,
+      "ar_target_tokens": 128,
+      "tokenize_s": 0.620242608000126,
+      "loss_s": 0.22520659399992837
+    },
+    {
+      "stem": "aziz_alili_128kbps_079025_simple",
+      "ar_ce": 5.339974880218506,
+      "ar_kl": 0.9152215719223022,
+      "caption_tokens": 81,
+      "ar_target_tokens": 153,
+      "tokenize_s": 0.764031728999953,
+      "loss_s": 0.2245645999998942
+    },
+    {
+      "stem": "aziz_alili_128kbps_079025_uthmani",
+      "ar_ce": 5.329295635223389,
+      "ar_kl": 0.9306422472000122,
+      "caption_tokens": 91,
+      "ar_target_tokens": 153,
+      "tokenize_s": 0.77011775699998,
+      "loss_s": 0.2261095359999672
+    }
+  ]
+}

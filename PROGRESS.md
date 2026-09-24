@@ -674,3 +674,31 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   alpha sweep is cheap, no batching. Output dir `output/` is git-ignored.
 - **Not done (next):** AR-loss replay over the 180 `val` pairs, the alpha sweep
   against held-out lyrics, and any audio.cpp inference. No GPU used here.
+
+## 2026-09-24 — Task 16B: 720-pass AR-loss replay completes on L4; int8 kernel confirmed engaged
+
+- **Preflight (fresh L4):** branch `pron-lora-ar-only` ✓; all three GCP vars exported ✓
+  (incl. `GCP_PRON_DATASET_PATH` — the past VM bug did not recur); `val` 180 mp3 + 180 txt ✓;
+  4 checkpoints pulled from GCS ✓. **Sidecars were not running** — agent started
+  `backup_to_gcp.py --run-name pron_lora_ar_only_r8` + `gpu_logger.py`.
+- **Kernel smoke (Step 1): PASS.** `--checkpoint final --limit 8 --device cuda` gave
+  **0.61 s/item** AR-loss forward (0.23 s steady-state) vs the CPU baseline's
+  **272.79 s/item** — ~450×, qualitative. The CPU W8A16-fallback warning is absent, so the
+  W8A8 int8 `torch._int_mm` kernel ran on the L4 (cc 8.9). `ar_ce`/`ar_kl` match the CPU
+  benchmark to 4 dp, confirming the same path. This is why the L4 is the right box for it.
+- **Full sweep (Step 2): 4 checkpoints × 180 = 720 passes, ~23 min, zero errors**
+  (detached, user-typed). Mean `ar_ce` / `ar_kl`:
+
+  | ckpt | 1525 | 3050 | 4575 | final |
+  |---|---|---|---|---|
+  | `ar_ce` | 5.1157 | 4.6202 | 4.5053 | **4.4507** |
+  | `ar_kl` | 0.7180 | 1.2715 | 1.4241 | **1.4828** |
+
+  `ar_ce` falls and `ar_kl` rises monotonically (same unbroken-drift shape as training),
+  with sharply diminishing `ar_ce` return after 3050.
+- **Persisted:** raw JSON + log + summary committed under `results/` (`README.md` table);
+  `docs/PRON_LORA_VERIFICATION.md` §A3b updated with these results and the **900→720 pass
+  correction** (there were only 4 trainable checkpoints, not 5).
+- **Next (not this task):** choose checkpoint + `alpha` from these numbers, merge with the
+  frozen v2 style LoRA, run the alpha sweep against held-out lyrics, then the
+  letter-substitution scorecard. No merge/inference done here.

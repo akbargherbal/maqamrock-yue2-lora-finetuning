@@ -118,16 +118,48 @@ NAR contributes to neither `ar_ce` nor `ar_kl`).
   4.0652, `loss/ar_kl` 1.3636** (range `ar_ce` 3.75–4.31, `ar_kl` 1.25–1.53) — the same
   neighborhood as the training last-50 means (`ar_ce` 4.397, `ar_kl` 1.533), finite, not
   NaN.
-- **Extrapolation:** 900 forward passes (180 pairs × 5 checkpoints) × 272.79 s
-  = 245,511 s ≈ **68.2 h** on this CPU box, plus tokenization (~0.9 h per full pass if
-  recomputed; cacheable to ~0.2 h once).
-- **STOP (deliberate):** the 900-pass sweep was **not** run, checkpoints were **not**
-  compared, and no pronunciation conclusion is drawn. Whether to run the full sweep on
-  CPU or wait for an L4 is the user's call.
+- **Extrapolation:** **720** forward passes (180 pairs × **4** checkpoints — there is no
+  `_000006100` numbered file; the post-loop no-step save *is* step 6100, see
+  `docs/L4_HANDOFF_TASK14C.md` §2) × 272.79 s = 196,409 s ≈ **54.6 h** on this CPU box,
+  plus tokenization (~0.9 h per full pass if recomputed; cacheable to ~0.2 h once).
+  *(Corrected 2026-09-24: this line read "900 … × 5 checkpoints ≈ 68.2 h", counting a
+  fifth checkpoint that does not exist.)*
+- **STOP (deliberate):** the sweep was **not** run on CPU, checkpoints were **not**
+  compared there, and no pronunciation conclusion is drawn. Whether to run the full sweep
+  on CPU or wait for an L4 was the user's call — **resolved: run it on the L4, below.**
 - **Gotcha:** on a CPU-only host `toolkit.util.get_model.get_model_class()` raises
   `RuntimeError: Found no NVIDIA driver` — an unrelated extension (omnigen2) calls
   `torch.cuda.current_device()` at import time and `get_all_models()` only catches
   `ImportError`. The replay imports `YuE2AudioModel` directly to avoid this.
+
+### A3b (L4) — full 720-pass sweep run on GPU, 2026-09-24
+
+The sweep the CPU benchmark deliberately stopped short of was run on a Colab **L4**
+(sm_89). The target was to confirm the int8 path actually engages on CUDA first, since
+the CPU VM fell back to dequantized bf16 (W8A16).
+
+- **Kernel smoke (`--checkpoint final --limit 8 --device cuda`): PASS.** Per-item AR-loss
+  forward **0.61 s mean / 0.23 s steady-state** vs the CPU's **272.79 s/item** — ~450×, a
+  *qualitative* jump, not the proportional gain more CPU cores could give. The CPU
+  fallback warning (`torch._int_mm … not usable on this device`) is **absent** from the L4
+  log, i.e. the W8A8 int8 path ran (compute capability 8.9 has a CUDA `torch._int_mm`
+  kernel; the CPU has none). Loss means match the CPU benchmark to 4 dp (`ar_ce` 4.0652,
+  `ar_kl` 1.3653/1.3636), confirming the same loss path.
+- **Full sweep: 4 checkpoints × 180 val pairs = 720 forward passes**, ~23 min wall, zero
+  errors. Raw JSON in `results/replay_l4_full_<ckpt>.json`; full stdout
+  `results/replay_l4_full_sweep.log`; summary `results/README.md`.
+
+| checkpoint | step | mean `ar_ce` | mean `ar_kl` |
+|---|---|---:|---:|
+| `_000001525` | 1525 | 5.1157 | 0.7180 |
+| `_000003050` | 3050 | 4.6202 | 1.2715 |
+| `_000004575` | 4575 | 4.5053 | 1.4241 |
+| `final` | 6100 | **4.4507** | **1.4828** |
+
+`ar_ce` falls monotonically (5.12 → 4.45) while `ar_kl` rises monotonically (0.72 → 1.48),
+with strongly diminishing `ar_ce` returns after 3050 (4575→final: −0.05 `ar_ce` for
++0.06 `ar_kl`). This is a held-out loss report only; it does **not** pick the merge
+checkpoint/alpha, and no merge has been run.
 
 ## A4 — what `loss/ar_kl` measures; what changes when only AR is trainable
 

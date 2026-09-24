@@ -1,0 +1,805 @@
+nohup: ignoring input
+=== checkpoint 1525 ===
+[replay] checkpoint=1525 adapter=/content/ai-toolkit/output/pron_lora_ar_only_r8/pron_lora_ar_only_r8_000001525.safetensors
+[replay] val_dir=/content/pron_dataset/val pairs=180 device=cuda
+Flax classes are deprecated and will be removed in Diffusers v0.40.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+Flax classes are deprecated and will be removed in Diffusers v0.40.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+Loading YuE2 from /content/ai-toolkit/models/checkpoints/yue2_3b_int8_convrot.safetensors
+Checkpoint is pre-quantized (convrot8); keeping it
+create LoRA network. base dim (rank): 8, alpha: 8
+neuron dropout: p=None, rank dropout: p=None, module dropout: p=None
+apply LoRA to Conv2d with kernel size (3,3). dim (rank): 16, alpha: 16
+create LoRA for Text Encoder: 0 modules.
+create LoRA for U-Net: 112 modules.
+enable LoRA for U-Net
+Missing keys: []
+[replay] model+adapter loaded in 46.4s
+Loading YuE2 semantic tokenizer (MERT-v2-FullSong + head)
+Loading weights:   0%|          | 0/876 [00:00<?, ?it/s]Loading weights:  49%|████▊     | 426/876 [00:00<00:00, 4235.02it/s]Loading weights:  99%|█████████▉| 868/876 [00:00<00:00, 4343.29it/s]Loading weights: 100%|██████████| 876/876 [00:00<00:00, 4355.13it/s]
+`use_return_dict` is deprecated! Use `return_dict` instead!
+[1/180] Abdul_Basit_Murattal_192kbps_006042_simple  ar_ce=4.2643 ar_kl=0.5576 prefix=144 targets=594 tokenize=3.21s loss=2.06s total=5.27s
+[2/180] Abdul_Basit_Murattal_192kbps_006042_uthmani  ar_ce=4.2773 ar_kl=0.5715 prefix=154 targets=594 tokenize=2.38s loss=0.23s total=2.61s
+[3/180] Abdul_Basit_Murattal_192kbps_007052_simple  ar_ce=4.7007 ar_kl=0.5173 prefix=126 targets=442 tokenize=1.73s loss=0.23s total=1.96s
+[4/180] Abdul_Basit_Murattal_192kbps_007052_uthmani  ar_ce=4.7010 ar_kl=0.5313 prefix=135 targets=442 tokenize=1.71s loss=0.23s total=1.93s
+[5/180] Abdul_Basit_Murattal_192kbps_007078_simple  ar_ce=4.8929 ar_kl=0.5074 prefix=93 targets=276 tokenize=1.47s loss=0.24s total=1.70s
+[6/180] Abdul_Basit_Murattal_192kbps_007078_uthmani  ar_ce=4.8783 ar_kl=0.5472 prefix=101 targets=276 tokenize=1.39s loss=0.25s total=1.64s
+[7/180] Abdul_Basit_Murattal_192kbps_012039_simple  ar_ce=4.7724 ar_kl=0.6758 prefix=115 targets=286 tokenize=1.76s loss=0.22s total=1.99s
+[8/180] Abdul_Basit_Murattal_192kbps_012039_uthmani  ar_ce=4.7973 ar_kl=0.6707 prefix=132 targets=286 tokenize=1.48s loss=0.26s total=1.73s
+[9/180] Abdul_Basit_Murattal_192kbps_020005_simple  ar_ce=5.6144 ar_kl=0.9269 prefix=76 targets=134 tokenize=0.80s loss=0.25s total=1.05s
+[10/180] Abdul_Basit_Murattal_192kbps_020005_uthmani  ar_ce=5.6376 ar_kl=0.9203 prefix=80 targets=134 tokenize=1.01s loss=0.23s total=1.24s
+[11/180] Abdul_Basit_Murattal_192kbps_030017_simple  ar_ce=4.8181 ar_kl=0.7689 prefix=83 targets=213 tokenize=1.03s loss=0.22s total=1.25s
+[12/180] Abdul_Basit_Murattal_192kbps_030017_uthmani  ar_ce=4.8202 ar_kl=0.8105 prefix=88 targets=213 tokenize=1.00s loss=0.23s total=1.22s
+[13/180] Abdul_Basit_Murattal_192kbps_037061_simple  ar_ce=5.9610 ar_kl=0.7762 prefix=77 targets=129 tokenize=0.75s loss=0.24s total=0.99s
+[14/180] Abdul_Basit_Murattal_192kbps_037061_uthmani  ar_ce=5.9636 ar_kl=0.7595 prefix=82 targets=129 tokenize=1.04s loss=0.24s total=1.28s
+[15/180] Abdul_Basit_Murattal_192kbps_043067_simple  ar_ce=4.7552 ar_kl=0.5773 prefix=106 targets=328 tokenize=1.35s loss=0.25s total=1.60s
+[16/180] Abdul_Basit_Murattal_192kbps_043067_uthmani  ar_ce=4.7499 ar_kl=0.5765 prefix=112 targets=328 tokenize=1.48s loss=0.23s total=1.70s
+[17/180] Abdul_Basit_Murattal_192kbps_069046_simple  ar_ce=4.9732 ar_kl=0.9021 prefix=69 targets=150 tokenize=1.17s loss=0.23s total=1.40s
+[18/180] Abdul_Basit_Murattal_192kbps_069046_uthmani  ar_ce=4.9678 ar_kl=0.8965 prefix=71 targets=150 tokenize=1.09s loss=0.25s total=1.34s
+[19/180] Abdul_Basit_Murattal_192kbps_079025_simple  ar_ce=5.3429 ar_kl=1.0907 prefix=81 targets=166 tokenize=1.22s loss=0.25s total=1.47s
+[20/180] Abdul_Basit_Murattal_192kbps_079025_uthmani  ar_ce=5.3781 ar_kl=1.1152 prefix=91 targets=166 tokenize=0.89s loss=0.24s total=1.13s
+[21/180] Abdullah_Basfar_192kbps_006042_simple  ar_ce=4.5137 ar_kl=0.5566 prefix=144 targets=514 tokenize=1.95s loss=0.68s total=2.64s
+[22/180] Abdullah_Basfar_192kbps_006042_uthmani  ar_ce=4.5221 ar_kl=0.5769 prefix=154 targets=514 tokenize=1.94s loss=0.24s total=2.17s
+[23/180] Abdullah_Basfar_192kbps_007052_simple  ar_ce=4.5273 ar_kl=0.5566 prefix=126 targets=337 tokenize=1.37s loss=0.25s total=1.63s
+[24/180] Abdullah_Basfar_192kbps_007052_uthmani  ar_ce=4.5306 ar_kl=0.5651 prefix=135 targets=337 tokenize=1.44s loss=0.25s total=1.69s
+[25/180] Abdullah_Basfar_192kbps_007078_simple  ar_ce=5.2661 ar_kl=0.8998 prefix=93 targets=224 tokenize=1.21s loss=0.24s total=1.45s
+[26/180] Abdullah_Basfar_192kbps_007078_uthmani  ar_ce=5.2633 ar_kl=0.9265 prefix=101 targets=224 tokenize=1.49s loss=0.24s total=1.72s
+[27/180] Abdullah_Basfar_192kbps_012039_simple  ar_ce=5.1686 ar_kl=0.5879 prefix=115 targets=332 tokenize=1.99s loss=0.23s total=2.22s
+[28/180] Abdullah_Basfar_192kbps_012039_uthmani  ar_ce=5.1673 ar_kl=0.5714 prefix=132 targets=332 tokenize=1.60s loss=0.23s total=1.83s
+[29/180] Abdullah_Basfar_192kbps_020005_simple  ar_ce=4.8269 ar_kl=0.6602 prefix=76 targets=169 tokenize=0.89s loss=0.23s total=1.12s
+[30/180] Abdullah_Basfar_192kbps_020005_uthmani  ar_ce=4.8442 ar_kl=0.6723 prefix=80 targets=169 tokenize=0.99s loss=0.23s total=1.23s
+[31/180] Abdullah_Basfar_192kbps_030017_simple  ar_ce=5.1995 ar_kl=0.6866 prefix=83 targets=194 tokenize=0.96s loss=0.25s total=1.21s
+[32/180] Abdullah_Basfar_192kbps_030017_uthmani  ar_ce=5.1851 ar_kl=0.7067 prefix=88 targets=194 tokenize=0.97s loss=0.23s total=1.20s
+[33/180] Abdullah_Basfar_192kbps_037061_simple  ar_ce=5.5602 ar_kl=0.7422 prefix=77 targets=160 tokenize=0.87s loss=0.24s total=1.10s
+[34/180] Abdullah_Basfar_192kbps_037061_uthmani  ar_ce=5.5580 ar_kl=0.7494 prefix=82 targets=160 tokenize=0.86s loss=0.24s total=1.10s
+[35/180] Abdullah_Basfar_192kbps_043067_simple  ar_ce=5.1917 ar_kl=0.8524 prefix=106 targets=279 tokenize=1.23s loss=0.23s total=1.46s
+[36/180] Abdullah_Basfar_192kbps_043067_uthmani  ar_ce=5.1629 ar_kl=0.8481 prefix=112 targets=279 tokenize=1.34s loss=0.24s total=1.58s
+[37/180] Abdullah_Basfar_192kbps_069046_simple  ar_ce=5.4794 ar_kl=0.7704 prefix=69 targets=143 tokenize=0.91s loss=0.25s total=1.15s
+[38/180] Abdullah_Basfar_192kbps_069046_uthmani  ar_ce=5.4901 ar_kl=0.7845 prefix=71 targets=143 tokenize=1.05s loss=0.25s total=1.30s
+[39/180] Abdullah_Basfar_192kbps_079025_simple  ar_ce=5.5730 ar_kl=0.9237 prefix=81 targets=189 tokenize=1.32s loss=0.23s total=1.56s
+[40/180] Abdullah_Basfar_192kbps_079025_uthmani  ar_ce=5.6095 ar_kl=0.9502 prefix=91 targets=189 tokenize=1.16s loss=0.23s total=1.39s
+[41/180] Abu_Bakr_Ash-Shaatree_128kbps_006042_simple  ar_ce=5.0073 ar_kl=0.5412 prefix=144 targets=432 tokenize=1.71s loss=0.22s total=1.93s
+[42/180] Abu_Bakr_Ash-Shaatree_128kbps_006042_uthmani  ar_ce=5.0064 ar_kl=0.5444 prefix=154 targets=432 tokenize=1.72s loss=0.23s total=1.96s
+[43/180] Abu_Bakr_Ash-Shaatree_128kbps_007052_simple  ar_ce=5.1718 ar_kl=0.4410 prefix=126 targets=316 tokenize=1.31s loss=0.23s total=1.54s
+[44/180] Abu_Bakr_Ash-Shaatree_128kbps_007052_uthmani  ar_ce=5.1720 ar_kl=0.4453 prefix=135 targets=316 tokenize=1.33s loss=0.24s total=1.57s
+[45/180] Abu_Bakr_Ash-Shaatree_128kbps_007078_simple  ar_ce=5.1868 ar_kl=0.6587 prefix=93 targets=174 tokenize=0.91s loss=0.23s total=1.13s
+[46/180] Abu_Bakr_Ash-Shaatree_128kbps_007078_uthmani  ar_ce=5.1810 ar_kl=0.6611 prefix=101 targets=174 tokenize=1.02s loss=0.23s total=1.25s
+[47/180] Abu_Bakr_Ash-Shaatree_128kbps_012039_simple  ar_ce=5.2948 ar_kl=0.5553 prefix=115 targets=342 tokenize=1.89s loss=0.23s total=2.12s
+[48/180] Abu_Bakr_Ash-Shaatree_128kbps_012039_uthmani  ar_ce=5.3036 ar_kl=0.5521 prefix=132 targets=342 tokenize=2.05s loss=0.23s total=2.27s
+[49/180] Abu_Bakr_Ash-Shaatree_128kbps_020005_simple  ar_ce=6.0732 ar_kl=0.6210 prefix=76 targets=99 tokenize=0.83s loss=0.23s total=1.06s
+[50/180] Abu_Bakr_Ash-Shaatree_128kbps_020005_uthmani  ar_ce=6.0938 ar_kl=0.6122 prefix=80 targets=99 tokenize=0.64s loss=0.23s total=0.87s
+[51/180] Abu_Bakr_Ash-Shaatree_128kbps_030017_simple  ar_ce=5.9111 ar_kl=1.0202 prefix=83 targets=158 tokenize=0.88s loss=0.24s total=1.12s
+[52/180] Abu_Bakr_Ash-Shaatree_128kbps_030017_uthmani  ar_ce=5.9245 ar_kl=1.0274 prefix=88 targets=158 tokenize=0.85s loss=0.24s total=1.09s
+[53/180] Abu_Bakr_Ash-Shaatree_128kbps_037061_simple  ar_ce=4.5189 ar_kl=0.4539 prefix=77 targets=337 tokenize=1.43s loss=0.25s total=1.68s
+[54/180] Abu_Bakr_Ash-Shaatree_128kbps_037061_uthmani  ar_ce=4.5225 ar_kl=0.4506 prefix=82 targets=337 tokenize=1.40s loss=0.25s total=1.65s
+[55/180] Abu_Bakr_Ash-Shaatree_128kbps_043067_simple  ar_ce=5.3499 ar_kl=0.6462 prefix=106 targets=247 tokenize=1.12s loss=0.24s total=1.36s
+[56/180] Abu_Bakr_Ash-Shaatree_128kbps_043067_uthmani  ar_ce=5.3481 ar_kl=0.6371 prefix=112 targets=247 tokenize=1.10s loss=0.23s total=1.33s
+[57/180] Abu_Bakr_Ash-Shaatree_128kbps_069046_simple  ar_ce=6.0174 ar_kl=1.0382 prefix=69 targets=123 tokenize=0.80s loss=0.22s total=1.02s
+[58/180] Abu_Bakr_Ash-Shaatree_128kbps_069046_uthmani  ar_ce=6.0108 ar_kl=1.0263 prefix=71 targets=123 tokenize=0.97s loss=0.23s total=1.20s
+[59/180] Abu_Bakr_Ash-Shaatree_128kbps_079025_simple  ar_ce=6.0608 ar_kl=0.8272 prefix=81 targets=167 tokenize=1.22s loss=0.24s total=1.47s
+[60/180] Abu_Bakr_Ash-Shaatree_128kbps_079025_uthmani  ar_ce=6.0718 ar_kl=0.8672 prefix=91 targets=167 tokenize=1.20s loss=0.23s total=1.43s
+[61/180] Hudhaify_128kbps_006042_simple  ar_ce=4.5462 ar_kl=0.4703 prefix=144 targets=627 tokenize=2.78s loss=0.24s total=3.02s
+[62/180] Hudhaify_128kbps_006042_uthmani  ar_ce=4.5492 ar_kl=0.4775 prefix=154 targets=627 tokenize=2.44s loss=0.25s total=2.69s
+[63/180] Hudhaify_128kbps_007052_simple  ar_ce=5.2150 ar_kl=0.6831 prefix=126 targets=359 tokenize=1.77s loss=0.24s total=2.00s
+[64/180] Hudhaify_128kbps_007052_uthmani  ar_ce=5.2305 ar_kl=0.7020 prefix=135 targets=359 tokenize=1.47s loss=0.24s total=1.70s
+[65/180] Hudhaify_128kbps_007078_simple  ar_ce=4.7728 ar_kl=0.8382 prefix=93 targets=223 tokenize=1.07s loss=0.24s total=1.30s
+[66/180] Hudhaify_128kbps_007078_uthmani  ar_ce=4.7735 ar_kl=0.8453 prefix=101 targets=223 tokenize=1.48s loss=0.23s total=1.72s
+[67/180] Hudhaify_128kbps_012039_simple  ar_ce=5.0205 ar_kl=0.5604 prefix=115 targets=301 tokenize=1.85s loss=0.22s total=2.07s
+[68/180] Hudhaify_128kbps_012039_uthmani  ar_ce=5.0199 ar_kl=0.5697 prefix=132 targets=301 tokenize=1.75s loss=0.23s total=1.98s
+[69/180] Hudhaify_128kbps_020005_simple  ar_ce=5.6371 ar_kl=0.9900 prefix=76 targets=119 tokenize=0.72s loss=0.24s total=0.95s
+[70/180] Hudhaify_128kbps_020005_uthmani  ar_ce=5.6512 ar_kl=0.9973 prefix=80 targets=119 tokenize=0.72s loss=0.23s total=0.96s
+[71/180] Hudhaify_128kbps_030017_simple  ar_ce=4.6302 ar_kl=0.7463 prefix=83 targets=190 tokenize=0.98s loss=0.23s total=1.21s
+[72/180] Hudhaify_128kbps_030017_uthmani  ar_ce=4.6201 ar_kl=0.7550 prefix=88 targets=190 tokenize=0.96s loss=0.25s total=1.20s
+[73/180] Hudhaify_128kbps_037061_simple  ar_ce=5.5777 ar_kl=0.8046 prefix=77 targets=165 tokenize=0.96s loss=0.24s total=1.19s
+[74/180] Hudhaify_128kbps_037061_uthmani  ar_ce=5.5762 ar_kl=0.8107 prefix=82 targets=165 tokenize=0.90s loss=0.23s total=1.13s
+[75/180] Hudhaify_128kbps_043067_simple  ar_ce=5.2073 ar_kl=0.7174 prefix=106 targets=329 tokenize=1.39s loss=0.23s total=1.62s
+[76/180] Hudhaify_128kbps_043067_uthmani  ar_ce=5.1996 ar_kl=0.7400 prefix=112 targets=329 tokenize=1.52s loss=0.22s total=1.74s
+[77/180] Hudhaify_128kbps_069046_simple  ar_ce=4.7545 ar_kl=0.8260 prefix=69 targets=160 tokenize=1.07s loss=0.24s total=1.31s
+[78/180] Hudhaify_128kbps_069046_uthmani  ar_ce=4.7541 ar_kl=0.8244 prefix=71 targets=160 tokenize=1.19s loss=0.23s total=1.43s
+[79/180] Hudhaify_128kbps_079025_simple  ar_ce=5.6167 ar_kl=0.8524 prefix=81 targets=158 tokenize=1.20s loss=0.22s total=1.43s
+[80/180] Hudhaify_128kbps_079025_uthmani  ar_ce=5.6581 ar_kl=0.8204 prefix=91 targets=158 tokenize=1.07s loss=0.23s total=1.30s
+[81/180] Husary_128kbps_006042_simple  ar_ce=4.1824 ar_kl=0.4840 prefix=144 targets=721 tokenize=2.77s loss=0.24s total=3.01s
+[82/180] Husary_128kbps_006042_uthmani  ar_ce=4.1858 ar_kl=0.4952 prefix=154 targets=721 tokenize=2.77s loss=0.24s total=3.01s
+[83/180] Husary_128kbps_007052_simple  ar_ce=4.5410 ar_kl=0.4428 prefix=126 targets=571 tokenize=2.32s loss=0.23s total=2.56s
+[84/180] Husary_128kbps_007052_uthmani  ar_ce=4.5399 ar_kl=0.4415 prefix=135 targets=571 tokenize=2.58s loss=0.24s total=2.82s
+[85/180] Husary_128kbps_007078_simple  ar_ce=4.3036 ar_kl=0.5562 prefix=93 targets=342 tokenize=2.01s loss=0.23s total=2.24s
+[86/180] Husary_128kbps_007078_uthmani  ar_ce=4.3015 ar_kl=0.5791 prefix=101 targets=342 tokenize=1.92s loss=0.23s total=2.16s
+[87/180] Husary_128kbps_012039_simple  ar_ce=4.4206 ar_kl=0.4533 prefix=115 targets=510 tokenize=1.95s loss=0.23s total=2.19s
+[88/180] Husary_128kbps_012039_uthmani  ar_ce=4.4124 ar_kl=0.4429 prefix=132 targets=510 tokenize=2.03s loss=0.24s total=2.27s
+[89/180] Husary_128kbps_020005_simple  ar_ce=4.6390 ar_kl=0.5278 prefix=76 targets=183 tokenize=0.91s loss=0.23s total=1.14s
+[90/180] Husary_128kbps_020005_uthmani  ar_ce=4.6283 ar_kl=0.5282 prefix=80 targets=183 tokenize=0.92s loss=0.23s total=1.15s
+[91/180] Husary_128kbps_030017_simple  ar_ce=4.5589 ar_kl=0.5474 prefix=83 targets=316 tokenize=1.30s loss=0.23s total=1.53s
+[92/180] Husary_128kbps_030017_uthmani  ar_ce=4.5641 ar_kl=0.5521 prefix=88 targets=316 tokenize=1.39s loss=0.23s total=1.62s
+[93/180] Husary_128kbps_037061_simple  ar_ce=5.0180 ar_kl=0.7854 prefix=77 targets=195 tokenize=1.04s loss=0.24s total=1.27s
+[94/180] Husary_128kbps_037061_uthmani  ar_ce=5.0200 ar_kl=0.7915 prefix=82 targets=195 tokenize=1.12s loss=0.24s total=1.36s
+[95/180] Husary_128kbps_043067_simple  ar_ce=4.3627 ar_kl=0.5421 prefix=106 targets=377 tokenize=1.69s loss=0.23s total=1.92s
+[96/180] Husary_128kbps_043067_uthmani  ar_ce=4.3656 ar_kl=0.5365 prefix=112 targets=377 tokenize=1.96s loss=0.24s total=2.20s
+[97/180] Husary_128kbps_069046_simple  ar_ce=5.0880 ar_kl=0.5970 prefix=69 targets=197 tokenize=0.99s loss=0.22s total=1.21s
+[98/180] Husary_128kbps_069046_uthmani  ar_ce=5.0870 ar_kl=0.6014 prefix=71 targets=197 tokenize=0.96s loss=0.23s total=1.20s
+[99/180] Husary_128kbps_079025_simple  ar_ce=4.8818 ar_kl=0.4793 prefix=81 targets=273 tokenize=1.19s loss=0.23s total=1.43s
+[100/180] Husary_128kbps_079025_uthmani  ar_ce=4.8567 ar_kl=0.5311 prefix=91 targets=273 tokenize=1.17s loss=0.24s total=1.41s
+[101/180] Minshawy_Murattal_128kbps_006042_simple  ar_ce=4.4559 ar_kl=0.5312 prefix=144 targets=510 tokenize=1.95s loss=0.23s total=2.18s
+[102/180] Minshawy_Murattal_128kbps_006042_uthmani  ar_ce=4.4501 ar_kl=0.5299 prefix=154 targets=510 tokenize=1.98s loss=0.23s total=2.21s
+[103/180] Minshawy_Murattal_128kbps_007052_simple  ar_ce=4.6476 ar_kl=0.7510 prefix=126 targets=377 tokenize=1.70s loss=0.23s total=1.94s
+[104/180] Minshawy_Murattal_128kbps_007052_uthmani  ar_ce=4.6594 ar_kl=0.7630 prefix=135 targets=377 tokenize=1.71s loss=0.22s total=1.93s
+[105/180] Minshawy_Murattal_128kbps_007078_simple  ar_ce=4.5391 ar_kl=0.7333 prefix=93 targets=215 tokenize=1.44s loss=0.24s total=1.68s
+[106/180] Minshawy_Murattal_128kbps_007078_uthmani  ar_ce=4.5565 ar_kl=0.7465 prefix=101 targets=215 tokenize=1.13s loss=0.23s total=1.36s
+[107/180] Minshawy_Murattal_128kbps_012039_simple  ar_ce=5.0746 ar_kl=0.6637 prefix=115 targets=352 tokenize=1.42s loss=0.24s total=1.66s
+[108/180] Minshawy_Murattal_128kbps_012039_uthmani  ar_ce=5.0707 ar_kl=0.6726 prefix=132 targets=352 tokenize=1.44s loss=0.23s total=1.68s
+[109/180] Minshawy_Murattal_128kbps_020005_simple  ar_ce=5.9923 ar_kl=0.9648 prefix=76 targets=123 tokenize=0.74s loss=0.23s total=0.97s
+[110/180] Minshawy_Murattal_128kbps_020005_uthmani  ar_ce=5.9926 ar_kl=0.9421 prefix=80 targets=123 tokenize=0.72s loss=0.23s total=0.95s
+[111/180] Minshawy_Murattal_128kbps_030017_simple  ar_ce=5.3030 ar_kl=0.7612 prefix=83 targets=173 tokenize=0.95s loss=0.22s total=1.18s
+[112/180] Minshawy_Murattal_128kbps_030017_uthmani  ar_ce=5.3185 ar_kl=0.7541 prefix=88 targets=173 tokenize=0.89s loss=0.23s total=1.13s
+[113/180] Minshawy_Murattal_128kbps_037061_simple  ar_ce=5.7545 ar_kl=0.7685 prefix=77 targets=145 tokenize=0.96s loss=0.23s total=1.19s
+[114/180] Minshawy_Murattal_128kbps_037061_uthmani  ar_ce=5.7710 ar_kl=0.7466 prefix=82 targets=145 tokenize=0.92s loss=0.23s total=1.15s
+[115/180] Minshawy_Murattal_128kbps_043067_simple  ar_ce=5.2365 ar_kl=0.9298 prefix=106 targets=274 tokenize=1.72s loss=0.24s total=1.96s
+[116/180] Minshawy_Murattal_128kbps_043067_uthmani  ar_ce=5.2298 ar_kl=0.9667 prefix=112 targets=274 tokenize=1.57s loss=0.25s total=1.82s
+[117/180] Minshawy_Murattal_128kbps_069046_simple  ar_ce=5.2357 ar_kl=0.6635 prefix=69 targets=141 tokenize=0.90s loss=0.24s total=1.13s
+[118/180] Minshawy_Murattal_128kbps_069046_uthmani  ar_ce=5.2339 ar_kl=0.6703 prefix=71 targets=141 tokenize=0.93s loss=0.25s total=1.18s
+[119/180] Minshawy_Murattal_128kbps_079025_simple  ar_ce=5.1336 ar_kl=0.9260 prefix=81 targets=212 tokenize=1.02s loss=0.23s total=1.25s
+[120/180] Minshawy_Murattal_128kbps_079025_uthmani  ar_ce=5.1488 ar_kl=1.0394 prefix=91 targets=212 tokenize=1.08s loss=0.23s total=1.32s
+[121/180] Muhammad_Ayyoub_128kbps_006042_simple  ar_ce=4.5551 ar_kl=0.4958 prefix=144 targets=860 tokenize=3.54s loss=0.24s total=3.78s
+[122/180] Muhammad_Ayyoub_128kbps_006042_uthmani  ar_ce=4.5538 ar_kl=0.4863 prefix=154 targets=860 tokenize=3.75s loss=0.24s total=3.98s
+[123/180] Muhammad_Ayyoub_128kbps_007052_simple  ar_ce=4.6591 ar_kl=0.4712 prefix=126 targets=392 tokenize=2.25s loss=0.23s total=2.48s
+[124/180] Muhammad_Ayyoub_128kbps_007052_uthmani  ar_ce=4.6599 ar_kl=0.4735 prefix=135 targets=392 tokenize=1.73s loss=0.25s total=1.98s
+[125/180] Muhammad_Ayyoub_128kbps_007078_simple  ar_ce=4.8659 ar_kl=0.8817 prefix=93 targets=217 tokenize=1.37s loss=0.23s total=1.60s
+[126/180] Muhammad_Ayyoub_128kbps_007078_uthmani  ar_ce=4.8676 ar_kl=0.9227 prefix=101 targets=217 tokenize=1.02s loss=0.24s total=1.26s
+[127/180] Muhammad_Ayyoub_128kbps_012039_simple  ar_ce=4.8333 ar_kl=0.5287 prefix=115 targets=352 tokenize=1.49s loss=0.23s total=1.72s
+[128/180] Muhammad_Ayyoub_128kbps_012039_uthmani  ar_ce=4.8388 ar_kl=0.5077 prefix=132 targets=352 tokenize=1.42s loss=0.23s total=1.65s
+[129/180] Muhammad_Ayyoub_128kbps_020005_simple  ar_ce=5.4298 ar_kl=1.2864 prefix=76 targets=113 tokenize=0.70s loss=0.24s total=0.94s
+[130/180] Muhammad_Ayyoub_128kbps_020005_uthmani  ar_ce=5.4328 ar_kl=1.2451 prefix=80 targets=113 tokenize=0.58s loss=0.22s total=0.81s
+[131/180] Muhammad_Ayyoub_128kbps_030017_simple  ar_ce=4.5409 ar_kl=0.7702 prefix=83 targets=200 tokenize=0.86s loss=0.22s total=1.09s
+[132/180] Muhammad_Ayyoub_128kbps_030017_uthmani  ar_ce=4.5407 ar_kl=0.7811 prefix=88 targets=200 tokenize=0.86s loss=0.22s total=1.08s
+[133/180] Muhammad_Ayyoub_128kbps_037061_simple  ar_ce=6.0674 ar_kl=0.7864 prefix=77 targets=170 tokenize=0.96s loss=0.23s total=1.19s
+[134/180] Muhammad_Ayyoub_128kbps_037061_uthmani  ar_ce=6.0832 ar_kl=0.7742 prefix=82 targets=170 tokenize=0.93s loss=0.23s total=1.15s
+[135/180] Muhammad_Ayyoub_128kbps_043067_simple  ar_ce=4.7975 ar_kl=0.7267 prefix=106 targets=300 tokenize=1.81s loss=0.22s total=2.03s
+[136/180] Muhammad_Ayyoub_128kbps_043067_uthmani  ar_ce=4.7930 ar_kl=0.7165 prefix=112 targets=300 tokenize=1.48s loss=0.22s total=1.70s
+[137/180] Muhammad_Ayyoub_128kbps_069046_simple  ar_ce=4.7348 ar_kl=0.8336 prefix=69 targets=161 tokenize=0.78s loss=0.23s total=1.01s
+[138/180] Muhammad_Ayyoub_128kbps_069046_uthmani  ar_ce=4.7377 ar_kl=0.8388 prefix=71 targets=161 tokenize=0.77s loss=0.22s total=0.99s
+[139/180] Muhammad_Ayyoub_128kbps_079025_simple  ar_ce=5.3009 ar_kl=1.3529 prefix=81 targets=180 tokenize=0.81s loss=0.23s total=1.04s
+[140/180] Muhammad_Ayyoub_128kbps_079025_uthmani  ar_ce=5.3263 ar_kl=1.3486 prefix=91 targets=180 tokenize=0.80s loss=0.22s total=1.02s
+[141/180] Yaser_Salamah_128kbps_006042_simple  ar_ce=4.6358 ar_kl=0.4864 prefix=144 targets=462 tokenize=1.54s loss=0.22s total=1.77s
+[142/180] Yaser_Salamah_128kbps_006042_uthmani  ar_ce=4.6460 ar_kl=0.4837 prefix=154 targets=462 tokenize=1.53s loss=0.22s total=1.75s
+[143/180] Yaser_Salamah_128kbps_007052_simple  ar_ce=5.0090 ar_kl=0.5190 prefix=126 targets=330 tokenize=1.19s loss=0.23s total=1.42s
+[144/180] Yaser_Salamah_128kbps_007052_uthmani  ar_ce=5.0100 ar_kl=0.5219 prefix=135 targets=330 tokenize=1.48s loss=0.22s total=1.70s
+[145/180] Yaser_Salamah_128kbps_007078_simple  ar_ce=5.1651 ar_kl=0.4780 prefix=93 targets=224 tokenize=1.14s loss=0.23s total=1.36s
+[146/180] Yaser_Salamah_128kbps_007078_uthmani  ar_ce=5.1567 ar_kl=0.5387 prefix=101 targets=224 tokenize=1.13s loss=0.23s total=1.36s
+[147/180] Yaser_Salamah_128kbps_012039_simple  ar_ce=5.3019 ar_kl=0.8721 prefix=115 targets=336 tokenize=1.99s loss=0.22s total=2.21s
+[148/180] Yaser_Salamah_128kbps_012039_uthmani  ar_ce=5.3224 ar_kl=0.8325 prefix=132 targets=336 tokenize=1.20s loss=0.22s total=1.42s
+[149/180] Yaser_Salamah_128kbps_020005_simple  ar_ce=6.0862 ar_kl=0.8890 prefix=76 targets=111 tokenize=0.57s loss=0.22s total=0.79s
+[150/180] Yaser_Salamah_128kbps_020005_uthmani  ar_ce=6.0732 ar_kl=0.8870 prefix=80 targets=111 tokenize=0.58s loss=0.22s total=0.80s
+[151/180] Yaser_Salamah_128kbps_030017_simple  ar_ce=5.6039 ar_kl=0.6822 prefix=83 targets=183 tokenize=0.83s loss=0.22s total=1.05s
+[152/180] Yaser_Salamah_128kbps_030017_uthmani  ar_ce=5.6065 ar_kl=0.6870 prefix=88 targets=183 tokenize=0.81s loss=0.22s total=1.03s
+[153/180] Yaser_Salamah_128kbps_037061_simple  ar_ce=5.0356 ar_kl=0.7841 prefix=77 targets=200 tokenize=0.87s loss=0.22s total=1.09s
+[154/180] Yaser_Salamah_128kbps_037061_uthmani  ar_ce=5.0367 ar_kl=0.7677 prefix=82 targets=200 tokenize=0.84s loss=0.22s total=1.06s
+[155/180] Yaser_Salamah_128kbps_043067_simple  ar_ce=5.0193 ar_kl=0.5331 prefix=106 targets=326 tokenize=1.19s loss=0.22s total=1.41s
+[156/180] Yaser_Salamah_128kbps_043067_uthmani  ar_ce=5.0182 ar_kl=0.5316 prefix=112 targets=326 tokenize=1.22s loss=0.22s total=1.44s
+[157/180] Yaser_Salamah_128kbps_069046_simple  ar_ce=4.6358 ar_kl=0.7378 prefix=69 targets=141 tokenize=0.86s loss=0.23s total=1.09s
+[158/180] Yaser_Salamah_128kbps_069046_uthmani  ar_ce=4.6281 ar_kl=0.7369 prefix=71 targets=141 tokenize=1.07s loss=0.22s total=1.29s
+[159/180] Yaser_Salamah_128kbps_079025_simple  ar_ce=5.9656 ar_kl=1.0787 prefix=81 targets=168 tokenize=1.19s loss=0.24s total=1.42s
+[160/180] Yaser_Salamah_128kbps_079025_uthmani  ar_ce=5.9932 ar_kl=1.0806 prefix=91 targets=168 tokenize=1.24s loss=0.24s total=1.47s
+[161/180] aziz_alili_128kbps_006042_simple  ar_ce=4.6210 ar_kl=0.5247 prefix=144 targets=439 tokenize=1.93s loss=0.24s total=2.17s
+[162/180] aziz_alili_128kbps_006042_uthmani  ar_ce=4.6251 ar_kl=0.5351 prefix=154 targets=439 tokenize=1.81s loss=0.23s total=2.05s
+[163/180] aziz_alili_128kbps_007052_simple  ar_ce=4.7922 ar_kl=0.5446 prefix=126 targets=305 tokenize=1.31s loss=0.24s total=1.54s
+[164/180] aziz_alili_128kbps_007052_uthmani  ar_ce=4.7988 ar_kl=0.5537 prefix=135 targets=305 tokenize=1.30s loss=0.23s total=1.54s
+[165/180] aziz_alili_128kbps_007078_simple  ar_ce=5.4283 ar_kl=0.6975 prefix=93 targets=194 tokenize=0.97s loss=0.24s total=1.21s
+[166/180] aziz_alili_128kbps_007078_uthmani  ar_ce=5.4376 ar_kl=0.7123 prefix=101 targets=194 tokenize=1.00s loss=0.24s total=1.24s
+[167/180] aziz_alili_128kbps_012039_simple  ar_ce=5.2788 ar_kl=0.6977 prefix=115 targets=281 tokenize=1.66s loss=0.24s total=1.90s
+[168/180] aziz_alili_128kbps_012039_uthmani  ar_ce=5.2802 ar_kl=0.6875 prefix=132 targets=281 tokenize=1.40s loss=0.24s total=1.64s
+[169/180] aziz_alili_128kbps_020005_simple  ar_ce=6.3770 ar_kl=0.5555 prefix=76 targets=98 tokenize=0.73s loss=0.23s total=0.96s
+[170/180] aziz_alili_128kbps_020005_uthmani  ar_ce=6.3709 ar_kl=0.5707 prefix=80 targets=98 tokenize=0.71s loss=0.26s total=0.97s
+[171/180] aziz_alili_128kbps_030017_simple  ar_ce=4.8093 ar_kl=0.8596 prefix=83 targets=175 tokenize=0.99s loss=0.23s total=1.21s
+[172/180] aziz_alili_128kbps_030017_uthmani  ar_ce=4.8178 ar_kl=0.8709 prefix=88 targets=175 tokenize=0.80s loss=0.22s total=1.02s
+[173/180] aziz_alili_128kbps_037061_simple  ar_ce=6.0235 ar_kl=0.7203 prefix=77 targets=128 tokenize=0.64s loss=0.22s total=0.86s
+[174/180] aziz_alili_128kbps_037061_uthmani  ar_ce=6.0448 ar_kl=0.7002 prefix=82 targets=128 tokenize=0.64s loss=0.22s total=0.86s
+[175/180] aziz_alili_128kbps_043067_simple  ar_ce=5.2559 ar_kl=0.8426 prefix=106 targets=277 tokenize=1.05s loss=0.22s total=1.28s
+[176/180] aziz_alili_128kbps_043067_uthmani  ar_ce=5.2615 ar_kl=0.8259 prefix=112 targets=277 tokenize=1.04s loss=0.22s total=1.26s
+[177/180] aziz_alili_128kbps_069046_simple  ar_ce=5.7373 ar_kl=0.8730 prefix=69 targets=128 tokenize=0.62s loss=0.23s total=0.85s
+[178/180] aziz_alili_128kbps_069046_uthmani  ar_ce=5.7256 ar_kl=0.8836 prefix=71 targets=128 tokenize=0.62s loss=0.23s total=0.85s
+[179/180] aziz_alili_128kbps_079025_simple  ar_ce=5.3400 ar_kl=0.9152 prefix=81 targets=153 tokenize=0.76s loss=0.22s total=0.99s
+[180/180] aziz_alili_128kbps_079025_uthmani  ar_ce=5.3293 ar_kl=0.9306 prefix=91 targets=153 tokenize=0.77s loss=0.23s total=1.00s
+[replay] mean loss/ar_ce=5.1157 loss/ar_kl=0.7180
+[replay] per item: tokenize=1.30s loss=0.25s total=1.55s (model load 46.4s, not counted per item)
+[replay] wrote /content/logs/replay_l4_full_1525.json
+=== checkpoint 3050 ===
+[replay] checkpoint=3050 adapter=/content/ai-toolkit/output/pron_lora_ar_only_r8/pron_lora_ar_only_r8_000003050.safetensors
+[replay] val_dir=/content/pron_dataset/val pairs=180 device=cuda
+Flax classes are deprecated and will be removed in Diffusers v0.40.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+Flax classes are deprecated and will be removed in Diffusers v0.40.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+Loading YuE2 from /content/ai-toolkit/models/checkpoints/yue2_3b_int8_convrot.safetensors
+Checkpoint is pre-quantized (convrot8); keeping it
+create LoRA network. base dim (rank): 8, alpha: 8
+neuron dropout: p=None, rank dropout: p=None, module dropout: p=None
+apply LoRA to Conv2d with kernel size (3,3). dim (rank): 16, alpha: 16
+create LoRA for Text Encoder: 0 modules.
+create LoRA for U-Net: 112 modules.
+enable LoRA for U-Net
+Missing keys: []
+[replay] model+adapter loaded in 45.4s
+Loading YuE2 semantic tokenizer (MERT-v2-FullSong + head)
+Loading weights:   0%|          | 0/876 [00:00<?, ?it/s]Loading weights:  49%|████▉     | 432/876 [00:00<00:00, 4306.96it/s]Loading weights: 100%|██████████| 876/876 [00:00<00:00, 4710.50it/s]
+`use_return_dict` is deprecated! Use `return_dict` instead!
+[1/180] Abdul_Basit_Murattal_192kbps_006042_simple  ar_ce=3.8997 ar_kl=1.0588 prefix=144 targets=594 tokenize=2.04s loss=1.95s total=3.99s
+[2/180] Abdul_Basit_Murattal_192kbps_006042_uthmani  ar_ce=3.9044 ar_kl=1.0826 prefix=154 targets=594 tokenize=2.00s loss=0.23s total=2.23s
+[3/180] Abdul_Basit_Murattal_192kbps_007052_simple  ar_ce=4.2845 ar_kl=1.1145 prefix=126 targets=442 tokenize=1.53s loss=0.22s total=1.75s
+[4/180] Abdul_Basit_Murattal_192kbps_007052_uthmani  ar_ce=4.2765 ar_kl=1.1232 prefix=135 targets=442 tokenize=1.84s loss=0.25s total=2.09s
+[5/180] Abdul_Basit_Murattal_192kbps_007078_simple  ar_ce=4.4746 ar_kl=1.0320 prefix=93 targets=276 tokenize=1.69s loss=0.25s total=1.94s
+[6/180] Abdul_Basit_Murattal_192kbps_007078_uthmani  ar_ce=4.4640 ar_kl=1.0717 prefix=101 targets=276 tokenize=1.33s loss=0.23s total=1.57s
+[7/180] Abdul_Basit_Murattal_192kbps_012039_simple  ar_ce=4.2533 ar_kl=1.2945 prefix=115 targets=286 tokenize=1.44s loss=0.23s total=1.67s
+[8/180] Abdul_Basit_Murattal_192kbps_012039_uthmani  ar_ce=4.2718 ar_kl=1.2944 prefix=132 targets=286 tokenize=1.24s loss=0.23s total=1.47s
+[9/180] Abdul_Basit_Murattal_192kbps_020005_simple  ar_ce=5.0950 ar_kl=1.6854 prefix=76 targets=134 tokenize=0.80s loss=0.23s total=1.04s
+[10/180] Abdul_Basit_Murattal_192kbps_020005_uthmani  ar_ce=5.0963 ar_kl=1.6767 prefix=80 targets=134 tokenize=0.79s loss=0.23s total=1.02s
+[11/180] Abdul_Basit_Murattal_192kbps_030017_simple  ar_ce=4.3011 ar_kl=1.4035 prefix=83 targets=213 tokenize=1.08s loss=0.23s total=1.31s
+[12/180] Abdul_Basit_Murattal_192kbps_030017_uthmani  ar_ce=4.2944 ar_kl=1.4321 prefix=88 targets=213 tokenize=1.00s loss=0.23s total=1.23s
+[13/180] Abdul_Basit_Murattal_192kbps_037061_simple  ar_ce=5.4927 ar_kl=1.2979 prefix=77 targets=129 tokenize=0.75s loss=0.23s total=0.98s
+[14/180] Abdul_Basit_Murattal_192kbps_037061_uthmani  ar_ce=5.5068 ar_kl=1.2942 prefix=82 targets=129 tokenize=0.72s loss=0.25s total=0.97s
+[15/180] Abdul_Basit_Murattal_192kbps_043067_simple  ar_ce=4.3174 ar_kl=1.1315 prefix=106 targets=328 tokenize=1.35s loss=0.23s total=1.59s
+[16/180] Abdul_Basit_Murattal_192kbps_043067_uthmani  ar_ce=4.3182 ar_kl=1.1322 prefix=112 targets=328 tokenize=1.84s loss=0.24s total=2.08s
+[17/180] Abdul_Basit_Murattal_192kbps_069046_simple  ar_ce=4.4440 ar_kl=1.5274 prefix=69 targets=150 tokenize=1.14s loss=0.24s total=1.38s
+[18/180] Abdul_Basit_Murattal_192kbps_069046_uthmani  ar_ce=4.4460 ar_kl=1.5204 prefix=71 targets=150 tokenize=1.13s loss=0.24s total=1.37s
+[19/180] Abdul_Basit_Murattal_192kbps_079025_simple  ar_ce=4.7774 ar_kl=1.7098 prefix=81 targets=166 tokenize=1.03s loss=0.23s total=1.26s
+[20/180] Abdul_Basit_Murattal_192kbps_079025_uthmani  ar_ce=4.8518 ar_kl=1.7778 prefix=91 targets=166 tokenize=0.89s loss=0.24s total=1.13s
+[21/180] Abdullah_Basfar_192kbps_006042_simple  ar_ce=4.1199 ar_kl=1.0553 prefix=144 targets=514 tokenize=2.07s loss=0.30s total=2.37s
+[22/180] Abdullah_Basfar_192kbps_006042_uthmani  ar_ce=4.1208 ar_kl=1.0845 prefix=154 targets=514 tokenize=1.94s loss=0.23s total=2.17s
+[23/180] Abdullah_Basfar_192kbps_007052_simple  ar_ce=4.1260 ar_kl=1.0537 prefix=126 targets=337 tokenize=1.39s loss=0.22s total=1.62s
+[24/180] Abdullah_Basfar_192kbps_007052_uthmani  ar_ce=4.1199 ar_kl=1.0560 prefix=135 targets=337 tokenize=1.41s loss=0.23s total=1.64s
+[25/180] Abdullah_Basfar_192kbps_007078_simple  ar_ce=4.6088 ar_kl=1.4980 prefix=93 targets=224 tokenize=1.47s loss=0.23s total=1.71s
+[26/180] Abdullah_Basfar_192kbps_007078_uthmani  ar_ce=4.6077 ar_kl=1.5119 prefix=101 targets=224 tokenize=1.15s loss=0.23s total=1.38s
+[27/180] Abdullah_Basfar_192kbps_012039_simple  ar_ce=4.6093 ar_kl=1.1640 prefix=115 targets=332 tokenize=1.78s loss=0.22s total=2.00s
+[28/180] Abdullah_Basfar_192kbps_012039_uthmani  ar_ce=4.6198 ar_kl=1.1331 prefix=132 targets=332 tokenize=1.59s loss=0.23s total=1.82s
+[29/180] Abdullah_Basfar_192kbps_020005_simple  ar_ce=4.2963 ar_kl=1.2461 prefix=76 targets=169 tokenize=0.88s loss=0.23s total=1.11s
+[30/180] Abdullah_Basfar_192kbps_020005_uthmani  ar_ce=4.3073 ar_kl=1.2530 prefix=80 targets=169 tokenize=0.89s loss=0.24s total=1.13s
+[31/180] Abdullah_Basfar_192kbps_030017_simple  ar_ce=4.5640 ar_kl=1.3741 prefix=83 targets=194 tokenize=0.95s loss=0.24s total=1.19s
+[32/180] Abdullah_Basfar_192kbps_030017_uthmani  ar_ce=4.5562 ar_kl=1.3718 prefix=88 targets=194 tokenize=1.00s loss=0.23s total=1.22s
+[33/180] Abdullah_Basfar_192kbps_037061_simple  ar_ce=5.0029 ar_kl=1.2924 prefix=77 targets=160 tokenize=0.90s loss=0.23s total=1.13s
+[34/180] Abdullah_Basfar_192kbps_037061_uthmani  ar_ce=4.9981 ar_kl=1.2946 prefix=82 targets=160 tokenize=0.86s loss=0.23s total=1.09s
+[35/180] Abdullah_Basfar_192kbps_043067_simple  ar_ce=4.6006 ar_kl=1.4010 prefix=106 targets=279 tokenize=1.21s loss=0.23s total=1.44s
+[36/180] Abdullah_Basfar_192kbps_043067_uthmani  ar_ce=4.5912 ar_kl=1.3980 prefix=112 targets=279 tokenize=1.37s loss=0.23s total=1.61s
+[37/180] Abdullah_Basfar_192kbps_069046_simple  ar_ce=4.9308 ar_kl=1.2951 prefix=69 targets=143 tokenize=1.12s loss=0.24s total=1.36s
+[38/180] Abdullah_Basfar_192kbps_069046_uthmani  ar_ce=4.9325 ar_kl=1.3023 prefix=71 targets=143 tokenize=1.12s loss=0.23s total=1.35s
+[39/180] Abdullah_Basfar_192kbps_079025_simple  ar_ce=4.9531 ar_kl=1.6297 prefix=81 targets=189 tokenize=1.33s loss=0.23s total=1.56s
+[40/180] Abdullah_Basfar_192kbps_079025_uthmani  ar_ce=4.9859 ar_kl=1.6826 prefix=91 targets=189 tokenize=1.03s loss=0.23s total=1.26s
+[41/180] Abu_Bakr_Ash-Shaatree_128kbps_006042_simple  ar_ce=4.6691 ar_kl=1.0148 prefix=144 targets=432 tokenize=1.67s loss=0.23s total=1.91s
+[42/180] Abu_Bakr_Ash-Shaatree_128kbps_006042_uthmani  ar_ce=4.6703 ar_kl=1.0175 prefix=154 targets=432 tokenize=1.67s loss=0.26s total=1.93s
+[43/180] Abu_Bakr_Ash-Shaatree_128kbps_007052_simple  ar_ce=4.8112 ar_kl=0.9461 prefix=126 targets=316 tokenize=1.52s loss=0.24s total=1.75s
+[44/180] Abu_Bakr_Ash-Shaatree_128kbps_007052_uthmani  ar_ce=4.8103 ar_kl=0.9466 prefix=135 targets=316 tokenize=1.31s loss=0.25s total=1.56s
+[45/180] Abu_Bakr_Ash-Shaatree_128kbps_007078_simple  ar_ce=4.6048 ar_kl=1.2842 prefix=93 targets=174 tokenize=0.91s loss=0.22s total=1.14s
+[46/180] Abu_Bakr_Ash-Shaatree_128kbps_007078_uthmani  ar_ce=4.5992 ar_kl=1.2834 prefix=101 targets=174 tokenize=0.99s loss=0.23s total=1.22s
+[47/180] Abu_Bakr_Ash-Shaatree_128kbps_012039_simple  ar_ce=4.8730 ar_kl=1.0760 prefix=115 targets=342 tokenize=1.66s loss=0.24s total=1.90s
+[48/180] Abu_Bakr_Ash-Shaatree_128kbps_012039_uthmani  ar_ce=4.8911 ar_kl=1.0655 prefix=132 targets=342 tokenize=2.01s loss=0.23s total=2.24s
+[49/180] Abu_Bakr_Ash-Shaatree_128kbps_020005_simple  ar_ce=5.3055 ar_kl=1.2249 prefix=76 targets=99 tokenize=0.72s loss=0.25s total=0.97s
+[50/180] Abu_Bakr_Ash-Shaatree_128kbps_020005_uthmani  ar_ce=5.3176 ar_kl=1.2160 prefix=80 targets=99 tokenize=0.88s loss=0.24s total=1.11s
+[51/180] Abu_Bakr_Ash-Shaatree_128kbps_030017_simple  ar_ce=5.3245 ar_kl=1.5730 prefix=83 targets=158 tokenize=1.06s loss=0.23s total=1.29s
+[52/180] Abu_Bakr_Ash-Shaatree_128kbps_030017_uthmani  ar_ce=5.3247 ar_kl=1.5913 prefix=88 targets=158 tokenize=0.86s loss=0.23s total=1.09s
+[53/180] Abu_Bakr_Ash-Shaatree_128kbps_037061_simple  ar_ce=4.2570 ar_kl=0.9128 prefix=77 targets=337 tokenize=1.37s loss=0.23s total=1.60s
+[54/180] Abu_Bakr_Ash-Shaatree_128kbps_037061_uthmani  ar_ce=4.2590 ar_kl=0.9133 prefix=82 targets=337 tokenize=1.35s loss=0.23s total=1.58s
+[55/180] Abu_Bakr_Ash-Shaatree_128kbps_043067_simple  ar_ce=4.9306 ar_kl=1.0827 prefix=106 targets=247 tokenize=1.15s loss=0.24s total=1.39s
+[56/180] Abu_Bakr_Ash-Shaatree_128kbps_043067_uthmani  ar_ce=4.9317 ar_kl=1.0766 prefix=112 targets=247 tokenize=1.09s loss=0.25s total=1.34s
+[57/180] Abu_Bakr_Ash-Shaatree_128kbps_069046_simple  ar_ce=5.3715 ar_kl=1.5412 prefix=69 targets=123 tokenize=0.73s loss=0.24s total=0.97s
+[58/180] Abu_Bakr_Ash-Shaatree_128kbps_069046_uthmani  ar_ce=5.3689 ar_kl=1.5311 prefix=71 targets=123 tokenize=1.01s loss=0.25s total=1.26s
+[59/180] Abu_Bakr_Ash-Shaatree_128kbps_079025_simple  ar_ce=5.5194 ar_kl=1.4991 prefix=81 targets=167 tokenize=0.98s loss=0.23s total=1.21s
+[60/180] Abu_Bakr_Ash-Shaatree_128kbps_079025_uthmani  ar_ce=5.5095 ar_kl=1.5469 prefix=91 targets=167 tokenize=0.94s loss=0.24s total=1.18s
+[61/180] Hudhaify_128kbps_006042_simple  ar_ce=4.2446 ar_kl=0.9096 prefix=144 targets=627 tokenize=2.78s loss=0.23s total=3.02s
+[62/180] Hudhaify_128kbps_006042_uthmani  ar_ce=4.2416 ar_kl=0.9186 prefix=154 targets=627 tokenize=2.42s loss=0.25s total=2.66s
+[63/180] Hudhaify_128kbps_007052_simple  ar_ce=4.8106 ar_kl=1.1516 prefix=126 targets=359 tokenize=1.46s loss=0.23s total=1.69s
+[64/180] Hudhaify_128kbps_007052_uthmani  ar_ce=4.8153 ar_kl=1.1613 prefix=135 targets=359 tokenize=1.43s loss=0.23s total=1.66s
+[65/180] Hudhaify_128kbps_007078_simple  ar_ce=4.2947 ar_kl=1.3705 prefix=93 targets=223 tokenize=1.04s loss=0.23s total=1.27s
+[66/180] Hudhaify_128kbps_007078_uthmani  ar_ce=4.2890 ar_kl=1.3774 prefix=101 targets=223 tokenize=1.02s loss=0.23s total=1.25s
+[67/180] Hudhaify_128kbps_012039_simple  ar_ce=4.5629 ar_kl=1.1264 prefix=115 targets=301 tokenize=1.32s loss=0.24s total=1.56s
+[68/180] Hudhaify_128kbps_012039_uthmani  ar_ce=4.5745 ar_kl=1.1325 prefix=132 targets=301 tokenize=1.79s loss=0.22s total=2.01s
+[69/180] Hudhaify_128kbps_020005_simple  ar_ce=5.0470 ar_kl=1.5960 prefix=76 targets=119 tokenize=0.97s loss=0.24s total=1.21s
+[70/180] Hudhaify_128kbps_020005_uthmani  ar_ce=5.0533 ar_kl=1.5867 prefix=80 targets=119 tokenize=0.96s loss=0.25s total=1.21s
+[71/180] Hudhaify_128kbps_030017_simple  ar_ce=4.1775 ar_kl=1.3393 prefix=83 targets=190 tokenize=1.00s loss=0.23s total=1.23s
+[72/180] Hudhaify_128kbps_030017_uthmani  ar_ce=4.1703 ar_kl=1.3460 prefix=88 targets=190 tokenize=0.93s loss=0.23s total=1.16s
+[73/180] Hudhaify_128kbps_037061_simple  ar_ce=5.0588 ar_kl=1.4208 prefix=77 targets=165 tokenize=0.88s loss=0.25s total=1.13s
+[74/180] Hudhaify_128kbps_037061_uthmani  ar_ce=5.0683 ar_kl=1.4201 prefix=82 targets=165 tokenize=0.87s loss=0.24s total=1.11s
+[75/180] Hudhaify_128kbps_043067_simple  ar_ce=4.8492 ar_kl=1.1777 prefix=106 targets=329 tokenize=1.40s loss=0.25s total=1.64s
+[76/180] Hudhaify_128kbps_043067_uthmani  ar_ce=4.8607 ar_kl=1.1934 prefix=112 targets=329 tokenize=1.34s loss=0.24s total=1.57s
+[77/180] Hudhaify_128kbps_069046_simple  ar_ce=4.2857 ar_kl=1.3171 prefix=69 targets=160 tokenize=0.93s loss=0.23s total=1.15s
+[78/180] Hudhaify_128kbps_069046_uthmani  ar_ce=4.2843 ar_kl=1.3139 prefix=71 targets=160 tokenize=0.85s loss=0.23s total=1.08s
+[79/180] Hudhaify_128kbps_079025_simple  ar_ce=4.8548 ar_kl=1.5295 prefix=81 targets=158 tokenize=1.12s loss=0.24s total=1.35s
+[80/180] Hudhaify_128kbps_079025_uthmani  ar_ce=4.8600 ar_kl=1.5262 prefix=91 targets=158 tokenize=1.19s loss=0.23s total=1.42s
+[81/180] Husary_128kbps_006042_simple  ar_ce=3.8208 ar_kl=0.9585 prefix=144 targets=721 tokenize=3.40s loss=0.23s total=3.63s
+[82/180] Husary_128kbps_006042_uthmani  ar_ce=3.8275 ar_kl=0.9810 prefix=154 targets=721 tokenize=2.96s loss=0.25s total=3.21s
+[83/180] Husary_128kbps_007052_simple  ar_ce=4.1939 ar_kl=0.9025 prefix=126 targets=571 tokenize=2.33s loss=0.24s total=2.57s
+[84/180] Husary_128kbps_007052_uthmani  ar_ce=4.1904 ar_kl=0.8992 prefix=135 targets=571 tokenize=2.30s loss=0.24s total=2.54s
+[85/180] Husary_128kbps_007078_simple  ar_ce=3.8900 ar_kl=1.0560 prefix=93 targets=342 tokenize=2.03s loss=0.23s total=2.26s
+[86/180] Husary_128kbps_007078_uthmani  ar_ce=3.8904 ar_kl=1.0731 prefix=101 targets=342 tokenize=2.04s loss=0.23s total=2.27s
+[87/180] Husary_128kbps_012039_simple  ar_ce=4.0440 ar_kl=0.9598 prefix=115 targets=510 tokenize=2.29s loss=0.23s total=2.52s
+[88/180] Husary_128kbps_012039_uthmani  ar_ce=4.0470 ar_kl=0.9386 prefix=132 targets=510 tokenize=1.94s loss=0.23s total=2.17s
+[89/180] Husary_128kbps_020005_simple  ar_ce=4.2291 ar_kl=1.0848 prefix=76 targets=183 tokenize=0.94s loss=0.23s total=1.18s
+[90/180] Husary_128kbps_020005_uthmani  ar_ce=4.2227 ar_kl=1.0781 prefix=80 targets=183 tokenize=0.93s loss=0.24s total=1.17s
+[91/180] Husary_128kbps_030017_simple  ar_ce=4.1628 ar_kl=1.0315 prefix=83 targets=316 tokenize=1.29s loss=0.23s total=1.53s
+[92/180] Husary_128kbps_030017_uthmani  ar_ce=4.1595 ar_kl=1.0406 prefix=88 targets=316 tokenize=1.28s loss=0.24s total=1.52s
+[93/180] Husary_128kbps_037061_simple  ar_ce=4.6494 ar_kl=1.3021 prefix=77 targets=195 tokenize=1.01s loss=0.23s total=1.24s
+[94/180] Husary_128kbps_037061_uthmani  ar_ce=4.6429 ar_kl=1.2913 prefix=82 targets=195 tokenize=1.31s loss=0.23s total=1.55s
+[95/180] Husary_128kbps_043067_simple  ar_ce=3.9924 ar_kl=0.9926 prefix=106 targets=377 tokenize=1.67s loss=0.25s total=1.92s
+[96/180] Husary_128kbps_043067_uthmani  ar_ce=3.9918 ar_kl=0.9971 prefix=112 targets=377 tokenize=2.10s loss=0.24s total=2.34s
+[97/180] Husary_128kbps_069046_simple  ar_ce=4.6669 ar_kl=1.0809 prefix=69 targets=197 tokenize=0.97s loss=0.23s total=1.20s
+[98/180] Husary_128kbps_069046_uthmani  ar_ce=4.6673 ar_kl=1.0839 prefix=71 targets=197 tokenize=0.95s loss=0.24s total=1.19s
+[99/180] Husary_128kbps_079025_simple  ar_ce=4.4189 ar_kl=0.9544 prefix=81 targets=273 tokenize=1.18s loss=0.23s total=1.41s
+[100/180] Husary_128kbps_079025_uthmani  ar_ce=4.3831 ar_kl=1.0217 prefix=91 targets=273 tokenize=1.15s loss=0.23s total=1.39s
+[101/180] Minshawy_Murattal_128kbps_006042_simple  ar_ce=4.0986 ar_kl=1.0415 prefix=144 targets=510 tokenize=1.91s loss=0.24s total=2.15s
+[102/180] Minshawy_Murattal_128kbps_006042_uthmani  ar_ce=4.0867 ar_kl=1.0486 prefix=154 targets=510 tokenize=1.93s loss=0.23s total=2.16s
+[103/180] Minshawy_Murattal_128kbps_007052_simple  ar_ce=4.2245 ar_kl=1.3063 prefix=126 targets=377 tokenize=1.71s loss=0.25s total=1.96s
+[104/180] Minshawy_Murattal_128kbps_007052_uthmani  ar_ce=4.2224 ar_kl=1.3217 prefix=135 targets=377 tokenize=1.69s loss=0.22s total=1.91s
+[105/180] Minshawy_Murattal_128kbps_007078_simple  ar_ce=4.0600 ar_kl=1.4044 prefix=93 targets=215 tokenize=1.42s loss=0.23s total=1.65s
+[106/180] Minshawy_Murattal_128kbps_007078_uthmani  ar_ce=4.0704 ar_kl=1.4290 prefix=101 targets=215 tokenize=1.30s loss=0.23s total=1.53s
+[107/180] Minshawy_Murattal_128kbps_012039_simple  ar_ce=4.5443 ar_kl=1.2899 prefix=115 targets=352 tokenize=1.46s loss=0.24s total=1.70s
+[108/180] Minshawy_Murattal_128kbps_012039_uthmani  ar_ce=4.5421 ar_kl=1.2804 prefix=132 targets=352 tokenize=1.43s loss=0.23s total=1.66s
+[109/180] Minshawy_Murattal_128kbps_020005_simple  ar_ce=5.3357 ar_kl=1.6259 prefix=76 targets=123 tokenize=0.74s loss=0.24s total=0.97s
+[110/180] Minshawy_Murattal_128kbps_020005_uthmani  ar_ce=5.3597 ar_kl=1.5682 prefix=80 targets=123 tokenize=0.78s loss=0.24s total=1.02s
+[111/180] Minshawy_Murattal_128kbps_030017_simple  ar_ce=4.7708 ar_kl=1.4147 prefix=83 targets=173 tokenize=0.96s loss=0.21s total=1.18s
+[112/180] Minshawy_Murattal_128kbps_030017_uthmani  ar_ce=4.7774 ar_kl=1.4117 prefix=88 targets=173 tokenize=0.89s loss=0.23s total=1.12s
+[113/180] Minshawy_Murattal_128kbps_037061_simple  ar_ce=5.2811 ar_kl=1.3212 prefix=77 targets=145 tokenize=0.82s loss=0.24s total=1.06s
+[114/180] Minshawy_Murattal_128kbps_037061_uthmani  ar_ce=5.2873 ar_kl=1.2873 prefix=82 targets=145 tokenize=1.15s loss=0.23s total=1.38s
+[115/180] Minshawy_Murattal_128kbps_043067_simple  ar_ce=4.6790 ar_kl=1.5325 prefix=106 targets=274 tokenize=1.41s loss=0.23s total=1.65s
+[116/180] Minshawy_Murattal_128kbps_043067_uthmani  ar_ce=4.6875 ar_kl=1.5586 prefix=112 targets=274 tokenize=1.69s loss=0.22s total=1.92s
+[117/180] Minshawy_Murattal_128kbps_069046_simple  ar_ce=4.7240 ar_kl=1.2110 prefix=69 targets=141 tokenize=1.13s loss=0.23s total=1.36s
+[118/180] Minshawy_Murattal_128kbps_069046_uthmani  ar_ce=4.7182 ar_kl=1.2156 prefix=71 targets=141 tokenize=0.81s loss=0.25s total=1.06s
+[119/180] Minshawy_Murattal_128kbps_079025_simple  ar_ce=4.6138 ar_kl=1.4478 prefix=81 targets=212 tokenize=1.00s loss=0.23s total=1.24s
+[120/180] Minshawy_Murattal_128kbps_079025_uthmani  ar_ce=4.6348 ar_kl=1.5561 prefix=91 targets=212 tokenize=1.00s loss=0.24s total=1.23s
+[121/180] Muhammad_Ayyoub_128kbps_006042_simple  ar_ce=4.2186 ar_kl=0.9437 prefix=144 targets=860 tokenize=3.50s loss=0.24s total=3.74s
+[122/180] Muhammad_Ayyoub_128kbps_006042_uthmani  ar_ce=4.2114 ar_kl=0.9379 prefix=154 targets=860 tokenize=3.60s loss=0.24s total=3.84s
+[123/180] Muhammad_Ayyoub_128kbps_007052_simple  ar_ce=4.2725 ar_kl=0.9616 prefix=126 targets=392 tokenize=2.21s loss=0.25s total=2.46s
+[124/180] Muhammad_Ayyoub_128kbps_007052_uthmani  ar_ce=4.2702 ar_kl=0.9634 prefix=135 targets=392 tokenize=1.71s loss=0.24s total=1.95s
+[125/180] Muhammad_Ayyoub_128kbps_007078_simple  ar_ce=4.3319 ar_kl=1.3769 prefix=93 targets=217 tokenize=1.15s loss=0.23s total=1.38s
+[126/180] Muhammad_Ayyoub_128kbps_007078_uthmani  ar_ce=4.3211 ar_kl=1.4116 prefix=101 targets=217 tokenize=1.06s loss=0.23s total=1.29s
+[127/180] Muhammad_Ayyoub_128kbps_012039_simple  ar_ce=4.4245 ar_kl=1.0430 prefix=115 targets=352 tokenize=1.42s loss=0.23s total=1.65s
+[128/180] Muhammad_Ayyoub_128kbps_012039_uthmani  ar_ce=4.4302 ar_kl=1.0231 prefix=132 targets=352 tokenize=1.38s loss=0.23s total=1.60s
+[129/180] Muhammad_Ayyoub_128kbps_020005_simple  ar_ce=4.7741 ar_kl=1.7956 prefix=76 targets=113 tokenize=0.69s loss=0.23s total=0.93s
+[130/180] Muhammad_Ayyoub_128kbps_020005_uthmani  ar_ce=4.7801 ar_kl=1.7554 prefix=80 targets=113 tokenize=0.66s loss=0.24s total=0.90s
+[131/180] Muhammad_Ayyoub_128kbps_030017_simple  ar_ce=4.0597 ar_kl=1.3518 prefix=83 targets=200 tokenize=0.99s loss=0.24s total=1.23s
+[132/180] Muhammad_Ayyoub_128kbps_030017_uthmani  ar_ce=4.0573 ar_kl=1.3645 prefix=88 targets=200 tokenize=1.34s loss=0.23s total=1.57s
+[133/180] Muhammad_Ayyoub_128kbps_037061_simple  ar_ce=5.4321 ar_kl=1.4467 prefix=77 targets=170 tokenize=1.23s loss=0.25s total=1.48s
+[134/180] Muhammad_Ayyoub_128kbps_037061_uthmani  ar_ce=5.4370 ar_kl=1.4319 prefix=82 targets=170 tokenize=0.97s loss=0.23s total=1.20s
+[135/180] Muhammad_Ayyoub_128kbps_043067_simple  ar_ce=4.2912 ar_kl=1.2420 prefix=106 targets=300 tokenize=1.84s loss=0.25s total=2.09s
+[136/180] Muhammad_Ayyoub_128kbps_043067_uthmani  ar_ce=4.2907 ar_kl=1.2408 prefix=112 targets=300 tokenize=1.31s loss=0.24s total=1.55s
+[137/180] Muhammad_Ayyoub_128kbps_069046_simple  ar_ce=4.2353 ar_kl=1.3185 prefix=69 targets=161 tokenize=0.87s loss=0.23s total=1.10s
+[138/180] Muhammad_Ayyoub_128kbps_069046_uthmani  ar_ce=4.2375 ar_kl=1.3212 prefix=71 targets=161 tokenize=0.95s loss=0.24s total=1.18s
+[139/180] Muhammad_Ayyoub_128kbps_079025_simple  ar_ce=4.6987 ar_kl=1.7778 prefix=81 targets=180 tokenize=0.96s loss=0.25s total=1.21s
+[140/180] Muhammad_Ayyoub_128kbps_079025_uthmani  ar_ce=4.7044 ar_kl=1.7979 prefix=91 targets=180 tokenize=0.98s loss=0.24s total=1.22s
+[141/180] Yaser_Salamah_128kbps_006042_simple  ar_ce=4.2351 ar_kl=0.9684 prefix=144 targets=462 tokenize=1.78s loss=0.23s total=2.01s
+[142/180] Yaser_Salamah_128kbps_006042_uthmani  ar_ce=4.2604 ar_kl=0.9570 prefix=154 targets=462 tokenize=1.77s loss=0.24s total=2.01s
+[143/180] Yaser_Salamah_128kbps_007052_simple  ar_ce=4.6052 ar_kl=1.0118 prefix=126 targets=330 tokenize=1.89s loss=0.23s total=2.12s
+[144/180] Yaser_Salamah_128kbps_007052_uthmani  ar_ce=4.6059 ar_kl=1.0178 prefix=135 targets=330 tokenize=1.93s loss=0.23s total=2.16s
+[145/180] Yaser_Salamah_128kbps_007078_simple  ar_ce=4.7382 ar_kl=0.9505 prefix=93 targets=224 tokenize=1.41s loss=0.25s total=1.67s
+[146/180] Yaser_Salamah_128kbps_007078_uthmani  ar_ce=4.7464 ar_kl=0.9937 prefix=101 targets=224 tokenize=1.07s loss=0.23s total=1.30s
+[147/180] Yaser_Salamah_128kbps_012039_simple  ar_ce=4.8370 ar_kl=1.4156 prefix=115 targets=336 tokenize=1.39s loss=0.23s total=1.62s
+[148/180] Yaser_Salamah_128kbps_012039_uthmani  ar_ce=4.8584 ar_kl=1.3549 prefix=132 targets=336 tokenize=1.39s loss=0.23s total=1.62s
+[149/180] Yaser_Salamah_128kbps_020005_simple  ar_ce=5.3620 ar_kl=1.5035 prefix=76 targets=111 tokenize=0.96s loss=0.23s total=1.18s
+[150/180] Yaser_Salamah_128kbps_020005_uthmani  ar_ce=5.3312 ar_kl=1.5086 prefix=80 targets=111 tokenize=0.76s loss=0.23s total=0.99s
+[151/180] Yaser_Salamah_128kbps_030017_simple  ar_ce=5.0574 ar_kl=1.2559 prefix=83 targets=183 tokenize=0.94s loss=0.23s total=1.17s
+[152/180] Yaser_Salamah_128kbps_030017_uthmani  ar_ce=5.0606 ar_kl=1.2678 prefix=88 targets=183 tokenize=0.92s loss=0.24s total=1.16s
+[153/180] Yaser_Salamah_128kbps_037061_simple  ar_ce=4.5984 ar_kl=1.2968 prefix=77 targets=200 tokenize=1.08s loss=0.23s total=1.31s
+[154/180] Yaser_Salamah_128kbps_037061_uthmani  ar_ce=4.5947 ar_kl=1.2814 prefix=82 targets=200 tokenize=1.36s loss=0.23s total=1.58s
+[155/180] Yaser_Salamah_128kbps_043067_simple  ar_ce=4.6335 ar_kl=1.0490 prefix=106 targets=326 tokenize=1.94s loss=0.24s total=2.17s
+[156/180] Yaser_Salamah_128kbps_043067_uthmani  ar_ce=4.6246 ar_kl=1.0465 prefix=112 targets=326 tokenize=1.52s loss=0.23s total=1.75s
+[157/180] Yaser_Salamah_128kbps_069046_simple  ar_ce=4.1046 ar_kl=1.2618 prefix=69 targets=141 tokenize=0.80s loss=0.23s total=1.03s
+[158/180] Yaser_Salamah_128kbps_069046_uthmani  ar_ce=4.1024 ar_kl=1.2542 prefix=71 targets=141 tokenize=0.83s loss=0.23s total=1.06s
+[159/180] Yaser_Salamah_128kbps_079025_simple  ar_ce=5.3324 ar_kl=1.6298 prefix=81 targets=168 tokenize=0.87s loss=0.23s total=1.10s
+[160/180] Yaser_Salamah_128kbps_079025_uthmani  ar_ce=5.3438 ar_kl=1.6239 prefix=91 targets=168 tokenize=0.86s loss=0.23s total=1.08s
+[161/180] aziz_alili_128kbps_006042_simple  ar_ce=4.2355 ar_kl=0.9676 prefix=144 targets=439 tokenize=1.67s loss=0.25s total=1.92s
+[162/180] aziz_alili_128kbps_006042_uthmani  ar_ce=4.2391 ar_kl=0.9802 prefix=154 targets=439 tokenize=1.65s loss=0.23s total=1.88s
+[163/180] aziz_alili_128kbps_007052_simple  ar_ce=4.3828 ar_kl=1.0506 prefix=126 targets=305 tokenize=1.39s loss=0.24s total=1.63s
+[164/180] aziz_alili_128kbps_007052_uthmani  ar_ce=4.3952 ar_kl=1.0538 prefix=135 targets=305 tokenize=1.59s loss=0.24s total=1.83s
+[165/180] aziz_alili_128kbps_007078_simple  ar_ce=4.9452 ar_kl=1.3007 prefix=93 targets=194 tokenize=1.34s loss=0.23s total=1.57s
+[166/180] aziz_alili_128kbps_007078_uthmani  ar_ce=4.9492 ar_kl=1.2959 prefix=101 targets=194 tokenize=1.33s loss=0.23s total=1.56s
+[167/180] aziz_alili_128kbps_012039_simple  ar_ce=4.8165 ar_kl=1.2717 prefix=115 targets=281 tokenize=1.29s loss=0.23s total=1.53s
+[168/180] aziz_alili_128kbps_012039_uthmani  ar_ce=4.8428 ar_kl=1.2439 prefix=132 targets=281 tokenize=1.21s loss=0.24s total=1.45s
+[169/180] aziz_alili_128kbps_020005_simple  ar_ce=5.7205 ar_kl=1.3072 prefix=76 targets=98 tokenize=0.64s loss=0.23s total=0.88s
+[170/180] aziz_alili_128kbps_020005_uthmani  ar_ce=5.7064 ar_kl=1.3154 prefix=80 targets=98 tokenize=0.64s loss=0.24s total=0.88s
+[171/180] aziz_alili_128kbps_030017_simple  ar_ce=4.1873 ar_kl=1.5592 prefix=83 targets=175 tokenize=0.91s loss=0.25s total=1.16s
+[172/180] aziz_alili_128kbps_030017_uthmani  ar_ce=4.1884 ar_kl=1.5611 prefix=88 targets=175 tokenize=0.89s loss=0.23s total=1.11s
+[173/180] aziz_alili_128kbps_037061_simple  ar_ce=5.1964 ar_kl=1.5924 prefix=77 targets=128 tokenize=0.77s loss=0.23s total=1.00s
+[174/180] aziz_alili_128kbps_037061_uthmani  ar_ce=5.1995 ar_kl=1.5638 prefix=82 targets=128 tokenize=0.72s loss=0.23s total=0.95s
+[175/180] aziz_alili_128kbps_043067_simple  ar_ce=4.6609 ar_kl=1.3733 prefix=106 targets=277 tokenize=1.28s loss=0.24s total=1.52s
+[176/180] aziz_alili_128kbps_043067_uthmani  ar_ce=4.6667 ar_kl=1.3593 prefix=112 targets=277 tokenize=1.31s loss=0.24s total=1.55s
+[177/180] aziz_alili_128kbps_069046_simple  ar_ce=5.1089 ar_kl=1.5002 prefix=69 targets=128 tokenize=1.02s loss=0.23s total=1.26s
+[178/180] aziz_alili_128kbps_069046_uthmani  ar_ce=5.1042 ar_kl=1.4969 prefix=71 targets=128 tokenize=1.02s loss=0.23s total=1.25s
+[179/180] aziz_alili_128kbps_079025_simple  ar_ce=4.7994 ar_kl=1.4309 prefix=81 targets=153 tokenize=1.17s loss=0.24s total=1.40s
+[180/180] aziz_alili_128kbps_079025_uthmani  ar_ce=4.7941 ar_kl=1.4697 prefix=91 targets=153 tokenize=0.91s loss=0.25s total=1.16s
+[replay] mean loss/ar_ce=4.6202 loss/ar_kl=1.2715
+[replay] per item: tokenize=1.32s loss=0.24s total=1.56s (model load 45.4s, not counted per item)
+[replay] wrote /content/logs/replay_l4_full_3050.json
+=== checkpoint 4575 ===
+[replay] checkpoint=4575 adapter=/content/ai-toolkit/output/pron_lora_ar_only_r8/pron_lora_ar_only_r8_000004575.safetensors
+[replay] val_dir=/content/pron_dataset/val pairs=180 device=cuda
+Flax classes are deprecated and will be removed in Diffusers v0.40.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+Flax classes are deprecated and will be removed in Diffusers v0.40.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+Loading YuE2 from /content/ai-toolkit/models/checkpoints/yue2_3b_int8_convrot.safetensors
+Checkpoint is pre-quantized (convrot8); keeping it
+create LoRA network. base dim (rank): 8, alpha: 8
+neuron dropout: p=None, rank dropout: p=None, module dropout: p=None
+apply LoRA to Conv2d with kernel size (3,3). dim (rank): 16, alpha: 16
+create LoRA for Text Encoder: 0 modules.
+create LoRA for U-Net: 112 modules.
+enable LoRA for U-Net
+Missing keys: []
+[replay] model+adapter loaded in 47.2s
+Loading YuE2 semantic tokenizer (MERT-v2-FullSong + head)
+Loading weights:   0%|          | 0/876 [00:00<?, ?it/s]Loading weights:  53%|█████▎    | 465/876 [00:00<00:00, 4621.64it/s]Loading weights: 100%|██████████| 876/876 [00:00<00:00, 4428.81it/s]
+`use_return_dict` is deprecated! Use `return_dict` instead!
+[1/180] Abdul_Basit_Murattal_192kbps_006042_simple  ar_ce=3.8000 ar_kl=1.2020 prefix=144 targets=594 tokenize=3.07s loss=2.04s total=5.11s
+[2/180] Abdul_Basit_Murattal_192kbps_006042_uthmani  ar_ce=3.8027 ar_kl=1.2277 prefix=154 targets=594 tokenize=2.99s loss=0.24s total=3.22s
+[3/180] Abdul_Basit_Murattal_192kbps_007052_simple  ar_ce=4.1734 ar_kl=1.3109 prefix=126 targets=442 tokenize=1.80s loss=0.23s total=2.03s
+[4/180] Abdul_Basit_Murattal_192kbps_007052_uthmani  ar_ce=4.1624 ar_kl=1.3237 prefix=135 targets=442 tokenize=1.76s loss=0.23s total=1.98s
+[5/180] Abdul_Basit_Murattal_192kbps_007078_simple  ar_ce=4.3776 ar_kl=1.2117 prefix=93 targets=276 tokenize=1.24s loss=0.24s total=1.48s
+[6/180] Abdul_Basit_Murattal_192kbps_007078_uthmani  ar_ce=4.3716 ar_kl=1.2425 prefix=101 targets=276 tokenize=1.44s loss=0.23s total=1.67s
+[7/180] Abdul_Basit_Murattal_192kbps_012039_simple  ar_ce=4.1362 ar_kl=1.4656 prefix=115 targets=286 tokenize=1.35s loss=0.23s total=1.59s
+[8/180] Abdul_Basit_Murattal_192kbps_012039_uthmani  ar_ce=4.1472 ar_kl=1.4587 prefix=132 targets=286 tokenize=1.35s loss=0.25s total=1.60s
+[9/180] Abdul_Basit_Murattal_192kbps_020005_simple  ar_ce=5.0175 ar_kl=1.8546 prefix=76 targets=134 tokenize=1.08s loss=0.24s total=1.32s
+[10/180] Abdul_Basit_Murattal_192kbps_020005_uthmani  ar_ce=5.0064 ar_kl=1.8503 prefix=80 targets=134 tokenize=1.07s loss=0.23s total=1.30s
+[11/180] Abdul_Basit_Murattal_192kbps_030017_simple  ar_ce=4.1849 ar_kl=1.5591 prefix=83 targets=213 tokenize=1.16s loss=0.23s total=1.39s
+[12/180] Abdul_Basit_Murattal_192kbps_030017_uthmani  ar_ce=4.1816 ar_kl=1.5747 prefix=88 targets=213 tokenize=1.00s loss=0.23s total=1.23s
+[13/180] Abdul_Basit_Murattal_192kbps_037061_simple  ar_ce=5.4001 ar_kl=1.4712 prefix=77 targets=129 tokenize=0.72s loss=0.24s total=0.96s
+[14/180] Abdul_Basit_Murattal_192kbps_037061_uthmani  ar_ce=5.4071 ar_kl=1.4654 prefix=82 targets=129 tokenize=0.73s loss=0.23s total=0.96s
+[15/180] Abdul_Basit_Murattal_192kbps_043067_simple  ar_ce=4.2268 ar_kl=1.2960 prefix=106 targets=328 tokenize=1.33s loss=0.23s total=1.56s
+[16/180] Abdul_Basit_Murattal_192kbps_043067_uthmani  ar_ce=4.2260 ar_kl=1.2919 prefix=112 targets=328 tokenize=1.33s loss=0.24s total=1.57s
+[17/180] Abdul_Basit_Murattal_192kbps_069046_simple  ar_ce=4.3099 ar_kl=1.6814 prefix=69 targets=150 tokenize=0.93s loss=0.23s total=1.16s
+[18/180] Abdul_Basit_Murattal_192kbps_069046_uthmani  ar_ce=4.3136 ar_kl=1.6776 prefix=71 targets=150 tokenize=0.83s loss=0.23s total=1.06s
+[19/180] Abdul_Basit_Murattal_192kbps_079025_simple  ar_ce=4.6504 ar_kl=1.8712 prefix=81 targets=166 tokenize=0.94s loss=0.25s total=1.19s
+[20/180] Abdul_Basit_Murattal_192kbps_079025_uthmani  ar_ce=4.7366 ar_kl=1.8898 prefix=91 targets=166 tokenize=0.98s loss=0.25s total=1.24s
+[21/180] Abdullah_Basfar_192kbps_006042_simple  ar_ce=4.0045 ar_kl=1.2198 prefix=144 targets=514 tokenize=2.66s loss=0.29s total=2.95s
+[22/180] Abdullah_Basfar_192kbps_006042_uthmani  ar_ce=4.0100 ar_kl=1.2485 prefix=154 targets=514 tokenize=2.43s loss=0.23s total=2.66s
+[23/180] Abdullah_Basfar_192kbps_007052_simple  ar_ce=4.0255 ar_kl=1.2062 prefix=126 targets=337 tokenize=1.39s loss=0.25s total=1.63s
+[24/180] Abdullah_Basfar_192kbps_007052_uthmani  ar_ce=4.0259 ar_kl=1.2152 prefix=135 targets=337 tokenize=1.43s loss=0.23s total=1.66s
+[25/180] Abdullah_Basfar_192kbps_007078_simple  ar_ce=4.4260 ar_kl=1.6659 prefix=93 targets=224 tokenize=1.05s loss=0.22s total=1.27s
+[26/180] Abdullah_Basfar_192kbps_007078_uthmani  ar_ce=4.4289 ar_kl=1.6694 prefix=101 targets=224 tokenize=1.04s loss=0.24s total=1.28s
+[27/180] Abdullah_Basfar_192kbps_012039_simple  ar_ce=4.4638 ar_kl=1.3464 prefix=115 targets=332 tokenize=1.42s loss=0.23s total=1.65s
+[28/180] Abdullah_Basfar_192kbps_012039_uthmani  ar_ce=4.4739 ar_kl=1.3164 prefix=132 targets=332 tokenize=1.45s loss=0.23s total=1.68s
+[29/180] Abdullah_Basfar_192kbps_020005_simple  ar_ce=4.1664 ar_kl=1.4293 prefix=76 targets=169 tokenize=1.25s loss=0.25s total=1.50s
+[30/180] Abdullah_Basfar_192kbps_020005_uthmani  ar_ce=4.1841 ar_kl=1.4347 prefix=80 targets=169 tokenize=0.97s loss=0.23s total=1.20s
+[31/180] Abdullah_Basfar_192kbps_030017_simple  ar_ce=4.4140 ar_kl=1.5878 prefix=83 targets=194 tokenize=1.34s loss=0.24s total=1.58s
+[32/180] Abdullah_Basfar_192kbps_030017_uthmani  ar_ce=4.4051 ar_kl=1.5735 prefix=88 targets=194 tokenize=1.13s loss=0.23s total=1.36s
+[33/180] Abdullah_Basfar_192kbps_037061_simple  ar_ce=4.8570 ar_kl=1.4465 prefix=77 targets=160 tokenize=0.86s loss=0.24s total=1.10s
+[34/180] Abdullah_Basfar_192kbps_037061_uthmani  ar_ce=4.8537 ar_kl=1.4504 prefix=82 targets=160 tokenize=0.85s loss=0.23s total=1.09s
+[35/180] Abdullah_Basfar_192kbps_043067_simple  ar_ce=4.4494 ar_kl=1.5457 prefix=106 targets=279 tokenize=1.21s loss=0.23s total=1.44s
+[36/180] Abdullah_Basfar_192kbps_043067_uthmani  ar_ce=4.4392 ar_kl=1.5380 prefix=112 targets=279 tokenize=1.20s loss=0.24s total=1.44s
+[37/180] Abdullah_Basfar_192kbps_069046_simple  ar_ce=4.7978 ar_kl=1.4556 prefix=69 targets=143 tokenize=0.86s loss=0.24s total=1.10s
+[38/180] Abdullah_Basfar_192kbps_069046_uthmani  ar_ce=4.8054 ar_kl=1.4635 prefix=71 targets=143 tokenize=0.82s loss=0.25s total=1.07s
+[39/180] Abdullah_Basfar_192kbps_079025_simple  ar_ce=4.8005 ar_kl=1.8109 prefix=81 targets=189 tokenize=1.04s loss=0.24s total=1.27s
+[40/180] Abdullah_Basfar_192kbps_079025_uthmani  ar_ce=4.8163 ar_kl=1.8698 prefix=91 targets=189 tokenize=1.32s loss=0.24s total=1.56s
+[41/180] Abu_Bakr_Ash-Shaatree_128kbps_006042_simple  ar_ce=4.5777 ar_kl=1.1266 prefix=144 targets=432 tokenize=1.93s loss=0.22s total=2.15s
+[42/180] Abu_Bakr_Ash-Shaatree_128kbps_006042_uthmani  ar_ce=4.5790 ar_kl=1.1301 prefix=154 targets=432 tokenize=2.50s loss=0.23s total=2.73s
+[43/180] Abu_Bakr_Ash-Shaatree_128kbps_007052_simple  ar_ce=4.7452 ar_kl=1.1211 prefix=126 targets=316 tokenize=1.42s loss=0.23s total=1.65s
+[44/180] Abu_Bakr_Ash-Shaatree_128kbps_007052_uthmani  ar_ce=4.7396 ar_kl=1.1255 prefix=135 targets=316 tokenize=1.32s loss=0.23s total=1.56s
+[45/180] Abu_Bakr_Ash-Shaatree_128kbps_007078_simple  ar_ce=4.4999 ar_kl=1.4694 prefix=93 targets=174 tokenize=0.91s loss=0.23s total=1.14s
+[46/180] Abu_Bakr_Ash-Shaatree_128kbps_007078_uthmani  ar_ce=4.4949 ar_kl=1.4655 prefix=101 targets=174 tokenize=0.90s loss=0.23s total=1.13s
+[47/180] Abu_Bakr_Ash-Shaatree_128kbps_012039_simple  ar_ce=4.7755 ar_kl=1.2305 prefix=115 targets=342 tokenize=1.41s loss=0.23s total=1.64s
+[48/180] Abu_Bakr_Ash-Shaatree_128kbps_012039_uthmani  ar_ce=4.7875 ar_kl=1.2257 prefix=132 targets=342 tokenize=1.42s loss=0.24s total=1.66s
+[49/180] Abu_Bakr_Ash-Shaatree_128kbps_020005_simple  ar_ce=5.1873 ar_kl=1.3732 prefix=76 targets=99 tokenize=0.65s loss=0.24s total=0.89s
+[50/180] Abu_Bakr_Ash-Shaatree_128kbps_020005_uthmani  ar_ce=5.1900 ar_kl=1.3592 prefix=80 targets=99 tokenize=0.88s loss=0.23s total=1.11s
+[51/180] Abu_Bakr_Ash-Shaatree_128kbps_030017_simple  ar_ce=5.1892 ar_kl=1.7023 prefix=83 targets=158 tokenize=1.21s loss=0.23s total=1.44s
+[52/180] Abu_Bakr_Ash-Shaatree_128kbps_030017_uthmani  ar_ce=5.1901 ar_kl=1.7200 prefix=88 targets=158 tokenize=1.19s loss=0.24s total=1.42s
+[53/180] Abu_Bakr_Ash-Shaatree_128kbps_037061_simple  ar_ce=4.1691 ar_kl=1.0554 prefix=77 targets=337 tokenize=1.91s loss=0.24s total=2.15s
+[54/180] Abu_Bakr_Ash-Shaatree_128kbps_037061_uthmani  ar_ce=4.1728 ar_kl=1.0572 prefix=82 targets=337 tokenize=1.52s loss=0.23s total=1.76s
+[55/180] Abu_Bakr_Ash-Shaatree_128kbps_043067_simple  ar_ce=4.8083 ar_kl=1.2110 prefix=106 targets=247 tokenize=1.15s loss=0.23s total=1.38s
+[56/180] Abu_Bakr_Ash-Shaatree_128kbps_043067_uthmani  ar_ce=4.8002 ar_kl=1.2096 prefix=112 targets=247 tokenize=1.12s loss=0.24s total=1.36s
+[57/180] Abu_Bakr_Ash-Shaatree_128kbps_069046_simple  ar_ce=5.2541 ar_kl=1.6572 prefix=69 targets=123 tokenize=0.73s loss=0.22s total=0.95s
+[58/180] Abu_Bakr_Ash-Shaatree_128kbps_069046_uthmani  ar_ce=5.2508 ar_kl=1.6510 prefix=71 targets=123 tokenize=0.71s loss=0.25s total=0.96s
+[59/180] Abu_Bakr_Ash-Shaatree_128kbps_079025_simple  ar_ce=5.4159 ar_kl=1.6531 prefix=81 targets=167 tokenize=1.22s loss=0.23s total=1.45s
+[60/180] Abu_Bakr_Ash-Shaatree_128kbps_079025_uthmani  ar_ce=5.4006 ar_kl=1.7149 prefix=91 targets=167 tokenize=1.10s loss=0.26s total=1.36s
+[61/180] Hudhaify_128kbps_006042_simple  ar_ce=4.1611 ar_kl=1.0543 prefix=144 targets=627 tokenize=3.56s loss=0.23s total=3.79s
+[62/180] Hudhaify_128kbps_006042_uthmani  ar_ce=4.1555 ar_kl=1.0614 prefix=154 targets=627 tokenize=2.86s loss=0.25s total=3.11s
+[63/180] Hudhaify_128kbps_007052_simple  ar_ce=4.6795 ar_kl=1.2626 prefix=126 targets=359 tokenize=1.44s loss=0.23s total=1.67s
+[64/180] Hudhaify_128kbps_007052_uthmani  ar_ce=4.6765 ar_kl=1.2741 prefix=135 targets=359 tokenize=1.43s loss=0.23s total=1.66s
+[65/180] Hudhaify_128kbps_007078_simple  ar_ce=4.1746 ar_kl=1.5172 prefix=93 targets=223 tokenize=1.03s loss=0.23s total=1.27s
+[66/180] Hudhaify_128kbps_007078_uthmani  ar_ce=4.1661 ar_kl=1.5116 prefix=101 targets=223 tokenize=1.03s loss=0.25s total=1.28s
+[67/180] Hudhaify_128kbps_012039_simple  ar_ce=4.4693 ar_kl=1.2947 prefix=115 targets=301 tokenize=1.26s loss=0.22s total=1.49s
+[68/180] Hudhaify_128kbps_012039_uthmani  ar_ce=4.4766 ar_kl=1.3053 prefix=132 targets=301 tokenize=1.38s loss=0.24s total=1.62s
+[69/180] Hudhaify_128kbps_020005_simple  ar_ce=4.8896 ar_kl=1.7572 prefix=76 targets=119 tokenize=0.78s loss=0.25s total=1.03s
+[70/180] Hudhaify_128kbps_020005_uthmani  ar_ce=4.9020 ar_kl=1.7546 prefix=80 targets=119 tokenize=0.99s loss=0.23s total=1.22s
+[71/180] Hudhaify_128kbps_030017_simple  ar_ce=4.0784 ar_kl=1.4917 prefix=83 targets=190 tokenize=1.32s loss=0.23s total=1.55s
+[72/180] Hudhaify_128kbps_030017_uthmani  ar_ce=4.0709 ar_kl=1.4975 prefix=88 targets=190 tokenize=1.16s loss=0.23s total=1.39s
+[73/180] Hudhaify_128kbps_037061_simple  ar_ce=4.9362 ar_kl=1.5550 prefix=77 targets=165 tokenize=0.87s loss=0.23s total=1.10s
+[74/180] Hudhaify_128kbps_037061_uthmani  ar_ce=4.9428 ar_kl=1.5570 prefix=82 targets=165 tokenize=0.87s loss=0.23s total=1.10s
+[75/180] Hudhaify_128kbps_043067_simple  ar_ce=4.7446 ar_kl=1.2764 prefix=106 targets=329 tokenize=1.36s loss=0.23s total=1.59s
+[76/180] Hudhaify_128kbps_043067_uthmani  ar_ce=4.7483 ar_kl=1.2861 prefix=112 targets=329 tokenize=1.35s loss=0.24s total=1.59s
+[77/180] Hudhaify_128kbps_069046_simple  ar_ce=4.2069 ar_kl=1.4483 prefix=69 targets=160 tokenize=0.86s loss=0.23s total=1.09s
+[78/180] Hudhaify_128kbps_069046_uthmani  ar_ce=4.2073 ar_kl=1.4489 prefix=71 targets=160 tokenize=0.85s loss=0.23s total=1.09s
+[79/180] Hudhaify_128kbps_079025_simple  ar_ce=4.7246 ar_kl=1.7064 prefix=81 targets=158 tokenize=0.85s loss=0.24s total=1.09s
+[80/180] Hudhaify_128kbps_079025_uthmani  ar_ce=4.7071 ar_kl=1.7124 prefix=91 targets=158 tokenize=0.91s loss=0.23s total=1.14s
+[81/180] Husary_128kbps_006042_simple  ar_ce=3.7239 ar_kl=1.1169 prefix=144 targets=721 tokenize=3.12s loss=0.23s total=3.35s
+[82/180] Husary_128kbps_006042_uthmani  ar_ce=3.7333 ar_kl=1.1402 prefix=154 targets=721 tokenize=3.17s loss=0.24s total=3.41s
+[83/180] Husary_128kbps_007052_simple  ar_ce=4.0967 ar_kl=1.0537 prefix=126 targets=571 tokenize=2.30s loss=0.24s total=2.54s
+[84/180] Husary_128kbps_007052_uthmani  ar_ce=4.0965 ar_kl=1.0508 prefix=135 targets=571 tokenize=2.31s loss=0.24s total=2.54s
+[85/180] Husary_128kbps_007078_simple  ar_ce=3.7643 ar_kl=1.2152 prefix=93 targets=342 tokenize=1.40s loss=0.25s total=1.65s
+[86/180] Husary_128kbps_007078_uthmani  ar_ce=3.7579 ar_kl=1.2281 prefix=101 targets=342 tokenize=1.37s loss=0.23s total=1.61s
+[87/180] Husary_128kbps_012039_simple  ar_ce=3.9296 ar_kl=1.1275 prefix=115 targets=510 tokenize=2.01s loss=0.23s total=2.24s
+[88/180] Husary_128kbps_012039_uthmani  ar_ce=3.9335 ar_kl=1.1050 prefix=132 targets=510 tokenize=2.61s loss=0.23s total=2.84s
+[89/180] Husary_128kbps_020005_simple  ar_ce=4.1550 ar_kl=1.2425 prefix=76 targets=183 tokenize=1.33s loss=0.24s total=1.57s
+[90/180] Husary_128kbps_020005_uthmani  ar_ce=4.1550 ar_kl=1.2417 prefix=80 targets=183 tokenize=1.15s loss=0.23s total=1.38s
+[91/180] Husary_128kbps_030017_simple  ar_ce=4.0667 ar_kl=1.1782 prefix=83 targets=316 tokenize=1.33s loss=0.22s total=1.55s
+[92/180] Husary_128kbps_030017_uthmani  ar_ce=4.0625 ar_kl=1.1848 prefix=88 targets=316 tokenize=1.32s loss=0.23s total=1.55s
+[93/180] Husary_128kbps_037061_simple  ar_ce=4.5419 ar_kl=1.4096 prefix=77 targets=195 tokenize=0.96s loss=0.24s total=1.19s
+[94/180] Husary_128kbps_037061_uthmani  ar_ce=4.5466 ar_kl=1.3993 prefix=82 targets=195 tokenize=1.05s loss=0.24s total=1.29s
+[95/180] Husary_128kbps_043067_simple  ar_ce=3.9113 ar_kl=1.1283 prefix=106 targets=377 tokenize=1.51s loss=0.23s total=1.74s
+[96/180] Husary_128kbps_043067_uthmani  ar_ce=3.9120 ar_kl=1.1271 prefix=112 targets=377 tokenize=1.51s loss=0.25s total=1.76s
+[97/180] Husary_128kbps_069046_simple  ar_ce=4.5634 ar_kl=1.2086 prefix=69 targets=197 tokenize=1.35s loss=0.23s total=1.58s
+[98/180] Husary_128kbps_069046_uthmani  ar_ce=4.5618 ar_kl=1.2107 prefix=71 targets=197 tokenize=1.33s loss=0.23s total=1.57s
+[99/180] Husary_128kbps_079025_simple  ar_ce=4.2683 ar_kl=1.1269 prefix=81 targets=273 tokenize=1.39s loss=0.23s total=1.62s
+[100/180] Husary_128kbps_079025_uthmani  ar_ce=4.2461 ar_kl=1.1943 prefix=91 targets=273 tokenize=1.33s loss=0.23s total=1.56s
+[101/180] Minshawy_Murattal_128kbps_006042_simple  ar_ce=4.0125 ar_kl=1.1987 prefix=144 targets=510 tokenize=2.01s loss=0.24s total=2.24s
+[102/180] Minshawy_Murattal_128kbps_006042_uthmani  ar_ce=4.0034 ar_kl=1.2081 prefix=154 targets=510 tokenize=1.99s loss=0.23s total=2.22s
+[103/180] Minshawy_Murattal_128kbps_007052_simple  ar_ce=4.1143 ar_kl=1.4562 prefix=126 targets=377 tokenize=1.56s loss=0.24s total=1.80s
+[104/180] Minshawy_Murattal_128kbps_007052_uthmani  ar_ce=4.1139 ar_kl=1.4723 prefix=135 targets=377 tokenize=1.54s loss=0.23s total=1.77s
+[105/180] Minshawy_Murattal_128kbps_007078_simple  ar_ce=3.9258 ar_kl=1.5903 prefix=93 targets=215 tokenize=1.04s loss=0.25s total=1.29s
+[106/180] Minshawy_Murattal_128kbps_007078_uthmani  ar_ce=3.9460 ar_kl=1.6102 prefix=101 targets=215 tokenize=1.13s loss=0.23s total=1.36s
+[107/180] Minshawy_Murattal_128kbps_012039_simple  ar_ce=4.4187 ar_kl=1.4891 prefix=115 targets=352 tokenize=1.64s loss=0.26s total=1.90s
+[108/180] Minshawy_Murattal_128kbps_012039_uthmani  ar_ce=4.4117 ar_kl=1.4673 prefix=132 targets=352 tokenize=1.64s loss=0.26s total=1.90s
+[109/180] Minshawy_Murattal_128kbps_020005_simple  ar_ce=5.1868 ar_kl=1.8121 prefix=76 targets=123 tokenize=1.03s loss=0.25s total=1.28s
+[110/180] Minshawy_Murattal_128kbps_020005_uthmani  ar_ce=5.1994 ar_kl=1.7719 prefix=80 targets=123 tokenize=1.01s loss=0.23s total=1.25s
+[111/180] Minshawy_Murattal_128kbps_030017_simple  ar_ce=4.6633 ar_kl=1.5713 prefix=83 targets=173 tokenize=1.23s loss=0.22s total=1.45s
+[112/180] Minshawy_Murattal_128kbps_030017_uthmani  ar_ce=4.6682 ar_kl=1.5690 prefix=88 targets=173 tokenize=1.18s loss=0.23s total=1.40s
+[113/180] Minshawy_Murattal_128kbps_037061_simple  ar_ce=5.1640 ar_kl=1.4900 prefix=77 targets=145 tokenize=0.95s loss=0.25s total=1.21s
+[114/180] Minshawy_Murattal_128kbps_037061_uthmani  ar_ce=5.1893 ar_kl=1.4517 prefix=82 targets=145 tokenize=0.98s loss=0.24s total=1.22s
+[115/180] Minshawy_Murattal_128kbps_043067_simple  ar_ce=4.5714 ar_kl=1.6717 prefix=106 targets=274 tokenize=1.23s loss=0.24s total=1.47s
+[116/180] Minshawy_Murattal_128kbps_043067_uthmani  ar_ce=4.5725 ar_kl=1.6921 prefix=112 targets=274 tokenize=1.27s loss=0.23s total=1.50s
+[117/180] Minshawy_Murattal_128kbps_069046_simple  ar_ce=4.6297 ar_kl=1.3914 prefix=69 targets=141 tokenize=0.85s loss=0.24s total=1.09s
+[118/180] Minshawy_Murattal_128kbps_069046_uthmani  ar_ce=4.6259 ar_kl=1.3920 prefix=71 targets=141 tokenize=0.88s loss=0.23s total=1.12s
+[119/180] Minshawy_Murattal_128kbps_079025_simple  ar_ce=4.4589 ar_kl=1.6187 prefix=81 targets=212 tokenize=1.12s loss=0.25s total=1.37s
+[120/180] Minshawy_Murattal_128kbps_079025_uthmani  ar_ce=4.4795 ar_kl=1.7150 prefix=91 targets=212 tokenize=1.43s loss=0.22s total=1.65s
+[121/180] Muhammad_Ayyoub_128kbps_006042_simple  ar_ce=4.1358 ar_kl=1.0771 prefix=144 targets=860 tokenize=4.06s loss=0.24s total=4.30s
+[122/180] Muhammad_Ayyoub_128kbps_006042_uthmani  ar_ce=4.1302 ar_kl=1.0741 prefix=154 targets=860 tokenize=3.53s loss=0.23s total=3.76s
+[123/180] Muhammad_Ayyoub_128kbps_007052_simple  ar_ce=4.1766 ar_kl=1.1180 prefix=126 targets=392 tokenize=1.59s loss=0.24s total=1.84s
+[124/180] Muhammad_Ayyoub_128kbps_007052_uthmani  ar_ce=4.1719 ar_kl=1.1215 prefix=135 targets=392 tokenize=1.63s loss=0.25s total=1.88s
+[125/180] Muhammad_Ayyoub_128kbps_007078_simple  ar_ce=4.1806 ar_kl=1.5033 prefix=93 targets=217 tokenize=1.15s loss=0.25s total=1.40s
+[126/180] Muhammad_Ayyoub_128kbps_007078_uthmani  ar_ce=4.1822 ar_kl=1.5296 prefix=101 targets=217 tokenize=1.15s loss=0.24s total=1.38s
+[127/180] Muhammad_Ayyoub_128kbps_012039_simple  ar_ce=4.3453 ar_kl=1.1948 prefix=115 targets=352 tokenize=2.06s loss=0.22s total=2.28s
+[128/180] Muhammad_Ayyoub_128kbps_012039_uthmani  ar_ce=4.3524 ar_kl=1.1730 prefix=132 targets=352 tokenize=1.78s loss=0.24s total=2.01s
+[129/180] Muhammad_Ayyoub_128kbps_020005_simple  ar_ce=4.6455 ar_kl=1.9063 prefix=76 targets=113 tokenize=0.69s loss=0.24s total=0.93s
+[130/180] Muhammad_Ayyoub_128kbps_020005_uthmani  ar_ce=4.6581 ar_kl=1.8678 prefix=80 targets=113 tokenize=0.70s loss=0.23s total=0.93s
+[131/180] Muhammad_Ayyoub_128kbps_030017_simple  ar_ce=3.9572 ar_kl=1.5089 prefix=83 targets=200 tokenize=0.97s loss=0.23s total=1.20s
+[132/180] Muhammad_Ayyoub_128kbps_030017_uthmani  ar_ce=3.9483 ar_kl=1.5219 prefix=88 targets=200 tokenize=0.95s loss=0.23s total=1.18s
+[133/180] Muhammad_Ayyoub_128kbps_037061_simple  ar_ce=5.3193 ar_kl=1.6063 prefix=77 targets=170 tokenize=0.88s loss=0.23s total=1.11s
+[134/180] Muhammad_Ayyoub_128kbps_037061_uthmani  ar_ce=5.3168 ar_kl=1.5903 prefix=82 targets=170 tokenize=0.88s loss=0.24s total=1.11s
+[135/180] Muhammad_Ayyoub_128kbps_043067_simple  ar_ce=4.1672 ar_kl=1.3824 prefix=106 targets=300 tokenize=1.26s loss=0.24s total=1.50s
+[136/180] Muhammad_Ayyoub_128kbps_043067_uthmani  ar_ce=4.1713 ar_kl=1.3822 prefix=112 targets=300 tokenize=1.30s loss=0.24s total=1.54s
+[137/180] Muhammad_Ayyoub_128kbps_069046_simple  ar_ce=4.1435 ar_kl=1.4326 prefix=69 targets=161 tokenize=1.20s loss=0.24s total=1.44s
+[138/180] Muhammad_Ayyoub_128kbps_069046_uthmani  ar_ce=4.1446 ar_kl=1.4352 prefix=71 targets=161 tokenize=1.18s loss=0.24s total=1.42s
+[139/180] Muhammad_Ayyoub_128kbps_079025_simple  ar_ce=4.6018 ar_kl=1.8375 prefix=81 targets=180 tokenize=1.26s loss=0.24s total=1.50s
+[140/180] Muhammad_Ayyoub_128kbps_079025_uthmani  ar_ce=4.6013 ar_kl=1.8590 prefix=91 targets=180 tokenize=1.01s loss=0.24s total=1.25s
+[141/180] Yaser_Salamah_128kbps_006042_simple  ar_ce=4.1454 ar_kl=1.1143 prefix=144 targets=462 tokenize=1.77s loss=0.23s total=2.00s
+[142/180] Yaser_Salamah_128kbps_006042_uthmani  ar_ce=4.1709 ar_kl=1.1042 prefix=154 targets=462 tokenize=1.74s loss=0.23s total=1.97s
+[143/180] Yaser_Salamah_128kbps_007052_simple  ar_ce=4.5093 ar_kl=1.1730 prefix=126 targets=330 tokenize=1.34s loss=0.24s total=1.58s
+[144/180] Yaser_Salamah_128kbps_007052_uthmani  ar_ce=4.5092 ar_kl=1.1827 prefix=135 targets=330 tokenize=1.34s loss=0.23s total=1.57s
+[145/180] Yaser_Salamah_128kbps_007078_simple  ar_ce=4.6214 ar_kl=1.1020 prefix=93 targets=224 tokenize=1.06s loss=0.25s total=1.31s
+[146/180] Yaser_Salamah_128kbps_007078_uthmani  ar_ce=4.6118 ar_kl=1.1393 prefix=101 targets=224 tokenize=1.14s loss=0.24s total=1.38s
+[147/180] Yaser_Salamah_128kbps_012039_simple  ar_ce=4.7159 ar_kl=1.5388 prefix=115 targets=336 tokenize=1.99s loss=0.23s total=2.23s
+[148/180] Yaser_Salamah_128kbps_012039_uthmani  ar_ce=4.7340 ar_kl=1.4885 prefix=132 targets=336 tokenize=1.99s loss=0.24s total=2.23s
+[149/180] Yaser_Salamah_128kbps_020005_simple  ar_ce=5.2058 ar_kl=1.6101 prefix=76 targets=111 tokenize=0.70s loss=0.25s total=0.95s
+[150/180] Yaser_Salamah_128kbps_020005_uthmani  ar_ce=5.1753 ar_kl=1.6211 prefix=80 targets=111 tokenize=0.70s loss=0.23s total=0.93s
+[151/180] Yaser_Salamah_128kbps_030017_simple  ar_ce=4.9344 ar_kl=1.4333 prefix=83 targets=183 tokenize=0.92s loss=0.24s total=1.16s
+[152/180] Yaser_Salamah_128kbps_030017_uthmani  ar_ce=4.9309 ar_kl=1.4434 prefix=88 targets=183 tokenize=0.93s loss=0.23s total=1.17s
+[153/180] Yaser_Salamah_128kbps_037061_simple  ar_ce=4.5289 ar_kl=1.4165 prefix=77 targets=200 tokenize=0.97s loss=0.24s total=1.21s
+[154/180] Yaser_Salamah_128kbps_037061_uthmani  ar_ce=4.5280 ar_kl=1.4072 prefix=82 targets=200 tokenize=0.98s loss=0.23s total=1.22s
+[155/180] Yaser_Salamah_128kbps_043067_simple  ar_ce=4.5585 ar_kl=1.1924 prefix=106 targets=326 tokenize=1.44s loss=0.24s total=1.68s
+[156/180] Yaser_Salamah_128kbps_043067_uthmani  ar_ce=4.5481 ar_kl=1.1881 prefix=112 targets=326 tokenize=1.41s loss=0.24s total=1.65s
+[157/180] Yaser_Salamah_128kbps_069046_simple  ar_ce=3.9863 ar_kl=1.3750 prefix=69 targets=141 tokenize=0.89s loss=0.24s total=1.13s
+[158/180] Yaser_Salamah_128kbps_069046_uthmani  ar_ce=3.9874 ar_kl=1.3690 prefix=71 targets=141 tokenize=0.88s loss=0.25s total=1.14s
+[159/180] Yaser_Salamah_128kbps_079025_simple  ar_ce=5.1864 ar_kl=1.7186 prefix=81 targets=168 tokenize=1.23s loss=0.24s total=1.47s
+[160/180] Yaser_Salamah_128kbps_079025_uthmani  ar_ce=5.2043 ar_kl=1.7213 prefix=91 targets=168 tokenize=1.10s loss=0.23s total=1.32s
+[161/180] aziz_alili_128kbps_006042_simple  ar_ce=4.1272 ar_kl=1.1084 prefix=144 targets=439 tokenize=1.89s loss=0.23s total=2.12s
+[162/180] aziz_alili_128kbps_006042_uthmani  ar_ce=4.1343 ar_kl=1.1201 prefix=154 targets=439 tokenize=1.70s loss=0.24s total=1.94s
+[163/180] aziz_alili_128kbps_007052_simple  ar_ce=4.2793 ar_kl=1.2265 prefix=126 targets=305 tokenize=1.30s loss=0.23s total=1.53s
+[164/180] aziz_alili_128kbps_007052_uthmani  ar_ce=4.2823 ar_kl=1.2357 prefix=135 targets=305 tokenize=1.29s loss=0.24s total=1.53s
+[165/180] aziz_alili_128kbps_007078_simple  ar_ce=4.8199 ar_kl=1.4870 prefix=93 targets=194 tokenize=0.96s loss=0.24s total=1.21s
+[166/180] aziz_alili_128kbps_007078_uthmani  ar_ce=4.8315 ar_kl=1.4778 prefix=101 targets=194 tokenize=1.00s loss=0.23s total=1.23s
+[167/180] aziz_alili_128kbps_012039_simple  ar_ce=4.7112 ar_kl=1.4559 prefix=115 targets=281 tokenize=1.23s loss=0.24s total=1.46s
+[168/180] aziz_alili_128kbps_012039_uthmani  ar_ce=4.7327 ar_kl=1.4224 prefix=132 targets=281 tokenize=1.38s loss=0.23s total=1.61s
+[169/180] aziz_alili_128kbps_020005_simple  ar_ce=5.5695 ar_kl=1.5252 prefix=76 targets=98 tokenize=0.72s loss=0.26s total=0.98s
+[170/180] aziz_alili_128kbps_020005_uthmani  ar_ce=5.5713 ar_kl=1.5152 prefix=80 targets=98 tokenize=0.88s loss=0.23s total=1.12s
+[171/180] aziz_alili_128kbps_030017_simple  ar_ce=4.0682 ar_kl=1.7312 prefix=83 targets=175 tokenize=1.01s loss=0.23s total=1.24s
+[172/180] aziz_alili_128kbps_030017_uthmani  ar_ce=4.0704 ar_kl=1.7337 prefix=88 targets=175 tokenize=1.24s loss=0.24s total=1.48s
+[173/180] aziz_alili_128kbps_037061_simple  ar_ce=5.0516 ar_kl=1.7853 prefix=77 targets=128 tokenize=0.80s loss=0.24s total=1.03s
+[174/180] aziz_alili_128kbps_037061_uthmani  ar_ce=5.0566 ar_kl=1.7643 prefix=82 targets=128 tokenize=0.74s loss=0.23s total=0.98s
+[175/180] aziz_alili_128kbps_043067_simple  ar_ce=4.5170 ar_kl=1.5167 prefix=106 targets=277 tokenize=1.22s loss=0.24s total=1.46s
+[176/180] aziz_alili_128kbps_043067_uthmani  ar_ce=4.5150 ar_kl=1.5046 prefix=112 targets=277 tokenize=1.22s loss=0.23s total=1.44s
+[177/180] aziz_alili_128kbps_069046_simple  ar_ce=4.9267 ar_kl=1.6559 prefix=69 targets=128 tokenize=0.75s loss=0.24s total=0.98s
+[178/180] aziz_alili_128kbps_069046_uthmani  ar_ce=4.9225 ar_kl=1.6520 prefix=71 targets=128 tokenize=0.74s loss=0.23s total=0.98s
+[179/180] aziz_alili_128kbps_079025_simple  ar_ce=4.7221 ar_kl=1.5665 prefix=81 targets=153 tokenize=1.04s loss=0.24s total=1.28s
+[180/180] aziz_alili_128kbps_079025_uthmani  ar_ce=4.6900 ar_kl=1.6075 prefix=91 targets=153 tokenize=0.87s loss=0.24s total=1.11s
+[replay] mean loss/ar_ce=4.5053 loss/ar_kl=1.4241
+[replay] per item: tokenize=1.33s loss=0.25s total=1.58s (model load 47.2s, not counted per item)
+[replay] wrote /content/logs/replay_l4_full_4575.json
+=== checkpoint final ===
+[replay] checkpoint=final adapter=/content/ai-toolkit/output/pron_lora_ar_only_r8/pron_lora_ar_only_r8.safetensors
+[replay] val_dir=/content/pron_dataset/val pairs=180 device=cuda
+Flax classes are deprecated and will be removed in Diffusers v0.40.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+Flax classes are deprecated and will be removed in Diffusers v0.40.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+Loading YuE2 from /content/ai-toolkit/models/checkpoints/yue2_3b_int8_convrot.safetensors
+Checkpoint is pre-quantized (convrot8); keeping it
+create LoRA network. base dim (rank): 8, alpha: 8
+neuron dropout: p=None, rank dropout: p=None, module dropout: p=None
+apply LoRA to Conv2d with kernel size (3,3). dim (rank): 16, alpha: 16
+create LoRA for Text Encoder: 0 modules.
+create LoRA for U-Net: 112 modules.
+enable LoRA for U-Net
+Missing keys: []
+[replay] model+adapter loaded in 47.1s
+Loading YuE2 semantic tokenizer (MERT-v2-FullSong + head)
+Loading weights:   0%|          | 0/876 [00:00<?, ?it/s]Loading weights:  49%|████▉     | 432/876 [00:00<00:00, 4314.24it/s]Loading weights: 100%|██████████| 876/876 [00:00<00:00, 4554.69it/s]
+`use_return_dict` is deprecated! Use `return_dict` instead!
+[1/180] Abdul_Basit_Murattal_192kbps_006042_simple  ar_ce=3.7555 ar_kl=1.2487 prefix=144 targets=594 tokenize=2.50s loss=2.07s total=4.56s
+[2/180] Abdul_Basit_Murattal_192kbps_006042_uthmani  ar_ce=3.7568 ar_kl=1.2750 prefix=154 targets=594 tokenize=2.55s loss=0.23s total=2.78s
+[3/180] Abdul_Basit_Murattal_192kbps_007052_simple  ar_ce=4.1110 ar_kl=1.3738 prefix=126 targets=442 tokenize=1.96s loss=0.23s total=2.19s
+[4/180] Abdul_Basit_Murattal_192kbps_007052_uthmani  ar_ce=4.1026 ar_kl=1.3869 prefix=135 targets=442 tokenize=2.53s loss=0.24s total=2.77s
+[5/180] Abdul_Basit_Murattal_192kbps_007078_simple  ar_ce=4.3158 ar_kl=1.2743 prefix=93 targets=276 tokenize=1.67s loss=0.24s total=1.91s
+[6/180] Abdul_Basit_Murattal_192kbps_007078_uthmani  ar_ce=4.3042 ar_kl=1.3073 prefix=101 targets=276 tokenize=1.27s loss=0.23s total=1.51s
+[7/180] Abdul_Basit_Murattal_192kbps_012039_simple  ar_ce=4.0838 ar_kl=1.5276 prefix=115 targets=286 tokenize=1.43s loss=0.24s total=1.66s
+[8/180] Abdul_Basit_Murattal_192kbps_012039_uthmani  ar_ce=4.0923 ar_kl=1.5290 prefix=132 targets=286 tokenize=1.20s loss=0.24s total=1.44s
+[9/180] Abdul_Basit_Murattal_192kbps_020005_simple  ar_ce=4.9682 ar_kl=1.9132 prefix=76 targets=134 tokenize=0.80s loss=0.25s total=1.05s
+[10/180] Abdul_Basit_Murattal_192kbps_020005_uthmani  ar_ce=4.9655 ar_kl=1.9101 prefix=80 targets=134 tokenize=0.80s loss=0.23s total=1.03s
+[11/180] Abdul_Basit_Murattal_192kbps_030017_simple  ar_ce=4.1010 ar_kl=1.6096 prefix=83 targets=213 tokenize=1.04s loss=0.23s total=1.27s
+[12/180] Abdul_Basit_Murattal_192kbps_030017_uthmani  ar_ce=4.1062 ar_kl=1.6242 prefix=88 targets=213 tokenize=0.98s loss=0.24s total=1.22s
+[13/180] Abdul_Basit_Murattal_192kbps_037061_simple  ar_ce=5.3647 ar_kl=1.5586 prefix=77 targets=129 tokenize=1.04s loss=0.23s total=1.27s
+[14/180] Abdul_Basit_Murattal_192kbps_037061_uthmani  ar_ce=5.3574 ar_kl=1.5435 prefix=82 targets=129 tokenize=1.04s loss=0.22s total=1.26s
+[15/180] Abdul_Basit_Murattal_192kbps_043067_simple  ar_ce=4.1736 ar_kl=1.3593 prefix=106 targets=328 tokenize=1.74s loss=0.23s total=1.97s
+[16/180] Abdul_Basit_Murattal_192kbps_043067_uthmani  ar_ce=4.1754 ar_kl=1.3516 prefix=112 targets=328 tokenize=1.48s loss=0.24s total=1.72s
+[17/180] Abdul_Basit_Murattal_192kbps_069046_simple  ar_ce=4.2496 ar_kl=1.7178 prefix=69 targets=150 tokenize=0.83s loss=0.23s total=1.06s
+[18/180] Abdul_Basit_Murattal_192kbps_069046_uthmani  ar_ce=4.2490 ar_kl=1.7203 prefix=71 targets=150 tokenize=0.82s loss=0.23s total=1.05s
+[19/180] Abdul_Basit_Murattal_192kbps_079025_simple  ar_ce=4.5691 ar_kl=1.9425 prefix=81 targets=166 tokenize=0.90s loss=0.23s total=1.13s
+[20/180] Abdul_Basit_Murattal_192kbps_079025_uthmani  ar_ce=4.6141 ar_kl=1.9277 prefix=91 targets=166 tokenize=0.88s loss=0.23s total=1.11s
+[21/180] Abdullah_Basfar_192kbps_006042_simple  ar_ce=3.9525 ar_kl=1.2720 prefix=144 targets=514 tokenize=1.95s loss=0.30s total=2.25s
+[22/180] Abdullah_Basfar_192kbps_006042_uthmani  ar_ce=3.9543 ar_kl=1.3032 prefix=154 targets=514 tokenize=1.94s loss=0.23s total=2.17s
+[23/180] Abdullah_Basfar_192kbps_007052_simple  ar_ce=3.9674 ar_kl=1.2788 prefix=126 targets=337 tokenize=1.53s loss=0.23s total=1.75s
+[24/180] Abdullah_Basfar_192kbps_007052_uthmani  ar_ce=3.9680 ar_kl=1.2907 prefix=135 targets=337 tokenize=2.01s loss=0.22s total=2.23s
+[25/180] Abdullah_Basfar_192kbps_007078_simple  ar_ce=4.3359 ar_kl=1.7409 prefix=93 targets=224 tokenize=1.49s loss=0.23s total=1.72s
+[26/180] Abdullah_Basfar_192kbps_007078_uthmani  ar_ce=4.3372 ar_kl=1.7504 prefix=101 targets=224 tokenize=1.10s loss=0.23s total=1.33s
+[27/180] Abdullah_Basfar_192kbps_012039_simple  ar_ce=4.3999 ar_kl=1.4139 prefix=115 targets=332 tokenize=1.38s loss=0.23s total=1.61s
+[28/180] Abdullah_Basfar_192kbps_012039_uthmani  ar_ce=4.4101 ar_kl=1.3826 prefix=132 targets=332 tokenize=1.37s loss=0.23s total=1.60s
+[29/180] Abdullah_Basfar_192kbps_020005_simple  ar_ce=4.1267 ar_kl=1.4839 prefix=76 targets=169 tokenize=0.91s loss=0.23s total=1.14s
+[30/180] Abdullah_Basfar_192kbps_020005_uthmani  ar_ce=4.1383 ar_kl=1.4953 prefix=80 targets=169 tokenize=0.99s loss=0.23s total=1.22s
+[31/180] Abdullah_Basfar_192kbps_030017_simple  ar_ce=4.3486 ar_kl=1.7004 prefix=83 targets=194 tokenize=1.08s loss=0.22s total=1.31s
+[32/180] Abdullah_Basfar_192kbps_030017_uthmani  ar_ce=4.3396 ar_kl=1.6840 prefix=88 targets=194 tokenize=0.96s loss=0.23s total=1.19s
+[33/180] Abdullah_Basfar_192kbps_037061_simple  ar_ce=4.7868 ar_kl=1.5048 prefix=77 targets=160 tokenize=0.90s loss=0.24s total=1.14s
+[34/180] Abdullah_Basfar_192kbps_037061_uthmani  ar_ce=4.7771 ar_kl=1.5058 prefix=82 targets=160 tokenize=0.97s loss=0.23s total=1.20s
+[35/180] Abdullah_Basfar_192kbps_043067_simple  ar_ce=4.4105 ar_kl=1.5930 prefix=106 targets=279 tokenize=1.34s loss=0.24s total=1.58s
+[36/180] Abdullah_Basfar_192kbps_043067_uthmani  ar_ce=4.3994 ar_kl=1.5852 prefix=112 targets=279 tokenize=1.32s loss=0.25s total=1.57s
+[37/180] Abdullah_Basfar_192kbps_069046_simple  ar_ce=4.7187 ar_kl=1.5292 prefix=69 targets=143 tokenize=0.91s loss=0.23s total=1.14s
+[38/180] Abdullah_Basfar_192kbps_069046_uthmani  ar_ce=4.7178 ar_kl=1.5363 prefix=71 targets=143 tokenize=0.88s loss=0.25s total=1.14s
+[39/180] Abdullah_Basfar_192kbps_079025_simple  ar_ce=4.7366 ar_kl=1.8848 prefix=81 targets=189 tokenize=1.00s loss=0.23s total=1.23s
+[40/180] Abdullah_Basfar_192kbps_079025_uthmani  ar_ce=4.7552 ar_kl=1.9454 prefix=91 targets=189 tokenize=0.94s loss=0.23s total=1.17s
+[41/180] Abu_Bakr_Ash-Shaatree_128kbps_006042_simple  ar_ce=4.5431 ar_kl=1.1700 prefix=144 targets=432 tokenize=1.87s loss=0.23s total=2.10s
+[42/180] Abu_Bakr_Ash-Shaatree_128kbps_006042_uthmani  ar_ce=4.5506 ar_kl=1.1708 prefix=154 targets=432 tokenize=1.70s loss=0.23s total=1.93s
+[43/180] Abu_Bakr_Ash-Shaatree_128kbps_007052_simple  ar_ce=4.6988 ar_kl=1.1862 prefix=126 targets=316 tokenize=1.33s loss=0.23s total=1.56s
+[44/180] Abu_Bakr_Ash-Shaatree_128kbps_007052_uthmani  ar_ce=4.6926 ar_kl=1.1949 prefix=135 targets=316 tokenize=1.32s loss=0.23s total=1.55s
+[45/180] Abu_Bakr_Ash-Shaatree_128kbps_007078_simple  ar_ce=4.4532 ar_kl=1.5381 prefix=93 targets=174 tokenize=0.95s loss=0.24s total=1.19s
+[46/180] Abu_Bakr_Ash-Shaatree_128kbps_007078_uthmani  ar_ce=4.4477 ar_kl=1.5382 prefix=101 targets=174 tokenize=0.98s loss=0.23s total=1.22s
+[47/180] Abu_Bakr_Ash-Shaatree_128kbps_012039_simple  ar_ce=4.7347 ar_kl=1.2786 prefix=115 targets=342 tokenize=2.02s loss=0.26s total=2.28s
+[48/180] Abu_Bakr_Ash-Shaatree_128kbps_012039_uthmani  ar_ce=4.7405 ar_kl=1.2772 prefix=132 targets=342 tokenize=1.57s loss=0.24s total=1.81s
+[49/180] Abu_Bakr_Ash-Shaatree_128kbps_020005_simple  ar_ce=5.1959 ar_kl=1.4274 prefix=76 targets=99 tokenize=0.83s loss=0.25s total=1.08s
+[50/180] Abu_Bakr_Ash-Shaatree_128kbps_020005_uthmani  ar_ce=5.2058 ar_kl=1.4176 prefix=80 targets=99 tokenize=0.66s loss=0.23s total=0.90s
+[51/180] Abu_Bakr_Ash-Shaatree_128kbps_030017_simple  ar_ce=5.1317 ar_kl=1.7892 prefix=83 targets=158 tokenize=0.88s loss=0.23s total=1.12s
+[52/180] Abu_Bakr_Ash-Shaatree_128kbps_030017_uthmani  ar_ce=5.1459 ar_kl=1.8011 prefix=88 targets=158 tokenize=0.86s loss=0.23s total=1.09s
+[53/180] Abu_Bakr_Ash-Shaatree_128kbps_037061_simple  ar_ce=4.1300 ar_kl=1.1018 prefix=77 targets=337 tokenize=1.40s loss=0.23s total=1.63s
+[54/180] Abu_Bakr_Ash-Shaatree_128kbps_037061_uthmani  ar_ce=4.1348 ar_kl=1.1026 prefix=82 targets=337 tokenize=1.42s loss=0.22s total=1.64s
+[55/180] Abu_Bakr_Ash-Shaatree_128kbps_043067_simple  ar_ce=4.7644 ar_kl=1.2724 prefix=106 targets=247 tokenize=1.19s loss=0.23s total=1.42s
+[56/180] Abu_Bakr_Ash-Shaatree_128kbps_043067_uthmani  ar_ce=4.7476 ar_kl=1.2677 prefix=112 targets=247 tokenize=1.13s loss=0.24s total=1.36s
+[57/180] Abu_Bakr_Ash-Shaatree_128kbps_069046_simple  ar_ce=5.1615 ar_kl=1.7087 prefix=69 targets=123 tokenize=0.83s loss=0.22s total=1.05s
+[58/180] Abu_Bakr_Ash-Shaatree_128kbps_069046_uthmani  ar_ce=5.1709 ar_kl=1.7042 prefix=71 targets=123 tokenize=0.80s loss=0.23s total=1.03s
+[59/180] Abu_Bakr_Ash-Shaatree_128kbps_079025_simple  ar_ce=5.3738 ar_kl=1.7434 prefix=81 targets=167 tokenize=1.11s loss=0.23s total=1.34s
+[60/180] Abu_Bakr_Ash-Shaatree_128kbps_079025_uthmani  ar_ce=5.3590 ar_kl=1.8016 prefix=91 targets=167 tokenize=1.22s loss=0.24s total=1.46s
+[61/180] Hudhaify_128kbps_006042_simple  ar_ce=4.1159 ar_kl=1.1061 prefix=144 targets=627 tokenize=2.84s loss=0.23s total=3.07s
+[62/180] Hudhaify_128kbps_006042_uthmani  ar_ce=4.1151 ar_kl=1.1179 prefix=154 targets=627 tokenize=2.45s loss=0.24s total=2.69s
+[63/180] Hudhaify_128kbps_007052_simple  ar_ce=4.5998 ar_kl=1.3339 prefix=126 targets=359 tokenize=1.52s loss=0.23s total=1.75s
+[64/180] Hudhaify_128kbps_007052_uthmani  ar_ce=4.5907 ar_kl=1.3458 prefix=135 targets=359 tokenize=1.49s loss=0.23s total=1.72s
+[65/180] Hudhaify_128kbps_007078_simple  ar_ce=4.0988 ar_kl=1.5693 prefix=93 targets=223 tokenize=1.08s loss=0.23s total=1.31s
+[66/180] Hudhaify_128kbps_007078_uthmani  ar_ce=4.0906 ar_kl=1.5598 prefix=101 targets=223 tokenize=1.26s loss=0.23s total=1.48s
+[67/180] Hudhaify_128kbps_012039_simple  ar_ce=4.4181 ar_kl=1.3741 prefix=115 targets=301 tokenize=1.82s loss=0.22s total=2.04s
+[68/180] Hudhaify_128kbps_012039_uthmani  ar_ce=4.4293 ar_kl=1.3770 prefix=132 targets=301 tokenize=1.60s loss=0.22s total=1.82s
+[69/180] Hudhaify_128kbps_020005_simple  ar_ce=4.8317 ar_kl=1.8214 prefix=76 targets=119 tokenize=0.97s loss=0.23s total=1.20s
+[70/180] Hudhaify_128kbps_020005_uthmani  ar_ce=4.8295 ar_kl=1.8256 prefix=80 targets=119 tokenize=0.70s loss=0.22s total=0.92s
+[71/180] Hudhaify_128kbps_030017_simple  ar_ce=4.0216 ar_kl=1.5588 prefix=83 targets=190 tokenize=0.94s loss=0.23s total=1.17s
+[72/180] Hudhaify_128kbps_030017_uthmani  ar_ce=4.0155 ar_kl=1.5642 prefix=88 targets=190 tokenize=0.93s loss=0.24s total=1.17s
+[73/180] Hudhaify_128kbps_037061_simple  ar_ce=4.8547 ar_kl=1.5874 prefix=77 targets=165 tokenize=0.86s loss=0.25s total=1.11s
+[74/180] Hudhaify_128kbps_037061_uthmani  ar_ce=4.8523 ar_kl=1.5867 prefix=82 targets=165 tokenize=0.88s loss=0.23s total=1.10s
+[75/180] Hudhaify_128kbps_043067_simple  ar_ce=4.6949 ar_kl=1.3167 prefix=106 targets=329 tokenize=1.32s loss=0.23s total=1.55s
+[76/180] Hudhaify_128kbps_043067_uthmani  ar_ce=4.6929 ar_kl=1.3256 prefix=112 targets=329 tokenize=1.35s loss=0.24s total=1.59s
+[77/180] Hudhaify_128kbps_069046_simple  ar_ce=4.1407 ar_kl=1.4973 prefix=69 targets=160 tokenize=0.86s loss=0.24s total=1.10s
+[78/180] Hudhaify_128kbps_069046_uthmani  ar_ce=4.1332 ar_kl=1.4996 prefix=71 targets=160 tokenize=1.17s loss=0.24s total=1.41s
+[79/180] Hudhaify_128kbps_079025_simple  ar_ce=4.6207 ar_kl=1.7982 prefix=81 targets=158 tokenize=1.17s loss=0.23s total=1.40s
+[80/180] Hudhaify_128kbps_079025_uthmani  ar_ce=4.6106 ar_kl=1.8033 prefix=91 targets=158 tokenize=1.15s loss=0.23s total=1.38s
+[81/180] Husary_128kbps_006042_simple  ar_ce=3.6971 ar_kl=1.1822 prefix=144 targets=721 tokenize=2.95s loss=0.25s total=3.20s
+[82/180] Husary_128kbps_006042_uthmani  ar_ce=3.7062 ar_kl=1.2028 prefix=154 targets=721 tokenize=2.73s loss=0.23s total=2.96s
+[83/180] Husary_128kbps_007052_simple  ar_ce=4.0593 ar_kl=1.1073 prefix=126 targets=571 tokenize=2.25s loss=0.23s total=2.47s
+[84/180] Husary_128kbps_007052_uthmani  ar_ce=4.0556 ar_kl=1.1056 prefix=135 targets=571 tokenize=2.40s loss=0.23s total=2.63s
+[85/180] Husary_128kbps_007078_simple  ar_ce=3.7016 ar_kl=1.2752 prefix=93 targets=342 tokenize=2.02s loss=0.23s total=2.25s
+[86/180] Husary_128kbps_007078_uthmani  ar_ce=3.7005 ar_kl=1.2882 prefix=101 targets=342 tokenize=1.67s loss=0.22s total=1.90s
+[87/180] Husary_128kbps_012039_simple  ar_ce=3.8868 ar_kl=1.1851 prefix=115 targets=510 tokenize=2.06s loss=0.23s total=2.29s
+[88/180] Husary_128kbps_012039_uthmani  ar_ce=3.8831 ar_kl=1.1669 prefix=132 targets=510 tokenize=1.93s loss=0.24s total=2.17s
+[89/180] Husary_128kbps_020005_simple  ar_ce=4.1234 ar_kl=1.3117 prefix=76 targets=183 tokenize=0.93s loss=0.23s total=1.16s
+[90/180] Husary_128kbps_020005_uthmani  ar_ce=4.1186 ar_kl=1.3117 prefix=80 targets=183 tokenize=1.00s loss=0.24s total=1.23s
+[91/180] Husary_128kbps_030017_simple  ar_ce=4.0171 ar_kl=1.2239 prefix=83 targets=316 tokenize=1.33s loss=0.23s total=1.56s
+[92/180] Husary_128kbps_030017_uthmani  ar_ce=4.0137 ar_kl=1.2337 prefix=88 targets=316 tokenize=1.64s loss=0.24s total=1.88s
+[93/180] Husary_128kbps_037061_simple  ar_ce=4.5061 ar_kl=1.4331 prefix=77 targets=195 tokenize=1.13s loss=0.23s total=1.36s
+[94/180] Husary_128kbps_037061_uthmani  ar_ce=4.5170 ar_kl=1.4278 prefix=82 targets=195 tokenize=1.33s loss=0.23s total=1.56s
+[95/180] Husary_128kbps_043067_simple  ar_ce=3.8693 ar_kl=1.1802 prefix=106 targets=377 tokenize=1.75s loss=0.23s total=1.99s
+[96/180] Husary_128kbps_043067_uthmani  ar_ce=3.8682 ar_kl=1.1789 prefix=112 targets=377 tokenize=2.12s loss=0.23s total=2.35s
+[97/180] Husary_128kbps_069046_simple  ar_ce=4.4946 ar_kl=1.2564 prefix=69 targets=197 tokenize=0.97s loss=0.23s total=1.20s
+[98/180] Husary_128kbps_069046_uthmani  ar_ce=4.4987 ar_kl=1.2591 prefix=71 targets=197 tokenize=0.97s loss=0.23s total=1.20s
+[99/180] Husary_128kbps_079025_simple  ar_ce=4.1946 ar_kl=1.1937 prefix=81 targets=273 tokenize=1.23s loss=0.23s total=1.46s
+[100/180] Husary_128kbps_079025_uthmani  ar_ce=4.1754 ar_kl=1.2624 prefix=91 targets=273 tokenize=1.25s loss=0.23s total=1.47s
+[101/180] Minshawy_Murattal_128kbps_006042_simple  ar_ce=3.9607 ar_kl=1.2464 prefix=144 targets=510 tokenize=1.96s loss=0.23s total=2.19s
+[102/180] Minshawy_Murattal_128kbps_006042_uthmani  ar_ce=3.9506 ar_kl=1.2562 prefix=154 targets=510 tokenize=1.96s loss=0.25s total=2.21s
+[103/180] Minshawy_Murattal_128kbps_007052_simple  ar_ce=4.0751 ar_kl=1.5168 prefix=126 targets=377 tokenize=1.84s loss=0.23s total=2.08s
+[104/180] Minshawy_Murattal_128kbps_007052_uthmani  ar_ce=4.0758 ar_kl=1.5331 prefix=135 targets=377 tokenize=2.20s loss=0.22s total=2.42s
+[105/180] Minshawy_Murattal_128kbps_007078_simple  ar_ce=3.8839 ar_kl=1.6309 prefix=93 targets=215 tokenize=1.36s loss=0.23s total=1.59s
+[106/180] Minshawy_Murattal_128kbps_007078_uthmani  ar_ce=3.9016 ar_kl=1.6556 prefix=101 targets=215 tokenize=1.10s loss=0.24s total=1.34s
+[107/180] Minshawy_Murattal_128kbps_012039_simple  ar_ce=4.3774 ar_kl=1.5609 prefix=115 targets=352 tokenize=1.55s loss=0.24s total=1.79s
+[108/180] Minshawy_Murattal_128kbps_012039_uthmani  ar_ce=4.3654 ar_kl=1.5408 prefix=132 targets=352 tokenize=1.46s loss=0.23s total=1.69s
+[109/180] Minshawy_Murattal_128kbps_020005_simple  ar_ce=5.1275 ar_kl=1.8762 prefix=76 targets=123 tokenize=0.78s loss=0.24s total=1.02s
+[110/180] Minshawy_Murattal_128kbps_020005_uthmani  ar_ce=5.1328 ar_kl=1.8386 prefix=80 targets=123 tokenize=0.73s loss=0.24s total=0.97s
+[111/180] Minshawy_Murattal_128kbps_030017_simple  ar_ce=4.6200 ar_kl=1.6395 prefix=83 targets=173 tokenize=0.92s loss=0.22s total=1.14s
+[112/180] Minshawy_Murattal_128kbps_030017_uthmani  ar_ce=4.6288 ar_kl=1.6345 prefix=88 targets=173 tokenize=0.91s loss=0.23s total=1.14s
+[113/180] Minshawy_Murattal_128kbps_037061_simple  ar_ce=5.1217 ar_kl=1.5567 prefix=77 targets=145 tokenize=0.93s loss=0.23s total=1.17s
+[114/180] Minshawy_Murattal_128kbps_037061_uthmani  ar_ce=5.1637 ar_kl=1.5218 prefix=82 targets=145 tokenize=0.89s loss=0.24s total=1.13s
+[115/180] Minshawy_Murattal_128kbps_043067_simple  ar_ce=4.5466 ar_kl=1.7124 prefix=106 targets=274 tokenize=1.58s loss=0.23s total=1.81s
+[116/180] Minshawy_Murattal_128kbps_043067_uthmani  ar_ce=4.5385 ar_kl=1.7348 prefix=112 targets=274 tokenize=1.70s loss=0.25s total=1.95s
+[117/180] Minshawy_Murattal_128kbps_069046_simple  ar_ce=4.5713 ar_kl=1.4550 prefix=69 targets=141 tokenize=0.92s loss=0.26s total=1.18s
+[118/180] Minshawy_Murattal_128kbps_069046_uthmani  ar_ce=4.5673 ar_kl=1.4573 prefix=71 targets=141 tokenize=0.83s loss=0.23s total=1.06s
+[119/180] Minshawy_Murattal_128kbps_079025_simple  ar_ce=4.3866 ar_kl=1.6854 prefix=81 targets=212 tokenize=1.04s loss=0.25s total=1.29s
+[120/180] Minshawy_Murattal_128kbps_079025_uthmani  ar_ce=4.3939 ar_kl=1.7789 prefix=91 targets=212 tokenize=1.08s loss=0.23s total=1.31s
+[121/180] Muhammad_Ayyoub_128kbps_006042_simple  ar_ce=4.0837 ar_kl=1.1247 prefix=144 targets=860 tokenize=3.74s loss=0.23s total=3.97s
+[122/180] Muhammad_Ayyoub_128kbps_006042_uthmani  ar_ce=4.0844 ar_kl=1.1218 prefix=154 targets=860 tokenize=4.14s loss=0.24s total=4.38s
+[123/180] Muhammad_Ayyoub_128kbps_007052_simple  ar_ce=4.1016 ar_kl=1.1770 prefix=126 targets=392 tokenize=1.76s loss=0.24s total=1.99s
+[124/180] Muhammad_Ayyoub_128kbps_007052_uthmani  ar_ce=4.0948 ar_kl=1.1849 prefix=135 targets=392 tokenize=1.83s loss=0.24s total=2.07s
+[125/180] Muhammad_Ayyoub_128kbps_007078_simple  ar_ce=4.1101 ar_kl=1.5575 prefix=93 targets=217 tokenize=1.07s loss=0.24s total=1.31s
+[126/180] Muhammad_Ayyoub_128kbps_007078_uthmani  ar_ce=4.1197 ar_kl=1.5850 prefix=101 targets=217 tokenize=1.15s loss=0.23s total=1.38s
+[127/180] Muhammad_Ayyoub_128kbps_012039_simple  ar_ce=4.3036 ar_kl=1.2422 prefix=115 targets=352 tokenize=1.47s loss=0.24s total=1.71s
+[128/180] Muhammad_Ayyoub_128kbps_012039_uthmani  ar_ce=4.3055 ar_kl=1.2275 prefix=132 targets=352 tokenize=1.55s loss=0.23s total=1.78s
+[129/180] Muhammad_Ayyoub_128kbps_020005_simple  ar_ce=4.5700 ar_kl=1.9105 prefix=76 targets=113 tokenize=0.67s loss=0.23s total=0.90s
+[130/180] Muhammad_Ayyoub_128kbps_020005_uthmani  ar_ce=4.5783 ar_kl=1.8858 prefix=80 targets=113 tokenize=0.68s loss=0.23s total=0.91s
+[131/180] Muhammad_Ayyoub_128kbps_030017_simple  ar_ce=3.8968 ar_kl=1.5543 prefix=83 targets=200 tokenize=0.98s loss=0.23s total=1.21s
+[132/180] Muhammad_Ayyoub_128kbps_030017_uthmani  ar_ce=3.8983 ar_kl=1.5598 prefix=88 targets=200 tokenize=1.02s loss=0.21s total=1.24s
+[133/180] Muhammad_Ayyoub_128kbps_037061_simple  ar_ce=5.2407 ar_kl=1.6462 prefix=77 targets=170 tokenize=0.98s loss=0.23s total=1.21s
+[134/180] Muhammad_Ayyoub_128kbps_037061_uthmani  ar_ce=5.2403 ar_kl=1.6372 prefix=82 targets=170 tokenize=0.94s loss=0.23s total=1.16s
+[135/180] Muhammad_Ayyoub_128kbps_043067_simple  ar_ce=4.1143 ar_kl=1.4290 prefix=106 targets=300 tokenize=1.83s loss=0.23s total=2.05s
+[136/180] Muhammad_Ayyoub_128kbps_043067_uthmani  ar_ce=4.1170 ar_kl=1.4352 prefix=112 targets=300 tokenize=1.42s loss=0.23s total=1.65s
+[137/180] Muhammad_Ayyoub_128kbps_069046_simple  ar_ce=4.0789 ar_kl=1.4715 prefix=69 targets=161 tokenize=0.78s loss=0.23s total=1.01s
+[138/180] Muhammad_Ayyoub_128kbps_069046_uthmani  ar_ce=4.0824 ar_kl=1.4772 prefix=71 targets=161 tokenize=0.78s loss=0.23s total=1.01s
+[139/180] Muhammad_Ayyoub_128kbps_079025_simple  ar_ce=4.5541 ar_kl=1.8633 prefix=81 targets=180 tokenize=0.85s loss=0.23s total=1.07s
+[140/180] Muhammad_Ayyoub_128kbps_079025_uthmani  ar_ce=4.5635 ar_kl=1.8888 prefix=91 targets=180 tokenize=0.84s loss=0.23s total=1.07s
+[141/180] Yaser_Salamah_128kbps_006042_simple  ar_ce=4.1088 ar_kl=1.1628 prefix=144 targets=462 tokenize=1.69s loss=0.23s total=1.92s
+[142/180] Yaser_Salamah_128kbps_006042_uthmani  ar_ce=4.1343 ar_kl=1.1568 prefix=154 targets=462 tokenize=1.59s loss=0.22s total=1.81s
+[143/180] Yaser_Salamah_128kbps_007052_simple  ar_ce=4.4437 ar_kl=1.2504 prefix=126 targets=330 tokenize=1.31s loss=0.23s total=1.54s
+[144/180] Yaser_Salamah_128kbps_007052_uthmani  ar_ce=4.4425 ar_kl=1.2618 prefix=135 targets=330 tokenize=1.48s loss=0.24s total=1.72s
+[145/180] Yaser_Salamah_128kbps_007078_simple  ar_ce=4.5889 ar_kl=1.1513 prefix=93 targets=224 tokenize=1.45s loss=0.23s total=1.68s
+[146/180] Yaser_Salamah_128kbps_007078_uthmani  ar_ce=4.5864 ar_kl=1.1875 prefix=101 targets=224 tokenize=1.45s loss=0.23s total=1.68s
+[147/180] Yaser_Salamah_128kbps_012039_simple  ar_ce=4.6444 ar_kl=1.5873 prefix=115 targets=336 tokenize=1.25s loss=0.23s total=1.48s
+[148/180] Yaser_Salamah_128kbps_012039_uthmani  ar_ce=4.6570 ar_kl=1.5354 prefix=132 targets=336 tokenize=1.22s loss=0.22s total=1.44s
+[149/180] Yaser_Salamah_128kbps_020005_simple  ar_ce=5.1874 ar_kl=1.6404 prefix=76 targets=111 tokenize=0.60s loss=0.23s total=0.83s
+[150/180] Yaser_Salamah_128kbps_020005_uthmani  ar_ce=5.1562 ar_kl=1.6630 prefix=80 targets=111 tokenize=0.61s loss=0.23s total=0.84s
+[151/180] Yaser_Salamah_128kbps_030017_simple  ar_ce=4.8774 ar_kl=1.5168 prefix=83 targets=183 tokenize=0.86s loss=0.22s total=1.09s
+[152/180] Yaser_Salamah_128kbps_030017_uthmani  ar_ce=4.8783 ar_kl=1.5194 prefix=88 targets=183 tokenize=0.86s loss=0.23s total=1.09s
+[153/180] Yaser_Salamah_128kbps_037061_simple  ar_ce=4.4686 ar_kl=1.4797 prefix=77 targets=200 tokenize=0.90s loss=0.23s total=1.13s
+[154/180] Yaser_Salamah_128kbps_037061_uthmani  ar_ce=4.4688 ar_kl=1.4679 prefix=82 targets=200 tokenize=0.91s loss=0.24s total=1.14s
+[155/180] Yaser_Salamah_128kbps_043067_simple  ar_ce=4.5322 ar_kl=1.2311 prefix=106 targets=326 tokenize=1.38s loss=0.24s total=1.61s
+[156/180] Yaser_Salamah_128kbps_043067_uthmani  ar_ce=4.5190 ar_kl=1.2253 prefix=112 targets=326 tokenize=1.70s loss=0.23s total=1.93s
+[157/180] Yaser_Salamah_128kbps_069046_simple  ar_ce=3.9570 ar_kl=1.4093 prefix=69 targets=141 tokenize=1.10s loss=0.23s total=1.33s
+[158/180] Yaser_Salamah_128kbps_069046_uthmani  ar_ce=3.9536 ar_kl=1.4067 prefix=71 targets=141 tokenize=1.10s loss=0.24s total=1.34s
+[159/180] Yaser_Salamah_128kbps_079025_simple  ar_ce=5.1362 ar_kl=1.7478 prefix=81 targets=168 tokenize=0.84s loss=0.22s total=1.06s
+[160/180] Yaser_Salamah_128kbps_079025_uthmani  ar_ce=5.1245 ar_kl=1.7537 prefix=91 targets=168 tokenize=0.84s loss=0.22s total=1.06s
+[161/180] aziz_alili_128kbps_006042_simple  ar_ce=4.0781 ar_kl=1.1608 prefix=144 targets=439 tokenize=1.55s loss=0.22s total=1.77s
+[162/180] aziz_alili_128kbps_006042_uthmani  ar_ce=4.0806 ar_kl=1.1696 prefix=154 targets=439 tokenize=1.61s loss=0.24s total=1.85s
+[163/180] aziz_alili_128kbps_007052_simple  ar_ce=4.2254 ar_kl=1.3070 prefix=126 targets=305 tokenize=1.85s loss=0.24s total=2.09s
+[164/180] aziz_alili_128kbps_007052_uthmani  ar_ce=4.2331 ar_kl=1.3181 prefix=135 targets=305 tokenize=1.15s loss=0.22s total=1.37s
+[165/180] aziz_alili_128kbps_007078_simple  ar_ce=4.7598 ar_kl=1.5492 prefix=93 targets=194 tokenize=0.97s loss=0.22s total=1.20s
+[166/180] aziz_alili_128kbps_007078_uthmani  ar_ce=4.7626 ar_kl=1.5411 prefix=101 targets=194 tokenize=1.31s loss=0.22s total=1.54s
+[167/180] aziz_alili_128kbps_012039_simple  ar_ce=4.6484 ar_kl=1.5202 prefix=115 targets=281 tokenize=1.34s loss=0.23s total=1.57s
+[168/180] aziz_alili_128kbps_012039_uthmani  ar_ce=4.6621 ar_kl=1.4912 prefix=132 targets=281 tokenize=1.69s loss=0.23s total=1.91s
+[169/180] aziz_alili_128kbps_020005_simple  ar_ce=5.5401 ar_kl=1.5982 prefix=76 targets=98 tokenize=0.60s loss=0.23s total=0.83s
+[170/180] aziz_alili_128kbps_020005_uthmani  ar_ce=5.5401 ar_kl=1.6050 prefix=80 targets=98 tokenize=0.55s loss=0.23s total=0.78s
+[171/180] aziz_alili_128kbps_030017_simple  ar_ce=4.0080 ar_kl=1.8306 prefix=83 targets=175 tokenize=0.84s loss=0.22s total=1.06s
+[172/180] aziz_alili_128kbps_030017_uthmani  ar_ce=4.0082 ar_kl=1.8304 prefix=88 targets=175 tokenize=0.81s loss=0.22s total=1.03s
+[173/180] aziz_alili_128kbps_037061_simple  ar_ce=4.9949 ar_kl=1.8627 prefix=77 targets=128 tokenize=0.65s loss=0.23s total=0.88s
+[174/180] aziz_alili_128kbps_037061_uthmani  ar_ce=4.9999 ar_kl=1.8462 prefix=82 targets=128 tokenize=0.62s loss=0.22s total=0.85s
+[175/180] aziz_alili_128kbps_043067_simple  ar_ce=4.4845 ar_kl=1.5752 prefix=106 targets=277 tokenize=1.07s loss=0.22s total=1.30s
+[176/180] aziz_alili_128kbps_043067_uthmani  ar_ce=4.4557 ar_kl=1.5710 prefix=112 targets=277 tokenize=1.04s loss=0.22s total=1.26s
+[177/180] aziz_alili_128kbps_069046_simple  ar_ce=4.8532 ar_kl=1.7290 prefix=69 targets=128 tokenize=0.65s loss=0.22s total=0.87s
+[178/180] aziz_alili_128kbps_069046_uthmani  ar_ce=4.8461 ar_kl=1.7227 prefix=71 targets=128 tokenize=0.62s loss=0.23s total=0.85s
+[179/180] aziz_alili_128kbps_079025_simple  ar_ce=4.6741 ar_kl=1.6150 prefix=81 targets=153 tokenize=0.90s loss=0.23s total=1.13s
+[180/180] aziz_alili_128kbps_079025_uthmani  ar_ce=4.6547 ar_kl=1.6612 prefix=91 targets=153 tokenize=0.88s loss=0.22s total=1.10s
+[replay] mean loss/ar_ce=4.4507 loss/ar_kl=1.4828
+[replay] per item: tokenize=1.30s loss=0.24s total=1.55s (model load 47.1s, not counted per item)
+[replay] wrote /content/logs/replay_l4_full_final.json
