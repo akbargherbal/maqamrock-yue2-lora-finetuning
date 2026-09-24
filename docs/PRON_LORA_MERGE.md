@@ -121,6 +121,11 @@ and **0** `diffusion_model.*`.
 
 ## Verification (2026-09-24, CPU)
 
+- **Re-verified live, session 11, 2026-09-24: PASS.** `pytest tests/test_merge_pron_lora.py -v -s`
+  → `12 passed in 2.62s`; `test_alpha_zero_reproduces_live_converted_v2` ran (not skipped)
+  and passed. Both staged converted-v2 inputs were hash-checked before the run and match
+  the table above: AR `747d5cfe2224b1bae6e582ccf5f2ee2a57e3f030c53d54e134f34a85960426fa`,
+  NAR `ad2c8d8690640e8fd8fea779b57bc2c7c887b93f2bb103bbcbfea056536d7ac9`.
 - **alpha=0 invariant — PASS.** Merged tensors are byte-identical to v2 (all 448),
   no padding. Through the converter, the resulting `_ar`/`_nar` files reproduce
   the live converted v2 adapters' sha256 **exactly** when the merged input keeps
