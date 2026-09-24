@@ -153,6 +153,22 @@ DEFAULT_EXCLUDES = [r".*\.tmp$"]
 # to gate the settle wait on; the metrics db must not be allowed to starve
 # every sync just because it's perpetually "recently touched."
 SETTLE_IGNORE_NAMES = {"loss_log.db", "loss_log.db-wal", "loss_log.db-shm"}
+# TensorBoard event files are rewritten every logged step (logging.log_every: 1)
+# -- the same perpetual-freshness problem as loss_log.db, and NOT covered by
+# SETTLE_IGNORE_NAMES. If they gate the settle, wait_for_settle on the run's
+# output folder never completes (newest file is always ~0s old), so the folder
+# is never synced and the checkpoints silently stop reaching GCS. Treat every
+# `tensorboard/` file and any `events.out.tfevents.*` as not gating the settle
+# (they are still synced; they just don't hold up the pass).
+SETTLE_IGNORE_DIRS = {"tensorboard"}
+
+
+def _settle_ignored(path: Path) -> bool:
+    if path.name in SETTLE_IGNORE_NAMES:
+        return True
+    if path.name.startswith("events.out.tfevents"):
+        return True
+    return any(part in SETTLE_IGNORE_DIRS for part in path.parts)
 
 
 def parse_watch_specs(specs: list[str]) -> list[tuple[Path, str]]:
@@ -295,7 +311,7 @@ def wait_for_settle(folder: Path, seconds: float, logger: logging.Logger) -> Non
     while True:
         newest = max(
             (p.stat().st_mtime for p in folder.rglob("*")
-             if p.is_file() and p.name not in SETTLE_IGNORE_NAMES),
+             if p.is_file() and not _settle_ignored(p)),
             default=0.0,
         )
         age = time.time() - newest

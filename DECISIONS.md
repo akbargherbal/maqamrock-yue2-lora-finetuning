@@ -58,6 +58,7 @@ Where a claim below says "verified against source," it means the actual `ostris/
 ## Backup: `loss_log.db` must not gate the settle wait
 
 - `backup_to_gcp.py`'s `wait_for_settle` skips files still being written. `loss_log.db` (WAL) is always being touched during a run, so it and its `-wal`/`-shm` sidecars are excluded by name — otherwise every sync would starve. Checkpoints/`config.yaml`/samples are written atomically and remain safe to gate on.
+- **PS (2026-09-24):** the TensorBoard event file (`tensorboard/<job>_<ts>/events.out.tfevents.*`, rewritten every step under `log_every: 1`) has the *same* perpetual-freshness property and was **not** excluded. Effect: `wait_for_settle` on the run's output folder never completed, so `output/` was never synced — the pron run's checkpoints stayed local-only and **no checkpoint reached GCS for ~1 h** (797 wait lines, zero output syncs) until noticed. Fix: `_settle_ignored()` now also skips any path under a `tensorboard/` dir or named `events.out.tfevents*` (they're still uploaded; they just don't gate the pass). When adding any new always-written file to a run folder, add it here too — and watch for "pass complete: 2/3" repeating with no `output` sync as the symptom.
 
 ## Goal correction: full-song structure — `train_window_frames` was the gap
 
