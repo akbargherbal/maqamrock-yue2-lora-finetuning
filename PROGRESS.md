@@ -621,3 +621,32 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 ## 2026-09-24 — AR-only pronunciation LoRA (Task 14) prepared, not yet trained
 
 - Added `config/pron_lora_ar_only.yml` (6,100 steps = 1 epoch) + `config/pron_lora_ar_only_smoke.yml`, `docs/PRON_LORA.md` (runbook), `docs/PRON_LORA_VERIFICATION.md` (A0–A6, source-cited), opt-in `job_pron_dataset()` in `bootstrap/setup.sh`, and run-name-aware `backup_to_gcp.py`; Task 13's set exposed at `/content/pron_dataset/{train,val,smoke}`. Runbook: `docs/PRON_LORA.md`.
+
+## 2026-09-24 — Task 14c: AR-only pron LoRA real run completes 6100/6100 on A100 ✅
+
+- `pron_lora_ar_only_r8` ran **6100/6100 steps (1 epoch)** on a Colab
+  **A100-SXM4-80GB**, clean exit at ~07:27 UTC (final adapter + optimizer, no
+  traceback/OOM). Final-adapter metadata `training_info = {"step": 6100, "epoch": 1}`.
+- **Final loss** (step 6099): `loss/loss` 5.412, `loss/ar_ce` 4.163, `loss/ar_kl`
+  1.531; last-50 means 5.815 / 4.397 / 1.533. `ar_ce` fell all run (6.13→4.40
+  first→last 50); `ar_kl` rose monotonically (0.21→1.53, bounded, max 2.19) — same
+  shape as v1/v2. Median **0.886 s/step**, 1.52 h logged. GPU peak 10.5 GB / 80 GB,
+  util p50 22 % → **data/CPU-bound, not compute-bound** (A100 is overkill for this
+  workload; L4 is fine). Full write-up: `TRAINING_ANALYSIS/pron_lora_ar_only_r8/ANALYSIS.md`.
+- **Artifacts local + GCS** (9 objects / 73.27 MiB): checkpoints
+  `000001525 / 000003050 / 000004575` + final no-step `pron_lora_ar_only_r8.safetensors`
+  + `optimizer.pt` + `loss_log.db` + `config.yaml` + `tensorboard/`. **No
+  `_000006100` numbered file** — the post-loop save *is* the step-6100 artifact
+  (loop runs steps 0–6099); four trainable artifacts, not five.
+- **Found and fixed a backup bug.** `backup_to_gcp.py`'s `wait_for_settle` did
+  not exclude the TensorBoard `events.out.tfevents.*` file (rewritten every step),
+  so the run's `output/` folder never settled and **no checkpoint reached GCS for
+  ~1 h** while `logs/`/`agent_notes/` synced normally. Fix: `_settle_ignored()`
+  now skips `tensorboard/` and `events.out.tfevents*`. Verified: forced passes put
+  all artifacts in GCS; daemon restarted. Recorded in `DECISIONS.md`.
+- **Handoff for the A100→L4 switch written:** `docs/L4_HANDOFF_TASK14C.md` (state,
+  GCS paths, gotchas, next tasks). Run results also appended to
+  `docs/PRON_LORA_VERIFICATION.md`.
+- **Next (L4):** build + run the offline AR-loss replay over the 180 `val` pairs per
+  checkpoint (`PRON_LORA_VERIFICATION.md` A3), then merge with the frozen v2 style
+  LoRA. **No merge / inference / sweep done.**
