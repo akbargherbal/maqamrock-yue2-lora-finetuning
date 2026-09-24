@@ -172,6 +172,29 @@ job_dataset() {
   touch "$marker"
 }
 
+# Pronunciation (AR-only) LoRA dataset -- SEPARATE from the v2 dataset above.
+# Opt-in: runs only when GCP_PRON_DATASET_PATH is exported, so a v2 training
+# bootstrap behaves exactly as before. The GCS prefix is a SIBLING of
+# dataset/ (pron_dataset/), never inside it, so job_dataset's recursive rsync
+# can never pull pron files into v2's /content/yue2_dataset. The completion
+# marker lives at the /content/pron_dataset ROOT, never inside train/val/smoke
+# (a marker in a subfolder would be uploaded and then skip that subtree's sync).
+job_pron_dataset() {
+  if [ -z "${GCP_PRON_DATASET_PATH:-}" ]; then
+    echo "GCP_PRON_DATASET_PATH unset; skipping pron dataset (opt-in)"
+    return 0
+  fi
+  local local_dir="/content/pron_dataset"
+  local marker="${local_dir}/.bootstrap_complete"
+  if [ -f "$marker" ]; then
+    echo "pron dataset already downloaded (marker $marker); skipping"
+    return 0
+  fi
+  mkdir -p "$local_dir"
+  gsutil -m rsync -r "$GCP_PRON_DATASET_PATH" "$local_dir"
+  touch "$marker"
+}
+
 # --- HF cache pre-warm: no custom directory tree, just make these a cache
 # hit instead of a stall the first time training actually asks for them. ---
 job_hf_yue2_backbone() {
@@ -277,6 +300,10 @@ start_job opencode job_opencode
 if [ "$MODE" = "training" ]; then
   start_job ai_toolkit job_ai_toolkit
   start_job dataset job_dataset
+  # opt-in: only when the launching notebook exported GCP_PRON_DATASET_PATH
+  if [ -n "${GCP_PRON_DATASET_PATH:-}" ]; then
+    start_job pron_dataset job_pron_dataset
+  fi
   start_job hf_yue2_backbone job_hf_yue2_backbone
   start_job hf_mert job_hf_mert
   start_job hf_tokenizer_head job_hf_tokenizer_head

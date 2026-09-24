@@ -302,6 +302,24 @@ def test_main_training_once(bak, monkeypatch, tmp_path, capsys):
     assert len(fake.calls) >= 2
 
 
+def test_main_run_name_selects_local_output_folder(bak, monkeypatch, tmp_path, capsys):
+    # A non-default --run-name must mirror training_folder/<run-name>/, not the
+    # default JOB_ROOT, while still writing to <base>/<run-name>/.
+    monkeypatch.setattr(bak, "TRAINING_FOLDER", tmp_path)
+    (tmp_path / "pron_lora_ar_only_r8").mkdir()
+    fake = FakeGsutil()
+    _patch(bak, monkeypatch, fake)
+    rc = _invoke(bak, monkeypatch,
+                 ["--run-name", "pron_lora_ar_only_r8", "--base", "gs://b/p",
+                  "--once", "--settle-seconds", "0",
+                  "--log-file", str(tmp_path / "m.log")])
+    assert rc == 0
+    srcs = [c[0][-2] for c in fake.calls if "rsync" in c[0]]
+    dsts = [c[0][-1] for c in fake.calls if "rsync" in c[0]]
+    assert str(tmp_path / "pron_lora_ar_only_r8") in srcs
+    assert "gs://b/p/pron_lora_ar_only_r8/output/" in dsts
+
+
 def test_main_inference_defaults(bak, monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(bak, "INFERENCE_TARGETS",
                         _dirs(tmp_path, ["out", "prompts"]))

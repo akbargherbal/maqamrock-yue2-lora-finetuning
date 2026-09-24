@@ -598,3 +598,7 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 - **Next:** listen to the 21 tracks (quality / maqam / pronunciation, plus track 13's
   truncation). Still open: clean-VM proof + cold timing; re-run the 2026-09-22 batch's 5
   truncated seeds at the corrected cap; per-arch binary auto-selection.
+
+## 2026-09-24 — AR-only pronunciation LoRA (Task 14) prepared, not yet trained
+
+- Added `config/pron_lora_ar_only.yml` (6,100 steps = 1 epoch) + `config/pron_lora_ar_only_smoke.yml`, `docs/PRON_LORA.md` (runbook), `docs/PRON_LORA_VERIFICATION.md` (A0–A6, source-cited), opt-in `job_pron_dataset()` in `bootstrap/setup.sh`, and run-name-aware `backup_to_gcp.py`; Task 13's set exposed at `/content/pron_dataset/{train,val,smoke}`. Runbook: `docs/PRON_LORA.md`.

@@ -113,11 +113,30 @@ INFERENCE_RUN_NAME = "audiocpp_inference"
 LORA_LOCAL = Path("/content/converter/out")
 
 # (source folder, remote subfolder, wait for writes to settle before syncing)
+# Default run only; main() swaps in training_targets(run_name) for any other
+# --run-name. Kept as a module constant because tests monkeypatch it.
 TRAINING_TARGETS = [
     (JOB_ROOT, "output", True),
     (Path("/content/logs"), "logs", False),
     (REPO_ROOT / "agent_notes", "agent_notes", False),
 ]
+
+
+def training_targets(run_name: str) -> list[tuple[Path, str, bool]]:
+    """Same shape as TRAINING_TARGETS, but for an arbitrary run name.
+
+    `--run-name` selects BOTH the remote prefix (<base>/<run-name>/) AND the
+    local output folder (training_folder/<run-name>/). Hardcoding JOB_ROOT made
+    `--run-name some_other_run` mirror the WRONG local folder (the default run's
+    checkpoints) under that run's prefix. JOB_ROOT remains the default.
+    """
+    return [
+        (TRAINING_FOLDER / run_name, "output", True),
+        (Path("/content/logs"), "logs", False),
+        (REPO_ROOT / "agent_notes", "agent_notes", False),
+    ]
+
+
 INFERENCE_TARGETS = [
     (INFERENCE_ROOT / "out", "out", False),
     (INFERENCE_ROOT / "prompts", "prompts", False),
@@ -444,8 +463,14 @@ def main() -> int:
 
     prefix = f"{args.base}/{args.run_name}"
 
-    base_targets = ([(path, sub, False) for path, sub in watch] if watch
-                    else list(INFERENCE_TARGETS if args.inference else TRAINING_TARGETS))
+    if watch:
+        base_targets = [(path, sub, False) for path, sub in watch]
+    elif args.inference:
+        base_targets = list(INFERENCE_TARGETS)
+    elif args.run_name == JOB_NAME:
+        base_targets = list(TRAINING_TARGETS)
+    else:
+        base_targets = training_targets(args.run_name)
     targets = base_targets + [(path, sub, False) for path, sub in (extra or [])]
 
     subs = [sub for _, sub, _ in targets]

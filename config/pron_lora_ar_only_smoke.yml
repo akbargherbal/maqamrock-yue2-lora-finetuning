@@ -1,0 +1,150 @@
+# =============================================================================
+# pron_lora_ar_only_smoke -- 10-step smoke test for the AR-only pronunciation LoRA.
+# Identical to config/pron_lora_ar_only.yml except:
+#   - name: pron_lora_ar_only_smoke (run name + save folder)
+#   - log_dir: output/pron_lora_ar_only_smoke/tensorboard
+#   - datasets[0].folder_path: /content/pron_dataset/smoke (16 pairs, a subset of train)
+#   - train.steps: 10, save.save_every: 10
+# Purpose: confirm the saved adapter is AR-only and rank 8. See docs/PRON_LORA_VERIFICATION.md.
+# =============================================================================
+---
+job: "extension"
+config:
+  name: "pron_lora_ar_only_smoke"
+  process:
+    - type: "diffusion_trainer"
+      training_folder: "/content/ai-toolkit/output"
+      sqlite_db_path: "/content/ai-toolkit/aitk_db.db"   # made absolute -- easier to target in the backup script below
+      device: "cuda"
+      trigger_word: ""   # A2: blank string -> injector's `if trigger.strip() != ""` guard is false, so NOTHING is prepended (toolkit/prompt_utils.py:736-742). The pron captions have no trigger word by design.
+      performance_log_every: 10
+      network:
+        type: "lora"
+        linear: 8
+        linear_alpha: 8
+        conv: 16
+        conv_alpha: 16
+        lokr_full_rank: true
+        lokr_factor: -1
+        network_kwargs:
+          ignore_if_contains: ["transformer.nar"]
+      # TensorBoard event log -- a stable, well-known format an AI agent can parse
+      # directly (tensorboard.backend.event_processing.event_accumulator) without
+      # needing to know aitk_db.db's internal schema. Seen in other users' exported
+      # configs, not primary docs -- confirm it's honored for diffusion_trainer/yue2
+      # before relying on it.
+      log_dir: "output/pron_lora_ar_only_smoke/tensorboard"
+      # NOTE (verified against ai-toolkit source, see DECISIONS.md): log_dir is real
+      # and generic (jobs/process/BaseTrainProcess.py), but it writes into a
+      # TIMESTAMPED SUBFOLDER under this path, not this path directly --
+      # output/akbar_arabic_rock_lora/tensorboard/akbar_arabic_rock_lora_<YYYYMMDD-HHMMSS>/.
+      # log_config below is NOT read anywhere in toolkit/config_modules.py's LoggingConfig
+      # -- it's a dead key, left over from an example config. Only `logging.log_every`
+      # below (already set) controls anything. Kept here, not deleted, so nobody re-adds
+      # it later thinking it's missing.
+      log_config:
+        log_every: 1
+      save:
+        dtype: "bf16"
+        save_every: 10
+        max_step_saves_to_keep: 12   # was 4 -- widened so the background GCS sync (every 15 min, backup_to_gcp.py default) has a buffer before local rotation deletes older checkpoints
+        save_format: "diffusers"
+        push_to_hub: false
+      datasets:
+        - folder_path: "/content/pron_dataset/smoke"  # 16 pairs (subset of train); restored by setup.sh's opt-in job_pron_dataset()
+          mask_path: null
+          mask_min_value: 0.1
+          default_caption: ""
+          caption_ext: "txt"
+          caption_dropout_rate: 0
+          cache_latents_to_disk: true   # correct -- mandatory for YuE2
+          is_reg: false
+          network_weight: 1
+          resolution:
+            - 512
+          controls: []
+          shrink_video_to_frames: true
+          num_frames: 1
+          flip_x: false
+          flip_y: false
+          num_repeats: 1
+      train:
+        batch_size: 1
+        bypass_guidance_embedding: false
+        steps: 10   # smoke: 10 steps over the 16-pair smoke set (final no-step checkpoint is always saved)
+        # Wall-clock cost: don't reuse the killed run's ~7.8s/step (that was measured under the
+        # 60s train_window_frames, not whole-song). Measured whole-song A100 step-time instead:
+        # see docs/GPU_L4_VS_A100.md (~3.10 s/step A100 vs ~13.4 s/step L4, ~4.3x).
+        gradient_accumulation: 1
+        train_unet: true
+        train_text_encoder: false
+        gradient_checkpointing: true
+        noise_scheduler: "flowmatch"
+        optimizer: "adamw8bit"
+        timestep_type: "sigmoid"
+        content_or_style: "balanced"   # confirmed honored -- traced to the generic timestep sampler in BaseSDTrainProcess.py; a separate axis from train_window_frames below, left alone by design
+        optimizer_params:
+          weight_decay: 0.0001
+        unload_text_encoder: false
+        cache_text_embeddings: true   # was false -- your captions are static per file, so this is close-to-free speed with no quality cost
+        lr: 0.0001
+        ema_config:
+          use_ema: true    # was false -- community YuE2 LoRA trainers specifically credit ema_decay:0.999 for reducing run-to-run variance
+          ema_decay: 0.999
+        skip_first_sample: false
+        force_first_sample: false
+        disable_sampling: true
+        dtype: "bf16"
+        diff_output_preservation: false
+        diff_output_preservation_multiplier: 1
+        diff_output_preservation_class: "person"
+        switch_boundary_every: 1
+        loss_type: "mse"
+      logging:
+        log_every: 1
+        use_ui_logger: true
+      model:
+        name_or_path: "Comfy-Org/YuE2/checkpoints/yue2_3b_int8_convrot.safetensors"
+        quantize: true
+        qtype: "convrot8"
+        quantize_te: false
+        qtype_te: "qfloat8"
+        arch: "yue2"
+        low_vram: false
+        model_kwargs:
+          cot: "off"   # was "full" -- your captions carry no melodic/ABC info, so this skips SheetSage2 entirely (faster caching + training); switch back to "full" if you want the LoRA to shape melodic structure, not just style/timbre
+          abc_dropout: 0.5   # moot while cot:"off" -- only relevant if you switch cot back to "full"
+          sample_ar_repetition_penalty: 1.2
+          ar_kl_weight: 0.2
+          # NEW, was unset (implicit default 1500 = 60s). Verified against yue2_model.py's
+          # condition_noisy_latents(): every step was cropping ONE random 60s window out of the
+          # cached full-song latents and computing BOTH the NAR flow loss and the AR next-token
+          # loss (loss/ar_ce -- confirmed the dominant term in TRAINING_ANALYSIS) on that window
+          # only. Fine for a pure timbre/style adapter; wrong for a full-song-structure goal,
+          # since the AR expert never once saw a gradient spanning a verse->chorus transition.
+          # 0 = whole song, no cropping (condition_noisy_latents no-ops when window<=0). Safe per
+          # verification.md: dataset max is 370s, well inside the ~983s AR context ceiling
+          # (CONTEXT 24576 / 25fps), and the VAE's "60s chunks" are only an offline encode-time
+          # memory trick (src/vae.py encode()) -- cached latents are one contiguous per-song
+          # tensor, so a larger window isn't crossing any real boundary.
+          # VERIFIED: whole-song (this setting) ran cleanly to 3000/3000 steps on both L4 and
+          # A100 in the v1 run, peak VRAM ~15-16GB, no OOM. No fallback-window logic needed.
+          train_window_frames: 0
+        compile: false
+      sample:
+        sampler: "flowmatch"
+        sample_every: 250
+        sample_start_step: 0
+        width: 1024   # vestigial from the image template, harmless
+        height: 1024
+        neg: ""
+        seed: 42
+        walk_seed: true
+        guidance_scale: 1
+        sample_steps: 32
+        num_frames: 1
+        fps: 1
+        duration: 360
+meta:
+  name: "[name]"
+  version: "1.0"
