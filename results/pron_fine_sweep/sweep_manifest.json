@@ -1,0 +1,84 @@
+{
+  "task": "Fine alpha sweep -- pron checkpoint 3050 fixed, alpha {0.2,0.3,0.55,0.65}, Hijaz+Kurd only",
+  "generated_utc": "2026-09-24T19:57:36Z",
+  "seed": 20260924,
+  "blinding_seed": 20260925,
+  "cap_mode": "auto",
+  "maqams": [
+    "Hijaz",
+    "Kurd"
+  ],
+  "binary": {
+    "path": "/content/audiocpp_inference/bin/audiocpp_cli",
+    "sha256": "97028a71fd4d86378161162364dc6cdc85a569461d3afb6bf78f83ea572ad3d4",
+    "arch": "sm_89 (L4)"
+  },
+  "gpu": {
+    "name": "NVIDIA L4",
+    "compute_cap": "8.9"
+  },
+  "inputs": {
+    "v2_raw_path": "/content/ai-toolkit/output/akbar_arabic_rock_lora/akbar_arabic_rock_lora.safetensors",
+    "v2_raw_sha256": "b1d090987355303129a3765d257e61c983b91d48cecb8a30aa424e09cdd24cd4",
+    "pron_3050_path": "/content/ai-toolkit/output/pron_lora_ar_only_r8/pron_lora_ar_only_r8_000003050.safetensors",
+    "pron_3050_sha256": "ead30d5202dec368838304546d5400ce46e4a2da713a19a9236781f575178a21",
+    "pron_final_sha256": "0d506719af3b8d5fc7af8dc211baf2767b169d7596d9239f4a2850a4d2d37bf5",
+    "converter_script": "/content/converter/out/convert_aitoolkit_yue2_lora.py"
+  },
+  "prompts": {
+    "Hijaz_style.txt": "9e201bfbfcae2987e117c62ea781056923b23c8c5c570702d9f8e3b3fff4bd16",
+    "Kurd_style.txt": "0e789bfd7c9b496a115d7bd48802a860e49442e15cf6ff25394f79206a94a98c",
+    "Hijaz_lyrics.txt": "1b8dc015eca8f0e7694b9f382eaf70d0419ac9876486b1c75a896e0b29705af9",
+    "Kurd_lyrics.txt": "ac29850aea7f553c5bfa3d78b3d696a5761cc42f6595d141595db6838ea4ce0d"
+  },
+  "configs": {
+    "c3050_a0.2": {
+      "alpha": 0.2,
+      "pron_checkpoint": "3050",
+      "merged_path": "/content/pron_fine_sweep/merged/c3050_a0.2/akbar_arabic_rock_lora.safetensors",
+      "merged_sha256": "05209645d2f4f1ac4d8fbb9607c523854f9d2af3cc0c9621dfbac967aa85021a",
+      "converted_ar_path": "/content/converter/out/c3050_a0.2/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "c68217ab619a9cfa992bbba650f03dd19616ea19fd0967060d0a45e9e415d34c",
+      "converted_nar_path": "/content/converter/out/c3050_a0.2/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    },
+    "c3050_a0.3": {
+      "alpha": 0.3,
+      "pron_checkpoint": "3050",
+      "merged_path": "/content/pron_fine_sweep/merged/c3050_a0.3/akbar_arabic_rock_lora.safetensors",
+      "merged_sha256": "f0a7e59ab3d3e3ececf780bd5638063d4ab0919dee54dbd88b2cccc6734e826c",
+      "converted_ar_path": "/content/converter/out/c3050_a0.3/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "dd0d495924c3b533df2fe89cdb5ff82c5a708047c3e3b0bf6ccec42d6033c6e9",
+      "converted_nar_path": "/content/converter/out/c3050_a0.3/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    },
+    "c3050_a0.55": {
+      "alpha": 0.55,
+      "pron_checkpoint": "3050",
+      "merged_path": "/content/pron_fine_sweep/merged/c3050_a0.55/akbar_arabic_rock_lora.safetensors",
+      "merged_sha256": "cd883caacb4fefff4497e1dab9e003e02c1ca1735b569769c7c3c858f0e887ba",
+      "converted_ar_path": "/content/converter/out/c3050_a0.55/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "ba328949f995e539bc8d968eaca62b7923ff321c165ef312a2289f8c19ebf53f",
+      "converted_nar_path": "/content/converter/out/c3050_a0.55/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    },
+    "c3050_a0.65": {
+      "alpha": 0.65,
+      "pron_checkpoint": "3050",
+      "merged_path": "/content/pron_fine_sweep/merged/c3050_a0.65/akbar_arabic_rock_lora.safetensors",
+      "merged_sha256": "a4daf801391a6b5d1216e80d8642f0737d30f9b7fdd2f524bc9df685577f3be3",
+      "converted_ar_path": "/content/converter/out/c3050_a0.65/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "e495beca26aa4e7922b18e03a799b45f0d48e38a2efbe6d662fe3584b17c4d00",
+      "converted_nar_path": "/content/converter/out/c3050_a0.65/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    }
+  },
+  "prior_sweep_reference": {
+    "seed": 20260924,
+    "existing_tracks_not_regenerated": [
+      "a0",
+      "c3050_a0.5"
+    ],
+    "prior_manifest": "gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/pron_alpha_sweep/sweep_manifest.json"
+  }
+}

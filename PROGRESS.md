@@ -731,3 +731,19 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `ca2d2fa`.
 - **Next (user's):** listen to the blinded package, pick checkpoint + `alpha`, then the
   merge at that setting and the letter-substitution scorecard. No quality verdict made.
+
+## 2026-09-24 — Task 18: fine alpha sweep — ckpt 3050, alpha {0.2,0.3,0.55,0.65}, Hijaz + Kurd
+
+- Fine round on Task 17: pron checkpoint **fixed at 3050**, alpha ∈ {0.2, 0.3, 0.55,
+  0.65}, **Hijaz + Kurd only** — 8 tracks, alpha the only variable vs Task 17's existing
+  `a0` / `c3050_a0.5` (reused, not regenerated). Held-out inputs reused byte-for-byte:
+  **Hijaz** `New_Abu_Tammam_16082026` / `05-استجابة-النداء-وامعتصماه-وكرامة-الفرسان`
+  (26 lines, auto cap **7250**); **Kurd** `amin_almanoon_17082026` /
+  `04-مثل-الدهر-الأول-2-مكمن-القانص-ومصرع-الأتن` (24 lines, auto cap **6500**);
+  generation **seed 20260924**; **pron ckpt 3050**; L4 + sm89 binary `97028a71…`; new
+  blinding seed **20260925**. **8/8 exit 0**, no failures, no cap-truncations, mean
+  **218.5 s/track** (~29 min).
+- Blinded package `PRON_FINE_SWEEP_INPUT/` (`Hijaz_{A..D}.mp3`, `Kurd_{A..D}.mp3`,
+  `KEY_open_after_listening.txt`); records `results/pron_fine_sweep/`; driver
+  `INFERENCE/pron_fine_sweep.sh`. GCS `<base>/audiocpp_inference/pron_fine_sweep/`.
+- **Next (user's):** listen blind, then decode. No quality verdict/winner made.

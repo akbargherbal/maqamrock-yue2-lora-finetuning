@@ -108,3 +108,17 @@ in this runbook.
 
 The eventual checkpoint/`alpha` choice (and the letter-substitution scorecard) is the
 user's, informed by listening to the blinded package — not decided by this task.
+
+## Round 2 — fine sweep at checkpoint 3050 (2026-09-24)
+
+After Task 17, the checkpoint was fixed at **3050** and `alpha` refined to
+**{0.2, 0.3, 0.55, 0.65}**, for **Hijaz + Kurd only** (8 tracks; 4 labels per maqam).
+Task 17's `a0` and `c3050_a0.5` tracks are reused as references, not regenerated, so
+`alpha` is the only variable. Same held-out prompts, same generation seed `20260924`,
+auto cap, same sm89 binary; new **blinding seed `20260925`** (labels only).
+
+Driver: [`INFERENCE/pron_fine_sweep.sh`](../INFERENCE/pron_fine_sweep.sh) (same
+resumable/skip contract as `pron_alpha_sweep.sh`, maqam-major). Records:
+[`results/pron_fine_sweep/`](../results/pron_fine_sweep/) (config table, per-track table,
+`KEY.json`). Blinded review package: `PRON_FINE_SWEEP_INPUT/` at the repo root. Raw WAVs +
+adapters: `/content/pron_fine_sweep/` + `/content/converter/out/<cfg>/`.

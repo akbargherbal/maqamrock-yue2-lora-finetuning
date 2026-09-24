@@ -1,0 +1,21 @@
+PRON_FINE_SWEEP_INPUT — listening key (open AFTER listening)
+generation seed = 20260924   (identical to the Task 17 alpha sweep — only alpha varies)
+blinding seed   = 20260925
+blinding: one random.Random(20260925); for each maqam in ['Hijaz', 'Kurd']: shuffle(['c3050_a0.2', 'c3050_a0.3', 'c3050_a0.55', 'c3050_a0.65']); labels A..D in shuffled order.
+
+Held-out inputs (identical to the Task 17 sweep for these maqams; auto cap):
+  Hijaz: New_Abu_Tammam_16082026 / 05-استجابة-النداء-وامعتصماه-وكرامة-الفرسان  (26 lines, cap 7250)
+  Kurd : amin_almanoon_17082026 / 04-مثل-الدهر-الأول-2-مكمن-القانص-ومصرع-الأتن  (24 lines, cap 6500)
+
+Hijaz:
+  Hijaz_A.mp3 = c3050_a0.3
+  Hijaz_B.mp3 = c3050_a0.65
+  Hijaz_C.mp3 = c3050_a0.2
+  Hijaz_D.mp3 = c3050_a0.55
+Kurd:
+  Kurd_A.mp3 = c3050_a0.3
+  Kurd_B.mp3 = c3050_a0.2
+  Kurd_C.mp3 = c3050_a0.55
+  Kurd_D.mp3 = c3050_a0.65
+
+Config decode: c3050_aX = pron checkpoint 3050 merged into v2 at alpha X (this batch); a0 = v2 baseline (alpha 0) and c3050_a0.5 = prior sweep's best-so-far reference — both from the Task 17 package, not regenerated here.
