@@ -138,4 +138,6 @@ and **0** `diffusion_model.*`.
   146,861,544 B → converted AR 87,203,736 B / NAR 87,205,304 B.
 - **Wall clock per merge+convert cycle: ~3.4–3.7 s** (merge ~3.0–3.3 s, convert
   ~0.35–0.41 s). An N-point alpha sweep is cheap and needs no batching.
-- Unit tests: `tests/test_merge_pron_lora.py` (11 tests, CPU-only).
+- Unit tests: `tests/test_merge_pron_lora.py` (12 tests, CPU-only; the alpha=0
+  end-to-end invariant runs when the real v2/pron/converter artifacts are staged
+  and skips on a clean clone).

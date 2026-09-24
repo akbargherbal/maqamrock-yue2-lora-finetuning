@@ -178,3 +178,56 @@ def test_no_accelerator_calls_in_source():
     src = (REPO_ROOT / "merge_pron_lora.py").read_text()
     assert "torch.cuda" not in src
     assert ".cuda(" not in src
+
+
+# --- optional end-to-end invariant (needs the real files + audio.cpp converter) ---
+# alpha=0 must reproduce the live converted v2 adapters byte-for-byte. Skipped on a
+# clean clone where those artifacts are not staged.
+
+_CONVERTER_CANDIDATES = [
+    Path("/content/converter/out/convert_aitoolkit_yue2_lora.py"),
+    REPO_ROOT / "converter" / "convert_aitoolkit_yue2_lora.py",
+    Path("/content/merge_task/convert_aitoolkit_yue2_lora.py"),
+]
+_V2_DEFAULT = Path(
+    "/content/ai-toolkit/output/akbar_arabic_rock_lora/akbar_arabic_rock_lora.safetensors"
+)
+_PRON_DEFAULT = Path(
+    "/content/ai-toolkit/output/pron_lora_ar_only_r8/pron_lora_ar_only_r8.safetensors"
+)
+_CUR_DEFAULT = Path("/content/converter/out")
+
+
+def _sha(path):
+    import hashlib
+
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def test_alpha_zero_reproduces_live_converted_v2(tmp_path):
+    import os
+
+    conv = Path(os.environ["YUE2_CONVERTER"]) if os.environ.get("YUE2_CONVERTER") else None
+    if conv is None or not conv.is_file():
+        conv = next((p for p in _CONVERTER_CANDIDATES if p.is_file()), None)
+    v2 = Path(os.environ.get("YUE2_V2", _V2_DEFAULT))
+    pron = Path(os.environ.get("YUE2_PRON", _PRON_DEFAULT))
+    cur = Path(os.environ.get("YUE2_CURRENT_DIR", _CUR_DEFAULT))
+    cur_ar = cur / "akbar_arabic_rock_lora_ar.safetensors"
+    cur_nar = cur / "akbar_arabic_rock_lora_nar.safetensors"
+    if conv is None or not all(p.is_file() for p in (v2, pron, cur_ar, cur_nar)):
+        pytest.skip("real v2/pron/converter artifacts not staged")
+
+    # the converter stamps its input filename into the output `source_file`
+    # metadata, so use v2's own basename to reproduce the live files exactly.
+    named = tmp_path / "akbar_arabic_rock_lora.safetensors"
+    M.run(v2, pron, 0.0, named, pron.name)
+
+    spec = importlib.util.spec_from_file_location("_merge_e2e_converter", conv)
+    c = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(c)
+    out = tmp_path / "out"
+    rc = c.main([str(named), "--out-dir", str(out), "--stem", "x"])
+    assert rc == 0
+    assert _sha(out / "x_ar.safetensors") == _sha(cur_ar)
+    assert _sha(out / "x_nar.safetensors") == _sha(cur_nar)
