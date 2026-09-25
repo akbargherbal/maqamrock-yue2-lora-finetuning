@@ -128,7 +128,7 @@ adapters: `/content/pron_fine_sweep/` + `/content/converter/out/<cfg>/`.
 With `alpha` fixed at the already-shipped **0.5**, this round compares the two
 not-yet-shipped pron checkpoints **{1525, 4575}** (2 configs x Hijaz + Kurd = **4
 tracks**). Same held-out prompts, same generation seed `20260924`, auto cap (Hijaz
-7250 / Kurd 6500), same sm89 binary; new **blinding seed `20260926`** (labels only,
+7250 / Kurd 6500), binary `7ad69d1c…` (sm_75, PTX-JIT on the L4); new **blinding seed `20260926`** (labels only,
 one new random label per maqam). Strictly sequential.
 
 Driver: [`INFERENCE/pron_ckpt_sweep.py`](../INFERENCE/pron_ckpt_sweep.py) (reuses

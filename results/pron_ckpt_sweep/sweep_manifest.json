@@ -11,7 +11,7 @@
   "binary": {
     "path": "/content/audiocpp_inference/bin/audiocpp_cli",
     "sha256": "7ad69d1ccfe432b8c5e100009188b56013e48dc117ae391958b1000439caa93c",
-    "arch": "sm_89 (L4)"
+    "arch": "sm_75 (PTX-JIT on sm_89 L4)"
   },
   "gpu": {
     "name": "NVIDIA L4",
