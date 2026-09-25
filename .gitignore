@@ -5,3 +5,8 @@ __pycache__/
 .reconcile/
 # merge_pron_lora.py output: large regenerable merged fused LoRAs
 /output/
+
+# graphify: the interpreter path is VM-specific; the skill regenerates this on
+# each fresh VM (see graphify Step 1). The rest of graphify-out/ is committed on
+# the pron-lora-ar-only branch so the graph + incremental-update cache survive.
+graphify-out/.graphify_python
