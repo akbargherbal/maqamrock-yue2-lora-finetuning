@@ -1,0 +1,164 @@
+{
+  "task": "Cross-maqam lyric swap -- one maqam's caption+tag with the other's held-out lyric, at alpha 0 (a0) and c3050_a0.5",
+  "generated_utc": "2026-09-25T12:04:02Z",
+  "seed": 20260924,
+  "blinding_seed": 20260927,
+  "cap_mode": "auto",
+  "cap_convention": "auto cap from the lyric file actually used (follows the swapped-in lyric)",
+  "binary": {
+    "path": "/content/audiocpp_inference/bin/audiocpp_cli",
+    "sha256": "97028a71fd4d86378161162364dc6cdc85a569461d3afb6bf78f83ea572ad3d4",
+    "arch": "sm_89"
+  },
+  "gpu": {
+    "name": "NVIDIA L4",
+    "compute_cap": "8.9"
+  },
+  "inputs": {
+    "v2_raw_path": "/content/ai-toolkit/output/akbar_arabic_rock_lora/akbar_arabic_rock_lora.safetensors",
+    "v2_raw_sha256": "b1d090987355303129a3765d257e61c983b91d48cecb8a30aa424e09cdd24cd4",
+    "pron_3050_sha256": "ead30d5202dec368838304546d5400ce46e4a2da713a19a9236781f575178a21",
+    "converter_script": "/content/converter/out/convert_aitoolkit_yue2_lora.py"
+  },
+  "prompts": {
+    "Hijaz_style.txt": "9e201bfbfcae2987e117c62ea781056923b23c8c5c570702d9f8e3b3fff4bd16",
+    "Hijaz_lyrics.txt": "1b8dc015eca8f0e7694b9f382eaf70d0419ac9876486b1c75a896e0b29705af9",
+    "Kurd_style.txt": "0e789bfd7c9b496a115d7bd48802a860e49442e15cf6ff25394f79206a94a98c",
+    "Kurd_lyrics.txt": "ac29850aea7f553c5bfa3d78b3d696a5761cc42f6595d141595db6838ea4ce0d"
+  },
+  "configs": {
+    "a0": {
+      "alpha": 0.0,
+      "pron_checkpoint": "3050",
+      "merged_path": "/content/maqam_lyric_swap/merged/a0/akbar_arabic_rock_lora.safetensors",
+      "converted_ar_path": "/content/maqam_lyric_swap/converted/a0/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "747d5cfe2224b1bae6e582ccf5f2ee2a57e3f030c53d54e134f34a85960426fa",
+      "converted_nar_path": "/content/maqam_lyric_swap/converted/a0/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "ad2c8d8690640e8fd8fea779b57bc2c7c887b93f2bb103bbcbfea056536d7ac9"
+    },
+    "c3050_a0.5": {
+      "alpha": 0.5,
+      "pron_checkpoint": "3050",
+      "merged_path": "/content/maqam_lyric_swap/merged/c3050_a0.5/akbar_arabic_rock_lora.safetensors",
+      "converted_ar_path": "/content/maqam_lyric_swap/converted/c3050_a0.5/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "33e824f24f1eec1ab06a45365e93a19b078a2a7cfbea724eba1b908d27360509",
+      "converted_nar_path": "/content/maqam_lyric_swap/converted/c3050_a0.5/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    }
+  },
+  "groups": {
+    "KurdStyle_HijazLyrics": {
+      "style_maqam": "Kurd",
+      "lyrics_maqam": "Hijaz",
+      "style_file": "/content/audiocpp_inference/prompts/Kurd_style.txt",
+      "style_sha256": "0e789bfd7c9b496a115d7bd48802a860e49442e15cf6ff25394f79206a94a98c",
+      "lyrics_file": "/content/audiocpp_inference/prompts/Hijaz_lyrics.txt",
+      "lyrics_sha256": "1b8dc015eca8f0e7694b9f382eaf70d0419ac9876486b1c75a896e0b29705af9",
+      "cap": 7250
+    },
+    "HijazStyle_KurdLyrics": {
+      "style_maqam": "Hijaz",
+      "lyrics_maqam": "Kurd",
+      "style_file": "/content/audiocpp_inference/prompts/Hijaz_style.txt",
+      "style_sha256": "9e201bfbfcae2987e117c62ea781056923b23c8c5c570702d9f8e3b3fff4bd16",
+      "lyrics_file": "/content/audiocpp_inference/prompts/Kurd_lyrics.txt",
+      "lyrics_sha256": "ac29850aea7f553c5bfa3d78b3d696a5761cc42f6595d141595db6838ea4ce0d",
+      "cap": 6500
+    }
+  },
+  "blinding": {
+    "algorithm": "one random.Random(20260927); for each group in ['KurdStyle_HijazLyrics', 'HijazStyle_KurdLyrics']: shuffle(['a0', 'c3050_a0.5']); labels A..B in shuffled order",
+    "mapping": {
+      "KurdStyle_HijazLyrics": {
+        "A": "c3050_a0.5",
+        "B": "a0"
+      },
+      "HijazStyle_KurdLyrics": {
+        "A": "a0",
+        "B": "c3050_a0.5"
+      }
+    }
+  },
+  "tracks": [
+    {
+      "group": "KurdStyle_HijazLyrics",
+      "style_maqam": "Kurd",
+      "lyrics_maqam": "Hijaz",
+      "maqam": "Kurd",
+      "config": "a0",
+      "alpha": 0.0,
+      "pron_checkpoint": 3050,
+      "seed": 20260924,
+      "cap": 7250,
+      "cap_mode": "auto",
+      "exit": 0,
+      "wall_s": 254.1,
+      "wav_duration_s": 243.92,
+      "truncated": false,
+      "wav_sha256": "1958ad7a3ce28d689ef8e2c9eeef24c901375ae151b77f41e1676663597535ea",
+      "label": "B",
+      "converted_ar_sha256": "747d5cfe2224b1bae6e582ccf5f2ee2a57e3f030c53d54e134f34a85960426fa",
+      "converted_nar_sha256": "ad2c8d8690640e8fd8fea779b57bc2c7c887b93f2bb103bbcbfea056536d7ac9"
+    },
+    {
+      "group": "KurdStyle_HijazLyrics",
+      "style_maqam": "Kurd",
+      "lyrics_maqam": "Hijaz",
+      "maqam": "Kurd",
+      "config": "c3050_a0.5",
+      "alpha": 0.5,
+      "pron_checkpoint": 3050,
+      "seed": 20260924,
+      "cap": 7250,
+      "cap_mode": "auto",
+      "exit": 0,
+      "wall_s": 244.7,
+      "wav_duration_s": 227.28,
+      "truncated": false,
+      "wav_sha256": "fd8b2618fb947cd283a9ae087ea78f90732aee6eb74c51a953a74f99c5daac89",
+      "label": "A",
+      "converted_ar_sha256": "33e824f24f1eec1ab06a45365e93a19b078a2a7cfbea724eba1b908d27360509",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    },
+    {
+      "group": "HijazStyle_KurdLyrics",
+      "style_maqam": "Hijaz",
+      "lyrics_maqam": "Kurd",
+      "maqam": "Hijaz",
+      "config": "a0",
+      "alpha": 0.0,
+      "pron_checkpoint": 3050,
+      "seed": 20260924,
+      "cap": 6500,
+      "cap_mode": "auto",
+      "exit": 0,
+      "wall_s": 220.0,
+      "wav_duration_s": 229.92,
+      "truncated": false,
+      "wav_sha256": "df4aa119eb5215956d3e8f2af7851784db982c3df8a809573c223dbdbd3cd087",
+      "label": "A",
+      "converted_ar_sha256": "747d5cfe2224b1bae6e582ccf5f2ee2a57e3f030c53d54e134f34a85960426fa",
+      "converted_nar_sha256": "ad2c8d8690640e8fd8fea779b57bc2c7c887b93f2bb103bbcbfea056536d7ac9"
+    },
+    {
+      "group": "HijazStyle_KurdLyrics",
+      "style_maqam": "Hijaz",
+      "lyrics_maqam": "Kurd",
+      "maqam": "Hijaz",
+      "config": "c3050_a0.5",
+      "alpha": 0.5,
+      "pron_checkpoint": 3050,
+      "seed": 20260924,
+      "cap": 6500,
+      "cap_mode": "auto",
+      "exit": 0,
+      "wall_s": 194.1,
+      "wav_duration_s": 190.84,
+      "truncated": false,
+      "wav_sha256": "ec7e60fd3c5c01877bcf4f2f69924c7c52a1d7bcb9cec87da040eb7310a8dbb3",
+      "label": "B",
+      "converted_ar_sha256": "33e824f24f1eec1ab06a45365e93a19b078a2a7cfbea724eba1b908d27360509",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    }
+  ]
+}

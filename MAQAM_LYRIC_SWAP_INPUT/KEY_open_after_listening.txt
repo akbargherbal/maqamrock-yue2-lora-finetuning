@@ -1,0 +1,19 @@
+MAQAM_LYRIC_SWAP_INPUT — listening key (open AFTER listening)
+generation seed = 20260924
+blinding seed   = 20260927
+blinding: one random.Random(20260927); for each group: shuffle(['a0', 'c3050_a0.5']);
+          labels A..B in shuffled order.
+
+Each group pairs one maqam's caption+tag with the OTHER maqam's held-out lyric;
+the two files within a group differ only in the pron config (blinded):
+  a0          = v2 verbatim, no pron contribution (AR rank 32)
+  c3050_a0.5  = v2 + pron checkpoint 3050 at alpha 0.5 (AR rank 40)
+
+KurdStyle_HijazLyrics:  Kurd caption/tag  +  Hijaz held-out lyric
+  KurdStyle_HijazLyrics_A.mp3 = c3050_a0.5
+  KurdStyle_HijazLyrics_B.mp3 = a0
+
+HijazStyle_KurdLyrics:  Hijaz caption/tag  +  Kurd held-out lyric
+  HijazStyle_KurdLyrics_A.mp3 = a0
+  HijazStyle_KurdLyrics_B.mp3 = c3050_a0.5
+

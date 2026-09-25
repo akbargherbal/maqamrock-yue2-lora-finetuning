@@ -138,3 +138,28 @@ generation). Records: [`results/pron_ckpt_sweep/`](../results/pron_ckpt_sweep/)
 package: `PRON_CKPT_SWEEP_INPUT/` at the repo root. Raw WAVs + adapters:
 `/content/pron_ckpt_sweep/{<cfg>,merged,converted}/`.
 
+## Round 4 — cross-maqam lyric swap (2026-09-25)
+
+Not an alpha/checkpoint sweep: this round crosses the held-out inputs. Each group pairs
+one maqam's **caption + maqam tag** with the **other maqam's held-out lyric**, at two pron
+settings — `a0` (v2 verbatim) and `c3050_a0.5` (the shipped α 0.5 merge). 2 groups x 2
+configs = **4 tracks**, strictly sequential per group. The question is whether the
+style/tag or the lyric text dominates the render.
+
+| group | caption/tag | lyric | cap |
+|---|---|---:|---:|
+| `KurdStyle_HijazLyrics` | `Kurd_style.txt` | `Hijaz_lyrics.txt` | 7250 |
+| `HijazStyle_KurdLyrics` | `Hijaz_style.txt` | `Kurd_lyrics.txt` | 6500 |
+
+Same generation seed `20260924` as the sweeps; **auto cap follows the swapped-in lyric**
+(Hijaz lyric -> 7250, Kurd lyric -> 6500). Native sm89 L4 binary (`97028a71…`); new
+**blinding seed `20260927`** (labels only, one new random A/B per group — the config is
+the blinded axis, the swap group is visible).
+
+Driver: [`INFERENCE/maqam_lyric_swap.py`](../INFERENCE/maqam_lyric_swap.py) (reuses
+`generate.py`'s sidecar helpers; full per-track JSON sidecar written before and updated
+after). Records: [`results/maqam_lyric_swap/`](../results/maqam_lyric_swap/)
+(`sweep_manifest.json`, `KEY.json`, `README.md`, per-track `sidecars/`). Blinded review
+package: `MAQAM_LYRIC_SWAP_INPUT/` at the repo root. Raw WAVs + adapters:
+`/content/maqam_lyric_swap/`.
+

@@ -1,0 +1,23 @@
+{
+  "seed": 20260924,
+  "blinding_seed": 20260927,
+  "algorithm": "one random.Random(20260927); for each group in ['KurdStyle_HijazLyrics', 'HijazStyle_KurdLyrics']: shuffle(['a0', 'c3050_a0.5']); labels A..B in shuffled order",
+  "config_order": [
+    "a0",
+    "c3050_a0.5"
+  ],
+  "labels": [
+    "A",
+    "B"
+  ],
+  "mapping": {
+    "KurdStyle_HijazLyrics": {
+      "A": "c3050_a0.5",
+      "B": "a0"
+    },
+    "HijazStyle_KurdLyrics": {
+      "A": "a0",
+      "B": "c3050_a0.5"
+    }
+  }
+}
