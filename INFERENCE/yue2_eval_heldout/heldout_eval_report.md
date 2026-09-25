@@ -145,15 +145,15 @@ Full prompt:
 arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Nahawand. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Nahawand with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: nostalgic, faithful, solemn hope.
 [Lyrics]
 [Intro]
-بِاللَّهِ يَا مَنْزِلَ الْعَيْشِ ٱلَّذِي دَرَسَتْ
+بِاللهِ يَا مَنْزِلَ الْعَيْشِ ٱلَّذِي دَرَسَتْ
 آثَارُهُ وَعَفَتْ مُذْ بِنْتُ أَرْبُعُهُ...
 
 [Verse 1]
-بِاللَّهِ يَا مَنْزِلَ الْعَيْشِ ٱلَّذِي دَرَسَتْ
+بِاللهِ يَا مَنْزِلَ الْعَيْشِ ٱلَّذِي دَرَسَتْ
 آثَارُهُ وَعَفَتْ مُذْ بِنْتُ أَرْبُعُهُ...
 هَلِ الزَّمَانُ مُعِيدٌ فِيكَ لَذَّتَنَا
 أَمِ ٱلَّيَالِي ٱلَّتِي أَمْضَتْهُ تُرْجِعُهُ...
-فِي ذِمَّةِ ٱللَّهِ مَنْ أَصْبَحْتَ مَنْزِلَهُ
+فِي ذِمَّةِ ٱللهِ مَنْ أَصْبَحْتَ مَنْزِلَهُ
 وَجَادَ غَيْثٌ عَلَى مَغْنَاكَ يُمَرِّعُهُ...
 مَنْ عِنْدَهُ لِيَ عَهْدٌ لَا يَضِيعُ كَمَا
 عِنْدِي لَهُ عَهْدُ صِدْقٍ لَا أُضَيِّعُهُ...
