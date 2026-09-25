@@ -22,6 +22,7 @@ operating contract is `../AGENTS.md`.
 | Hand the user a command to run (terminal reality check) | [COMMAND_HANDOVER_GOTCHAS.md](COMMAND_HANDOVER_GOTCHAS.md) |
 | How the text→duration cap is derived | [text_to_duration_formula.md](text_to_duration_formula.md) |
 | Repo audit: stale docs, drift & workflow backlog | [IMPROVEMENTS.md](IMPROVEMENTS.md) |
+| Use / refresh the repo knowledge graph (graphify) | [GRAPHIFY.md](GRAPHIFY.md) |
 
 Future ideas (not runbooks, not scheduled): [FUTURE_PRONUNCIATION_LORA.md](FUTURE_PRONUNCIATION_LORA.md)
 — fixing Arabic pronunciation with a second, AR-only LoRA.
