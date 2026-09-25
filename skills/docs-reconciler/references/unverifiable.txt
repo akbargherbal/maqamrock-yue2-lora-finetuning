@@ -66,12 +66,18 @@ docs/PRON_LORA_SWEEP.md :: KEY.json
 docs/PRON_LORA_SWEEP.md :: results/pron_sweep/KEY.json
 results/pron_sweep/README.md :: KEY_open_after_listening.txt
 RECONCILIATION_LOG.md :: KEY_open_after_listening.txt
+RECONCILIATION_LOG.md :: sweep_manifest.json
+RECONCILIATION_LOG.md :: KEY.json
 
 # flags of external tools quoted in commands (git log --left-right/--count, cmake)
 --left-right
 --count
 --generate-code
 --porcelain
+docs/GRAPHIFY.md :: --platform
+
+# generated graph edge-arrow notation in graphify output (not a CLI flag)
+graphify-out/GRAPH_REPORT.md :: --references--
 
 # historical quotes inside the reconciliation log (old wrong values, kept as history)
 RECONCILIATION_LOG.md :: ANALYSIS.md
