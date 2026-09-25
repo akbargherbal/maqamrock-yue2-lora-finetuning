@@ -1,0 +1,23 @@
+{
+  "seed": 20260924,
+  "blinding_seed": 20260926,
+  "algorithm": "one random.Random(20260926); for each maqam in ['Hijaz','Kurd']: shuffle(['c1525_a0.5','c4575_a0.5']); labels A..B in shuffled order",
+  "config_order": [
+    "c1525_a0.5",
+    "c4575_a0.5"
+  ],
+  "labels": [
+    "A",
+    "B"
+  ],
+  "mapping": {
+    "Hijaz": {
+      "A": "c4575_a0.5",
+      "B": "c1525_a0.5"
+    },
+    "Kurd": {
+      "A": "c4575_a0.5",
+      "B": "c1525_a0.5"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+PRON_CKPT_SWEEP_INPUT — listening key (open AFTER listening)
+generation seed = 20260924
+blinding seed   = 20260926
+blinding: one random.Random(20260926); for each maqam in ['Hijaz','Kurd']: shuffle(['c1525_a0.5','c4575_a0.5']); labels A..B in shuffled order.
+
+Held-out inputs (identical to the Task 17 / fine sweep; auto cap):
+  Hijaz: New_Abu_Tammam_16082026 / 05-استجابة-النداء-وامعتصماه-وكرامة-الفرسان (cap 7250)
+  Kurd : amin_almanoon_17082026 / 04-مثل-الدهر-الأول-2-مكمن-القانص-ومصرع-الأتن (cap 6500)
+
+Config decode: cX_a0.5 = pron checkpoint X merged into v2 at alpha 0.5.
+
+Hijaz:
+  Hijaz_A.mp3 = c4575_a0.5
+  Hijaz_B.mp3 = c1525_a0.5
+Kurd:
+  Kurd_A.mp3 = c4575_a0.5
+  Kurd_B.mp3 = c1525_a0.5

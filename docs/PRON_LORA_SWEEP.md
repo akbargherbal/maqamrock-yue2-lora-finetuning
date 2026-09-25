@@ -122,3 +122,19 @@ resumable/skip contract as `pron_alpha_sweep.sh`, maqam-major). Records:
 [`results/pron_fine_sweep/`](../results/pron_fine_sweep/) (config table, per-track table,
 `KEY.json`). Blinded review package: `PRON_FINE_SWEEP_INPUT/` at the repo root. Raw WAVs +
 adapters: `/content/pron_fine_sweep/` + `/content/converter/out/<cfg>/`.
+
+## Round 3 — checkpoint sweep at fixed alpha 0.5 (2026-09-25)
+
+With `alpha` fixed at the already-shipped **0.5**, this round compares the two
+not-yet-shipped pron checkpoints **{1525, 4575}** (2 configs x Hijaz + Kurd = **4
+tracks**). Same held-out prompts, same generation seed `20260924`, auto cap (Hijaz
+7250 / Kurd 6500), same sm89 binary; new **blinding seed `20260926`** (labels only,
+one new random label per maqam). Strictly sequential.
+
+Driver: [`INFERENCE/pron_ckpt_sweep.py`](../INFERENCE/pron_ckpt_sweep.py) (reuses
+`generate.py`'s sidecar helpers; writes a full per-track JSON sidecar before and after
+generation). Records: [`results/pron_ckpt_sweep/`](../results/pron_ckpt_sweep/)
+(config table, per-track table, `KEY.json`, per-track `sidecars/`). Blinded review
+package: `PRON_CKPT_SWEEP_INPUT/` at the repo root. Raw WAVs + adapters:
+`/content/pron_ckpt_sweep/{<cfg>,merged,converted}/`.
+
