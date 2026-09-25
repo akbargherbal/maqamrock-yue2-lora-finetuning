@@ -60,6 +60,21 @@ human and invisible to the agent — so they get written down here.
 - **Correct pattern:** `nvidia-smi` first; never run GPU work while training is
   active (`generate.py` refuses unless `--allow-concurrent`).
 
+## 2026-09-25 — `pkill -f '<pattern>'` matches the launching shell too
+
+- **Fact:** the agent's shell tool runs each command as `/bin/bash -c "<script>"`,
+  so that shell's own command line contains any pattern written literally in the
+  script. `pkill -f backup_to_gcp.py` therefore matches and kills the very shell
+  running it, before the restart line executes.
+- **Failure prevented:** two daemon-restart attempts died mid-script (empty
+  output), leaving **no** backup running while the agent believed it had
+  restarted one. The bracketed `[b]ackup…` trick does not help here, because the
+  same command also contains the literal `backup_to_gcp.py` it is launching.
+- **Correct pattern:** anchor to the real process — `pkill -f '^python.*backup_to_gcp'`
+  (`^` cannot match a `/bin/bash -c …` command line). Reserve the bracket trick
+  for the case where the bracketed literal is the pattern's **only** occurrence
+  in the command.
+
 ## Related traps (not terminal-specific)
 
 - The auto-resume trap: relaunching a run name with checkpoints present resumes

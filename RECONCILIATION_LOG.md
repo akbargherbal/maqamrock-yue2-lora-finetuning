@@ -33,3 +33,12 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
 - False positives (Batch B), curated in `skills/docs-reconciler/references/unverifiable.txt`: doc-scoped the external graphify `install` platform flag (`docs/GRAPHIFY.md`); doc-scoped two historical Task 17 artifact names quoted in this log; doc-scoped the generated graph edge-arrow token in `graphify-out/GRAPH_REPORT.md`.
 - Step 0 (Batch C): added a `docs/GRAPHIFY.md` authority row to `SOURCE_OF_TRUTH.md` for the new knowledge-graph topic (`docs/README.md` already indexes it).
 - No frozen doc touched; no config or hyperparameter changed.
+
+## 2026-09-25 — drift reconciliation (live docs) after the swap + Round-3 arch fix, 11 → 0
+
+- Reconciler run after the `maqam_lyric_swap` commit (`d3f4922`) and the Round-3 binary-arch correction (`73a92fb`): 1415 claims, 856 checkable, 11 flagged (1.3%) → **0**.
+- Real drift (Batch A): `skills/inference-batch-run/SKILL.md` said the alternative to the staged sm_75 binary was to "build from source"; the documented L4 path is a **prebuilt per-arch `gsutil cp`** (`docs/INFERENCE.md:210,305`, `docs/audiocpp_gpu_arch_builds.md:132`). Corrected. `SOURCE_OF_TRUTH.md`'s sweep row named only `results/pron_sweep/`; broadened to Rounds 1–4 and the four records dirs.
+- False positives (Batch B), curated in `skills/docs-reconciler/references/unverifiable.txt`: staged prompt files `*_style.txt` / `*_lyrics.txt` (the existing `_style.txt`/`_lyrics.txt` entries matched nothing — missing the leading `*`), and a doc-scoped `KEY_open_after_listening.txt` for the three `results/*/README.md` that cite the package-dir key.
+- Outside the reconciler (Batch C): appended the `pkill -f '<pattern>'` self-match gotcha to `docs/COMMAND_HANDOVER_GOTCHAS.md` (the launching shell's own command line contains the pattern; anchor with `^python.*…`).
+- Noted only, not touched: `DECISIONS.md:232` still says the sm89-l4 binary "has not been run on an L4" — **frozen**, history stays history.
+- No config or hyperparameter changed.

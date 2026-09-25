@@ -36,8 +36,10 @@ integer to override. `generate.py` batches accept `--out-dir` to resume a run an
   `setup.sh` re-fetches it; `models/` and `bin/` are deliberately not mirrored.
 - Repo `INFERENCE/` scripts are canonical; the GCS `scripts/` copy is a legacy
   mirror. The repo copy is what runs.
-- The staged binary is the sm_75 / T4 build; for another GPU build from source
-  (`docs/audiocpp_gpu_arch_builds.md`).
+- The bootstrap stages the sm_75 / T4 build. On an L4 (or another arch) stage the
+  prebuilt per-arch object from GCS (e.g.
+  `$GCP_BACKUP_BASE/audiocpp_inference/build/sm89-l4/audiocpp_cli`) — a source
+  build is not required (`docs/audiocpp_gpu_arch_builds.md`).
 - `run_one.sh` needs GNU `time` (`/usr/bin/time`); bootstrap installs it.
 - Outputs land per-run under `out/`; `out/latest` points at the newest batch.
 

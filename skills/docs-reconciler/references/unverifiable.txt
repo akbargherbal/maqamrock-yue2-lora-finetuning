@@ -44,8 +44,8 @@ INFERENCE/songs.*.json
 batch_manifest.json
 batch_summary.txt
 *.report.json
-_style.txt
-_lyrics.txt
+*_style.txt
+*_lyrics.txt
 _time.txt
 _gpu.csv
 _runs_status.log
@@ -65,6 +65,9 @@ docs/PRON_LORA_SWEEP.md :: KEY_open_after_listening.txt
 docs/PRON_LORA_SWEEP.md :: KEY.json
 docs/PRON_LORA_SWEEP.md :: results/pron_sweep/KEY.json
 results/pron_sweep/README.md :: KEY_open_after_listening.txt
+results/pron_fine_sweep/README.md :: KEY_open_after_listening.txt
+results/pron_ckpt_sweep/README.md :: KEY_open_after_listening.txt
+results/maqam_lyric_swap/README.md :: KEY_open_after_listening.txt
 RECONCILIATION_LOG.md :: KEY_open_after_listening.txt
 RECONCILIATION_LOG.md :: sweep_manifest.json
 RECONCILIATION_LOG.md :: KEY.json
