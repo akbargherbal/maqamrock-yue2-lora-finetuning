@@ -30,7 +30,9 @@ INFERENCE/generate.py               # JSON-driven batch generation (bring your o
 INFERENCE/suno_to_songs.py          # legacy Suno workspace_manifest.json -> generate.py input (A/B deduped)
 INFERENCE/songs.example.json        # template/example input for generate.py
 INFERENCE/run_one.sh                # one observed generation; generate.py's execution engine
-tests/ + pytest.ini                 # GPU-free unit tests (generate.py / suno_to_songs.py / duration_cap.py / backup_to_gcp.py / docs-reconciler)
+INFERENCE/prepare_ab_eval.py        # generic blinded A/B(/N) listening package (EVAL.txt public + KEYS.txt secret)
+INFERENCE/pron_knob_probe.sh        # request-option knob probe driver (ckpt 3050, alpha 0.5)
+tests/ + pytest.ini                 # GPU-free unit tests (generate.py / suno_to_songs.py / duration_cap.py / prepare_ab_eval.py / backup_to_gcp.py / docs-reconciler)
 monitor_loss.py                     # read-only loss_log.db inspector (step, metrics, ETA)
 gpu_logger.py                       # nvidia-smi poller -> CSV (AI Toolkit logs no GPU stats)
 backup_to_gcp.py                    # periodic GCS mirror of run artifacts
@@ -41,7 +43,7 @@ PROGRESS.md                         # milestone trail across sessions
 verification.md                     # independent dataset audit
 TRAINING_ANALYSIS/                  # v2 loss curves + final analysis (v1 archived under it)
 AGENTS.md                           # operating instructions for the coding agent
-skills/                             # portable agent skills (crash-resume, inference-batch, docs-reconciler)
+skills/                             # portable agent skills (crash-resume, inference-batch, docs-reconciler, ab-blind-eval)
 docs/                               # runbooks (start, pause/resume, backup, monitor, inference) + audit + future ideas
 ```
 

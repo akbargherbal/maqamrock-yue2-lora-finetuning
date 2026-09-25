@@ -19,6 +19,7 @@ operating contract is `../AGENTS.md`.
 | Verify / offline-eval the pronunciation LoRA (source + AR-loss replay) | [PRON_LORA_VERIFICATION.md](PRON_LORA_VERIFICATION.md) |
 | Merge v2 + pron at a chosen alpha | [PRON_LORA_MERGE.md](PRON_LORA_MERGE.md) |
 | Alpha sweep + blinded listening review | [PRON_LORA_SWEEP.md](PRON_LORA_SWEEP.md) |
+| Prepare a blinded A/B(/N) audio listening package | [AB_BLIND_EVAL.md](AB_BLIND_EVAL.md) |
 | Hand the user a command to run (terminal reality check) | [COMMAND_HANDOVER_GOTCHAS.md](COMMAND_HANDOVER_GOTCHAS.md) |
 | How the text→duration cap is derived | [text_to_duration_formula.md](text_to_duration_formula.md) |
 | Repo audit: stale docs, drift & workflow backlog | [IMPROVEMENTS.md](IMPROVEMENTS.md) |
