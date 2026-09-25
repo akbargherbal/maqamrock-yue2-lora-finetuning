@@ -16,7 +16,7 @@ but still open the real files before editing.
 | `graphify-out/GRAPH_REPORT.md` | The map: god nodes, communities, surprising connections, gaps |
 | `graphify-out/graph.json` | Raw graph (nodes / links / hyperedges + `built_at_commit`) |
 | `graphify-out/graph.html` | Self-contained interactive view — open in any browser |
-| `graphify-out/manifest.json` | What was scanned; drives incremental `--update` |
+| `graphify-out/manifest.json` | What was scanned; drives incremental `graphify update` |
 | `graphify-out/cache/` | Per-file extraction cache — what makes rebuilds cheap |
 
 Built at commit `9c03b20` on branch `pron-lora-ar-only` (committed there and
@@ -37,7 +37,7 @@ refresh it after meaningful changes (see below).
 ## Refresh it
 
 ```bash
-graphify --update     # re-extracts only changed files; reuses manifest.json + cache/
+graphify update .     # re-extracts only changed files; reuses manifest.json + cache/
 ```
 
 Run this before merging the branch, and at the end of a session that changed a
@@ -70,4 +70,4 @@ where `python` is the interpreter that has `graphify` installed (see caveat 1).
 3. The graph is **branch-specific**. The 2026-09-25 build has a known gap: 135
    dangling-endpoint edges + 1 self-loop; a targeted re-extract would clean them.
 4. Building / semantic extraction costs LLM tokens (~26k in / 9k out on the first
-   build); `--update` is far cheaper because of the cache.
+   build); `graphify update` is far cheaper because of the cache.

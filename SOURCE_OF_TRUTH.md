@@ -18,5 +18,6 @@ History files are authoritative for what happened, never for what is true now.
 | History / outcomes | `PROGRESS.md` | read-only |
 | Known stale / open items | `docs/IMPROVEMENTS.md` | read-only snapshot |
 | Doc index | `docs/README.md` | must list every live runbook |
+| Repo knowledge graph (graphify) | `docs/GRAPHIFY.md` | generated map; refresh with `graphify update` |
 | Agent contract | `AGENTS.md` | |
 | Archived / superseded | `docs/investigation.md`, `docs/yue2-gguf-lora-findings.md`, `verification.md`, `docs/LIVE_STATUS.md` | banners are correct; don't "fix" |
