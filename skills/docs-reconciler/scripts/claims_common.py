@@ -48,6 +48,7 @@ DEFAULT_EXCLUDES = (
     "docs/IMPROVEMENTS.md",
     "docs/LIVE_STATUS.md",
     "docs/investigation.md",
+    "docs/investigation_generation_knobs.md",
     "docs/yue2-gguf-lora-findings.md",
     "skills/docs-reconciler/references/example_drift_report.md",
 )

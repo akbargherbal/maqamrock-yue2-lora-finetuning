@@ -20,4 +20,5 @@ History files are authoritative for what happened, never for what is true now.
 | Doc index | `docs/README.md` | must list every live runbook |
 | Repo knowledge graph (graphify) | `docs/GRAPHIFY.md` | generated map; refresh with `graphify update` |
 | Agent contract | `AGENTS.md` | |
+| Frozen research report (not a runbook) | `docs/investigation_generation_knobs.md` | audio.cpp-source citations; excluded from reconciliation |
 | Archived / superseded | `docs/investigation.md`, `docs/yue2-gguf-lora-findings.md`, `verification.md`, `docs/LIVE_STATUS.md` | banners are correct; don't "fix" |
