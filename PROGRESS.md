@@ -801,3 +801,27 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   labels, copy/wav/mp3, `--json`, `--dry-run`. Added CPU tests, `docs/AB_BLIND_EVAL.md`, and
   the `ab-blind-eval` skill (+ symlink).
 
+## 2026-09-25 — Backup gap fixed: two lost Kurd WAVs re-rendered on T4 (arch divergence confirmed)
+
+- **Gap found:** Round 5's `pron_knob_probe` reached GitHub intact, but the GCS mirror
+  `.../pron_knob_probe/` was missing 6 objects — both Kurd lossless WAVs: `t0.8/Kurd.wav`
+  (its `_time.txt` written 0 B) and all of `rp1.4/Kurd.{wav,json,log,_gpu.csv,_time.txt}`.
+  Cause: the 15-min backup daemon's last pass was ~15:12:26Z and the VM ended before the
+  next (~15:27), *after* `t0.8/Kurd` finished (15:12:57) and `rp1.4/Kurd` ran
+  (15:13:20–15:17:15). `pron_knob_probe` **was** a daemon target — cadence + VM death, not
+  a coverage bug. `/content` is ephemeral, so the originals were gone.
+- **Fix:** re-rendered the two tracks on the only GPU available (Tesla **T4 / sm_75**, binary
+  `7ad69d1c…`) with byte-identical inputs (seed `20260924`, cap `6500`, `c3050_a0.5`, Kurd
+  prompts, BF16 GGUF). Both `exit=0`, no cap-truncation.
+- **Result — cross-arch reproduction does NOT hold** (settles the `DECISIONS.md` hypothesis):
+  `t0.8/Kurd` `d783a3bb…` (192.92 s) → `37c252c2…` (204.92 s); `rp1.4/Kurd` `01e903ed…`
+  (215.80 s) → `ddae993e…` (187.44 s). The committed L4 MP3s remain the canonical copies.
+- **Mirrored** to GCS `.../pron_knob_probe/t4_regen/` (a **separate prefix**, so the
+  surviving original L4 `t0.8/Kurd` companions are not overwritten). Sidecars with a
+  `regen` block committed at `results/pron_knob_probe/sidecars_t4_regen/`; write-up
+  `results/pron_knob_probe/T4_REGEN.md`.
+- **Tooling fix:** `INFERENCE/pron_knob_probe.sh` used `re.match` in its sidecar writer
+  without `import re`, so *every* run's completion sidecar silently failed (only
+  `status: started` was written). Added `import re`, plus `MAQAMS`/`CFGS` env overrides so a
+  partial regeneration can target only the missing tracks.
+

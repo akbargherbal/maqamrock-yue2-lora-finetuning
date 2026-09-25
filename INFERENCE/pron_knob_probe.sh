@@ -30,8 +30,11 @@ ANCHOR_CFG=c3050_a0.5
 AR="$CONV/$ANCHOR_CFG/akbar_arabic_rock_lora_ar.safetensors"
 NAR="$CONV/$ANCHOR_CFG/akbar_arabic_rock_lora_nar.safetensors"
 SEED=20260924
-MAQAMS="Hijaz Kurd"
-CFGS="g1.0 g1.5 t0.8 rp1.4"
+# Overridable for a partial/resume regeneration (defaults = the full 4x2 run),
+# e.g. `MAQAMS=Kurd CFGS="t0.8 rp1.4" bash INFERENCE/pron_knob_probe.sh` to
+# re-render only the two Kurd tracks.
+MAQAMS="${MAQAMS:-Hijaz Kurd}"
+CFGS="${CFGS:-g1.0 g1.5 t0.8 rp1.4}"
 FAILED="$PROBE/_failed.log"
 
 export SCRIPT_DIR SEED ANCHOR_CFG AR NAR
@@ -72,6 +75,7 @@ emit_sidecar() {
   STATUS="$1" python3 - <<'PY'
 import json
 import os
+import re
 import sys
 import wave
 from pathlib import Path
