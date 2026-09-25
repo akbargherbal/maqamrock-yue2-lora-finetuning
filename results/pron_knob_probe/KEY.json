@@ -1,0 +1,42 @@
+{
+  "seed": 20260924,
+  "blinding_seed": 20260928,
+  "algorithm": "one random.Random(20260928); for each maqam in ['Hijaz', 'Kurd']: shuffle(['g1.0', 'g1.5', 't0.8', 'rp1.4']); labels A..D in shuffled order",
+  "anchor_config": "c3050_a0.5",
+  "maqam_order": [
+    "Hijaz",
+    "Kurd"
+  ],
+  "config_order": [
+    "g1.0",
+    "g1.5",
+    "t0.8",
+    "rp1.4"
+  ],
+  "labels": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "knobs": {
+    "g1.0": "guidance_scale=1.0",
+    "g1.5": "guidance_scale=1.5",
+    "t0.8": "semantic_temperature=0.8",
+    "rp1.4": "semantic_repetition_penalty=1.4"
+  },
+  "mapping": {
+    "Hijaz": {
+      "A": "g1.5",
+      "B": "g1.0",
+      "C": "rp1.4",
+      "D": "t0.8"
+    },
+    "Kurd": {
+      "A": "g1.5",
+      "B": "g1.0",
+      "C": "rp1.4",
+      "D": "t0.8"
+    }
+  }
+}

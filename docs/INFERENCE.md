@@ -86,6 +86,14 @@ INFERENCE/run_one.sh <Maqam> <seed> [cap|auto]
 - `run_one.sh` wraps the call in `/usr/bin/time -v` — **GNU `time` must be
   installed** (the bootstrap does). Colab's builtin `time` alone gives
   `exit 127: /usr/bin/time: No such file or directory`.
+- **Extra request options** via the `EXTRA_REQUEST_OPTS` env hook: a
+  space-separated list of `key=value` pairs, each forwarded verbatim as an
+  additional `--request-option` (e.g.
+  `EXTRA_REQUEST_OPTS="guidance_scale=1.5 semantic_temperature=0.8"`). Unset
+  (the default) adds nothing, so behavior is unchanged. Valid keys/defaults are
+  in `audio.cpp`'s `docs/models/yue2.md`; for `cot=off` the anchor defaults are
+  `guidance_scale=1.01`, `semantic_temperature=1.0`,
+  `semantic_repetition_penalty=1.2`. Used by `INFERENCE/pron_knob_probe.sh`.
 
 Outputs, one set per run, under `$OUT` — `/content/audiocpp_inference/out/` by
 default, or the folder named by the `OUT_DIR` env var when a batch driver sets

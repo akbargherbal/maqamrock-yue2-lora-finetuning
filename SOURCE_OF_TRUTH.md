@@ -13,7 +13,7 @@ History files are authoritative for what happened, never for what is true now.
 | Pron LoRA training | `docs/PRON_LORA.md` | runbook; opt-in via `GCP_PRON_DATASET_PATH` |
 | Pron LoRA source verification / offline eval | `docs/PRON_LORA_VERIFICATION.md` | A0–A7 + smoke + A100 run + AR-loss replay |
 | v2 + pron merge (scaling, ranks) | `docs/PRON_LORA_MERGE.md` + `merge_pron_lora.py --help` | alpha convention is source-verified there |
-| Alpha sweep / listening review | `docs/PRON_LORA_SWEEP.md` | procedure + Rounds 1–4; numbers in `results/{pron_sweep,pron_fine_sweep,pron_ckpt_sweep,maqam_lyric_swap}/` |
+| Alpha sweep / listening review | `docs/PRON_LORA_SWEEP.md` | procedure + Rounds 1–5; numbers in `results/{pron_sweep,pron_fine_sweep,pron_ckpt_sweep,maqam_lyric_swap,pron_knob_probe}/` |
 | Blinded A/B listening package | `docs/AB_BLIND_EVAL.md` + `INFERENCE/prepare_ab_eval.py --help` | script flags beat prose; skill `ab-blind-eval` |
 | Why a decision was made | `DECISIONS.md` | read-only; cite, don't rewrite |
 | History / outcomes | `PROGRESS.md` | read-only |

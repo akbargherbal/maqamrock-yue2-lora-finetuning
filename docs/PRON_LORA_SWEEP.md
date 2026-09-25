@@ -163,3 +163,38 @@ after). Records: [`results/maqam_lyric_swap/`](../results/maqam_lyric_swap/)
 package: `MAQAM_LYRIC_SWAP_INPUT/` at the repo root. Raw WAVs + adapters:
 `/content/maqam_lyric_swap/`.
 
+## Round 5 — request-option knob probe at checkpoint 3050, alpha 0.5 (2026-09-25)
+
+Checkpoint and `alpha` are now **fixed** at the current best-so-far (`c3050_a0.5`), and
+exactly **one `audiocpp_cli` request option** varies per config via the new
+`EXTRA_REQUEST_OPTS` hook in `run_one.sh` (space-separated `key=value`, each forwarded as
+an extra `--request-option`; unset = byte-identical prior behavior). 4 configs x Hijaz +
+Kurd = **8 tracks**, strictly sequential. The anchor is the fine sweep's existing
+`c3050_a0.5` renders (identical seed `20260924`, auto cap, staged prompts and sm89 binary)
+— reused, not regenerated.
+
+| folder | knob | anchor default | value |
+|---|---|---:|---:|
+| `g1.0` | `guidance_scale` | 1.01 | **1.0** |
+| `g1.5` | `guidance_scale` | 1.01 | **1.5** |
+| `t0.8` | `semantic_temperature` | 1.0 | **0.8** |
+| `rp1.4` | `semantic_repetition_penalty` | 1.2 | **1.4** |
+
+Defaults are from `audio.cpp`'s `docs/models/yue2.md`; note `guidance_scale` defaults to
+**1.01** for `cot=off`, so `g1.0` is a real (small) change, not the anchor. New
+**blinding seed `20260928`** (labels only, per-maqam shuffle).
+
+Driver: [`INFERENCE/pron_knob_probe.sh`](../INFERENCE/pron_knob_probe.sh) — the
+fine-sweep resumable/skip contract (WAV + `Exit status: 0`), failures to `_failed.log`,
+one folder per config, and a **full per-track sidecar** including a `resources` block
+(max RSS, peak/mean VRAM, util, temp, power). Records:
+[`results/pron_knob_probe/`](../results/pron_knob_probe/) (`sweep_manifest.json`,
+`KEY.json`, `README.md`, per-track `sidecars/`). Blinded review package:
+`PRON_KNOB_PROBE_INPUT/` at the repo root. Raw WAVs: `/content/pron_knob_probe/`.
+
+All 8 `exit=0`, zero failures, zero cap-truncations; mean wall **211.8 s**, total
+**1694 s (28.2 min)**. Per-generation resources: **RAM 6.7–7.8 GiB**, **peak VRAM
+9.9–10.8 GiB** (mean 5.5–6.3 GiB of 23 GB), **100 % util**, **80 °C**, peak power
+74.7–81.6 W.
+
+

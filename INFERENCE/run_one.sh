@@ -44,6 +44,13 @@ tfile="$OUT/${M}_${S}_time.txt"
 csv="$OUT/${M}_${S}_gpu.csv"
 status="$OUT/_runs_status.log"
 
+# Extra request options, space-separated key=value pairs (e.g.
+# EXTRA_REQUEST_OPTS="guidance_scale=1.5 semantic_temperature=0.8").
+extra_request=()
+for kv in ${EXTRA_REQUEST_OPTS:-}; do
+  extra_request+=(--request-option "$kv")
+done
+
 if [ "$CAP_ARG" = "auto" ]; then
   CAP=$(python3 "$SCRIPT_DIR/duration_cap.py" "$lyrics")
 else
@@ -71,6 +78,7 @@ echo "$line"; echo "$line" >> "$status"
   --request-option style="$(cat "$style")" \
   --request-option cot=off \
   --request-option semantic_max_tokens="$CAP" \
+  "${extra_request[@]}" \
   --seed "$S" \
   --out "$wav" \
   --log > "$log" 2>&1

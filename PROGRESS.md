@@ -772,3 +772,32 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 - **No quality verdict and no audio generated** — the listening blind on
   `PRON_FINE_SWEEP_INPUT/` is still the user's call; these are the merge artifacts
   ready for whichever ckpt/alpha the listen selects.
+
+## 2026-09-25 — Task 20: request-option knob probe (c3050_a0.5) + generic A/B blind-eval tool
+
+- **Round 5 knob probe.** With pron checkpoint **3050** and `alpha` **0.5** fixed, exactly
+  one `audiocpp_cli` request option varied per config — `g1.0`/`g1.5`
+  (`guidance_scale`; anchor default **1.01** for `cot=off`), `t0.8`
+  (`semantic_temperature` 0.8), `rp1.4` (`semantic_repetition_penalty` 1.4) — x Hijaz +
+  Kurd = **8 tracks**, strictly sequential. Anchor = the fine sweep's existing
+  `c3050_a0.5` renders (same seed `20260924`, auto cap, prompts, sm89 binary `97028a71…`),
+  reused not regenerated. **8/8 exit=0, zero truncations**, mean wall **211.8 s**, total
+  **1694 s (28.2 min)** on an L4.
+- **Tooling:** `INFERENCE/run_one.sh` gained the additive `EXTRA_REQUEST_OPTS` env hook
+  (space-separated `key=value` -> extra `--request-option`; unset = unchanged), documented
+  in `docs/INFERENCE.md`. New `INFERENCE/pron_knob_probe.sh` (fine-sweep resumable/skip
+  contract + full per-track sidecar, now incl. a `resources` block).
+- **Resource tracking confirmed + committed:** per-track `/usr/bin/time -v` (`*_time.txt`:
+  RAM/RSS, CPU%) and 1 Hz `nvidia-smi` (`*_gpu.csv`: util/mem/power/temp), plus the global
+  `gpu_logger.py` CSV. Recorded per sidecar + a README table: RAM **6.7–7.8 GiB**, peak VRAM
+  **9.9–10.8 GiB** (mean 5.5–6.3 GiB), 100 % util, 80 °C, 74.7–81.6 W.
+- **Records + blinded package:** `results/pron_knob_probe/` (`README.md`, `KEY.json`,
+  `sweep_manifest.json`, per-track `sidecars/`), `PRON_KNOB_PROBE_INPUT/` (8 mp3 @192k,
+  no trim/normalize + listener key). New blinding seed `20260928`. No quality verdict — the
+  user's listen decides.
+- **Generic A/B blind-eval tool (commit `b46a0b0`):** root-level scratch
+  `prepare_ab_eval.py` adapted and moved to `INFERENCE/prepare_ab_eval.py` — generic over
+  variants (A/B/…), public `EVAL.txt` split from secret `KEYS.txt`, per-category consistent
+  labels, copy/wav/mp3, `--json`, `--dry-run`. Added CPU tests, `docs/AB_BLIND_EVAL.md`, and
+  the `ab-blind-eval` skill (+ symlink).
+
