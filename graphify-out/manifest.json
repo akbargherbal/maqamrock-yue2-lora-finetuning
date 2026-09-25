@@ -186,10 +186,10 @@
     "semantic_hash": "156c4f9234db1968678f3292d4e5208b"
   },
   "skills/docs-reconciler/scripts/claims_common.py": {
-    "mtime": 1790311414.665478,
-    "seen": 1790313604.1464806,
-    "ast_hash": "d5b6a71b95432d99a9b7782af00f47c7",
-    "semantic_hash": "d5b6a71b95432d99a9b7782af00f47c7"
+    "mtime": 1790316734.0216177,
+    "seen": 1790316927.4359794,
+    "ast_hash": "8ce57a9283cf522b1253b57132a05176",
+    "semantic_hash": "8ce57a9283cf522b1253b57132a05176"
   },
   "skills/docs-reconciler/scripts/extract_claims.py": {
     "mtime": 1790311414.665478,
@@ -252,10 +252,10 @@
     "semantic_hash": "8c838ed142b96cafb770a45891329062"
   },
   "AGENTS.md": {
-    "mtime": 1790311414.6544778,
-    "seen": 1790313604.1464937,
-    "ast_hash": "9fe1c4ca8028948017656d7a8a4a2bf7",
-    "semantic_hash": "9fe1c4ca8028948017656d7a8a4a2bf7"
+    "mtime": 1790316669.311676,
+    "seen": 1790316927.435998,
+    "ast_hash": "b3b9e9fdee5288b71cfdc98b893db244",
+    "semantic_hash": "b3b9e9fdee5288b71cfdc98b893db244"
   },
   "DECISIONS.md": {
     "mtime": 1790311414.676478,
@@ -294,16 +294,16 @@
     "semantic_hash": "2463efb0fec7bf9c868bcfafb7c7c4aa"
   },
   "RECONCILIATION_LOG.md": {
-    "mtime": 1790311414.8494775,
-    "seen": 1790313604.1465027,
-    "ast_hash": "3f121341afd4642be0bc149d1a1b1abb",
-    "semantic_hash": "3f121341afd4642be0bc149d1a1b1abb"
+    "mtime": 1790316739.098613,
+    "seen": 1790316927.4359996,
+    "ast_hash": "01df182cbc2efaaefb371a4b53430b9b",
+    "semantic_hash": "01df182cbc2efaaefb371a4b53430b9b"
   },
   "SOURCE_OF_TRUTH.md": {
-    "mtime": 1790311414.8494775,
-    "seen": 1790313604.1465037,
-    "ast_hash": "b311d883057ac8dcee2469f9e503692b",
-    "semantic_hash": "b311d883057ac8dcee2469f9e503692b"
+    "mtime": 1790316736.1826158,
+    "seen": 1790316927.4360015,
+    "ast_hash": "83a8879fe964d915bcf1a9a76d38fc45",
+    "semantic_hash": "83a8879fe964d915bcf1a9a76d38fc45"
   },
   "TRAINING_ANALYSIS/ANALYSIS.md": {
     "mtime": 1790311414.659478,
@@ -432,10 +432,10 @@
     "semantic_hash": "28f5366847ec0016bc39e3c8d29656a2"
   },
   "docs/README.md": {
-    "mtime": 1790311414.8544776,
-    "seen": 1790313604.1465287,
-    "ast_hash": "65f61da51b898e88f48bb090dfaf706a",
-    "semantic_hash": "65f61da51b898e88f48bb090dfaf706a"
+    "mtime": 1790314666.326484,
+    "seen": 1790316927.4360056,
+    "ast_hash": "8a3364ad5c95a62e18ba67e0ec651f0e",
+    "semantic_hash": "8a3364ad5c95a62e18ba67e0ec651f0e"
   },
   "docs/START.md": {
     "mtime": 1790311414.663478,
@@ -516,10 +516,10 @@
     "semantic_hash": "d67f962c63436d0b43c3dc5696d9154f"
   },
   "skills/docs-reconciler/references/unverifiable.txt": {
-    "mtime": 1790311414.8554776,
-    "seen": 1790313604.1465456,
-    "ast_hash": "022445d09ae598bc3994516aa5c93550",
-    "semantic_hash": "022445d09ae598bc3994516aa5c93550"
+    "mtime": 1790316669.312676,
+    "seen": 1790316927.4360101,
+    "ast_hash": "330c6f65bf7a7609e1d5b7a7c2b6fe43",
+    "semantic_hash": "330c6f65bf7a7609e1d5b7a7c2b6fe43"
   },
   "skills/inference-batch-run/SKILL.md": {
     "mtime": 1790311414.665478,
@@ -670,5 +670,17 @@
     "seen": 1790313604.1465743,
     "ast_hash": "54eecd7f69da2cdb88031763f71eb4ea",
     "semantic_hash": "54eecd7f69da2cdb88031763f71eb4ea"
+  },
+  "docs/GRAPHIFY.md": {
+    "mtime": 1790316669.312676,
+    "seen": 1790316927.4360034,
+    "ast_hash": "544fb452f2fc09d403a6d7a611b75266",
+    "semantic_hash": "544fb452f2fc09d403a6d7a611b75266"
+  },
+  "docs/investigation_generation_knobs.md": {
+    "mtime": 1790316669.301676,
+    "seen": 1790316927.436008,
+    "ast_hash": "e8bb1f7922ce56b379184192ab1a7b61",
+    "semantic_hash": "e8bb1f7922ce56b379184192ab1a7b61"
   }
 }
