@@ -747,3 +747,28 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `KEY_open_after_listening.txt`); records `results/pron_fine_sweep/`; driver
   `INFERENCE/pron_fine_sweep.sh`. GCS `<base>/audiocpp_inference/pron_fine_sweep/`.
 - **Next (user's):** listen blind, then decode. No quality verdict/winner made.
+
+## 2026-09-25 — Task 19: production merges baked (v2 + pron ckpt 3050, alpha 0.5 primary / 0.3 fallback)
+
+- **Merge-only, CPU.** No GPU present (`torch 2.11.0+cpu`, no `nvidia-smi`), no
+  inference. Inputs pulled from GCS and hash-checked: v2 raw `b1d09098…`, pron 3050
+  `ead30d52…` — both match `docs/PRON_LORA_MERGE.md` and the sweep manifests.
+- **Built with `merge_pron_lora.py --pron-checkpoint 3050`** at `alpha` 0.5 and 0.3
+  (rank 32+8→40, NAR zero-padded to 40), then converted with
+  `convert_aitoolkit_yue2_lora.py`. Converted AR/NAR sha256 match the sweeps
+  **exactly** (`c3050_a0.5` AR `33e824f2…`; `c3050_a0.3` AR `dd0d4959…`; both NAR
+  `7d9324bf…`) — same data, same pipeline. Converter byte-level check passed.
+- **New non-obvious finding (recorded in `DECISIONS.md`):** merged **file sha256 is
+  not reproducible** — `safetensors 0.8.0` writes `__metadata__` in nondeterministic
+  HashMap order, so re-running the identical merge yields different file bytes while
+  all 448 tensors and parsed metadata are identical (two live `a0.5` runs:
+  `cf0d69b7…` vs `62e084a7…`). Stable identities = **tensor digest** and
+  **converted AR/NAR sha256**.
+- **Persisted:** merged (140 MiB each, over GitHub's 100 MiB limit → not committed,
+  matching `results/pron_sweep/`) + converted under `/content/pron_production_merge/`;
+  GCS `<base>/pron_production_merge/`. Records committed: `results/pron_production_merge/`
+  (`README.md`, `merge_manifest.json`, one sidecar per output, `regenerate.sh`).
+  `regenerate.sh` re-run end-to-end into a scratch dir → **PASS**.
+- **No quality verdict and no audio generated** — the listening blind on
+  `PRON_FINE_SWEEP_INPUT/` is still the user's call; these are the merge artifacts
+  ready for whichever ckpt/alpha the listen selects.

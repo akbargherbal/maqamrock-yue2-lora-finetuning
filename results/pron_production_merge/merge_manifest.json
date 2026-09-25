@@ -1,0 +1,88 @@
+{
+  "task": "Production merges -- v2 (style) + pron (AR-only) ckpt 3050, alpha 0.5 (primary) and 0.3 (fallback)",
+  "kind": "merge_only",
+  "generated_utc": "2026-09-25T07:22:26Z",
+  "branch": "pron-lora-ar-only",
+  "repo_head_at_generation": "ec3048356b4c0b98f094d752bf2a8130d8ff38ec",
+  "tool": {
+    "path": "merge_pron_lora.py",
+    "sha256": "d644ce22157aa3b3fd8cd65941261af3c7b2918e486cf9ec5046d913b77efad9",
+    "convention": "docs/PRON_LORA_MERGE.md -- rank-concat, alpha folded into B_pron"
+  },
+  "converter": {
+    "path": "/content/converter/out/convert_aitoolkit_yue2_lora.py",
+    "sha256": "39540eefe02e20b76ca9e0390077c64e291cc95064ccb915a9efec4b43058f51"
+  },
+  "inputs": {
+    "v2_raw_path": "/content/ai-toolkit/output/akbar_arabic_rock_lora/akbar_arabic_rock_lora.safetensors",
+    "v2_raw_sha256": "b1d090987355303129a3765d257e61c983b91d48cecb8a30aa424e09cdd24cd4",
+    "v2_checkpoint_step": 3000,
+    "pron_path": "/content/ai-toolkit/output/pron_lora_ar_only_r8/pron_lora_ar_only_r8_000003050.safetensors",
+    "pron_sha256": "ead30d5202dec368838304546d5400ce46e4a2da713a19a9236781f575178a21",
+    "pron_checkpoint_step": 3050
+  },
+  "runtime_target": {
+    "audio_cpp_commit": "61e062d3",
+    "audio_cpp_commit_source": "last recorded commit in the inference workspace (/content/audiocpp_inference/out/20260922-1337_random16/*.json); the sm89-l4 build's commit was not separately recorded, no re-clone occurred after it",
+    "audiocpp_binary_sha256": "97028a71fd4d86378161162364dc6cdc85a569461d3afb6bf78f83ea572ad3d4",
+    "audiocpp_binary_arch": "sm_89 (L4)",
+    "note": "merge is CPU-only and does not depend on audio.cpp; recorded per the sidecar policy for the runtime the adapters target"
+  },
+  "hash_note": "safetensors 0.8.0 serialises __metadata__ in nondeterministic HashMap order, so merged file sha256 varies across runs while all tensors and parsed metadata are identical. merged_tensor_digest_sha256 and converted_*_sha256 are the stable identities; see README.md and DECISIONS.md.",
+  "commands": {
+    "c3050_a0.5": {
+      "merge": "python merge_pron_lora.py --alpha 0.5 --pron-checkpoint 3050 --out /content/pron_production_merge/merged/c3050_a0.5/akbar_arabic_rock_lora.safetensors",
+      "convert": "python /content/converter/out/convert_aitoolkit_yue2_lora.py /content/pron_production_merge/merged/c3050_a0.5/akbar_arabic_rock_lora.safetensors --out-dir /content/pron_production_merge/converted/c3050_a0.5"
+    },
+    "c3050_a0.3": {
+      "merge": "python merge_pron_lora.py --alpha 0.3 --pron-checkpoint 3050 --out /content/pron_production_merge/merged/c3050_a0.3/akbar_arabic_rock_lora.safetensors",
+      "convert": "python /content/converter/out/convert_aitoolkit_yue2_lora.py /content/pron_production_merge/merged/c3050_a0.3/akbar_arabic_rock_lora.safetensors --out-dir /content/pron_production_merge/converted/c3050_a0.3"
+    }
+  },
+  "configs": {
+    "c3050_a0.5": {
+      "role": "primary",
+      "alpha": 0.5,
+      "pron_checkpoint": "3050",
+      "pron_step": 3050,
+      "ar_rank": 40,
+      "nar_rank": 40,
+      "merged_path": "/content/pron_production_merge/merged/c3050_a0.5/akbar_arabic_rock_lora.safetensors",
+      "merged_size_bytes": 146861560,
+      "merged_sha256": "cf0d69b7c27a8aa4480a46f14984747cc08d8940f20f26fffc1fb6b7dcf428e3",
+      "merged_tensor_digest_sha256": "d9695b9780b96d440c61bc335de9b0b2d87a3429f9be0fa4f5bad77650bc6960",
+      "converted_ar_path": "/content/pron_production_merge/converted/c3050_a0.5/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "33e824f24f1eec1ab06a45365e93a19b078a2a7cfbea724eba1b908d27360509",
+      "converted_nar_path": "/content/pron_production_merge/converted/c3050_a0.5/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    },
+    "c3050_a0.3": {
+      "role": "fallback",
+      "alpha": 0.3,
+      "pron_checkpoint": "3050",
+      "pron_step": 3050,
+      "ar_rank": 40,
+      "nar_rank": 40,
+      "merged_path": "/content/pron_production_merge/merged/c3050_a0.3/akbar_arabic_rock_lora.safetensors",
+      "merged_size_bytes": 146861560,
+      "merged_sha256": "0668217e308a43c74e1b62a76bef859ec401662e6e6191133048c87785392b29",
+      "merged_tensor_digest_sha256": "c564e17096f4e208971c99b8fc343f963fea3446e427569ac48cdbfa3508d481",
+      "converted_ar_path": "/content/pron_production_merge/converted/c3050_a0.3/akbar_arabic_rock_lora_ar.safetensors",
+      "converted_ar_sha256": "dd0d495924c3b533df2fe89cdb5ff82c5a708047c3e3b0bf6ccec42d6033c6e9",
+      "converted_nar_path": "/content/pron_production_merge/converted/c3050_a0.3/akbar_arabic_rock_lora_nar.safetensors",
+      "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
+    }
+  },
+  "cross_check_against_sweeps": {
+    "c3050_a0.5": {
+      "converted_ar_sha256": "33e824f24f1eec1ab06a45365e93a19b078a2a7cfbea724eba1b908d27360509",
+      "matches": "results/pron_sweep/sweep_manifest.json",
+      "result": "EXACT MATCH"
+    },
+    "c3050_a0.3": {
+      "converted_ar_sha256": "dd0d495924c3b533df2fe89cdb5ff82c5a708047c3e3b0bf6ccec42d6033c6e9",
+      "matches": "results/pron_fine_sweep/sweep_manifest.json",
+      "result": "EXACT MATCH"
+    }
+  }
+}

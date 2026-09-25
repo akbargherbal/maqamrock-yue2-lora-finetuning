@@ -146,3 +146,17 @@ and **0** `diffusion_model.*`.
 - Unit tests: `tests/test_merge_pron_lora.py` (12 tests, CPU-only; the alpha=0
   end-to-end invariant runs when the real v2/pron/converter artifacts are staged
   and skips on a clean clone).
+
+## Production merges
+
+The shipped production pair is v2 + pron **checkpoint 3050**, `alpha` **0.5** (primary)
+and **0.3** (fallback) — built 2026-09-25. Records (manifest, one sidecar per output,
+regeneration script) live in `results/pron_production_merge/`; the ~140 MiB merged and
+converted binaries are GCS-mirrored under `<base>/pron_production_merge/` (not committed:
+over GitHub's 100 MiB per-file limit, and regenerable in <1 s). `regenerate.sh` reproduces
+the converted AR/NAR sha256 exactly.
+
+**Hash caveat:** `safetensors 0.8.0` writes `__metadata__` in nondeterministic HashMap
+order, so a merged file's whole-file sha256 is **not** reproducible run-to-run (the tensors
+and parsed metadata are). Verify with the converted AR/NAR sha256 or the tensor digest, not
+`merged_sha256`. Details: `DECISIONS.md` ("Merged file sha256 is NOT reproducible").
