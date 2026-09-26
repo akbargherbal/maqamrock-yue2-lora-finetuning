@@ -868,3 +868,14 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `loras/source/`; removed the duplicate `c4575_a0.5` experiment copy. Library now
   **16 adapters / 36 objects / 2.72 GiB**; `docs/LORA_INVENTORY.md` updated.
 
+## 2026-09-26 — NEXT SESSION AGENDA (project chores)
+
+- **graphify update** (`graphify update .`) after this session's edits, before any merge.
+- **Docs reconciliation** (`docs-reconciler`) — this session added the standalone
+  `vm-continuity` repo and touched `AGENTS.md`, `DECISIONS.md`, `bootstrap/setup.sh`; check
+  live docs for drift (skill lists, backup docs, setup references).
+- **Other setup chores** — the user's list (TBD).
+- Parked, **idle-time only** (never GPU-paid): cold-VM restore proof; vm-continuity
+  Milestone 1 (per-session layout). See `agent_notes/current.md` and `DECISIONS.md`'s
+  continuity-priority entry.
+
