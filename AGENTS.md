@@ -100,6 +100,13 @@ bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 &
   Recover a past session: `vm-continuity hosts` → `pull [--host H]` →
   `restore opencode -- --mode db|export`. A global reminder also lives at
   `~/.config/opencode/AGENTS.md` for other projects.
+- **Priority: continuity is idle-time work.** The loop is CPU-light and detached, so it
+  needs no attention; never spend a GPU-paid session's time on continuity *work*
+  (Milestone 1, restore tests, polish) while the project has training/inference to run.
+  Pick it up only when the GPU is already busy on the project (e.g. a generation batch)
+  or on an idle/CPU VM. Never launch GPU work for it. If CPU contention ever matters
+  during a data-bound run, bootstrap with `CONTINUITY_LOOP=0` and capture manually before
+  disconnecting.
 
 ## GitHub pushes
 

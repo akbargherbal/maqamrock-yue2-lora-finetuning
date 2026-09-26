@@ -505,7 +505,7 @@ if [ "${CONTINUITY_LOOP:-1}" = "1" ] && [ -d "$VM_CONTINUITY_DIR/.git" ]; then
   if pgrep -f "continuity.py watch" >/dev/null 2>&1; then
     echo "[ok]   vm-continuity loop already running"
   else
-    setsid nohup python3 "$VM_CONTINUITY_DIR/continuity.py" watch --interval-minutes 15 \
+    setsid nohup nice -n 19 python3 "$VM_CONTINUITY_DIR/continuity.py" watch --interval-minutes 15 \
       > /content/logs/vm_continuity.log 2>&1 & disown
     echo "[ok]   vm-continuity loop started (log: /content/logs/vm_continuity.log)"
   fi

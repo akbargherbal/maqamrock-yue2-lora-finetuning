@@ -271,3 +271,14 @@ Where a claim below says "verified against source," it means the actual `ostris/
   `c3050_a0.55`, `c3050_a0.65`, `c3050_a1.0`, `cfinal_a1.0` (converted pairs, fused merges,
   renders) were moved 2026-09-26 to `<base>/archive/alpha_gt_0.5/`, preserving original
   paths. Do not rebuild them.
+
+## Continuity work is idle-time only; the project comes first
+
+- The `vm-continuity` (OpenCode session backup) tooling is **auxiliary**. Its 15-minute loop
+  is CPU-only, detached, and `nice`d — it must never be a reason to delay or divert a
+  GPU-paid session from maqamrock work. Do continuity *development* (Milestone 1, cold-VM
+  restore test, polish) only while the GPU is already busy on the project (e.g. a long
+  generation batch) or on an idle/CPU VM. Never launch GPU work for it.
+- Lever if CPU contention ever matters during a data-bound run: bootstrap with
+  `CONTINUITY_LOOP=0` and run `vm-continuity capture && vm-continuity ship` manually before
+  disconnecting. This is the first release — the main project's training/inference wins.
