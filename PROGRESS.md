@@ -920,3 +920,35 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `docs/README.md`. (A more technical `docs/TROUBLESHOOTING.md` was added and then
   removed at the user's call.)
 
+
+## 2026-09-26 — vm-continuity hardened (restore `--mode`, `status`, early loop) + 5-min cadence; parallel Colab notebooks
+
+- **vm-continuity fixes pushed** (`6c4ddad`, branch `main`): the documented
+  `restore opencode -- --mode db|export` now parses (accepts `--mode` or the bare token,
+  tolerates an extra `--`); new `vm-continuity status` one-liner (reads
+  `$CONTINUITY_STAGE/watch_status.json`, exit 0 = healthy); the watch loop self-heals
+  (a transient capture/ship error is retried with capped backoff instead of ending the
+  loop). 14 CPU tests added under `tests/`, all pass. Fixes the bug found during the cold-VM
+  proof above; `DECISIONS.md`'s continuity entry corrected (it had said "still needs an
+  upstream fix").
+- **Session-backup loop now starts early.** `bootstrap/setup.sh` extracts
+  `start_continuity_loop()` and calls it at the end of `job_vm_continuity` — *before* the
+  setup-success gate, so a failed dataset/torch job can no longer silently leave session
+  backup off. The install job's log is renamed `vm_continuity_install.log` (the loop owns
+  `vm_continuity.log`); verify emits `[WARN]`, not `[FAIL]`, if the loop is down. Pushed
+  `87dc4e5`.
+- **Backup cadence reduced to 5 minutes** (user's call), both daemons:
+  `backup_to_gcp.py --interval-minutes` default `15 → 5`, and the vm-continuity watch default
+  `15 → 5` (setup.sh launches it at 5; the live loop was restarted at 5). Docs/configs updated
+  (`BACKUP_RESTORE`, `FINAL_BACKUP`, `PAUSE_RESUME`, `README`, `DECISIONS`, `AGENTS`,
+  `config/*.yml`); dated incident write-ups left as-is. Pushed `69918be`.
+- **Parallel Colab boot baked into the three notebooks** (repo-external;
+  `/content/colab_notebooks.zip` rebuilt): a kickoff block starts the VS Code CLI download +
+  repo clone in the background while `!gcloud auth login` runs, then a finish block launches
+  `setup.sh` detached while the terminal runs `code tunnel`. The dead hand-rolled CPU `%%bash`
+  cell (unset `$GCP_BACKUP_BASE`, `/content/ &converter/out` typo) was replaced; the
+  `ClickConnect` JS cell is untouched. All three now `git checkout pron-lora-ar-only` on every
+  run (the fixes/cadence live only on that branch).
+- **Open:** merge `pron-lora-ar-only` → `main` (`origin/main` still lacks the loop fix,
+  `restore --mode`, and the 5-min cadence). `graphify update .` + docs-reconciler still pending
+  from the earlier agenda.

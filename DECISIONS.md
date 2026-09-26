@@ -290,10 +290,52 @@ Where a claim below says "verified against source," it means the actual `ostris/
 - Lever if CPU contention ever matters during a data-bound run: bootstrap with
   `CONTINUITY_LOOP=0` and run `vm-continuity capture && vm-continuity ship` manually before
   disconnecting. This is the first release — the main project's training/inference wins.
-- **`vm-continuity restore` CLI (verified against `continuity.py` at `561d24a`):** the
-  README/SKILL-documented `restore opencode -- --mode db|export` does **not** work —
-  `continuity.py` selects the mode from a bare `db`/`export` token and never parses
-  `--mode`, so argparse rejects it. Working invocations: `vm-continuity restore opencode`
-  (db mode; add `--db-path FILE` to restore to an alternate target without stopping the live
-  service) and `vm-continuity restore opencode -- export --directory DIR`. Cold-VM recovery
-  proven 2026-09-26 (see `PROGRESS.md`); the docs/CLI mismatch still needs an upstream fix.
+- **`vm-continuity restore` CLI (fixed 2026-09-26, vm-continuity `6c4ddad`):** the
+  README/SKILL form `restore opencode -- --mode db|export` now works — `restore()` accepts
+  `--mode <db|export>` **and** the bare positional token, tolerating one extra `--` before
+  the mode's own options. Working invocations: `restore opencode -- --mode db` (add
+  `--db-path FILE` to target an alternate file without stopping the live service) and
+  `restore opencode -- --mode export --directory DIR`; the old bare-token forms still work.
+  Before the fix (verified at `561d24a`) argparse rejected `--mode`. Cold-VM recovery proven
+  2026-09-26 (see `PROGRESS.md`).
+- **Health is one line, and the loop self-heals.** `vm-continuity status` (exit 0 = healthy)
+  reads `$CONTINUITY_STAGE/watch_status.json`; a transient capture/ship error is logged and
+  retried with a capped backoff instead of ending the loop, so a persistent failure is
+  *visible* without a supervisor. Check it pre-run and at session end (`AGENTS.md`); if it is
+  stale, note it and carry on — never turn a session into backup repair.
+- **The loop starts early, not at the end of setup.** `setup.sh`'s `start_continuity_loop()`
+  runs inside `job_vm_continuity`, *before* the setup-success gate — previously the start
+  block sat *after* the gate, so one failed dataset/torch job silently left session backup
+  off. The install job's log moved to `vm_continuity_install.log` so it no longer collides
+  with the loop's `vm_continuity.log`.
+
+## Backup cadence is 5 minutes (was 15), for both daemons
+
+- Decided (user, 2026-09-26): the GCS backup interval is **5 minutes**, not 15 — both
+  `backup_to_gcp.py --interval-minutes` (default `5.0`) and the `vm-continuity` watch loop
+  (`continuity.py` default `5.0`). Direct cause: the 2026-09-25 loss window — a 15-min
+  cadence plus VM death lost two finished renders (see the inference-race entry). 5 min caps
+  the expected loss at ≤5 min of work.
+- Cost is bandwidth, not GPU: `vm-continuity` is ~21 MB/pass, so 5-min passes are
+  ~180 GB/month (was ~60 — `vm-continuity/docs/WHY.md`). `backup_to_gcp.py` is
+  append/update-only, so a pass re-uploads only changed files.
+- Don't pass an explicit old value: `vm-continuity watch` (no flag) now means 5, and
+  `bootstrap/setup.sh` starts the loop at 5. The **dated incident write-ups** (the
+  2026-09-25 inference-race entry here, and `PROGRESS.md`'s matching entry) still say
+  "15-min daemon" on purpose — that is what the cadence *was* at the time; only
+  forward-looking defaults and docs were updated.
+
+## Colab boot is parallel by design; `%%bash` cells are the vehicle
+
+- A Colab `%%bash` cell runs in the **notebook kernel, independent of the Colab terminal**.
+  Only two steps must be interactive — `gcloud auth login` (browser) and `code tunnel`
+  (device code); everything else is network-bound and belongs in a detached `%%bash` block,
+  so both auth waits overlap real work. The three launching notebooks follow a
+  kickoff → `gcloud auth login` → finish/launch → terminal-tunnel order.
+- **Non-obvious trap:** Colab's `%%bash` does **not** source `~/.bashrc`, so
+  `/root/.secrets.env` values (`GCP_BACKUP_BASE`, `HF_TOKEN`) are absent unless the block
+  `source`s it. The old hand-rolled `%%bash` cells that used `$GCP_BACKUP_BASE` without
+  sourcing were silent no-ops (they left `/content/converter/out` empty).
+- The notebooks `git checkout pron-lora-ar-only` on every run **until `main` is merged** —
+  the early-loop fix, `restore --mode`, and the 5-min cadence currently live only on that
+  branch (`origin/main` still carries the stale `setup.sh`).
