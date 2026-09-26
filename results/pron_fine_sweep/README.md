@@ -4,7 +4,7 @@ Follow-up to Task 17's `pron_sweep` (5 configs x 4 maqams). Here the pron checkp
 **fixed at 3050**, `alpha` is the only variable, and only the two maqams with the clearest
 signal are rendered — **Hijaz + Kurd**, 4 alphas x 2 maqams = **8 tracks**.
 
-Task 17's `a0` (v2 baseline) and `c3050_a0.5` (best-so-far) tracks are **reused, not
+Task 17's `a0` (v2 baseline) and `c3050_a0.5` (then-leading candidate) tracks are **reused, not
 regenerated**, so this batch carries only 4 labels per maqam (`A..D`), not 5.
 
 `alpha` is the pronunciation-adapter strength folded into the merged AR LoRA

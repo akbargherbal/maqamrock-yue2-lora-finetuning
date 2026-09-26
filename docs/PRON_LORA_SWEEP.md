@@ -125,8 +125,8 @@ adapters: `/content/pron_fine_sweep/` + `/content/converter/out/<cfg>/`.
 
 ## Round 3 — checkpoint sweep at fixed alpha 0.5 (2026-09-25)
 
-With `alpha` fixed at the already-shipped **0.5**, this round compares the two
-not-yet-shipped pron checkpoints **{1525, 4575}** (2 configs x Hijaz + Kurd = **4
+With `alpha` fixed at the (unlistened) candidate **0.5**, this round compares the two
+other pron checkpoints **{1525, 4575}** (2 configs x Hijaz + Kurd = **4
 tracks**). Same held-out prompts, same generation seed `20260924`, auto cap (Hijaz
 7250 / Kurd 6500), binary `7ad69d1c…` (sm_75, PTX-JIT on the L4); new **blinding seed `20260926`** (labels only,
 one new random label per maqam). Strictly sequential.
@@ -142,7 +142,7 @@ package: GCS `<base>/listening/PRON_CKPT_SWEEP_INPUT/`. Raw WAVs + adapters:
 
 Not an alpha/checkpoint sweep: this round crosses the held-out inputs. Each group pairs
 one maqam's **caption + maqam tag** with the **other maqam's held-out lyric**, at two pron
-settings — `a0` (v2 verbatim) and `c3050_a0.5` (the shipped α 0.5 merge). 2 groups x 2
+settings — `a0` (v2 verbatim) and `c3050_a0.5` (the α 0.5 merge). 2 groups x 2
 configs = **4 tracks**, strictly sequential per group. The question is whether the
 style/tag or the lyric text dominates the render.
 
@@ -165,7 +165,8 @@ package: GCS `<base>/listening/MAQAM_LYRIC_SWAP_INPUT/`. Raw WAVs + adapters:
 
 ## Round 5 — request-option knob probe at checkpoint 3050, alpha 0.5 (2026-09-25)
 
-Checkpoint and `alpha` are now **fixed** at the current best-so-far (`c3050_a0.5`), and
+Checkpoint and `alpha` are now **fixed** at the then-leading candidate (`c3050_a0.5`,
+unlistened), and
 exactly **one `audiocpp_cli` request option** varies per config via the new
 `EXTRA_REQUEST_OPTS` hook in `run_one.sh` (space-separated `key=value`, each forwarded as
 an extra `--request-option`; unset = byte-identical prior behavior). 4 configs x Hijaz +

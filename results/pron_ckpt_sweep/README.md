@@ -1,6 +1,6 @@
 # pron_ckpt_sweep — pron checkpoints 1525 vs 4575 at alpha 0.5 (Hijaz + Kurd)
 
-Renders the two not-yet-shipped pron checkpoints at the already-shipped `alpha=0.5`,
+Renders the two other pron checkpoints at the (unlistened) candidate `alpha=0.5`,
 on the same held-out inputs as `results/pron_fine_sweep/` (same staged prompts, same
 generation seed `20260924`, same auto cap). 2 configs x 2 maqams = **4 tracks**,
 strictly sequential.

@@ -1,12 +1,14 @@
-# pron_production_merge — production v2 + pron LoRAs (checkpoint 3050)
+# pron_production_merge — v2 + pron merge candidates (checkpoint 3050)
 
-Two **production** merges of the frozen v2 style adapter with the AR-only pronunciation
-adapter, both at pron checkpoint **3050**:
+Candidate merges of the frozen v2 style adapter with the AR-only pronunciation adapter, all
+at pron checkpoint **3050**. **No α is selected** — all are unlistened candidates; the
+`primary`/`fallback` labels that appeared here on 2026-09-25 were premature and are kept
+only as history. Only α≤0.5 is in scope (α>0.5 archived; see `docs/LORA_INVENTORY.md`).
 
-| run | role | alpha | merged file sha256 | merged tensor digest | converted AR sha256 |
-|---|---|---:|---|---|---|
-| `c3050_a0.5` | **primary** | 0.5 | `cf0d69b7c27a8aa4480a46f14984747cc08d8940f20f26fffc1fb6b7dcf428e3` | `d9695b9780b96d440c61bc335de9b0b2d87a3429f9be0fa4f5bad77650bc6960` | `33e824f24f1eec1ab06a45365e93a19b078a2a7cfbea724eba1b908d27360509` |
-| `c3050_a0.3` | fallback | 0.3 | `0668217e308a43c74e1b62a76bef859ec401662e6e6191133048c87785392b29` | `c564e17096f4e208971c99b8fc343f963fea3446e427569ac48cdbfa3508d481` | `dd0d495924c3b533df2fe89cdb5ff82c5a708047c3e3b0bf6ccec42d6033c6e9` |
+| run | alpha | merged file sha256 | merged tensor digest | converted AR sha256 |
+|---|---:|---|---|---|
+| `c3050_a0.5` | 0.5 | `cf0d69b7c27a8aa4480a46f14984747cc08d8940f20f26fffc1fb6b7dcf428e3` | `d9695b9780b96d440c61bc335de9b0b2d87a3429f9be0fa4f5bad77650bc6960` | `33e824f24f1eec1ab06a45365e93a19b078a2a7cfbea724eba1b908d27360509` |
+| `c3050_a0.3` | 0.3 | `0668217e308a43c74e1b62a76bef859ec401662e6e6191133048c87785392b29` | `c564e17096f4e208971c99b8fc343f963fea3446e427569ac48cdbfa3508d481` | `dd0d495924c3b533df2fe89cdb5ff82c5a708047c3e3b0bf6ccec42d6033c6e9` |
 
 Both converted NAR adapters are the same `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6`
 (NAR is copied from v2; it does not depend on alpha).

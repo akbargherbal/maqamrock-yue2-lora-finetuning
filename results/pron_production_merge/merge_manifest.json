@@ -1,5 +1,6 @@
 {
-  "task": "Production merges -- v2 (style) + pron (AR-only) ckpt 3050, alpha 0.5 (primary) and 0.3 (fallback)",
+  "task": "Merge candidates -- v2 (style) + pron (AR-only) ckpt 3050, alpha 0.5 and 0.3 (no alpha selected; all unlistened)",
+  "selection_status": "none - pending blinded listening",
   "kind": "merge_only",
   "generated_utc": "2026-09-25T07:22:26Z",
   "branch": "pron-lora-ar-only",
@@ -41,7 +42,7 @@
   },
   "configs": {
     "c3050_a0.5": {
-      "role": "primary",
+      "role": "candidate",
       "alpha": 0.5,
       "pron_checkpoint": "3050",
       "pron_step": 3050,
@@ -57,7 +58,7 @@
       "converted_nar_sha256": "7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6"
     },
     "c3050_a0.3": {
-      "role": "fallback",
+      "role": "candidate",
       "alpha": 0.3,
       "pron_checkpoint": "3050",
       "pron_step": 3050,

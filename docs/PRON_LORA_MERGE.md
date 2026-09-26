@@ -147,12 +147,13 @@ and **0** `diffusion_model.*`.
   end-to-end invariant runs when the real v2/pron/converter artifacts are staged
   and skips on a clean clone).
 
-## Production merges
+## Merge candidates (ckpt 3050)
 
-The shipped production merges are v2 + pron **checkpoint 3050**, `alpha` **0.5** (primary),
-**0.3** (fallback) and **0.4** — built 2026-09-25. Records (manifest, one sidecar per output,
-regeneration script) live in `results/pron_production_merge/`; the converted binaries are in
-the canonical LoRA library under `<base>/loras/audio_cpp/pron/<cfg>/` (see
+Candidate merges of v2 + pron **checkpoint 3050** — `alpha` **0.5**, **0.4**, **0.3** built
+2026-09-25, plus **0.1**/**0.2** added 2026-09-26. **No α is selected**: none has been
+listened to, and α>0.5 is out of scope (archived). Records (manifest, one sidecar per
+output, regeneration script) live in `results/pron_production_merge/`; the converted
+binaries are in the LoRA library under `<base>/loras/audio_cpp/pron/<cfg>/` (see
 `docs/LORA_INVENTORY.md`), and the fused merge intermediates under
 `<base>/pron_production_merge/merged/` (not committed: over GitHub's 100 MiB per-file limit,
 and regenerable in <1 s). `regenerate.sh` reproduces the converted AR/NAR sha256 exactly.

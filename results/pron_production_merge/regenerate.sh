@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerate the two production merges (v2 + pron ckpt 3050, alpha 0.5 / 0.3).
+# Regenerate the two merge candidates (v2 + pron ckpt 3050, alpha 0.5 / 0.3).
 #
 # CPU-only. Reproduces the converted AR/NAR adapter sha256 values recorded in
 # results/pron_production_merge/README.md, which are the stable identities.

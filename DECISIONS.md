@@ -224,7 +224,7 @@ Where a claim below says "verified against source," it means the actual `ostris/
 - **Non-obvious trap:** the converter enforces a *single* rank across both branches (`converter/convert_aitoolkit_yue2_lora.py:207-208`). So at alpha>0 the rank-32 NAR branch must be zero-padded to rank 40 or conversion fails with "mixed LoRA ranks found"; zero padding is a no-op on the delta. At alpha=0 the pron block is dropped, both branches stay rank 32, and no padding happens.
 - **alpha=0 reproduces the live converted v2 adapters byte-for-byte** (`747d5cfe…` / `ad2c8d86…`) — but only when the merged input keeps v2's basename `akbar_arabic_rock_lora.safetensors`, because the converter stamps its **input filename** into the output `source_file` metadata. A different name yields identical tensors and headers but a different whole-file sha256.
 - **Merged file sha256 is NOT reproducible — verify by tensor digest / converted hash instead.** `safetensors 0.8.0` serialises the `__metadata__` map in nondeterministic Rust-`HashMap` order, so two runs of the identical merge command emit different whole-file sha256 while *all 448 tensors and all parsed metadata are identical*. Verified 2026-09-25: two live `c3050_a0.5` runs were tensor-identical yet hashed `cf0d69b7…` vs `62e084a7…` (the Task-17 sweep's own run was `8a3dbdbd…`). Consequences: the `merged_sha256` fields in the sweep manifests are convenience records, not equality checks; verify a rebuild with (a) the **tensor digest** (sha256 over sorted `key‖dtype‖shape‖raw bytes`) or (b) the **converted AR/NAR sha256**, which *are* stable (the converter writes no volatile metadata and reproduces to the byte across environments — see below).
-- **Production merges (2026-09-25):** v2 + pron ckpt **3050**, `alpha` 0.5 (primary) and 0.3 (fallback); records in `results/pron_production_merge/` (manifest + one sidecar per output + `regenerate.sh`; binaries in GCS `<base>/pron_production_merge/`). Converted AR hashes match the Task-17/Task-18 sweeps exactly (`33e824f2…` / `dd0d4959…`), confirming the same data through the same pipeline.
+- **Merge candidates (2026-09-25):** v2 + pron ckpt **3050**, `alpha` 0.5 and 0.3 (0.1/0.2/0.4 added later); records in `results/pron_production_merge/` (manifest + one sidecar per output + `regenerate.sh`; converted binaries in the library `<base>/loras/audio_cpp/pron/`). **No alpha is selected — all are unlistened.** Converted AR hashes match the Task-17/Task-18 sweeps exactly (`33e824f2…` / `dd0d4959…`), confirming the same data through the same pipeline.
 
 ## `docs/models/yue2.md` is the source of truth for yue2 CLI flags
 
@@ -258,3 +258,16 @@ Where a claim below says "verified against source," it means the actual `ostris/
 - Removal from the index does **not** rewrite history — the mp3s are still in the git
   history of `pron-lora-ar-only`. Purging them needs a history rewrite (new SHAs, breaks
   the GCS bundle); not done, and a separate decision if wanted.
+
+## No adapter is "best"/"primary" before the blind listen; α capped at 0.5
+
+- An earlier record labelled the ckpt-3050 α0.5 merge "primary"/"production" and α0.3
+  "fallback". That asserts a winner we have **not** chosen — the arbiter is the blinded
+  listening. Rule (user, 2026-09-26): describe candidates by their parameters (which
+  checkpoint, which α) and mark them **unlistened**; never "best"/"primary"/"shipped"/
+  "winner" until the listening decides and the user confirms. Labels were reworded across
+  the live docs; the historical `results/` tables keep their numbers.
+- α is capped at **0.5** for this work. α>0.5 is out of scope: all artifacts for
+  `c3050_a0.55`, `c3050_a0.65`, `c3050_a1.0`, `cfinal_a1.0` (converted pairs, fused merges,
+  renders) were moved 2026-09-26 to `<base>/archive/alpha_gt_0.5/`, preserving original
+  paths. Do not rebuild them.

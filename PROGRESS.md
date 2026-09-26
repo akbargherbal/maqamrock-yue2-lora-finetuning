@@ -855,4 +855,10 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   ckpt 3050 from the pinned `loras/source/` inputs and placed under
   `<base>/loras/audio_cpp/pron/`. The duplicate experiment converted copy of a0.2 was
   removed; `docs/LORA_INVENTORY.md` updated. Neither is listened to yet.
+- **Hedged the labels and capped α at 0.5.** Dropped "primary / current / production /
+  best-so-far" wording from the live docs — no α/checkpoint is selected until the blinded
+  listening decides; candidates are described by their parameters and marked unlistened.
+  Archived every α>0.5 artifact (`c3050_a0.55`, `c3050_a0.65`, `c3050_a1.0`, `cfinal_a1.0`:
+  converted pairs, fused merges, renders — 15 dirs) to `<base>/archive/alpha_gt_0.5/`.
+  Decision in `DECISIONS.md`.
 

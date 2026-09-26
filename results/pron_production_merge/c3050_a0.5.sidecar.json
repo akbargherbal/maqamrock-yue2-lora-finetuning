@@ -1,6 +1,6 @@
 {
   "name": "c3050_a0.5",
-  "role": "primary",
+  "role": "candidate",
   "output_file": "akbar_arabic_rock_lora.safetensors",
   "output_kind": "merged_fused_lora",
   "command": "python merge_pron_lora.py --alpha 0.5 --pron-checkpoint 3050 --out /content/pron_production_merge/merged/c3050_a0.5/akbar_arabic_rock_lora.safetensors",

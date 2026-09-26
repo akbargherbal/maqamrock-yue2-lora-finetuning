@@ -1,6 +1,6 @@
 # pron_knob_probe — request-option knob probe at ckpt 3050, alpha 0.5
 
-Follow-up to `results/pron_fine_sweep/`: the pron checkpoint (`3050`) and `alpha` (`0.5`) are now **fixed** at the current best-so-far setting, and exactly **one request option** varies per config. 4 configs x 2 held-out maqams = **8 tracks**, strictly sequential.
+Follow-up to `results/pron_fine_sweep/`: the pron checkpoint (`3050`) and `alpha` (`0.5`) are now **fixed** at the then-leading candidate setting (unlistened), and exactly **one request option** varies per config. 4 configs x 2 held-out maqams = **8 tracks**, strictly sequential.
 
 The comparison anchor is the fine sweep's existing `c3050_a0.5` tracks (identical seed `20260924`, auto cap, staged prompts and binary) — **reused, not regenerated**. Every config uses the same anchor adapters; only the request-option override differs.
 
