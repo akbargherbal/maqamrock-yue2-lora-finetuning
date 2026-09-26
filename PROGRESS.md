@@ -914,7 +914,9 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `docs/COMMAND_HANDOVER_GOTCHAS.md` (+ the `trap - INT` finding), `skills/command-handover`,
   `skills/crash-diagnose-and-resume` (auto-resume bar → "evidence, else ask"), `DECISIONS.md`
   (run-control entry), `docs/PRON_LORA.md`, `docs/FINAL_BACKUP.md`.
-- Added **`docs/TROUBLESHOOTING.md`** — evidence bundle + per-lane checks (training /
-  inference / backup / env) + a 12-row agent-behavior scorecard + a hand-off block, so
-  "is it broken?" is measured, not vibed. Indexed in `docs/README.md`.
+- Added **`docs/EXPERIENCE_CHECKLIST.md`** — a user-POV instrument (10 experience
+  scores + a friction/pitfalls checklist + a hand-off block) for evaluating how it
+  *felt* to work with the agent, not only whether it worked. Indexed in
+  `docs/README.md`. (A more technical `docs/TROUBLESHOOTING.md` was added and then
+  removed at the user's call.)
 
