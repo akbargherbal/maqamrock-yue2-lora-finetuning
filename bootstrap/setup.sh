@@ -80,6 +80,12 @@ AI_TOOLKIT_REPO="https://github.com/ostris/ai-toolkit.git"
 AUDIO_CPP="/content/audio.cpp"
 AUDIO_CPP_REPO="https://github.com/0xShug0/audio.cpp"
 GGUF_REPO="audio-cpp/Yue2-3B-GGUF"
+# vm-continuity -- the standalone OpenCode-session continuity tool. Separate
+# repo on purpose (separation of concerns): this project only bootstraps it;
+# the tool and its skill are owned elsewhere. Clone-or-pull the latest, then
+# run its installer so the skill is registered globally for any project.
+VM_CONTINUITY_DIR="/content/vm-continuity"
+VM_CONTINUITY_REPO="https://github.com/akbargherbal/vm-continuity.git"
 # Not pinned to a commit on purpose: unlike FL-YuE2 (a third-party custom
 # node with its own release cadence), Ostris's yue2 support is upstream and
 # moving fast. The resolved commit is printed by the verify step below so
@@ -131,6 +137,25 @@ hf auth login --token "$HF_TOKEN"
 
 job_opencode() {
   curl -fsSL https://opencode.ai/install | bash
+}
+
+# Clone (or fast-forward) the standalone vm-continuity tool and register its
+# skill globally. If GH_TOKEN is present the clone works for a private repo;
+# otherwise the repo must be public (it holds only tooling -- session data lives
+# in a private GCS bucket), so a background, non-interactive bootstrap can clone
+# it. --no-opencode: job_opencode owns the OpenCode install; this must not race it.
+job_vm_continuity() {
+  local url="$VM_CONTINUITY_REPO"
+  if [ -n "${GH_TOKEN:-}" ]; then
+    url="https://x-access-token:${GH_TOKEN}@github.com/akbargherbal/vm-continuity.git"
+  fi
+  if [ -d "$VM_CONTINUITY_DIR/.git" ]; then
+    git -C "$VM_CONTINUITY_DIR" pull --ff-only --quiet
+  else
+    rm -rf "$VM_CONTINUITY_DIR" && git clone --quiet "$url" "$VM_CONTINUITY_DIR"
+  fi
+  git -C "$VM_CONTINUITY_DIR" rev-parse --short HEAD
+  bash "$VM_CONTINUITY_DIR/install.sh" --no-opencode
 }
 
 job_ai_toolkit() {
@@ -303,6 +328,7 @@ start_job() {
 }
 
 start_job opencode job_opencode
+start_job vm_continuity job_vm_continuity
 if [ "$MODE" = "training" ]; then
   start_job ai_toolkit job_ai_toolkit
   start_job dataset job_dataset
@@ -351,6 +377,19 @@ if command -v opencode >/dev/null 2>&1 || [ -x "$HOME/.opencode/bin/opencode" ];
   echo "[ok]   opencode installed"
 else
   echo "[WARN] opencode not found on PATH after install — check /content/logs/opencode.log"
+fi
+
+if [ -d "$VM_CONTINUITY_DIR/.git" ]; then
+  echo "[ok]   vm-continuity at $(git -C "$VM_CONTINUITY_DIR" rev-parse --short HEAD 2>/dev/null || echo '??')"
+else
+  echo "[FAIL] vm-continuity did not clone — see /content/logs/vm_continuity.log (repo URL/visibility?)"
+  fail=1
+fi
+if [ -L "$HOME/.config/opencode/skills/vm-continuity" ]; then
+  echo "[ok]   vm-continuity skill registered (global)"
+else
+  echo "[FAIL] vm-continuity skill link missing — see /content/logs/vm_continuity.log"
+  fail=1
 fi
 
 # Confirm an HF cache asset actually landed. `hf download` is idempotent
@@ -457,6 +496,19 @@ fi
 if [ "$fail" -eq 1 ]; then
   echo "=== setup.sh finished WITH FAILURES — check the [FAIL] lines above (total ${SECONDS}s) ==="
   exit 1
+fi
+
+# Start the vm-continuity capture loop (detached). Captures every 15 min and ships
+# to GCS; the anti-clobber guard refuses to overwrite a richer store, so running it
+# before a restore is safe. Opt out with CONTINUITY_LOOP=0.
+if [ "${CONTINUITY_LOOP:-1}" = "1" ] && [ -d "$VM_CONTINUITY_DIR/.git" ]; then
+  if pgrep -f "continuity.py watch" >/dev/null 2>&1; then
+    echo "[ok]   vm-continuity loop already running"
+  else
+    setsid nohup python3 "$VM_CONTINUITY_DIR/continuity.py" watch --interval-minutes 15 \
+      > /content/logs/vm_continuity.log 2>&1 & disown
+    echo "[ok]   vm-continuity loop started (log: /content/logs/vm_continuity.log)"
+  fi
 fi
 
 if [ "$MODE" = "training" ]; then
