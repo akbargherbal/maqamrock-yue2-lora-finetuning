@@ -139,6 +139,29 @@ job_opencode() {
   curl -fsSL https://opencode.ai/install | bash
 }
 
+# Start the OpenCode-session backup loop, detached and idempotent. Called from
+# job_vm_continuity once the tool is installed, so it comes up EARLY and in
+# parallel with the heavy jobs — and, crucially, is NOT gated by whether the rest
+# of setup succeeds. A failed setup job must never silently disable session backup.
+# Opt out with CONTINUITY_LOOP=0.
+start_continuity_loop() {
+  if [ "${CONTINUITY_LOOP:-1}" != "1" ]; then
+    echo "CONTINUITY_LOOP=0; not starting the session-backup loop"
+    return 0
+  fi
+  if [ ! -d "$VM_CONTINUITY_DIR/.git" ]; then
+    echo "vm-continuity not cloned; not starting the session-backup loop"
+    return 0
+  fi
+  if pgrep -f '[c]ontinuity\.py watch' >/dev/null 2>&1; then
+    echo "vm-continuity loop already running"
+    return 0
+  fi
+  setsid nohup nice -n 19 python3 "$VM_CONTINUITY_DIR/continuity.py" watch --interval-minutes 15 \
+    > /content/logs/vm_continuity.log 2>&1 < /dev/null & disown
+  echo "vm-continuity loop started (log: /content/logs/vm_continuity.log)"
+}
+
 # Clone (or fast-forward) the standalone vm-continuity tool and register its
 # skill globally. If GH_TOKEN is present the clone works for a private repo;
 # otherwise the repo must be public (it holds only tooling -- session data lives
@@ -156,6 +179,8 @@ job_vm_continuity() {
   fi
   git -C "$VM_CONTINUITY_DIR" rev-parse --short HEAD
   bash "$VM_CONTINUITY_DIR/install.sh" --no-opencode
+  # Bring the session-backup loop up now (early, in parallel, fail-independent).
+  start_continuity_loop
 }
 
 job_ai_toolkit() {
@@ -328,7 +353,7 @@ start_job() {
 }
 
 start_job opencode job_opencode
-start_job vm_continuity job_vm_continuity
+start_job vm_continuity_install job_vm_continuity
 if [ "$MODE" = "training" ]; then
   start_job ai_toolkit job_ai_toolkit
   start_job dataset job_dataset
@@ -382,14 +407,21 @@ fi
 if [ -d "$VM_CONTINUITY_DIR/.git" ]; then
   echo "[ok]   vm-continuity at $(git -C "$VM_CONTINUITY_DIR" rev-parse --short HEAD 2>/dev/null || echo '??')"
 else
-  echo "[FAIL] vm-continuity did not clone — see /content/logs/vm_continuity.log (repo URL/visibility?)"
+  echo "[FAIL] vm-continuity did not clone — see /content/logs/vm_continuity_install.log (repo URL/visibility?)"
   fail=1
 fi
 if [ -L "$HOME/.config/opencode/skills/vm-continuity" ]; then
   echo "[ok]   vm-continuity skill registered (global)"
 else
-  echo "[FAIL] vm-continuity skill link missing — see /content/logs/vm_continuity.log"
+  echo "[FAIL] vm-continuity skill link missing — see /content/logs/vm_continuity_install.log"
   fail=1
+fi
+# Session backup is a sidecar, not a pass/fail gate: report it (WARN) so a dead
+# loop is never silent, but do not fail setup over it.
+if pgrep -f '[c]ontinuity\.py watch' >/dev/null 2>&1; then
+  echo "[ok]   vm-continuity loop running (OpenCode session backup)"
+else
+  echo "[WARN] vm-continuity loop NOT running — session backup is OFF; start: vm-continuity watch --interval-minutes 15"
 fi
 
 # Confirm an HF cache asset actually landed. `hf download` is idempotent
@@ -496,19 +528,6 @@ fi
 if [ "$fail" -eq 1 ]; then
   echo "=== setup.sh finished WITH FAILURES — check the [FAIL] lines above (total ${SECONDS}s) ==="
   exit 1
-fi
-
-# Start the vm-continuity capture loop (detached). Captures every 15 min and ships
-# to GCS; the anti-clobber guard refuses to overwrite a richer store, so running it
-# before a restore is safe. Opt out with CONTINUITY_LOOP=0.
-if [ "${CONTINUITY_LOOP:-1}" = "1" ] && [ -d "$VM_CONTINUITY_DIR/.git" ]; then
-  if pgrep -f "continuity.py watch" >/dev/null 2>&1; then
-    echo "[ok]   vm-continuity loop already running"
-  else
-    setsid nohup nice -n 19 python3 "$VM_CONTINUITY_DIR/continuity.py" watch --interval-minutes 15 \
-      > /content/logs/vm_continuity.log 2>&1 & disown
-    echo "[ok]   vm-continuity loop started (log: /content/logs/vm_continuity.log)"
-  fi
 fi
 
 if [ "$MODE" = "training" ]; then
