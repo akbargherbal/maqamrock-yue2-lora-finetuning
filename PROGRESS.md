@@ -844,8 +844,8 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   — and `akbar_arabic_rock_lora_crop60_killed/` and `dataset_v1_style_only_obsolete/` —
   are documented in this file as verified GCS archives but are **absent** from the project
   prefix. No surviving v1 adapter.
-- CPU-only; `pytest` green (exit 0), `bash -n` + `py_compile` clean. Changes are local,
-  **not committed/pushed**.
+- CPU-only; `pytest` green (exit 0), `bash -n` + `py_compile` clean. Committed and
+  pushed to `origin/pron-lora-ar-only` as **`cf0c4b3`**.
 - Moved the four blinded listening packages (`PRON_CKPT_SWEEP_INPUT`, `PRON_FINE_SWEEP_INPUT`,
   `PRON_KNOB_PROBE_INPUT`, `MAQAM_LYRIC_SWAP_INPUT`; 122 MB) out of the repo: mirrored to
   GCS `<base>/listening/` and untracked (`.gitignore` `*_INPUT/`). Docs referencing
