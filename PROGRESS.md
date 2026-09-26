@@ -850,4 +850,9 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `PRON_KNOB_PROBE_INPUT`, `MAQAM_LYRIC_SWAP_INPUT`; 122 MB) out of the repo: mirrored to
   GCS `<base>/listening/` and untracked (`.gitignore` `*_INPUT/`). Docs referencing
   "repo root" packages updated; decision in `DECISIONS.md`.
+- Added two library adapters, `c3050_a0.1` (new, AR `184bbd29…`) and `c3050_a0.2`
+  (AR `c68217ab…`, reproduces the pre-existing experiment byte-for-byte), merged at pron
+  ckpt 3050 from the pinned `loras/source/` inputs and placed under
+  `<base>/loras/audio_cpp/pron/`. The duplicate experiment converted copy of a0.2 was
+  removed; `docs/LORA_INVENTORY.md` updated. Neither is listened to yet.
 

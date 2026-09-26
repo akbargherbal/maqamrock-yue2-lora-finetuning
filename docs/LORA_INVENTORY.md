@@ -26,10 +26,10 @@ here — they stay under their round's prefix and are clearly non-canonical
 
 | Class | Count | Notes |
 |---|---|---|
-| Current loadable adapters (AR+NAR pairs) | **4** | style + 3 production pron merges |
+| Current loadable adapters (AR+NAR pairs) | **6** | style + 5 pron merges (`c3050_a0.1`–`a0.5`) |
 | Fused source adapters (ai-toolkit) | **2 families** | v2 style, pron AR-only r8 |
-| Experimental adapters | **8** | sweeps/probes; not shipped |
-| Objects in `loras/` | **10** | style 2 + pron 6 + source 2 (~758 MiB) |
+| Experimental adapters | **7** | sweeps/probes; not shipped |
+| Objects in `loras/` | **14** | style 2 + pron 10 + source 2 (~1.07 GiB) |
 
 ## Current loadable adapters (`loras/`)
 
@@ -39,11 +39,17 @@ The **converted AR sha256 is the stable identity** (see caveat below).
 | Config | Role | pron ckpt | α | AR rank | converted AR sha256 | converted NAR sha256 | Path in `loras/` |
 |---|---|---|---:|---:|---|---|---|
 | style (`a0`) | base style | — | 0 | 32 | `747d5cfe2224b1bae6e582ccf5f2ee2a57e3f030c53d54e134f34a85960426fa` | `ad2c8d8690640e8fd8fea779b57bc2c7c887b93f2bb103bbcbfea056536d7ac9` | `audio_cpp/style/` |
+| `c3050_a0.1` | new (unlistened) | 3050 | 0.1 | 40 | `184bbd29b552751ded9849429a81f74165ccef13ff82d2befb2978efcbdcbb32` | `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6` | `audio_cpp/pron/c3050_a0.1/` |
+| `c3050_a0.2` | new (unlistened) | 3050 | 0.2 | 40 | `c68217ab619a9cfa992bbba650f03dd19616ea19fd0967060d0a45e9e415d34c` | `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6` | `audio_cpp/pron/c3050_a0.2/` |
 | `c3050_a0.5` | **primary** | 3050 | 0.5 | 40 | `33e824f24f1eec1ab06a45365e93a19b078a2a7cfbea724eba1b908d27360509` | `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6` | `audio_cpp/pron/c3050_a0.5/` |
 | `c3050_a0.4` | current | 3050 | 0.4 | 40 | `210daf9f1f042d13929fd3be48ebd24c9e76618ce0cf4ba1eb6e555d907c6218` | `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6` | `audio_cpp/pron/c3050_a0.4/` |
 | `c3050_a0.3` | fallback | 3050 | 0.3 | 40 | `dd0d495924c3b533df2fe89cdb5ff82c5a708047c3e3b0bf6ccec42d6033c6e9` | `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6` | `audio_cpp/pron/c3050_a0.3/` |
 
-All three pron merges share the same NAR (copied from v2; independent of α).
+All five pron merges share the same NAR (copied from v2; independent of α).
+`c3050_a0.1`/`c3050_a0.2` were built 2026-09-26 from the pinned `loras/source/`
+inputs (v2 `b1d09098…`, pron 3050 `ead30d52…`) with `merge_pron_lora.py` + the
+converter; `c3050_a0.2` reproduces the pre-existing experiment byte-for-byte
+(converted AR `c68217ab…`).
 
 ## Fused source adapters (`loras/source/`)
 
@@ -62,7 +68,6 @@ intermediates as well as converted pairs; treat none of it as the library.
 
 | Config | pron ckpt | α | converted AR sha256 | Where |
 |---|---|---:|---|---|
-| `c3050_a0.2` | 3050 | 0.2 | `c68217ab619a9cfa992bbba650f03dd19616ea19fd0967060d0a45e9e415d34c` | `audiocpp_inference/converter/c3050_a0.2/`, `pron_fine_sweep/merged/` |
 | `c3050_a0.55` | 3050 | 0.55 | `ba328949f995e539bc8d968eaca62b7923ff321c165ef312a2289f8c19ebf53f` | `audiocpp_inference/converter/c3050_a0.55/`, `pron_fine_sweep/merged/` |
 | `c3050_a0.65` | 3050 | 0.65 | `e495beca26aa4e7922b18e03a799b45f0d48e38a2efbe6d662fe3584b17c4d00` | `audiocpp_inference/converter/c3050_a0.65/`, `pron_fine_sweep/merged/` |
 | `c3050_a1.0` | 3050 | 1.0 | `b4868133ad8094f898002aa28b311f9965f44ef37ffb84afa74000f8ef90b781` | `pron_alpha_sweep/merged/` (converted pair only) |
