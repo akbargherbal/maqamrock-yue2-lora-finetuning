@@ -92,6 +92,14 @@ bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 &
   ```
 
 - "Is my progress backed up?" → compare GCS object timestamps under the run's configured prefix with local timestamps and report the actual drift — don't assume the last known-good state is still current.
+- **OpenCode sessions (this machine, any project)** are backed up separately by the
+  standalone `vm-continuity` tool (installed and loop-started by `bootstrap/setup.sh`;
+  each VM ships to its own `by_host/<host>/` namespace, so a fresh VM can't clobber
+  another). If the loop isn't running, start it detached —
+  `vm-continuity watch --interval-minutes 15` (log `/content/logs/vm_continuity.log`).
+  Recover a past session: `vm-continuity hosts` → `pull [--host H]` →
+  `restore opencode -- --mode db|export`. A global reminder also lives at
+  `~/.config/opencode/AGENTS.md` for other projects.
 
 ## GitHub pushes
 
