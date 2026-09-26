@@ -15,8 +15,11 @@ continues toward `steps: 3000`. (Verified in
 
 ## Pause (at night)
 
-1. Stop training cleanly — `Ctrl-C` in the training terminal (or ask the agent
-   to `kill -INT` the `run.py` pid). Wait for `Job stopped`.
+1. Stop training cleanly:
+   ```bash
+   cd /content/maqamrock-yue2-lora-finetuning
+   python train_ctl.py stop      # SIGINT; waits for "Job stopped"
+   ```
 2. Force one backup pass and confirm the latest checkpoint is in GCS:
    ```bash
    cd /content/maqamrock-yue2-lora-finetuning
@@ -44,9 +47,10 @@ step that is a multiple of 250.
      /content/ai-toolkit/output/akbar_arabic_rock_lora
    ```
 3. Start the sidecars (START.md step 4).
-4. Launch the **identical** command (START.md step 5). You type it — this is a
-   planned resume, not the agent's auto-resume exception. Watch the log; it
-   should print a "Found step N ... starting from there" line, not start at 0.
+4. Launch, with the **identical** config and run name: `python train_ctl.py start`
+   (START.md step 5). You type it — this is a planned resume, not the agent's
+   auto-resume exception. Watch the log; it should print a "Found step N ...
+   starting from there" line, not start at 0.
 
 ## Notes
 

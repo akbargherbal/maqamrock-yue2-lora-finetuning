@@ -25,12 +25,15 @@ human and invisible to the agent — so they get written down here.
   it is lost.
 - **Correct pattern:** `> /content/logs/<name>.log 2>&1` on every detached launch.
 
-## A detached job inherits `SIGINT=ignored` — Ctrl+C won't stop it
+## A backgrounded job inherits `SIGINT=ignored` — Ctrl+C (and `kill -INT`) won't stop it
 
-- **Fact:** a detached `run.py` is un-interruptible by Ctrl+C (`DECISIONS.md`).
-  Training is therefore launched foreground on purpose, so Ctrl+C works.
-- **Correct pattern:** match the mode to the job (foreground for training,
-  detached for sidecars/batches) and state the stop command for detached jobs.
+- **Fact:** a shell background job (`… &`) inherits `SIGINT=SIG_IGN`, and a
+  non-interactive shell **cannot** reset it — so Ctrl+C doesn't reach it *and*
+  `kill -INT <pid>` is a silent no-op. Training is launched **detached** now, so
+  its clean stop has to reset SIGINT explicitly.
+- **Correct pattern:** use `python train_ctl.py start` (it spawns via
+  `Popen(start_new_session=True)` with a SIGINT reset) and `train_ctl.py stop`.
+  For any other detached job, still state its exact stop command.
 
 ## No stop/resume line = a stuck job
 
@@ -74,6 +77,19 @@ human and invisible to the agent — so they get written down here.
   (`^` cannot match a `/bin/bash -c …` command line). Reserve the bracket trick
   for the case where the bracketed literal is the pattern's **only** occurrence
   in the command.
+
+## 2026-09-26 — `trap - INT` cannot un-ignore an inherited signal
+
+- **Fact:** to keep `kill -INT` working on a detached run we first wrapped the
+  launch as `setsid nohup bash -c 'trap - INT; exec …'`. It does **not** work:
+  POSIX says a non-interactive shell cannot reset a signal that was ignored on
+  entry, so the child keeps `SIGINT=SIG_IGN` and `kill -INT` is a silent no-op
+  (verified via `/proc/<pid>/status` `SigIgn` bit `0x2` and a signal round-trip).
+- **Failure prevented:** a detached training run that *looks* stoppable but
+  ignores the clean stop, forcing `kill -9` and losing up to `save_every` steps.
+- **Correct pattern:** reset in Python before `exec` —
+  `signal.signal(signal.SIGINT, signal.SIG_DFL)` — which *can* override an
+  inherited ignored signal. `train_ctl.py start` does exactly this.
 
 ## Related traps (not terminal-specific)
 

@@ -239,7 +239,15 @@ Where a claim below says "verified against source," it means the actual `ostris/
 ## Handing over a command is part of the job — state its terminal semantics
 
 - The user runs commands by hand in a real terminal; the agent's shell tool is a different session, so human-terminal facts (Ctrl+C, closing the tab, where a detached process logs) are invisible to the agent. On 2026-09-23 the agent handed over a ~2 h inference batch in the foreground — the user had to ask for `disown`. The fix is a standing rule, not a one-off command.
-- Rule: before presenting any long-running, background/detached, or state-changing command, load `skills/command-handover/SKILL.md` and follow it — foreground vs detached, output log, stop command, resume command. Training stays foreground on purpose (see the auto-resume / `SIGINT` entries above). New gotchas append to `docs/COMMAND_HANDOVER_GOTCHAS.md`; that list is the accumulation, the skill is the procedure, and `AGENTS.md` carries the always-on trigger.
+- Rule: before presenting any long-running, background/detached, or state-changing command, load `skills/command-handover/SKILL.md` and follow it — foreground vs detached, output log, stop command, resume command. Training is launched detached via `train_ctl.py` (see the run-control entry below). New gotchas append to `docs/COMMAND_HANDOVER_GOTCHAS.md`; that list is the accumulation, the skill is the procedure, and `AGENTS.md` carries the always-on trigger.
+
+## Training run-control: detached via `train_ctl.py` (not bare `run.py`)
+
+- Decided (user, 2026-09-26): training is launched **detached** so an accidental Ctrl+C (the Linux copy-paste habit) can't kill it, and stopped with a checkpoint-safe SIGINT. Bare `cd /content/ai-toolkit && python run.py …` in the foreground is no longer the procedure.
+- All launch/stop goes through `train_ctl.py` (`start` / `status` / `stop`): it spawns with `Popen(start_new_session=True)`, resets SIGINT to `SIG_DFL` in the child, writes a pid + state file (`/content/logs/train.{pid,state.json}`), refuses a second copy of the same run, and on `stop` verifies the pid is our `run.py` before signalling.
+- Why the signal reset is load-bearing: a shell background job inherits `SIGINT=SIG_IGN`, and a non-interactive shell **cannot** un-ignore it, so `kill -INT` is a silent no-op. `trap - INT` does **not** fix this; a Python `signal.signal(SIGINT, SIG_DFL)` before `exec` does. Verified on-VM 2026-09-26 (see `docs/COMMAND_HANDOVER_GOTCHAS.md`).
+- Scope: `run.py` is still the engine; this is run-control only. The auto-resume exception is unchanged in spirit but now requires **evidence**: same config/run name, looks crashed (traceback / OOM / VM reclaimed), and no `Job stopped` / "stopped on purpose" note — otherwise ask the user (`AGENTS.md`).
+- Ripple landed with it (2026-09-26): `AGENTS.md`, `docs/START.md`, `docs/PAUSE_RESUME.md`, `docs/COMMAND_HANDOVER_GOTCHAS.md`, `skills/command-handover/SKILL.md`, `docs/PRON_LORA.md`, `docs/FINAL_BACKUP.md`.
 
 ## Canonical LoRA library: `<base>/loras/` — one place for current adapters
 
@@ -282,3 +290,10 @@ Where a claim below says "verified against source," it means the actual `ostris/
 - Lever if CPU contention ever matters during a data-bound run: bootstrap with
   `CONTINUITY_LOOP=0` and run `vm-continuity capture && vm-continuity ship` manually before
   disconnecting. This is the first release — the main project's training/inference wins.
+- **`vm-continuity restore` CLI (verified against `continuity.py` at `561d24a`):** the
+  README/SKILL-documented `restore opencode -- --mode db|export` does **not** work —
+  `continuity.py` selects the mode from a bare `db`/`export` token and never parses
+  `--mode`, so argparse rejects it. Working invocations: `vm-continuity restore opencode`
+  (db mode; add `--db-path FILE` to restore to an alternate target without stopping the live
+  service) and `vm-continuity restore opencode -- export --directory DIR`. Cold-VM recovery
+  proven 2026-09-26 (see `PROGRESS.md`); the docs/CLI mismatch still needs an upstream fix.

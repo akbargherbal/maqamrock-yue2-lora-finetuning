@@ -22,6 +22,7 @@ operating contract is `../AGENTS.md`.
 | LoRA inventory: what exists, how many, where | [LORA_INVENTORY.md](LORA_INVENTORY.md) |
 | Prepare a blinded A/B(/N) audio listening package | [AB_BLIND_EVAL.md](AB_BLIND_EVAL.md) |
 | Hand the user a command to run (terminal reality check) | [COMMAND_HANDOVER_GOTCHAS.md](COMMAND_HANDOVER_GOTCHAS.md) |
+| Diagnose something that looks wrong (evidence + agent scorecard) | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
 | How the text→duration cap is derived | [text_to_duration_formula.md](text_to_duration_formula.md) |
 | Repo audit: stale docs, drift & workflow backlog | [IMPROVEMENTS.md](IMPROVEMENTS.md) |
 | Use / refresh the repo knowledge graph (graphify) | [GRAPHIFY.md](GRAPHIFY.md) |

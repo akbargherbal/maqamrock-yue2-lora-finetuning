@@ -44,7 +44,8 @@ Then, as usual:
 git clone <this repo's URL>
 cd maqamrock-yue2-lora-finetuning
 git checkout pron-lora-ar-only     # the pron configs/docs live on this branch, not main
-bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 &
+mkdir -p /content/logs
+setsid nohup bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 & disown
 # authenticate vscode.dev in the foreground while setup runs
 ```
 
@@ -54,17 +55,19 @@ and drops the completion marker at `/content/pron_dataset/.bootstrap_complete`
 from `job_dataset()` and `GCP_DATASET_PATH`, so it can never contaminate
 `/content/yue2_dataset`.
 
-## Smoke test (foreground; run it once before the real run)
+## Smoke test (run it once before the real run)
 
 Runs 10 steps over the 16-pair smoke set and saves a checkpoint to prove the
 adapter is AR-only and rank 8.
 
 ```bash
-cd /content/ai-toolkit
-python run.py /content/maqamrock-yue2-lora-finetuning/config/pron_lora_ar_only_smoke.yml -l /content/logs/train_smoke.log
+cd /content/maqamrock-yue2-lora-finetuning
+python train_ctl.py start --config config/pron_lora_ar_only_smoke.yml \
+  --run-name pron_lora_ar_only_smoke --log-name train_smoke
 ```
 
-- Foreground on purpose (Ctrl+C stops it).
+- Detached (a stray Ctrl+C won't kill it); stop with
+  `python train_ctl.py stop --log-name train_smoke`. Log: `/content/logs/train_smoke.log`.
 - After it finishes, inspect `output/pron_lora_ar_only_smoke/*.safetensors`.
   As saved, the AR (trainable) adapter is under **`text_encoders.*`** and the
   ignored NAR would be under **`diffusion_model.*`** (post-save prefix rewrite —
@@ -75,14 +78,16 @@ python run.py /content/maqamrock-yue2-lora-finetuning/config/pron_lora_ar_only_s
   `/content/logs/gpu_usage.csv` (AI Toolkit logs no GPU stats — `gpu_logger.py`
   must be running).
 
-## Real run (foreground; user-typed only)
+## Real run (user-typed only)
 
 ```bash
-cd /content/ai-toolkit
-python run.py /content/maqamrock-yue2-lora-finetuning/config/pron_lora_ar_only.yml -l /content/logs/train_pron.log
+cd /content/maqamrock-yue2-lora-finetuning
+python train_ctl.py start --config config/pron_lora_ar_only.yml \
+  --run-name pron_lora_ar_only --log-name train_pron
 ```
 
-- **Foreground on purpose** — Ctrl+C stops it. Do not detach it.
+- **Detached on purpose** — a stray Ctrl+C won't kill it. Stop with
+  `python train_ctl.py stop --log-name train_pron`. Log: `/content/logs/train_pron.log`.
 - Expect 4 checkpoints (quarter-epoch cadence, `save.save_every: 1525`,
   `max_step_saves_to_keep: 12` so all survive):
   - `pron_lora_ar_only_r8_000001525.safetensors`

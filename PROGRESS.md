@@ -875,7 +875,46 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `vm-continuity` repo and touched `AGENTS.md`, `DECISIONS.md`, `bootstrap/setup.sh`; check
   live docs for drift (skill lists, backup docs, setup references).
 - **Other setup chores** — the user's list (TBD).
-- Parked, **idle-time only** (never GPU-paid): cold-VM restore proof; vm-continuity
-  Milestone 1 (per-session layout). See `agent_notes/current.md` and `DECISIONS.md`'s
-  continuity-priority entry.
+- Parked, **idle-time only** (never GPU-paid): vm-continuity Milestone 1 (per-session
+  layout). See `agent_notes/current.md` and `DECISIONS.md`'s continuity-priority entry.
+
+## 2026-09-26 — Cold-VM restore proof: vm-continuity recovered the lost session (worked)
+
+- Colab dropped mid-discussion; a fresh VM came up with the repo but empty `/content/logs`
+  and `agent_notes/` and no vm-continuity. First real end-to-end cold-VM test of
+  `vm-continuity` — **it recovered the interrupted session**
+  `ses_f235771d7ffelzQ283jqWnMj7h` ("Updating graph for current directory", the docs-Q&A
+  discussion) from the lost VM's namespace `by_host/908cec5499a9/` (captured 08:29:45,
+  6 sessions), with all 42 messages intact.
+- Both restore paths verified: export-mode imported 6/6 sessions into this project
+  (`opencode session list` shows them; the target has 42 `session_message` rows), and the
+  whole-DB fallback restored to an alternate `--db-path` reproduced all 6 sessions without
+  touching the live service.
+- **Found a tooling bug:** the documented `restore opencode -- --mode db|export` is broken
+  (argparse rejects `--mode`). Working forms in `DECISIONS.md`.
+- Started this VM's capture loop (`by_host/c238efce27da/`, 7/7 sessions) so this session is
+  protected. Caveat: `/content` files (e.g. `B_questions.md`) are **not** covered by
+  vm-continuity — only OpenCode sessions are.
+
+## 2026-09-26 — `AGENTS.md` rewritten as a lean charter; `train_ctl.py` run-control; troubleshooting checklist
+
+- Rewrote the agent contract (`AGENTS.md`): lean charter that **points** to the canonical
+  docs instead of duplicating them; fixed two dead paths (`training_folder/…` →
+  `/content/ai-toolkit/output/akbar_arabic_rock_lora/`; an un-runnable stack command) and the
+  missing-`/content/logs` restore bug; reframed `agent_notes/current.md` as a **copy/paste
+  surface, not documentation**; readiness is now **mode-dependent** (per-mode runbook).
+- **Run-control change: training is detached, not foreground**, so an accidental Ctrl+C (the
+  Linux copy-paste habit) can't kill it. An independent review (`AGENTS_REVIEW.md`) caught that
+  the first fix (`trap - INT`) was wrong — a non-interactive shell can't un-ignore an inherited
+  `SIGINT=SIG_IGN`. Replaced with **`train_ctl.py`** (`start`/`status`/`stop`): spawns via
+  `Popen(start_new_session=True)` + a SIGINT reset, writes a pid/state file, refuses a
+  double-run, and verifies the PID before signalling. Verified on-VM (own session; clean SIGINT
+  stop in ~1 s) and with GPU-free tests (`tests/test_train_ctl.py`; full suite 161 passed, 1 skipped).
+- Ripple landed atomically: `docs/START.md`, `docs/PAUSE_RESUME.md`,
+  `docs/COMMAND_HANDOVER_GOTCHAS.md` (+ the `trap - INT` finding), `skills/command-handover`,
+  `skills/crash-diagnose-and-resume` (auto-resume bar → "evidence, else ask"), `DECISIONS.md`
+  (run-control entry), `docs/PRON_LORA.md`, `docs/FINAL_BACKUP.md`.
+- Added **`docs/TROUBLESHOOTING.md`** — evidence bundle + per-lane checks (training /
+  inference / backup / env) + a 12-row agent-behavior scorecard + a hand-off block, so
+  "is it broken?" is measured, not vibed. Indexed in `docs/README.md`.
 

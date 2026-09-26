@@ -151,5 +151,5 @@ git rev-list --left-right --count origin/main...HEAD   # expect: 0	0
   pass → **force a sync** rather than assume.
 - `generate_plots.py`'s "recent rate"/ETA line can read too pessimistic if a
   sample pause sits in its last-100 window; use the median in this doc.
-- Detached launches inherit `SIGINT=SIG_IGN`; this run was launched foreground,
-  so Ctrl+C works.
+- Training is launched detached via `train_ctl.py`, which resets SIGINT in the
+  child so `train_ctl.py stop` (SIGINT) is the clean, checkpoint-safe stop.

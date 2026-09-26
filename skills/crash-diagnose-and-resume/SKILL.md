@@ -30,13 +30,15 @@ or `Job stopped` after a clean interrupt.
 |---|---|
 | `Job stopped` after a kill/Ctrl-C, or `current.md` says a pause was planned | deliberate — never auto-resume |
 | Traceback (OOM, CUDA, disk), VM reclaimed, log just ends mid-step | unplanned — candidate |
-| You never saw this run going with human approval | hand it to the user |
+| You can't tell a crash from a deliberate stop | ask the user — don't guess |
 
 ## 3. Who resumes
 
-Auto-resume yourself only if **all three** hold (AGENTS.md): it was already
-running with human approval, the stop was unplanned, and the resume uses the
-identical config and run name. Otherwise give the user the exact command in §5
+Auto-resume yourself only with **evidence** (AGENTS.md): the run name and config
+are unchanged, it looks crashed (traceback / OOM / VM reclaimed), and nothing
+signals a deliberate stop — no `Job stopped` at the end of `train.log`, no
+"stopped on purpose" note in `current.md`. If you can't tell a crash from a
+deliberate stop, **ask the user**; otherwise give them the exact command in §5
 and stop.
 
 Never edit `config/akbar_arabic_rock_lora.yml` to "fix" a crash. A changed
@@ -48,7 +50,8 @@ config/hyperparameter is not a resume — archive and start fresh
 If `/content/ai-toolkit` or the run output folder is gone, the VM was lost:
 
 ```bash
-bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 &   # wait for [ok]
+mkdir -p /content/logs
+setsid nohup bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 & disown  # wait for [ok]
 mkdir -p /content/ai-toolkit/output/akbar_arabic_rock_lora
 gsutil -m rsync -r \
   gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/akbar_arabic_rock_lora/output \
@@ -61,9 +64,8 @@ on first start is normal, not a stall.
 ## 5. Relaunch (identical config + run name)
 
 ```bash
-cd /content/ai-toolkit
-python run.py /content/maqamrock-yue2-lora-finetuning/config/akbar_arabic_rock_lora.yml \
-  -l /content/logs/train.log
+cd /content/maqamrock-yue2-lora-finetuning
+python train_ctl.py start     # detached; auto-resumes the newest checkpoint
 ```
 
 Confirm the log prints a "Found step N ... starting from there" line and does not

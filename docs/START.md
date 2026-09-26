@@ -23,7 +23,8 @@ torch 2.13 / cu130 — see `../DECISIONS.md`), pre-warms the HF cache, and pulls
 the 267-track dataset from GCS.
 
 ```bash
-bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 &
+mkdir -p /content/logs
+setsid nohup bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 & disown
 ```
 
 (`--training` is the default; for inference instead, see `setup.sh --help`.)
@@ -56,14 +57,19 @@ pgrep -af 'backup_to_gcp.py|gpu_logger.py'
 ## 5. Launch training (you type this)
 
 ```bash
-cd /content/ai-toolkit
-python run.py /content/maqamrock-yue2-lora-finetuning/config/akbar_arabic_rock_lora.yml \
-  -l /content/logs/train.log
+cd /content/maqamrock-yue2-lora-finetuning
+python train_ctl.py start
 ```
 
-Runs in the foreground; leave it. It reuses the latent cache if present
-(else caches ~12 min first), then trains to `train.steps`. Note: the very first
-thing after start is the **step-0 sample generation**, so `loss_log.db` stays at
-0 steps for a few minutes — that is normal, not a stall.
+Launches **detached** (its own session), so a stray Ctrl+C in this tab can't kill
+it, and writes a pid/state file plus both logs. It reuses the latent cache if
+present (else caches ~12 min first), then trains to `train.steps`. Note: the very
+first thing after start is the **step-0 sample generation**, so `loss_log.db`
+stays at 0 steps for a few minutes — that is normal, not a stall.
+
+```bash
+python train_ctl.py status    # running? pid? log tail
+python train_ctl.py stop      # SIGINT; waits for "Job stopped"
+```
 
 Then monitor it: [MONITOR.md](MONITOR.md).

@@ -38,12 +38,13 @@ foreground job, also say how to check progress.
 
 | Command | Mode | Why |
 |---|---|---|
-| Training run (`python run.py …`) | **foreground** | Intentional: Ctrl+C must stop it. A detached process inherits `SIGINT=ignored`, so Ctrl+C would *not* stop it. |
+| Training run | **detached via `train_ctl.py`** | A stray Ctrl+C must not kill it. `train_ctl.py start` resets SIGINT so the clean `stop` still works; never launch `python run.py` bare. |
 | Sidecars: `backup_to_gcp.py`, `gpu_logger.py` | **detached** | Must outlive the terminal tab / a stray Ctrl+C. |
 | Inference batch (`generate.py`) and other long jobs | **detached** | Ctrl+C-proof; progress via log + `out/latest`. |
 
-Do not "helpfully" detach a training run, and do not leave a long batch in the
-foreground where a stray Ctrl+C kills it.
+Launch training with `python train_ctl.py start` and stop it with
+`train_ctl.py stop`; do not leave a long batch in the foreground where a stray
+Ctrl+C kills it.
 
 ## Detached hygiene (all of it)
 
