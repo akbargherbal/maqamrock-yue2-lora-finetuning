@@ -861,4 +861,10 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   Archived every α>0.5 artifact (`c3050_a0.55`, `c3050_a0.65`, `c3050_a1.0`, `cfinal_a1.0`:
   converted pairs, fused merges, renders — 15 dirs) to `<base>/archive/alpha_gt_0.5/`.
   Decision in `DECISIONS.md`.
+- **Completed the α grid in the library** (`{3050, 4575, 6100(final)}` × α `{0.1…0.5}` =
+  15 configs, 30 files). Built the 10 missing ones (4575 & final) from the pinned
+  `loras/source/` inputs; overlaps reproduced the old records exactly (`c4575_a0.5`
+  `ebd22026…`, `cfinal_a0.5` `525d3af2…`). Pinned the 4575/final fused checkpoints into
+  `loras/source/`; removed the duplicate `c4575_a0.5` experiment copy. Library now
+  **16 adapters / 36 objects / 2.72 GiB**; `docs/LORA_INVENTORY.md` updated.
 
