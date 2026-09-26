@@ -37,7 +37,7 @@ refresh it after meaningful changes (see below).
 ## Refresh it
 
 ```bash
-graphify update .     # re-extracts only changed files; reuses manifest.json + cache/
+graphify update .     # re-extracts only changed files; reuses graphify-out/manifest.json + cache/
 ```
 
 Run this before merging the branch, and at the end of a session that changed a

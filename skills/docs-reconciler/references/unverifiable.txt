@@ -95,3 +95,46 @@ path/to/doc.md
 SOURCE_OF_TRUTH.md
 RECONCILIATION_LOG.md
 .reconcile/*
+
+# ab-blind-eval package outputs and placeholders (outputs land in gitignored
+# *_INPUT/ packages in GCS <base>/listening/; prepare_ab_eval.py writes EVAL.txt +
+# KEYS.txt, and --json picks the key filename, cited as key.json)
+README.md :: EVAL.txt
+README.md :: KEYS.txt
+docs/AB_BLIND_EVAL.md :: EVAL.txt
+docs/AB_BLIND_EVAL.md :: KEYS.txt
+docs/AB_BLIND_EVAL.md :: key.json
+docs/AB_BLIND_EVAL.md :: config/per-track
+skills/ab-blind-eval/SKILL.md :: EVAL.txt
+skills/ab-blind-eval/SKILL.md :: KEYS.txt
+skills/ab-blind-eval/SKILL.md :: key.json
+skills/ab-blind-eval/SKILL.md :: KEY_open_after_listening.txt
+skills/ab-blind-eval/SKILL.md :: config/per-track
+results/pron_knob_probe/README.md :: KEY_open_after_listening.txt
+
+# sweep/runbook runtime logs and example filenames cited as illustration
+docs/PRON_LORA_SWEEP.md :: _failed.log
+results/pron_knob_probe/T4_REGEN.md :: __Kurd.json
+results/pron_knob_probe/T4_REGEN.md :: json/log/gpu.csv/time.txt
+
+# external repo's doc and absolute runtime staging path, cited by path
+docs/models/yue2.md
+*/convert_aitoolkit_yue2_lora.py
+
+# external CLI flags quoted in commands (the graphify skill's /graphify --update,
+# uv's `tool run --from`)
+docs/GRAPHIFY.md :: --update
+docs/GRAPHIFY.md :: --from
+
+# foreign/old names quoted as history inside the reconciliation log itself
+RECONCILIATION_LOG.md :: GRAPH_REPORT.md
+RECONCILIATION_LOG.md :: manifest.json
+RECONCILIATION_LOG.md :: EVAL.txt
+RECONCILIATION_LOG.md :: KEYS.txt
+RECONCILIATION_LOG.md :: key.json
+RECONCILIATION_LOG.md :: config/per-track
+RECONCILIATION_LOG.md :: _failed.log
+RECONCILIATION_LOG.md :: __Kurd.json
+RECONCILIATION_LOG.md :: json/log/gpu.csv/time.txt
+RECONCILIATION_LOG.md :: --update
+RECONCILIATION_LOG.md :: --from

@@ -41,6 +41,10 @@ DEFAULT_EXCLUDES = (
     "__pycache__",
     "node_modules",
     "agent_notes",
+    # graphify's generated output (graph.json / GRAPH_REPORT.md / the dated
+    # snapshot) is rebuilt by `graphify update`, not a live doc — reconciling it
+    # would flag regenerated text, never real drift.
+    "graphify-out",
     "TRAINING_ANALYSIS/v1_nolyrics_archived",
     "DECISIONS.md",
     "PROGRESS.md",
@@ -61,6 +65,7 @@ SKIP_PARTS = {
     ".reconcile",
     "__pycache__",
     "node_modules",
+    "graphify-out",
     ".claude",
 }
 
