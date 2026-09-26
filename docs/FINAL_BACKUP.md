@@ -66,7 +66,7 @@ python monitor_loss.py <out>/loss_log.db # expect latest step ~2999, 4 metrics
       `_000000250` gets rotated out locally, that's fine — 250 is already in GCS
       (append-only) and local≠remote supersets are okay.
 
-## 3. Force a final GCS sync (do NOT wait for the 15-min daemon)
+## 3. Force a final GCS sync (do NOT wait for the 5-min daemon)
 
 ```bash
 gsutil -m rsync -r <out> <base>/<run>/output
@@ -92,9 +92,9 @@ tail -n 20 /content/logs/gcp_backup.log
 - [ ] `optimizer.pt` / `loss_log.db` sizes match local.
 - [ ] `run_manifest.json` present at `<base>/<run>/`, no errors in the daemon log.
 
-> **If the VM dies before this step:** the last 15-min daemon pass is the
+> **If the VM dies before this step:** the last 5-min daemon pass is the
 > fallback — resume from the newest checkpoint in GCS (see PAUSE_RESUME.md), or
-> just accept the ~≤15 min of steps lost. Once the run is *done*, there is no
+> just accept the ~≤5 min of steps lost. Once the run is *done*, there is no
 > "next checkpoint", so a final manual sync is not optional.
 
 ## 5. Finalize docs and push to GitHub
@@ -147,7 +147,7 @@ git rev-list --left-right --count origin/main...HEAD   # expect: 0	0
 - `gsutil rsync` is **append-only (no `-d`)** → a local wipe/supersede leaves
   remote files behind; delete remote explicitly if needed (bit us with 4 stale
   smoke-test samples).
-- Daemon lag: a *just-finished* sample/checkpoint may miss the current 15-min
+- Daemon lag: a *just-finished* sample/checkpoint may miss the current 5-min
   pass → **force a sync** rather than assume.
 - `generate_plots.py`'s "recent rate"/ETA line can read too pessimistic if a
   sample pause sits in its last-100 window; use the median in this doc.

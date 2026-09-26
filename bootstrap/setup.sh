@@ -157,7 +157,7 @@ start_continuity_loop() {
     echo "vm-continuity loop already running"
     return 0
   fi
-  setsid nohup nice -n 19 python3 "$VM_CONTINUITY_DIR/continuity.py" watch --interval-minutes 15 \
+  setsid nohup nice -n 19 python3 "$VM_CONTINUITY_DIR/continuity.py" watch --interval-minutes 5 \
     > /content/logs/vm_continuity.log 2>&1 < /dev/null & disown
   echo "vm-continuity loop started (log: /content/logs/vm_continuity.log)"
 }
@@ -421,7 +421,7 @@ fi
 if pgrep -f '[c]ontinuity\.py watch' >/dev/null 2>&1; then
   echo "[ok]   vm-continuity loop running (OpenCode session backup)"
 else
-  echo "[WARN] vm-continuity loop NOT running — session backup is OFF; start: vm-continuity watch --interval-minutes 15"
+  echo "[WARN] vm-continuity loop NOT running — session backup is OFF; start: vm-continuity watch --interval-minutes 5"
 fi
 
 # Confirm an HF cache asset actually landed. `hf download` is idempotent

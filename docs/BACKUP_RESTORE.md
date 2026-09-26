@@ -2,7 +2,7 @@
 
 `backup_to_gcp.py` is the only thing that persists run state — Colab's
 `/content` does not survive a VM loss. It runs as a **sidecar** next to training
-or generation and mirrors a fixed set of folders to GCS every 15 minutes with
+or generation and mirrors a fixed set of folders to GCS every 5 minutes with
 `gsutil rsync` **without `-d`** (append/update only — it never deletes anything
 remote). If a pass catches a file mid-write, the next pass re-uploads it once it
 stops changing, so a torn upload self-heals.
@@ -139,7 +139,7 @@ land in the same remote subfolder are rejected (exit 3) rather than interleaved.
 | `--watch LOCAL[:SUB]` | Mirror these folders instead of the mode's targets (repeatable). |
 | `--extra LOCAL[:SUB]` | ADD these folders on top of the mode's targets (repeatable); SUB defaults to the folder's basename, `LOCAL:` = prefix root. |
 | `--base gs://…` | GCS root; defaults to `$GCP_BACKUP_BASE`. |
-| `--interval-minutes N` | Minutes between passes (default 15). |
+| `--interval-minutes N` | Minutes between passes (default 5). |
 | `--once` | Run one pass and exit. |
 | `--dry-run` | Log the commands, upload nothing. |
 | `--settle-seconds N` | Wait for the newest file in the training `output/` target to be this old (default 60). |

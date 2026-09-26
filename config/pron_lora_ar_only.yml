@@ -56,7 +56,7 @@ config:
       save:
         dtype: "bf16"
         save_every: 1525
-        max_step_saves_to_keep: 12   # was 4 -- widened so the background GCS sync (every 15 min, backup_to_gcp.py default) has a buffer before local rotation deletes older checkpoints
+        max_step_saves_to_keep: 12   # was 4 -- widened so the background GCS sync (every 5 min, backup_to_gcp.py default) has a buffer before local rotation deletes older checkpoints
         save_format: "diffusers"
         push_to_hub: false
       datasets:

@@ -282,7 +282,7 @@ Where a claim below says "verified against source," it means the actual `ostris/
 
 ## Continuity work is idle-time only; the project comes first
 
-- The `vm-continuity` (OpenCode session backup) tooling is **auxiliary**. Its 15-minute loop
+- The `vm-continuity` (OpenCode session backup) tooling is **auxiliary**. Its 5-minute loop
   is CPU-only, detached, and `nice`d — it must never be a reason to delay or divert a
   GPU-paid session from maqamrock work. Do continuity *development* (Milestone 1, cold-VM
   restore test, polish) only while the GPU is already busy on the project (e.g. a long

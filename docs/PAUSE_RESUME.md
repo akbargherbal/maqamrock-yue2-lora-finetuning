@@ -60,6 +60,6 @@ step that is a multiple of 250.
   resume — archive the old run and start fresh instead
   ([BACKUP_RESTORE.md](BACKUP_RESTORE.md)).
 - Disconnect safety: if the VM dies mid-run without a clean pause, the last
-  backed-up checkpoint (≤ 15 min old) is still resumable. An unplanned
+  backed-up checkpoint (≤ 5 min old) is still resumable. An unplanned
   interruption of an already-approved, unchanged run may be auto-resumed by the
   agent (`../AGENTS.md`); a planned pause is always you typing the command.

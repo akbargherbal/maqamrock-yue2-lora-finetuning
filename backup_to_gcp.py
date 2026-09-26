@@ -48,7 +48,7 @@ subfolder defaults to the folder's basename.
 
 Usage:
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora
-    python backup_to_gcp.py --run-name akbar_arabic_rock_lora --interval-minutes 15
+    python backup_to_gcp.py --run-name akbar_arabic_rock_lora --interval-minutes 5
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora --once
     python backup_to_gcp.py --run-name akbar_arabic_rock_lora --dry-run
     python backup_to_gcp.py --inference
@@ -255,8 +255,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--interval-minutes",
         type=float,
-        default=15.0,
-        help="Minutes between passes (default: 15)",
+        default=5.0,
+        help="Minutes between passes (default: 5)",
     )
     p.add_argument(
         "--once", action="store_true", help="Run one pass and exit (for cron)."
