@@ -48,8 +48,8 @@ convention). `--shuffle-per pair` re-shuffles per matched pair instead.
 
 Audio: `--audio-format copy` (default) byte-copies and keeps each file's
 extension; `wav` / `mp3` re-encode via ffmpeg with NO trim/normalize/fade
-(`mp3` defaults to `--bitrate 192k`), matching the review packages under
-`PRON_*_INPUT/`.
+(`mp3` defaults to `--bitrate 192k`), matching the listening packages under
+GCS `<base>/listening/`. Do not write the package inside the repo.
 """
 from __future__ import annotations
 

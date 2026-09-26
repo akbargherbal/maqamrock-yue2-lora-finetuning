@@ -240,3 +240,21 @@ Where a claim below says "verified against source," it means the actual `ostris/
 
 - The user runs commands by hand in a real terminal; the agent's shell tool is a different session, so human-terminal facts (Ctrl+C, closing the tab, where a detached process logs) are invisible to the agent. On 2026-09-23 the agent handed over a ~2 h inference batch in the foreground — the user had to ask for `disown`. The fix is a standing rule, not a one-off command.
 - Rule: before presenting any long-running, background/detached, or state-changing command, load `skills/command-handover/SKILL.md` and follow it — foreground vs detached, output log, stop command, resume command. Training stays foreground on purpose (see the auto-resume / `SIGINT` entries above). New gotchas append to `docs/COMMAND_HANDOVER_GOTCHAS.md`; that list is the accumulation, the skill is the procedure, and `AGENTS.md` carries the always-on trigger.
+
+## Canonical LoRA library: `<base>/loras/` — one place for current adapters
+
+- Decided (user, 2026-09-26): current/deployable LoRAs live in **one** prefix, `<base>/loras/` (`audio_cpp/style/`, `audio_cpp/pron/<cfg>/`, `source/`). Sweep/prototype adapters stay under their round prefixes and are explicitly non-canonical. A canonical location is a decision, not an insight, but losing it would re-scatter the set and force another full audit.
+- The map — what exists, how many, where — is `docs/LORA_INVENTORY.md` (counts: 4 current loadable adapters, 2 fused source families, 8 experimental). Do not re-derive it by listing GCS.
+- `bootstrap/setup.sh`'s `LORA_GCS` now stages `loras/audio_cpp/style/`; `backup_to_gcp.py --inference` no longer mirrors `/content/converter/out` (that `converter/` target was removed — the library is curated by hand, not by the daemon). `audiocpp_inference/converter/` keeps only the converter tool + experimental configs.
+- Stable identity is unchanged: converted AR/NAR sha256 (merged file sha256 is nondeterministic — separate entry). The duplicates folded into `loras/` were verified byte-identical by GCS md5 **before** removal.
+- Do not move a current adapter without updating `docs/LORA_INVENTORY.md` + the `SOURCE_OF_TRUTH.md` row in the same change.
+
+## Generated audio (listening packages) lives in GCS, not the repo
+
+- The blinded A/B listening packages (`PRON_*_INPUT/`, `MAQAM_LYRIC_SWAP_INPUT/`) are
+  generated mp3 audio built by `INFERENCE/prepare_ab_eval.py`; their home is GCS
+  `<base>/listening/`. They were untracked from the repo 2026-09-26 (`.gitignore`
+  `*_INPUT/`) and the four existing packages mirrored to that prefix.
+- Removal from the index does **not** rewrite history — the mp3s are still in the git
+  history of `pron-lora-ar-only`. Purging them needs a history rewrite (new SHAs, breaks
+  the GCS bundle); not done, and a separate decision if wanted.

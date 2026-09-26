@@ -74,7 +74,7 @@ the untouched originals, the mp3s are 192k review copies made with no trim/norma
 
 ## Blinded review
 
-`PRON_FINE_SWEEP_INPUT/` (repo root): `Hijaz_{A,B,C,D}.mp3`, `Kurd_{A,B,C,D}.mp3`
+`<GCP_BACKUP_BASE>/listening/PRON_FINE_SWEEP_INPUT/` (GCS, not the repo): `Hijaz_{A,B,C,D}.mp3`, `Kurd_{A,B,C,D}.mp3`
 (ffmpeg 192k, no trim/normalize) + `KEY_open_after_listening.txt`. Label map also at
 `results/pron_fine_sweep/KEY.json`. WAVs stay the untouched originals under
 `/content/pron_fine_sweep/<cfg>/` (mirrored to GCS). Decode only after listening.

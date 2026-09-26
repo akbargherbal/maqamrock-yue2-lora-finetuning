@@ -10,3 +10,8 @@ __pycache__/
 # each fresh VM (see graphify Step 1). The rest of graphify-out/ is committed on
 # the pron-lora-ar-only branch so the graph + incremental-update cache survive.
 graphify-out/.graphify_python
+
+# Generated blinded-listening packages (mp3 audio). Live in GCS
+# <base>/listening/, not in the repo. Written by INFERENCE/prepare_ab_eval.py.
+*_INPUT/
+/ab_eval/

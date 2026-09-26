@@ -120,7 +120,7 @@ auto cap, same sm89 binary; new **blinding seed `20260925`** (labels only).
 Driver: [`INFERENCE/pron_fine_sweep.sh`](../INFERENCE/pron_fine_sweep.sh) (same
 resumable/skip contract as `pron_alpha_sweep.sh`, maqam-major). Records:
 [`results/pron_fine_sweep/`](../results/pron_fine_sweep/) (config table, per-track table,
-`KEY.json`). Blinded review package: `PRON_FINE_SWEEP_INPUT/` at the repo root. Raw WAVs +
+`KEY.json`). Blinded review package: GCS `<base>/listening/PRON_FINE_SWEEP_INPUT/`. Raw WAVs +
 adapters: `/content/pron_fine_sweep/` + `/content/converter/out/<cfg>/`.
 
 ## Round 3 — checkpoint sweep at fixed alpha 0.5 (2026-09-25)
@@ -135,7 +135,7 @@ Driver: [`INFERENCE/pron_ckpt_sweep.py`](../INFERENCE/pron_ckpt_sweep.py) (reuse
 `generate.py`'s sidecar helpers; writes a full per-track JSON sidecar before and after
 generation). Records: [`results/pron_ckpt_sweep/`](../results/pron_ckpt_sweep/)
 (config table, per-track table, `KEY.json`, per-track `sidecars/`). Blinded review
-package: `PRON_CKPT_SWEEP_INPUT/` at the repo root. Raw WAVs + adapters:
+package: GCS `<base>/listening/PRON_CKPT_SWEEP_INPUT/`. Raw WAVs + adapters:
 `/content/pron_ckpt_sweep/{<cfg>,merged,converted}/`.
 
 ## Round 4 — cross-maqam lyric swap (2026-09-25)
@@ -160,7 +160,7 @@ Driver: [`INFERENCE/maqam_lyric_swap.py`](../INFERENCE/maqam_lyric_swap.py) (reu
 `generate.py`'s sidecar helpers; full per-track JSON sidecar written before and updated
 after). Records: [`results/maqam_lyric_swap/`](../results/maqam_lyric_swap/)
 (`sweep_manifest.json`, `KEY.json`, `README.md`, per-track `sidecars/`). Blinded review
-package: `MAQAM_LYRIC_SWAP_INPUT/` at the repo root. Raw WAVs + adapters:
+package: GCS `<base>/listening/MAQAM_LYRIC_SWAP_INPUT/`. Raw WAVs + adapters:
 `/content/maqam_lyric_swap/`.
 
 ## Round 5 — request-option knob probe at checkpoint 3050, alpha 0.5 (2026-09-25)
@@ -190,7 +190,7 @@ one folder per config, and a **full per-track sidecar** including a `resources` 
 (max RSS, peak/mean VRAM, util, temp, power). Records:
 [`results/pron_knob_probe/`](../results/pron_knob_probe/) (`sweep_manifest.json`,
 `KEY.json`, `README.md`, per-track `sidecars/`). Blinded review package:
-`PRON_KNOB_PROBE_INPUT/` at the repo root. Raw WAVs: `/content/pron_knob_probe/`.
+GCS `<base>/listening/PRON_KNOB_PROBE_INPUT/`. Raw WAVs: `/content/pron_knob_probe/`.
 
 All 8 `exit=0`, zero failures, zero cap-truncations; mean wall **211.8 s**, total
 **1694 s (28.2 min)**. Per-generation resources: **RAM 6.7–7.8 GiB**, **peak VRAM

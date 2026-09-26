@@ -19,6 +19,7 @@ operating contract is `../AGENTS.md`.
 | Verify / offline-eval the pronunciation LoRA (source + AR-loss replay) | [PRON_LORA_VERIFICATION.md](PRON_LORA_VERIFICATION.md) |
 | Merge v2 + pron at a chosen alpha | [PRON_LORA_MERGE.md](PRON_LORA_MERGE.md) |
 | Alpha sweep + blinded listening review | [PRON_LORA_SWEEP.md](PRON_LORA_SWEEP.md) |
+| LoRA inventory: what exists, how many, where | [LORA_INVENTORY.md](LORA_INVENTORY.md) |
 | Prepare a blinded A/B(/N) audio listening package | [AB_BLIND_EVAL.md](AB_BLIND_EVAL.md) |
 | Hand the user a command to run (terminal reality check) | [COMMAND_HANDOVER_GOTCHAS.md](COMMAND_HANDOVER_GOTCHAS.md) |
 | How the text→duration cap is derived | [text_to_duration_formula.md](text_to_duration_formula.md) |
@@ -45,6 +46,8 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 | Metrics db | `/content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db` |
 | GPU csv | `/content/logs/gpu_usage.csv` |
 | GCS base | `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning` |
+| LoRA library | `<GCS base>/loras/` (see [LORA_INVENTORY.md](LORA_INVENTORY.md)) |
+| Listening packages | `<GCS base>/listening/<PACKAGE>_INPUT/` (audio; not in the repo) |
 | Secrets/env | `/root/.secrets.env` (exports `HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_BACKUP_BASE`) |
 | Inference workspace | `/content/audiocpp_inference/` (GCS `<base>/audiocpp_inference/`) |
 | Inference output | `/content/audiocpp_inference/out/` (`_runs_status.log`, `*_time.txt`, `*.json`) |

@@ -34,7 +34,7 @@ Mean wall **246.3 s**, total **985.4 s (16.4 min)** — 4 tracks, one L4.
 
 ## Blinded review
 
-`PRON_CKPT_SWEEP_INPUT/` (repo root): `Hijaz_{A,B}.mp3`, `Kurd_{A,B}.mp3`
+`<GCP_BACKUP_BASE>/listening/PRON_CKPT_SWEEP_INPUT/` (GCS, not the repo): `Hijaz_{A,B}.mp3`, `Kurd_{A,B}.mp3`
 (ffmpeg 192k, no trim/normalize) + `KEY_open_after_listening.txt`. Label map also at
 `results/pron_ckpt_sweep/KEY.json`. Per-track sidecars in `results/pron_ckpt_sweep/sidecars/`.
 Raw WAVs + adapters: `/content/pron_ckpt_sweep/`.

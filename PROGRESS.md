@@ -825,3 +825,29 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `status: started` was written). Added `import re`, plus `MAQAMS`/`CFGS` env overrides so a
   partial regeneration can target only the missing tracks.
 
+## 2026-09-26 — LoRA inventory: current adapters consolidated into `<base>/loras/`
+
+- Created the canonical LoRA library and moved the current deployable set in:
+  style pair → `loras/audio_cpp/style/`; production merges `c3050_a0.5/a0.4/a0.3` →
+  `loras/audio_cpp/pron/<cfg>/`; pinned source fused finals → `loras/source/`.
+  **10 objects / 758 MiB.** `c3050_a0.4` confirmed **current** (ships alongside 0.5/0.3).
+- Duplicates folded in were verified byte-identical by GCS md5 before removal; the
+  redundant copies in `audiocpp_inference/converter/` were deleted and
+  `pron_production_merge/converted/` is gone (its `merged/` intermediates remain).
+- Rewired references: `bootstrap/setup.sh` (`LORA_GCS` → `loras/audio_cpp/style`, plus the
+  converter tool staged separately); `backup_to_gcp.py --inference` (removed the
+  `converter/` mirror target); `docs/INFERENCE.md`, `docs/PRON_LORA_MERGE.md`,
+  `results/pron_production_merge/README.md`, `docs/BACKUP_RESTORE.md`.
+- New `docs/LORA_INVENTORY.md` (what exists / how many / where) + rows in
+  `SOURCE_OF_TRUTH.md` and `docs/README.md`. Decision recorded in `DECISIONS.md`.
+- **Found (project-dir scan):** the v1 archive `akbar_arabic_rock_lora_v1_nolyrics_archived/`
+  — and `akbar_arabic_rock_lora_crop60_killed/` and `dataset_v1_style_only_obsolete/` —
+  are documented in this file as verified GCS archives but are **absent** from the project
+  prefix. No surviving v1 adapter.
+- CPU-only; `pytest` green (exit 0), `bash -n` + `py_compile` clean. Changes are local,
+  **not committed/pushed**.
+- Moved the four blinded listening packages (`PRON_CKPT_SWEEP_INPUT`, `PRON_FINE_SWEEP_INPUT`,
+  `PRON_KNOB_PROBE_INPUT`, `MAQAM_LYRIC_SWAP_INPUT`; 122 MB) out of the repo: mirrored to
+  GCS `<base>/listening/` and untracked (`.gitignore` `*_INPUT/`). Docs referencing
+  "repo root" packages updated; decision in `DECISIONS.md`.
+

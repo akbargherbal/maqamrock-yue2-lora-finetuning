@@ -47,4 +47,4 @@ Captured per track: `run_one.sh` wraps each render in `/usr/bin/time -v` (`*_tim
 
 ## Blinded review
 
-`PRON_KNOB_PROBE_INPUT/` (repo root): `Hijaz_{A,B,C,D}.mp3`, `Kurd_{A,B,C,D}.mp3` (ffmpeg 192k, no trim/normalize) + `KEY_open_after_listening.txt`. Label map also at `results/pron_knob_probe/KEY.json`. Per-track sidecars in `results/pron_knob_probe/sidecars/`. Raw WAVs: `/content/pron_knob_probe/<cfg>/` (GCS-mirrored). Decode only after listening.
+`<GCP_BACKUP_BASE>/listening/PRON_KNOB_PROBE_INPUT/` (GCS, not the repo): `Hijaz_{A,B,C,D}.mp3`, `Kurd_{A,B,C,D}.mp3` (ffmpeg 192k, no trim/normalize) + `KEY_open_after_listening.txt`. Label map also at `results/pron_knob_probe/KEY.json`. Per-track sidecars in `results/pron_knob_probe/sidecars/`. Raw WAVs: `/content/pron_knob_probe/<cfg>/` (GCS-mirrored). Decode only after listening.

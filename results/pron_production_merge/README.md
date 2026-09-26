@@ -22,8 +22,9 @@ limit, and regenerable in under a second from published inputs. Matching the
 sidecars, and a regeneration script**; the binaries live on disk / in GCS:
 
 - merged: `/content/pron_production_merge/merged/<run>/akbar_arabic_rock_lora.safetensors`
-- converted (audio.cpp loads these): `/content/pron_production_merge/converted/<run>/`
-- GCS: `<GCP_BACKUP_BASE>/pron_production_merge/`
+- converted (audio.cpp loads these) — canonical library:
+  `<GCP_BACKUP_BASE>/loras/audio_cpp/pron/<run>/` (see `docs/LORA_INVENTORY.md`)
+- fused merge intermediates: `<GCP_BACKUP_BASE>/pron_production_merge/merged/`
 
 Regenerate with [`regenerate.sh`](regenerate.sh) (downloads both inputs, verifies their
 sha256, merges, converts, and checks the converted AR hashes against the table above).

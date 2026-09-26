@@ -48,7 +48,7 @@ Mean wall **228.2 s**, total **912.9 s (15.2 min)** — 4 tracks, one L4.
 
 ## Blinded review
 
-`MAQAM_LYRIC_SWAP_INPUT/` (repo root): `KurdStyle_HijazLyrics_{A,B}.mp3`,
+`<GCP_BACKUP_BASE>/listening/MAQAM_LYRIC_SWAP_INPUT/` (GCS, not the repo): `KurdStyle_HijazLyrics_{A,B}.mp3`,
 `HijazStyle_KurdLyrics_{A,B}.mp3` (ffmpeg 192k, no trim/normalize) +
 `KEY_open_after_listening.txt`. Within each group the two files differ only in the
 pron config (A/B blinded). Label map also at `results/maqam_lyric_swap/KEY.json`.

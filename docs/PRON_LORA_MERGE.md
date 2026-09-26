@@ -113,7 +113,7 @@ Base: `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/`
 | `…_000001525.safetensors` | `9d8333d95b592a06e4f8b48d4dc65276f661e0bd76848a06344422ba4e088a09` |
 | `…_000003050.safetensors` | `ead30d5202dec368838304546d5400ce46e4a2da713a19a9236781f575178a21` |
 | `…_000004575.safetensors` | `c78bb5b6ea5abf551a209529bdee4e1b0f5d1ea87f14c3373b2165b1325ea201` |
-| converted v2 AR currently loaded by audio.cpp (`audiocpp_inference/converter/akbar_arabic_rock_lora_ar.safetensors`) | `747d5cfe2224b1bae6e582ccf5f2ee2a57e3f030c53d54e134f34a85960426fa` |
+| converted v2 AR currently loaded by audio.cpp (`loras/audio_cpp/style/akbar_arabic_rock_lora_ar.safetensors`) | `747d5cfe2224b1bae6e582ccf5f2ee2a57e3f030c53d54e134f34a85960426fa` |
 | converted v2 NAR (`…_nar.safetensors`) | `ad2c8d8690640e8fd8fea779b57bc2c7c887b93f2bb103bbcbfea056536d7ac9` |
 
 v2 and pron each carry 448 / 224 tensors; the pron file has 224 `text_encoders.*`
@@ -149,12 +149,13 @@ and **0** `diffusion_model.*`.
 
 ## Production merges
 
-The shipped production pair is v2 + pron **checkpoint 3050**, `alpha` **0.5** (primary)
-and **0.3** (fallback) — built 2026-09-25. Records (manifest, one sidecar per output,
-regeneration script) live in `results/pron_production_merge/`; the ~140 MiB merged and
-converted binaries are GCS-mirrored under `<base>/pron_production_merge/` (not committed:
-over GitHub's 100 MiB per-file limit, and regenerable in <1 s). `regenerate.sh` reproduces
-the converted AR/NAR sha256 exactly.
+The shipped production merges are v2 + pron **checkpoint 3050**, `alpha` **0.5** (primary),
+**0.3** (fallback) and **0.4** — built 2026-09-25. Records (manifest, one sidecar per output,
+regeneration script) live in `results/pron_production_merge/`; the converted binaries are in
+the canonical LoRA library under `<base>/loras/audio_cpp/pron/<cfg>/` (see
+`docs/LORA_INVENTORY.md`), and the fused merge intermediates under
+`<base>/pron_production_merge/merged/` (not committed: over GitHub's 100 MiB per-file limit,
+and regenerable in <1 s). `regenerate.sh` reproduces the converted AR/NAR sha256 exactly.
 
 **Hash caveat:** `safetensors 0.8.0` writes `__metadata__` in nondeterministic HashMap
 order, so a merged file's whole-file sha256 is **not** reproducible run-to-run (the tensors

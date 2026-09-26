@@ -24,7 +24,8 @@ INFERENCE/run_one.sh Hijaz 1                                          # cap defa
 | YuE2 GGUF main (`yue2-3b-bf16.gguf`), VAE (`yue2-vae-f16.gguf`), `sidecars/*` | **Hugging Face** `audio-cpp/Yue2-3B-GGUF` (`hf download`) | `/content/audiocpp_inference/models/Yue2-3B-GGUF/` | **No** — deliberately excluded, regenerable (`backup_to_gcp.py` comment: "models/ multi-GB GGUFs; setup.sh re-downloads them from HF") |
 | `audio.cpp` **source** | GitHub `0xShug0/audio.cpp` (clone only, never built by bootstrap) | `/content/audio.cpp` | No |
 | Prebuilt `audiocpp_cli` (sm_75 / T4) | GCS `audiocpp_inference/build/audiocpp_cli` | `/content/audiocpp_inference/bin/audiocpp_cli` | **Yes** |
-| Converted step-3000 LoRA, unfused (`akbar_arabic_rock_lora_{ar,nar}.safetensors`) | GCS `audiocpp_inference/converter/` | `/content/converter/out/` | **Yes** |
+| Converted step-3000 LoRA, unfused (`akbar_arabic_rock_lora_{ar,nar}.safetensors`) | GCS `loras/audio_cpp/style/` (canonical library; see `docs/LORA_INVENTORY.md`) | `/content/converter/out/` | **Yes** |
+| Production v2+pron merges (`c3050_a0.3/0.4/0.5`) | GCS `loras/audio_cpp/pron/<cfg>/` | staged per-sweep to `/content/converter/out/<cfg>/` | **Yes** |
 | Prompts (one `*_style.txt` + `*_lyrics.txt` per maqam) | GCS `audiocpp_inference/prompts/` | `/content/audiocpp_inference/prompts/` | **Yes** |
 | Runner + cap script (`run_one.sh`, `duration_cap.py`) | **Repo `INFERENCE/`** (canonical; the GCS `audiocpp_inference/scripts/` copy is a legacy mirror) | `/content/maqamrock-yue2-lora-finetuning/INFERENCE/` | `scripts/` still mirrored, but the repo copy is what runs |
 

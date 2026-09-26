@@ -33,8 +33,9 @@ Two modes, mirroring bootstrap/setup.sh's own --training/--inference split:
   training (default)  the run's training output + logs + agent_notes under
                       <base>/<run-name>/ (default run-name akbar_arabic_rock_lora).
   --inference         the audio.cpp inference workspace under
-                      <base>/audiocpp_inference/ (out, prompts, scripts, the
-                      converted LoRA) + logs + agent_notes. See INFERENCE_TARGETS.
+                      <base>/audiocpp_inference/ (out, prompts, scripts) + logs +
+                      agent_notes. See INFERENCE_TARGETS. The LoRA library
+                      (<base>/loras/) is curated by hand, not mirrored here.
 
 `--watch LOCAL[:SUB]` (repeatable) replaces the mode's targets with exactly the
 folders you name -- for mirroring an arbitrary location such as
@@ -103,8 +104,11 @@ JOB_ROOT = TRAINING_FOLDER / JOB_NAME
 #   out/       generated wavs + per-run .log/_time.txt/_gpu.csv/_runs_status.log
 #   prompts/   the Maqam <style,lyrics> pairs the runs are driven from
 #   scripts/   duration_cap.py etc.
-#   ../converter/out/  the converted step-3000 LoRA (.safetensors) + converter
-#                      scripts -- expensive to regenerate, so mirrored too.
+#   ../converter/out/  the converter tool + the style adapter staged from the
+#                      LoRA library. NOT mirrored here: the canonical library is
+#                      <base>/loras/ (docs/LORA_INVENTORY.md) and this dir is
+#                      re-staged from it by setup.sh each VM. A locally built
+#                      merge is curated into loras/ by hand, not by this daemon.
 # Deliberately NOT backed up (reproducible, not precious):
 #   models/    multi-GB GGUFs; setup.sh re-downloads them from HF
 #   bin/       prebuilt audiocpp_cli; already GCS-resident under .../build/
@@ -141,7 +145,6 @@ INFERENCE_TARGETS = [
     (INFERENCE_ROOT / "out", "out", False),
     (INFERENCE_ROOT / "prompts", "prompts", False),
     (INFERENCE_ROOT / "scripts", "scripts", False),
-    (LORA_LOCAL, "converter", False),
     (Path("/content/logs"), "logs", False),
     (REPO_ROOT / "agent_notes", "agent_notes", False),
 ]

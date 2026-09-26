@@ -39,9 +39,9 @@ This matches every sweep workspace already in use, e.g.
 python INFERENCE/prepare_ab_eval.py --root /content/pron_knob_probe \
   --output /tmp/ab --audio-format mp3 --seed 20260928 --dry-run
 
-# real package, repo review convention (192k mp3, no trim/normalize)
+# real package, listening convention (192k mp3, no trim/normalize); mirror to GCS after
 python INFERENCE/prepare_ab_eval.py --root /content/pron_knob_probe \
-  --output PRON_KNOB_PROBE_INPUT --audio-format mp3 --bitrate 192k \
+  --output /content/listening/PRON_KNOB_PROBE_INPUT --audio-format mp3 --bitrate 192k \
   --seed 20260928 --json /tmp/key.json \
   --note g1.5=guidance_scale=1.5 --note t0.8=semantic_temperature=0.8
 ```
@@ -57,6 +57,12 @@ Flags: `--variants` (2+; default = all detected), `--categories`, `--labels`,
 - **Per-category consistent labels** so "A" is the same variant across a
   category's tracks, matching `PRON_FINE_SWEEP_INPUT/` and
   `MAQAM_LYRIC_SWAP_INPUT/`.
-- Commit the mp3s + key text; keep raw WAVs under `/content/...` (GCS-mirrored).
+- **Mirror the mp3s + key text to GCS `<base>/listening/<PACKAGE>/`; do not commit
+  them** — audio is not repo content (`.gitignore` has `*_INPUT/`). Keep raw WAVs
+  under `/content/...` (GCS-mirrored).
+- **Generated listening packages live in GCS, not the repo.** The mp3 A/B packages
+  are audio artifacts; they are mirrored to `<base>/listening/` and git-ignored.
+  (They remain in git *history* — removing them from the index does not rewrite
+  history; purging history is a separate SHA-rewriting decision, not done here.)
 - Mirror the label map into `results/<round>/KEY.json`, with a `README.md` of the
   config/per-track tables and the provenance hashes.

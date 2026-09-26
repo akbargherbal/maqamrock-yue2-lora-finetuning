@@ -32,7 +32,7 @@ reproduce a track across GPU/attention architectures.
 - Raw output + README: GCS `…/audiocpp_inference/pron_knob_probe/t4_regen/`
   (deliberately a **separate prefix**, so the surviving original L4 `t0.8/Kurd`
   json/log/gpu.csv/time.txt at the canonical path are not overwritten).
-- The committed `PRON_KNOB_PROBE_INPUT/Kurd_C.mp3` (rp1.4) and `Kurd_D.mp3` (t0.8)
+- The GCS `listening/PRON_KNOB_PROBE_INPUT/Kurd_C.mp3` (rp1.4) and `Kurd_D.mp3` (t0.8)
   are from the L4 originals and remain the canonical listening copies.
 
 ## Caveats

@@ -22,7 +22,6 @@ is written there that refuses to let two different runs share a prefix.
 | | `agent_notes/` | `agent_notes/` |
 | **inference** `--inference` (`--run-name audiocpp_inference`) | `/content/audiocpp_inference/out/` | `out/` |
 | | `/content/audiocpp_inference/{prompts,scripts}/` | `prompts/`, `scripts/` |
-| | `/content/converter/out/` (the converted LoRA) | `converter/` |
 | | `/content/logs/`, `agent_notes/` | `logs/`, `agent_notes/` |
 | **watch** `--watch LOCAL[:SUB]` | exactly the folders you name | prefix root, or the given `SUB` |
 | **extra** `--extra LOCAL[:SUB]` | the mode's targets **plus** these folders | each at `<base>/<run-name>/<SUB>` (SUB defaults to the folder's basename) |

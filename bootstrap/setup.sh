@@ -107,7 +107,11 @@ AUDIOCPP_BIN_LOCAL="$AUDIOCPP_INFERENCE/bin/audiocpp_cli"
 AUDIOCPP_PROMPTS_LOCAL="$AUDIOCPP_INFERENCE/prompts"
 AUDIOCPP_SCRIPTS_LOCAL="$AUDIOCPP_INFERENCE/scripts"
 if [ "$MODE" = "inference" ]; then
-  LORA_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/audiocpp_inference/converter"
+  # Canonical LoRA library (docs/LORA_INVENTORY.md): the current style adapter.
+  # Production v2+pron merges live under loras/audio_cpp/pron/<cfg>/ and are
+  # staged per-sweep, not by the bootstrap.
+  LORA_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/loras/audio_cpp/style"
+  CONVERTER_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/audiocpp_inference/converter"
   AUDIOCPP_BIN_GCS="$GCP_BACKUP_BASE/audiocpp_inference/build/audiocpp_cli"
   AUDIOCPP_PROMPTS_GCS="$GCP_BACKUP_BASE/audiocpp_inference/prompts"
   AUDIOCPP_SCRIPTS_GCS="$GCP_BACKUP_BASE/audiocpp_inference/scripts"
@@ -255,11 +259,13 @@ job_hf_yue2_sidecars() {
   hf download "$GGUF_REPO" --include "sidecars/*" --local-dir "$YUE2_MODEL_DIR"
 }
 
-# Converted step-3000 adapters (unfused, for audio.cpp); 133 MiB, GCS-persisted
-# under audiocpp_inference/converter/. Same rsync pattern as the dataset pull.
+# Canonical style adapter (unfused, for audio.cpp) from the LoRA library
+# (loras/audio_cpp/style/) plus the offline converter tool, which stays with
+# the inference workspace. Same rsync pattern as the dataset pull.
 job_lora_adapters() {
   mkdir -p "$LORA_LOCAL"
   gsutil -m rsync -r "$LORA_GCS" "$LORA_LOCAL"
+  gsutil cp "$CONVERTER_GCS/convert_aitoolkit_yue2_lora.py" "$LORA_LOCAL/"
 }
 
 # Prebuilt CUDA audiocpp_cli (350 MiB, CUDA 12.0 / sm_75) plus the prompts/ and
