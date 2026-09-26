@@ -43,6 +43,12 @@ graphify update .     # re-extracts only changed files; reuses manifest.json + c
 Run this before merging the branch, and at the end of a session that changed a
 lot, so the graph never drifts far from the code.
 
+`update` is the code/AST path — no LLM, no API key, no token cost. It also
+re-extracts markdown files and their headings into nodes; richer doc/paper
+*semantic* edges need the assistant skill (`/graphify --update`, which uses an
+LLM). Before overwriting, it snapshots the previous curated graph to
+`graphify-out/<YYYY-MM-DD>/` — git-ignored (a local safety net, not the layout).
+
 ## Enable it in another agent / environment
 
 The artifact is agent-neutral, but the *integration* is per tool. One-time per
@@ -63,8 +69,13 @@ where `python` is the interpreter that has `graphify` installed (see caveat 1).
 ## Caveats
 
 1. `graphify-out/.graphify_python` is a **VM-specific** interpreter path and is
-   git-ignored. On a fresh VM, delete it and let the skill re-resolve, or install
-   `graphify` there.
+   git-ignored. On a fresh VM, install the CLI — `uv tool install graphifyy`
+   (PyPI package is `graphifyy`, double-y; the command is `graphify`) — then
+   re-resolve the interpreter and write it back:
+   ```bash
+   uv tool run --from graphifyy python -c "import sys; print(sys.executable)" \
+     > graphify-out/.graphify_python
+   ```
 2. The extraction cache is keyed by graphify version *and* extraction prompt — a
    version bump can miss cache and re-extract.
 3. The graph is **branch-specific**. The 2026-09-25 build has a known gap: 135

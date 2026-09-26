@@ -10,6 +10,10 @@ __pycache__/
 # each fresh VM (see graphify Step 1). The rest of graphify-out/ is committed on
 # the pron-lora-ar-only branch so the graph + incremental-update cache survive.
 graphify-out/.graphify_python
+# `graphify update` snapshots the previous curated graph to graphify-out/<date>/
+# before overwriting. It is a local safety net, not part of the layout (the live
+# copy is graph.json / GRAPH_REPORT.md / graph.html) — keep it out of git.
+graphify-out/20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
 
 # Generated blinded-listening packages (mp3 audio). Live in GCS
 # <base>/listening/, not in the repo. Written by INFERENCE/prepare_ab_eval.py.
