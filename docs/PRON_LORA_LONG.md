@@ -214,7 +214,7 @@ jobs detached with a log; --help outranks the prose.
 |---|---|---|---|---|---|
 | 2026-09-27 | planning/recovery | 0 → 0 | — | n/a | recovered builder+config+plan after VM loss; full dataset uploaded; decisions locked |
 | 2026-09-27 | pivot to 10% subsample | 0 → 0 | — | n/a | full-set L4 cache measured ~1.1 files/s (~20 h) → not session-feasible; built locked 10% combo sample (8,100 pairs), archived; new run `quran_long_aya_r8_s10`; full set reserved |
-| 2026-09-27 | s10 GPU run | 0 → 8100 | 2:46 | completed (self-stop at target) | first full epoch on the 10% set; cache built+banked (541.69 MiB); 6 ckpts (1500–7500 + final) + optimizer in GCS; per-step loss noisy, ended ~5.2 |
+| 2026-09-27 | s10 GPU run | 0 → 8100 | 2:46 | completed (self-stop at target) | first full epoch on the 10% set; cache built+banked (541.69 MiB); 6 ckpts (1500–7500 + final) + optimizer in GCS; loss/loss 50-mean 6.57→5.26, ar_ce 5.50→3.97, ar_kl rose 0.17→1.38 (analysis in `TRAINING_ANALYSIS/quran_long_aya_r8_s10/`) |
 
 The progress log is the durable "how much training have we done" record;
 `agent_notes/current.md` holds only the live next step.

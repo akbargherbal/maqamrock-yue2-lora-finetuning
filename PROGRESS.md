@@ -965,8 +965,9 @@ Durable, cross-session milestone record: what has actually been run, what it pro
   `cot: off`, `train_window_frames: 0`) completed **8100/8100 (1 epoch) in 2:46:18** on a Colab
   **L4**, clean self-stop at target; final save `training_info={"step": 8100, "epoch": 0}`.
   ~1.35 s/step (~2,500–2,700 steps/h); GPU **easy load** (~9 GB/23 GB, p50 util ~53 %, ≤80 °C).
-  Per-step loss noisy, ended `loss/loss` ~5.2, `ar_ce` ~3.9, `ar_kl` ~1.4 — **no clean descent
-  visible**; the real signal is the checkpoint eval, not loss.
+  Loss **descended cleanly** (50-step means): `loss/loss` 6.57→5.26, `ar_ce` 5.50→3.97; `ar_kl`
+  rose monotonically 0.17→1.38 (bounded) — same shape as v1/v2. Min `loss/loss` 4.21 @ step 7506.
+  (Single-step values are noisy; the decile means are in `TRAINING_ANALYSIS/quran_long_aya_r8_s10/`.)
 - **Artifacts local + GCS:** `_000001500/3000/4500/6000/7500` + final
   `quran_long_aya_r8_s10.safetensors` (step 8100) + `optimizer.pt` + `loss_log.db`. Latent cache
   banked `quran_long_aya_dataset_s10/_latent_cache.tar` (541.69 MiB); dataset banked
