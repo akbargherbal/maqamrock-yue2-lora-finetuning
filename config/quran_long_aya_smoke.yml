@@ -1,20 +1,18 @@
 # =============================================================================
-# pron_lora_long_smoke -- Phase-3 timing/cache smoke for the long-aya run.
-# Identical to config/pron_lora_long.yml except:
-#   - name: pron_lora_long_smoke
-#   - log_dir: output/pron_lora_long_smoke/tensorboard
+# quran_long_aya_smoke -- OPTIONAL preflight before the multi-day run.
+# Not part of the locked GPU_OPENING_PROMPT.md sequence; run it only if you want
+# to confirm the pipeline, VRAM, and cache path on the 14-pair smoke split before
+# committing to the ~5-9 h latent-cache build the real run pays on first launch.
+# Identical to config/quran_long_aya_r8.yml except:
+#   - name: quran_long_aya_smoke
+#   - log_dir: output/quran_long_aya_smoke/tensorboard
 #   - datasets[0].folder_path: /content/quran_long_aya_dataset/smoke (14 pairs)
 #   - train.steps: 20, save.save_every: 10
-# Every training-relevant knob (cache_text_embeddings=false, train_window_frames=0,
-# rank 8/8 AR-only, bf16, EMA) is kept identical to the real run, so the measured
-# s/step and cache bytes/clip transfer. Use the result to finalise save_every in
-# config/pron_lora_long.yml (plan section 5.2). Not a verification run -- see
-# config/pron_lora_ar_only_smoke.yml for the AR-only/rank-8 adapter check.
 # =============================================================================
 ---
 job: "extension"
 config:
-  name: "pron_lora_long_smoke"
+  name: "quran_long_aya_smoke"
   process:
     - type: "diffusion_trainer"
       training_folder: "/content/ai-toolkit/output"
@@ -32,7 +30,7 @@ config:
         lokr_factor: -1
         network_kwargs:
           ignore_if_contains: ["transformer.nar"]
-      log_dir: "output/pron_lora_long_smoke/tensorboard"
+      log_dir: "output/quran_long_aya_smoke/tensorboard"
       log_config:
         log_every: 1
       save:

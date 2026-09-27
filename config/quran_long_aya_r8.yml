@@ -1,21 +1,22 @@
 # =============================================================================
-# pron_lora_long_r8 -- LONG-aya Quran pronunciation LoRA (multi-day run).
+# quran_long_aya_r8 -- LONG-aya Quran pronunciation LoRA (multi-day run).
 #
-#   DRAFT for user approval. Nothing launches without you typing the command.
-#   Derived from config/pron_lora_ar_only.yml (the Task-14 run) with ONLY the
-#   changes the plan requires:
-#     1. name: pron_lora_long_r8
-#     2. log_dir: output/pron_lora_long_r8/tensorboard
+#   Derived from config/pron_lora_ar_only.yml with ONLY the changes the long run
+#   requires. Decisions below are locked (plan section 9 §10 + GPU_OPENING_PROMPT.md):
+#     1. name: quran_long_aya_r8
+#     2. log_dir: output/quran_long_aya_r8/tensorboard
 #     3. datasets[0].folder_path: /content/quran_long_aya_dataset/train
-#        (the FINAL quran set: min_words=6, max_words=60 -> 81,006 pairs)
-#     4. train.steps: 81006 (= 1 epoch at batch 1 x grad_accum 1)
-#     5. train.cache_text_embeddings: false  -- plan section 4: YuE2TextEncoder is
-#        just an embedding lookup, so caching is ~free to recompute and would add
-#        ~28-53 GiB + a per-VM rebuild. RECOMMENDED by the plan; flip to true to
-#        match the reference run exactly.
-#     6. save.save_every: 750  -- PROVISIONAL. Plan section 5.2: finalise after the
-#        Phase-3 timing smoke as clamp(round(1800 / s_per_step), 100, 4000).
-#     7. save.max_step_saves_to_keep: 12 (unchanged -- buffers the 5-min GCS mirror)
+#        (FINAL set: min_words=6, max_words=60 -> 81,006 pairs, 29 GB)
+#     4. train.steps: 81006 (= 1 epoch at batch 1 x grad_accum 1; option A)
+#     5. train.cache_text_embeddings: false  -- YuE2TextEncoder is an embedding
+#        lookup, so caching is ~free to recompute and would add ~28-53 GiB + a
+#        per-VM rebuild (plan section 4).
+#     6. save.save_every: 1500
+#     7. save.max_step_saves_to_keep: 24  -- keeps all checkpoints until the 5-min
+#        GCS mirror lands, across the multi-day run.
+#   The first launch builds the latent cache (`cache_latents_to_disk: true`,
+#   ~5.2 GiB, ~5-9 h) BEFORE step 1; bank it to GCS once complete (see
+#   GPU_OPENING_PROMPT.md step 5) so later VMs do not rebuild it.
 #   Everything else (rank 8/8 AR-only, lr 1e-4, adamw8bit, EMA 0.999, cot off,
 #   ar_kl_weight 0.2, train_window_frames 0, bf16, quantisation) is identical to
 #   pron_lora_ar_only.yml. Evidence: docs/PRON_LORA_VERIFICATION.md; runbook:
@@ -24,7 +25,7 @@
 ---
 job: "extension"
 config:
-  name: "pron_lora_long_r8"
+  name: "quran_long_aya_r8"
   process:
     - type: "diffusion_trainer"
       training_folder: "/content/ai-toolkit/output"
@@ -42,25 +43,25 @@ config:
         lokr_factor: -1
         network_kwargs:
           ignore_if_contains: ["transformer.nar"]
-      log_dir: "output/pron_lora_long_r8/tensorboard"
+      log_dir: "output/quran_long_aya_r8/tensorboard"
       # log_dir is real (jobs/process/BaseTrainProcess.py) but writes into a
-      # TIMESTAMPED SUBFOLDER under this path: output/pron_lora_long_r8/tensorboard/pron_lora_long_r8_<YYYYMMDD-HHMMSS>/
+      # TIMESTAMPED SUBFOLDER under this path: output/quran_long_aya_r8/tensorboard/quran_long_aya_r8_<YYYYMMDD-HHMMSS>/
       log_config:
         log_every: 1   # dead key (toolkit/config_modules.py LoggingConfig) -- kept so nobody re-adds it
       save:
         dtype: "bf16"
-        save_every: 750   # PROVISIONAL -- finalise after Phase-3 timing smoke (plan 5.2)
-        max_step_saves_to_keep: 12
+        save_every: 1500
+        max_step_saves_to_keep: 24
         save_format: "diffusers"
         push_to_hub: false
       datasets:
-        - folder_path: "/content/quran_long_aya_dataset/train"  # FINAL long-aya quran set (81,006 pairs). Restore from gs://.../quran_long_aya_dataset/ -- NOT wired into setup.sh yet.
+        - folder_path: "/content/quran_long_aya_dataset/train"  # FINAL long-aya quran set (81,006 pairs). Restore from gs://.../quran_long_aya_dataset/ (setup.sh job_quran_long_dataset, opt-in via GCP_QURAN_LONG_DATASET_PATH).
           mask_path: null
           mask_min_value: 0.1
           default_caption: ""
           caption_ext: "txt"
           caption_dropout_rate: 0
-          cache_latents_to_disk: true   # mandatory for YuE2
+          cache_latents_to_disk: true   # mandatory for YuE2; first launch pays a ~5-9 h one-time encode
           is_reg: false
           network_weight: 1
           resolution:
@@ -86,7 +87,7 @@ config:
         optimizer_params:
           weight_decay: 0.0001
         unload_text_encoder: false
-        cache_text_embeddings: false   # plan section 4: embedding-table lookup, ~free to recompute; avoids ~28-53 GiB cache + rebuild
+        cache_text_embeddings: false   # embedding-table lookup, ~free to recompute; avoids ~28-53 GiB cache + rebuild
         lr: 0.0001
         ema_config:
           use_ema: true
@@ -116,7 +117,7 @@ config:
           abc_dropout: 0.5
           sample_ar_repetition_penalty: 1.2
           ar_kl_weight: 0.2
-          train_window_frames: 0   # whole-clip; the 145-word outliers are excluded by max_words=60, so no crop needed
+          train_window_frames: 0   # whole-clip; max_words=60 bounds the outliers
         compile: false
       sample:
         sampler: "flowmatch"

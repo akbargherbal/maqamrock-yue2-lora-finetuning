@@ -210,4 +210,18 @@ the dataset on GCS is FINAL and supersedes §3's numbers.**
 - Location (final): `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset/`
 - Lost with the VM (reconstructed now): `prepare_pron_dataset.py`, the run config,
   and the specs files. Recovered from the surviving report: prompt + all params.
-- Pair-count decision: **A** (keep both `simple` and `uthmani` variants).
+
+### §9 open decisions — RESOLVED (locked; recovered from `GPU_OPENING_PROMPT.md`)
+1. **Pair count: A** — keep both `simple` and `uthmani` (81,006 train pairs).
+2. **Persist the latent cache to GCS: YES** — bank it once complete as
+   `gs://.../quran_long_aya_dataset/_latent_cache.tar` (one-time, ~5.2 GiB).
+3. **Run name / prefixes:** run `quran_long_aya_r8`; local dataset
+   `/content/quran_long_aya_dataset`; dataset prefix `.../quran_long_aya_dataset/`;
+   run output prefix `.../quran_long_aya_r8/output/`.
+4. **Commit on `pron-lora-long`:** yes — branch `pron-lora-long` off
+   `pron-lora-ar-only` (not `main`).
+- Config: `config/quran_long_aya_r8.yml` — steps 81,006 · `save_every: 1500` ·
+  `max_step_saves_to_keep: 24` · `cache_text_embeddings: false` ·
+  `cache_latents_to_disk: true`; else identical to `pron_lora_ar_only.yml`.
+- First launch pays the one-time latent-cache build (~5–9 h) before step 1; the
+  training config must not be edited after launch (see `GPU_OPENING_PROMPT.md`).
