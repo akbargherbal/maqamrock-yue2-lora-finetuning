@@ -56,7 +56,7 @@ state is ambiguous, ask before acting.
 | Local dataset | `/content/quran_long_aya_dataset/` |
 | Run output | `/content/ai-toolkit/output/quran_long_aya_r8/` → GCS `…/quran_long_aya_r8/output/` |
 | Log / metrics | `/content/logs/train_quran_long.log` · `<output>/loss_log.db` · `/content/logs/gpu_usage.csv` |
-| Latent cache | `/content/quran_long_aya_dataset/train/_latent_cache` (~5.2 GiB; banked as `…/quran_long_aya_dataset/_latent_cache.tar`) |
+| Latent cache | `/content/quran_long_aya_dataset/train/_latent_cache` (~5.2 GiB; banked as `…/quran_long_aya_dataset/_latent_cache.tar`). **The dataset must still be present too** — the cache only skips the encode, not the download (plan §4.1). |
 | Status | **GPU work not started.** 0 steps. No checkpoints. Cache not built. Dataset uploaded; branch pushed. |
 
 ## Commands that matter

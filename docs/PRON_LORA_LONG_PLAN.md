@@ -104,6 +104,16 @@ automatically, so a fresh VM rebuilds them before the first training step.
 **One-time build ≈ 5–9 h** on the first launch, **before step 1**. That build is
 the dominant cost of the first GPU session, not the steps.
 
+**What the cache does *not* replace — the dataset is still needed every VM.** The
+loader enumerates items from the folder by filename (`toolkit/data_loader.py` →
+`os.listdir`), and the cache file is keyed by the basename + a hash of
+latent-affecting settings (`dataloader_mixins.py:get_latent_info_dict`: resolution,
+crop, flip, frames, fps, latent version). So (a) deleting the audio orphans the
+cache; (b) the `.txt` captions are re-read every step (`cache_text_embeddings:
+false`); (c) changing the config changes the hash → cache miss → full re-encode.
+The cache removes the ~5–9 h *encode*, not the ~minutes *download*: restore the
+dataset **and** untar the cache.
+
 ### 4.2 Text-embedding cache (disabled)
 `cache_text_embeddings: true` would write AR-prefix embeddings (`[L, 2048]` bf16,
 ~0.33–0.61 MB/file ≈ **28–53 GiB**), 9× redundant because the caption is identical
