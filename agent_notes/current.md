@@ -1,6 +1,8 @@
 # agent_notes / current
 
-**Date:** 2026-09-27 · **State:** nothing training. Repo aligned to `docs/GPU_OPENING_PROMPT.md`. **This VM has NO GPU.**
+**Prime with:** `docs/PRON_LORA_LONG.md` (canonical hub) + this file.
+
+**Date:** 2026-09-27 · **State:** nothing training. Repo aligned to the locked prompt. **This VM has NO GPU.**
 
 ## Locked (matches `docs/GPU_OPENING_PROMPT.md` step for step)
 - Run **`quran_long_aya_r8`** · branch **`pron-lora-long`** · config **`config/quran_long_aya_r8.yml`**.

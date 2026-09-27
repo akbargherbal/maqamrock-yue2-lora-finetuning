@@ -2,8 +2,8 @@
 
 Branch: **`pron-lora-long`** (created off `pron-lora-ar-only`). Status as of
 2026-09-27: **dataset built + validated and in GCS; config written; decisions
-locked; no GPU work yet.** Companion runbook: `docs/PRON_LORA_LONG.md` (to be
-written once the run exists). GPU-phase handover: `docs/GPU_OPENING_PROMPT.md`.
+locked; no GPU work yet.** Canonical entry point: `docs/PRON_LORA_LONG.md` (run
+hub). GPU-phase handover: `docs/GPU_OPENING_PROMPT.md` (first session only).
 
 > **Provenance note.** The original plan/config/builder were lost with a VM on
 > 2026-09-26 and never pushed. This revision folds in the surviving facts: the

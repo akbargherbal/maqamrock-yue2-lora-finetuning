@@ -39,9 +39,10 @@ Don't re-explain the project. The repo + GCS carry the state; a fresh agent read
 The agent's contract (`AGENTS.md`) already tells it to read `DECISIONS.md` and the
 matching runbook; the project-specific entry points are:
 
-1. `agent_notes/current.md` — the live state line + next step (tracked in git).
-2. `docs/PRON_LORA_LONG_PLAN.md` — the run design and locked decisions.
-3. `docs/GPU_OPENING_PROMPT.md` — the GPU-phase sequence.
+1. [`docs/PRON_LORA_LONG.md`](PRON_LORA_LONG.md) — the run hub: identity, snapshot, commands.
+2. `agent_notes/current.md` — the live state line + next step (tracked in git).
+3. `docs/PRON_LORA_LONG_PLAN.md` — the run design and locked decisions.
+4. `docs/GPU_OPENING_PROMPT.md` — the GPU-phase sequence (first session only).
 
 Then the agent must **verify live state, never trust memory**: branch, `nvidia-smi`,
 sidecars (`pgrep -af 'run\.py'`, `backup_to_gcp.py`, `gpu_logger.py`), and the newest
