@@ -146,9 +146,10 @@ pause, force `--once` and confirm the newest checkpoint + optimizer are in GCS.
   (detached; `start` is Ctrl+C-proof).
 - **Pause:** `train_ctl.py stop --log-name <log>` (checkpoint-safe SIGINT) →
   `backup_to_gcp.py --run-name <run> --once` → verify GCS has the newest ckpt.
-- **Resume (fresh VM):** clone → `bootstrap/setup.sh --training` (opt-in
-  `job_quran_long_dataset` restores the dataset when `GCP_QURAN_LONG_DATASET_PATH`
-  is set) → untar the banked latent cache → restore the run output prefix into
+- **Resume (fresh VM):** clone → `bootstrap/setup.sh --training` (it may also
+  pull the old v2 dataset — ignore that) → restore the dataset by hand:
+  `gcloud storage rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset /content/quran_long_aya_dataset`
+  → untar the banked latent cache → restore the run output prefix into
   `output/quran_long_aya_r8/` → start sidecars → relaunch the **identical**
   command (user-typed). Log must show "Found step N", not step 0.
 
@@ -160,22 +161,46 @@ pause, force `--once` and confirm the newest checkpoint + optimizer are in GCS.
 - `train.start_step` only overrides the counter, never which checkpoint loads.
 - Dataset folder must be immutable once training starts (changes desync cache).
 
-## 6. Phased execution (gates in brackets)
+## 6. Phased execution
 
-0. **Plan + branch** — this doc; branch `pron-lora-long`. **[done]**
-1. **Build dataset** (download → build → validate). **[done — gates passed]**
-2. **Upload dataset to GCS + document restore.** **[done — 81,006 / 352 / 14 verified]**
-3. **Write the run config** — `config/quran_long_aya_r8.yml`. **[done — decisions locked]**
-4. **First GPU launch:** start sidecars; launch (user-typed); the latent cache
-   builds (~5–9 h) before step 1; **bank it** (§4.3) the moment it completes.
-5. **Measure** s/step, VRAM peak, and wall clock per 1500-step save over ~50 steps
-   (`monitor_loss.py` + `/content/logs/gpu_usage.csv`). Do not edit the config.
-6. **Train across sessions** per §5; **merge / inference** later via the existing
-   pron merge tooling.
+**Phases 0–3 — done:**
+0. Plan + branch — this doc; branch `pron-lora-long`.
+1. Build dataset (download → build → validate). *[gates passed]*
+2. Upload dataset to GCS + document restore. *[81,006 / 352 / 14 verified]*
+3. Write the run config — `config/quran_long_aya_r8.yml`. *[decisions locked]*
 
-Optional: a 20-step preflight on the smoke split
-(`config/quran_long_aya_smoke.yml`) to catch VRAM/plumbing issues before the long
-cache build. Not part of the locked sequence.
+**GPU phase — the exact sequence (`docs/GPU_OPENING_PROMPT.md`):**
+
+1. **Preflight.** Confirm the branch is `pron-lora-long` and the config parses;
+   report `nvidia-smi` (GPU/VRAM), disk, and `vm-continuity` health.
+2. **Bootstrap + restore.** `bootstrap/setup.sh --training` (it may also pull the
+   old v2 dataset — ignore that), then restore ours:
+   ```bash
+   gcloud storage rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset \
+     /content/quran_long_aya_dataset
+   ```
+   Verify 81,006 train `.mp3` + 81,006 `.txt`, 352/352 val, 14/14 smoke.
+3. **Sidecars.** `backup_to_gcp.py --run-name quran_long_aya_r8` and `gpu_logger.py`.
+4. **Launch** (user-typed, detached). The first launch builds the latent cache
+   (~5–9 h) **before step 1**:
+   ```bash
+   python train_ctl.py start --config config/quran_long_aya_r8.yml \
+     --run-name quran_long_aya_r8 --log-name train_quran_long
+   ```
+5. **Bank the cache** the moment it completes — watch
+   `/content/quran_long_aya_dataset/train/_latent_cache/*.safetensors` in
+   `/content/logs/train_quran_long.log` until ~81,006, then:
+   ```bash
+   tar -C /content/quran_long_aya_dataset/train -cf - _latent_cache \
+     | gcloud storage cp - gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset/_latent_cache.tar
+   ```
+6. **Measure** s/step, VRAM peak, and wall clock per 1500-step save over ~50 steps
+   (`monitor_loss.py` + `/content/logs/gpu_usage.csv`). **Do not edit the config.**
+7. **Train across sessions** per §5. Pause only with
+   `python train_ctl.py stop --log-name train_quran_long`; **no auto-resume**.
+   Later fresh VM = restore dataset, untar the banked cache, restore the run
+   output prefix, relaunch the identical command.
+8. **Merge / inference** later via the existing pron merge tooling.
 
 ## 7. Cost & scope
 

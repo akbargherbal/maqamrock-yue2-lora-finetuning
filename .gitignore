@@ -1,4 +1,8 @@
-agent_notes/
+# agent_notes is session state, but current.md is the handover the GPU-phase
+# prompt expects to find after a fresh clone (GPU_OPENING_PROMPT.md), so it is
+# tracked while the rest of the folder stays ignored.
+agent_notes/*
+!agent_notes/current.md
 arabic_user.txt
 *.pyc
 __pycache__/
