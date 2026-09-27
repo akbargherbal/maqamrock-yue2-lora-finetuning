@@ -96,7 +96,12 @@ tar -C /content/quran_long_aya_dataset/train -cf - _latent_cache \
 - **Restore the conversation** (if captured): `vm-continuity hosts` → `vm-continuity pull --host <H>` → `vm-continuity restore opencode -- --mode db`, then reopen the session. Only sessions captured *while the loop ran* come back; the loop is started early by `setup.sh` on every VM.
 - **Cold start** (always works): the repo + GCS carry the state — paste the prime prompt above.
 - **Opening:** restore the session, else paste a prompt below; ensure the notebook exported `HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_BACKUP_BASE`.
-- **Closing (before you disconnect):** stop training → `backup_to_gcp.py --run-name quran_long_aya_r8 --once` and confirm the newest `*.safetensors` **+** `optimizer.pt` in GCS → bank the cache if pending → agent updates `current.md` + pushes → confirm `vm-continuity status` / last ship.
+- **Closing (before you disconnect)** — in order:
+  1. stop cleanly: `python train_ctl.py stop --log-name train_quran_long`
+  2. mirror + verify: `python backup_to_gcp.py --run-name quran_long_aya_r8 --once`, then confirm the newest `*.safetensors` **and** `optimizer.pt` are in GCS
+  3. bank the latent cache if it was just built and not yet banked
+  4. agent updates `agent_notes/current.md` and pushes
+  5. **Continuity gate — do not disconnect until it reads OK.** Run `vm-continuity status`; the loop must print `loop=running … state=OK` with `last_ship_ok` under ~10 min. If it's down or stale, run `vm-continuity ship` and re-check. Stamp the result in the closing message: **continuity: OK (last ship HH:MMZ)** — or `NOT RUNNING` (then fix before disconnecting).
 - **Loss window:** checkpoints every 1500 steps, mirror every 5 min → lose at most the steps since the last 1500-multiple, plus ≤5 min.
 - **Never** run the same run name on two VMs; **never** edit the config mid-run; **no** auto-resume of a planned pause.
 
