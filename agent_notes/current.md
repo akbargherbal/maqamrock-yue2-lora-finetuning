@@ -12,8 +12,11 @@
 ## Repo state
 - Pushed: `origin/pron-lora-long` (tracked). Files: `config/quran_long_aya_r8.yml`,
   `prepare_pron_dataset.py`, `append_ayah_symbol.py`, `docs/PRON_LORA_LONG_PLAN.md`,
-  `docs/GPU_OPENING_PROMPT.md`. `bootstrap/setup.sh` is **unmodified** (the prompt restores
-  the dataset by hand). `agent_notes/current.md` is now tracked so the GPU session can read it.
+  `docs/GPU_OPENING_PROMPT.md`, `docs/SESSION_PROTOCOL.md` (multi-VM context protocol).
+  `bootstrap/setup.sh` is **unmodified** (the prompt restores the dataset by hand).
+  `agent_notes/current.md` is now tracked so the GPU session can read it.
+- This CPU session was captured to GCS: `opencode_sessions/by_host/87f6392cc09a/`
+  (pull + `restore opencode` to recover it; loop left running, 5-min interval).
 
 ## GPU phase — the exact sequence
 1. **Preflight:** confirm branch `pron-lora-long` + config parses; report `nvidia-smi`, disk, `vm-continuity` health.

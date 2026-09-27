@@ -9,6 +9,7 @@ operating contract is `../AGENTS.md`.
 |---|---|
 | Get training running on a fresh Colab VM | [START.md](START.md) |
 | Stop for the night and resume next session | [PAUSE_RESUME.md](PAUSE_RESUME.md) |
+| Keep context across VMs/sessions (resume the *agent*, not just the run) | [SESSION_PROTOCOL.md](SESSION_PROTOCOL.md) |
 | GCS mirror layout, verify a backup, restore from it | [BACKUP_RESTORE.md](BACKUP_RESTORE.md) |
 | Check how training is going | [MONITOR.md](MONITOR.md) |
 | Decide L4 vs A100 (cost/time) | [GPU_L4_VS_A100.md](GPU_L4_VS_A100.md) |
@@ -54,7 +55,7 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 | Inference output | `/content/audiocpp_inference/out/` (`_runs_status.log`, `*_time.txt`, `*.json`) |
 | Inference prompts | `/content/audiocpp_inference/prompts/<Maqam>_{style,lyrics}.txt` |
 | Converted LoRA | `/content/converter/out/akbar_arabic_rock_lora_{ar,nar}.safetensors` |
-| Handoff notes | `agent_notes/current.md` (git-ignored; GCS-mirrored, no pull command yet) |
+| Handoff notes | `agent_notes/current.md` (tracked in git; also GCS-mirrored) |
 
 Env vars are staged by the launching notebook before any terminal command; a
 terminal that can't see them means the notebook cell hasn't run yet.
