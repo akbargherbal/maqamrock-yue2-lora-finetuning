@@ -1,0 +1,125 @@
+# =============================================================================
+# pron_lora_long_smoke -- Phase-3 timing/cache smoke for the long-aya run.
+# Identical to config/pron_lora_long.yml except:
+#   - name: pron_lora_long_smoke
+#   - log_dir: output/pron_lora_long_smoke/tensorboard
+#   - datasets[0].folder_path: /content/quran_long_aya_dataset/smoke (14 pairs)
+#   - train.steps: 20, save.save_every: 10
+# Every training-relevant knob (cache_text_embeddings=false, train_window_frames=0,
+# rank 8/8 AR-only, bf16, EMA) is kept identical to the real run, so the measured
+# s/step and cache bytes/clip transfer. Use the result to finalise save_every in
+# config/pron_lora_long.yml (plan section 5.2). Not a verification run -- see
+# config/pron_lora_ar_only_smoke.yml for the AR-only/rank-8 adapter check.
+# =============================================================================
+---
+job: "extension"
+config:
+  name: "pron_lora_long_smoke"
+  process:
+    - type: "diffusion_trainer"
+      training_folder: "/content/ai-toolkit/output"
+      sqlite_db_path: "/content/ai-toolkit/aitk_db.db"
+      device: "cuda"
+      trigger_word: ""
+      performance_log_every: 10
+      network:
+        type: "lora"
+        linear: 8
+        linear_alpha: 8
+        conv: 16
+        conv_alpha: 16
+        lokr_full_rank: true
+        lokr_factor: -1
+        network_kwargs:
+          ignore_if_contains: ["transformer.nar"]
+      log_dir: "output/pron_lora_long_smoke/tensorboard"
+      log_config:
+        log_every: 1
+      save:
+        dtype: "bf16"
+        save_every: 10
+        max_step_saves_to_keep: 12
+        save_format: "diffusers"
+        push_to_hub: false
+      datasets:
+        - folder_path: "/content/quran_long_aya_dataset/smoke"  # 14 pairs, subset of train
+          mask_path: null
+          mask_min_value: 0.1
+          default_caption: ""
+          caption_ext: "txt"
+          caption_dropout_rate: 0
+          cache_latents_to_disk: true
+          is_reg: false
+          network_weight: 1
+          resolution:
+            - 512
+          controls: []
+          shrink_video_to_frames: true
+          num_frames: 1
+          flip_x: false
+          flip_y: false
+          num_repeats: 1
+      train:
+        batch_size: 1
+        bypass_guidance_embedding: false
+        steps: 20
+        gradient_accumulation: 1
+        train_unet: true
+        train_text_encoder: false
+        gradient_checkpointing: true
+        noise_scheduler: "flowmatch"
+        optimizer: "adamw8bit"
+        timestep_type: "sigmoid"
+        content_or_style: "balanced"
+        optimizer_params:
+          weight_decay: 0.0001
+        unload_text_encoder: false
+        cache_text_embeddings: false
+        lr: 0.0001
+        ema_config:
+          use_ema: true
+          ema_decay: 0.999
+        skip_first_sample: false
+        force_first_sample: false
+        disable_sampling: true
+        dtype: "bf16"
+        diff_output_preservation: false
+        diff_output_preservation_multiplier: 1
+        diff_output_preservation_class: "person"
+        switch_boundary_every: 1
+        loss_type: "mse"
+      logging:
+        log_every: 1
+        use_ui_logger: true
+      model:
+        name_or_path: "Comfy-Org/YuE2/checkpoints/yue2_3b_int8_convrot.safetensors"
+        quantize: true
+        qtype: "convrot8"
+        quantize_te: false
+        qtype_te: "qfloat8"
+        arch: "yue2"
+        low_vram: false
+        model_kwargs:
+          cot: "off"
+          abc_dropout: 0.5
+          sample_ar_repetition_penalty: 1.2
+          ar_kl_weight: 0.2
+          train_window_frames: 0
+        compile: false
+      sample:
+        sampler: "flowmatch"
+        sample_every: 250
+        sample_start_step: 0
+        width: 1024
+        height: 1024
+        neg: ""
+        seed: 42
+        walk_seed: true
+        guidance_scale: 1
+        sample_steps: 32
+        num_frames: 1
+        fps: 1
+        duration: 360
+meta:
+  name: "[name]"
+  version: "1.0"
