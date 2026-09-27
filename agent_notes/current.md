@@ -18,6 +18,9 @@
   (the runbook restores the dataset by hand). `agent_notes/current.md` is tracked.
 - This CPU session was captured to GCS: `opencode_sessions/by_host/87f6392cc09a/`
   (pull + `restore opencode` to recover it; loop left running, 5-min interval).
+- Launcher: `notebooks/L4_QPRON_ArabicSuno_vscode_anywhere.ipynb` (copy also at
+  `/content/`) now checks out `pron-lora-long`, exports `GCP_QURAN_LONG_DATASET_PATH`,
+  and pulls the 28 GiB dataset **in parallel** with the vscode.dev tunnel auth.
 
 ## GPU phase — the exact sequence
 1. **Preflight:** confirm branch `pron-lora-long` + config parses; report `nvidia-smi`, disk, `vm-continuity` health.
