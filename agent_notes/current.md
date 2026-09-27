@@ -2,7 +2,7 @@
 
 **Prime with:** `docs/PRON_LORA_LONG.md` + this file.
 
-**Date:** 2026-09-27 · **State:** s10 run **TRAINING** (pid 76687). Latent cache built (8,100) **+ banked** (541.69 MiB). Step **~330/8100**, ~1.35 s/it ⇒ ~3 h for the configured 8,100; first checkpoint at step 1500. Sidecars: backup `quran_long_aya_r8_s10` (73836), `gpu_logger` (34038). No errors.
+**Date:** 2026-09-27 · **State: RUN COMPLETE** — `quran_long_aya_r8_s10` finished **8100/8100** in **2:46:18** (final save metadata `{"step": 8100, "epoch": 0}`). Checkpoints 1500/3000/4500/6000/7500 + final + `optimizer.pt` all in GCS. GPU idle; sidecars still running. To train more: bump `steps` in the config and relaunch (auto-resumes from step 8100 — cache/optimizer preserved).
 
 ## What changed and why
 The full 81,006-pair set's latent-cache step measures **~1.1 files/s on this L4** →

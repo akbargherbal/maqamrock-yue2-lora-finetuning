@@ -952,3 +952,29 @@ Durable, cross-session milestone record: what has actually been run, what it pro
 - **Open:** merge `pron-lora-ar-only` → `main` (`origin/main` still lacks the loop fix,
   `restore --mode`, and the 5-min cadence). `graphify update .` + docs-reconciler still pending
   from the earlier agenda.
+
+## 2026-09-27 — Long-aya Quran run: full set pivoted to a 10% subsample; `quran_long_aya_r8_s10` completes 8100/8100 on an L4 ✅
+
+- **Pivot (measured, not assumed).** The full `quran_long_aya_dataset` (81,006 pairs)
+  latent-cache encode ran at **~1.1 files/s on an L4 ⇒ ~20 h** (live tqdm + file counts) —
+  cannot fit a Colab session; the plan's "5–9 h" was an A100 figure. Built a frozen, seeded
+  **10% sample of train combos** (both `_simple`/`_uthmani` kept together) → **8,100 pairs**,
+  3.0 GiB, cache ~1 h. Tool `sample_pron_dataset.py`; lock `docs/quran_long_aya_s10_manifest.json`.
+  Full set + identity `quran_long_aya_r8` reserved for high-end hardware.
+- **Run `quran_long_aya_r8_s10`** (`config/quran_long_aya_r8_s10.yml`; AR-only rank 8, EMA 0.999,
+  `cot: off`, `train_window_frames: 0`) completed **8100/8100 (1 epoch) in 2:46:18** on a Colab
+  **L4**, clean self-stop at target; final save `training_info={"step": 8100, "epoch": 0}`.
+  ~1.35 s/step (~2,500–2,700 steps/h); GPU **easy load** (~9 GB/23 GB, p50 util ~53 %, ≤80 °C).
+  Per-step loss noisy, ended `loss/loss` ~5.2, `ar_ce` ~3.9, `ar_kl` ~1.4 — **no clean descent
+  visible**; the real signal is the checkpoint eval, not loss.
+- **Artifacts local + GCS:** `_000001500/3000/4500/6000/7500` + final
+  `quran_long_aya_r8_s10.safetensors` (step 8100) + `optimizer.pt` + `loss_log.db`. Latent cache
+  banked `quran_long_aya_dataset_s10/_latent_cache.tar` (541.69 MiB); dataset banked
+  `quran_long_aya_dataset_s10.tar` (2.94 GiB, crc32c-verified). Aborted full-set local artifacts
+  cleaned (partial cache, empty output); its GCS prefix kept.
+- **Docs:** `docs/PRON_LORA_LONG.md` rewritten for s10; plan + `DECISIONS.md` updated;
+  `docs/README.md` / `PAUSE_RESUME.md` / `SOURCE_OF_TRUTH.md` point at s10; `RECONCILIATION_LOG.md`
+  entry; a T4 checkpoint-eval prompt added.
+- **Open:** evaluate the 6 checkpoints on a T4 (merge/convert/generate; `docs/PRON_LORA_MERGE.md`),
+  then decide extend vs conclude. Session backup (`vm-continuity`) failed all session
+  (`no such table: session_v2`) — flagged, not backed up.

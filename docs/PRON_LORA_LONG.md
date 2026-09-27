@@ -171,11 +171,50 @@ local vs GCS and the drift, and whether backup_to_gcp.py + gpu_logger.py are run
 Make no changes.
 ```
 
+### Checkpoint-eval on a second (T4) VM — while training runs
+Use this to try checkpoints as they land, without waiting for the run to finish.
+A T4 is the right box (the staged `audiocpp_cli` is sm_75/T4). Training continues
+untouched on the other VM; **never** run the same training run on two VMs. A
+paste-ready copy also lives at `/content/checkpoint_eval_prompt.md`.
+```text
+Second-VM checkpoint-eval session for the long-aya Quran pronunciation LoRA
+(branch pron-lora-long, run quran_long_aya_r8_s10).
+
+SITUATION: training is STILL RUNNING on another Colab (L4). Do NOT train here, and
+do NOT start/stop/resume that run — never run the same run name on two VMs. This VM
+only watches checkpoints appear and tries them: pull -> merge -> convert -> generate.
+
+READ FIRST (in this order):
+  1. docs/PRON_LORA_LONG.md   2. docs/PRON_LORA_MERGE.md
+  3. docs/PRON_LORA_SWEEP.md  4. agent_notes/current.md
+
+SETUP:
+  - git clone https://github.com/akbargherbal/maqamrock-yue2-lora-finetuning.git
+      && cd maqamrock-yue2-lora-finetuning && git checkout pron-lora-long
+  - export HF_TOKEN and GCP_BACKUP_BASE (from the training VM's notebook).
+  - bootstrap/setup.sh --inference     # audiocpp_cli (sm_75) + GGUF model + style LoRA + converter
+
+PROCEDURE (per new checkpoint):
+  1. gcloud storage ls -l gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_r8_s10/output/quran_long_aya_r8_s10_*.safetensors
+     (checkpoints every 1,500 steps; empty list = none yet, just say so)
+  2. Pull the newest checkpoint locally; note its step.
+  3. `python merge_pron_lora.py` — merge with the style adapter at the chosen alpha
+     (CPU-only; exact flags/scaling in docs/PRON_LORA_MERGE.md — do not guess).
+  4. `converter/convert_aitoolkit_yue2_lora.py` (staged at /content/converter/out).
+  5. Generate held-out prompts: `INFERENCE/run_one.sh <Maqam> <seed>` (or pron_ckpt_sweep.py).
+  6. Report from live artifacts: step + filename, alpha, output paths, errors. Compare
+     across steps — do not judge quality from one checkpoint.
+
+CONSTRAINTS: do not edit training configs/dataset; do not touch the training run; long
+jobs detached with a log; --help outranks the prose.
+```
+
 ## Progress log (append one row per session)
 | Date | Session | Steps (from→to) | Approx wall | How it ended | Notes |
 |---|---|---|---|---|---|
 | 2026-09-27 | planning/recovery | 0 → 0 | — | n/a | recovered builder+config+plan after VM loss; full dataset uploaded; decisions locked |
 | 2026-09-27 | pivot to 10% subsample | 0 → 0 | — | n/a | full-set L4 cache measured ~1.1 files/s (~20 h) → not session-feasible; built locked 10% combo sample (8,100 pairs), archived; new run `quran_long_aya_r8_s10`; full set reserved |
+| 2026-09-27 | s10 GPU run | 0 → 8100 | 2:46 | completed (self-stop at target) | first full epoch on the 10% set; cache built+banked (541.69 MiB); 6 ckpts (1500–7500 + final) + optimizer in GCS; per-step loss noisy, ended ~5.2 |
 
 The progress log is the durable "how much training have we done" record;
 `agent_notes/current.md` holds only the live next step.
