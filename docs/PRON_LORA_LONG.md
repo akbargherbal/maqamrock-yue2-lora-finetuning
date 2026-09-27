@@ -53,7 +53,7 @@ state is ambiguous, ask before acting.
 | Config | `config/quran_long_aya_r8.yml` — steps 81,006 · `save_every` 1500 · `max_step_saves_to_keep` 24 · `cache_text_embeddings: false` · `cache_latents_to_disk: true` |
 | Branch | `pron-lora-long` |
 | Dataset | `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset/` — 81,006 train pairs / 352 val / 14 smoke; 28.04 GiB |
-| Local dataset | `/content/quran_long_aya_dataset/` |
+| Local dataset | `/content/quran_long_aya_dataset/` — restored by `setup.sh`'s opt-in `job_quran_long_dataset` when `GCP_QURAN_LONG_DATASET_PATH` is set (the launcher exports it) |
 | Run output | `/content/ai-toolkit/output/quran_long_aya_r8/` → GCS `…/quran_long_aya_r8/output/` |
 | Log / metrics | `/content/logs/train_quran_long.log` · `<output>/loss_log.db` · `/content/logs/gpu_usage.csv` |
 | Latent cache | `/content/quran_long_aya_dataset/train/_latent_cache` (~5.2 GiB; banked as `…/quran_long_aya_dataset/_latent_cache.tar`). **The dataset must still be present too** — the cache only skips the encode, not the download (plan §4.1). |
@@ -75,8 +75,11 @@ python monitor_loss.py /content/ai-toolkit/output/quran_long_aya_r8/loss_log.db
 # mirror now
 python backup_to_gcp.py --run-name quran_long_aya_r8 --once
 
-# restore on a fresh VM (dataset; run output prefix; then untar the banked cache)
+# restore on a fresh VM:
+#  - dataset: setup.sh's opt-in job does it (export GCP_QURAN_LONG_DATASET_PATH before
+#    launching setup.sh; log /content/logs/quran_long_dataset.log). Manual fallback:
 gcloud storage rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset /content/quran_long_aya_dataset
+#  - run output prefix (checkpoints + optimizer):
 mkdir -p /content/ai-toolkit/output/quran_long_aya_r8
 gsutil -m rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_r8/output /content/ai-toolkit/output/quran_long_aya_r8
 
@@ -95,7 +98,7 @@ tar -C /content/quran_long_aya_dataset/train -cf - _latent_cache \
 
 - **Restore the conversation** (if captured): `vm-continuity hosts` → `vm-continuity pull --host <H>` → `vm-continuity restore opencode -- --mode db`, then reopen the session. Only sessions captured *while the loop ran* come back; the loop is started early by `setup.sh` on every VM.
 - **Cold start** (always works): the repo + GCS carry the state — paste the prime prompt above.
-- **Opening:** restore the session, else paste a prompt below; ensure the notebook exported `HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_BACKUP_BASE`.
+- **Opening:** restore the session, else paste a prompt below; ensure the notebook exported `HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_QURAN_LONG_DATASET_PATH`, `GCP_BACKUP_BASE`.
 - **Closing (before you disconnect)** — in order:
   1. stop cleanly: `python train_ctl.py stop --log-name train_quran_long`
   2. mirror + verify: `python backup_to_gcp.py --run-name quran_long_aya_r8 --once`, then confirm the newest `*.safetensors` **and** `optimizer.pt` are in GCS
@@ -114,9 +117,10 @@ pron-lora-long). Read docs/PRON_LORA_LONG.md + agent_notes/current.md first.
 
 1. Preflight: confirm branch pron-lora-long + config parses; report nvidia-smi (GPU/VRAM),
    disk, and vm-continuity health.
-2. bootstrap/setup.sh --training (it may also pull the old v2 dataset — ignore that), then
-   restore OUR dataset and verify 81,006 train .mp3 + 81,006 .txt, 352/352 val, 14/14 smoke:
-     gcloud storage rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset /content/quran_long_aya_dataset
+2. bootstrap/setup.sh --training. With GCP_QURAN_LONG_DATASET_PATH exported (the launcher does),
+   its opt-in job restores OUR dataset in parallel — confirm the "[ok] quran-long dataset:
+   81006 train pairs" line (352/352 val, 14/14 smoke), and if it failed read
+   /content/logs/quran_long_dataset.log. (It also pulls the old v2 dataset — ignore that.)
 3. Start sidecars: backup_to_gcp.py --run-name quran_long_aya_r8 ; gpu_logger.py.
 4. The first launch builds the latent cache (~5-9 h) before step 1. Give me the exact
    detached launch command to type (python train_ctl.py start --config config/quran_long_aya_r8.yml --run-name quran_long_aya_r8 --log-name train_quran_long).

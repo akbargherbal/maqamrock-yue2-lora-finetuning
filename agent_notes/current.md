@@ -14,13 +14,14 @@
 ## Repo state
 - Pushed: `origin/pron-lora-long` (tracked). Files: `config/quran_long_aya_r8.yml`,
   `prepare_pron_dataset.py`, `append_ayah_symbol.py`, `docs/PRON_LORA_LONG.md` (canonical
-  runbook), `docs/PRON_LORA_LONG_PLAN.md` (design). `bootstrap/setup.sh` is **unmodified**
-  (the runbook restores the dataset by hand). `agent_notes/current.md` is tracked.
+  runbook), `docs/PRON_LORA_LONG_PLAN.md` (design). `bootstrap/setup.sh` gains the opt-in
+  `job_quran_long_dataset` (marker-guarded, logged, verified). `agent_notes/current.md` is tracked.
 - This CPU session was captured to GCS: `opencode_sessions/by_host/87f6392cc09a/`
   (pull + `restore opencode` to recover it; loop left running, 5-min interval).
-- Launcher: `notebooks/L4_QPRON_ArabicSuno_vscode_anywhere.ipynb` (copy also at
-  `/content/`) now checks out `pron-lora-long`, exports `GCP_QURAN_LONG_DATASET_PATH`,
-  and pulls the 28 GiB dataset **in parallel** with the vscode.dev tunnel auth.
+- Launcher: `notebooks/L4_QPRON_ArabicSuno_vscode_anywhere.ipynb` (copy also at `/content/`)
+  checks out `pron-lora-long`, exports `GCP_QURAN_LONG_DATASET_PATH`, and launches
+  `setup.sh` detached; setup's opt-in job pulls the 28 GiB dataset **in parallel** with the
+  vscode.dev tunnel auth (log `/content/logs/quran_long_dataset.log`). No hand-rolled rsync.
 
 ## GPU phase — the exact sequence
 1. **Preflight:** confirm branch `pron-lora-long` + config parses; report `nvidia-smi`, disk, `vm-continuity` health.

@@ -249,6 +249,27 @@ job_pron_dataset() {
   touch "$marker"
 }
 
+# Long-aya Quran pronunciation dataset -- the quran_long_aya_r8 run's set
+# (docs/PRON_LORA_LONG.md). Same opt-in shape as job_pron_dataset: runs only when
+# GCP_QURAN_LONG_DATASET_PATH is exported, marker-guarded (so a re-run on the same
+# VM does not re-pull), and restored into its own path. Pulled in parallel with
+# the other jobs, so it downloads while the operator authenticates the tunnel.
+job_quran_long_dataset() {
+  if [ -z "${GCP_QURAN_LONG_DATASET_PATH:-}" ]; then
+    echo "GCP_QURAN_LONG_DATASET_PATH unset; skipping quran-long dataset (opt-in)"
+    return 0
+  fi
+  local local_dir="/content/quran_long_aya_dataset"
+  local marker="${local_dir}/.bootstrap_complete"
+  if [ -f "$marker" ]; then
+    echo "quran-long dataset already downloaded (marker $marker); skipping"
+    return 0
+  fi
+  mkdir -p "$local_dir"
+  gsutil -m rsync -r "$GCP_QURAN_LONG_DATASET_PATH" "$local_dir"
+  touch "$marker"
+}
+
 # --- HF cache pre-warm: no custom directory tree, just make these a cache
 # hit instead of a stall the first time training actually asks for them. ---
 job_hf_yue2_backbone() {
@@ -361,6 +382,10 @@ if [ "$MODE" = "training" ]; then
   if [ -n "${GCP_PRON_DATASET_PATH:-}" ]; then
     start_job pron_dataset job_pron_dataset
   fi
+  # opt-in: the quran_long_aya_r8 dataset
+  if [ -n "${GCP_QURAN_LONG_DATASET_PATH:-}" ]; then
+    start_job quran_long_dataset job_quran_long_dataset
+  fi
   start_job hf_yue2_backbone job_hf_yue2_backbone
   start_job hf_mert job_hf_mert
   start_job hf_tokenizer_head job_hf_tokenizer_head
@@ -445,6 +470,17 @@ if [ "$MODE" = "training" ]; then
     fail=1
   else
     echo "[ok]   dataset: $track_count tracks in $DATASET_LOCAL"
+  fi
+
+  # quran_long_aya_r8 dataset (opt-in). Count train PAIRS (.txt), expect 81,006.
+  if [ -n "${GCP_QURAN_LONG_DATASET_PATH:-}" ]; then
+    ql_pairs=$(find /content/quran_long_aya_dataset/train -maxdepth 1 -name "*.txt" 2>/dev/null | wc -l)
+    if [ "$ql_pairs" -eq 0 ]; then
+      echo "[FAIL] quran-long dataset empty — check /content/logs/quran_long_dataset.log and the GCS path"
+      fail=1
+    else
+      echo "[ok]   quran-long dataset: $ql_pairs train pairs (expect 81006)"
+    fi
   fi
 
   if [ -f "$AI_TOOLKIT/run.py" ]; then
