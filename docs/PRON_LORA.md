@@ -1,5 +1,10 @@
 # AR-only pronunciation LoRA (`pron_lora_ar_only_r8`)
 
+> **Superseded as the pronunciation donor (2026-09-27).** The donor is now the long-aya
+> Quran run (`quran_long_aya_r8_s10`; runbook [`PRON_LORA_LONG.md`](PRON_LORA_LONG.md)), and
+> the `pron_lora_ar_only_r8` family was archived to GCS `archive/pron_lora_ar_only_legacy/`
+> (`docs/LORA_INVENTORY.md`). Kept as the historical training runbook.
+
 A **separate** small LoRA trained on Quran verse recitation (audio + fully
 diacritized text) to sharpen consonant articulation (ح خ ع ض). It is **AR-only**
 (the AR expert carries the text/next-token path; `network_kwargs.ignore_if_contains:
@@ -43,7 +48,7 @@ Then, as usual:
 ```bash
 git clone <this repo's URL>
 cd maqamrock-yue2-lora-finetuning
-git checkout pron-lora-ar-only     # the pron configs/docs live on this branch, not main
+git checkout main     # all configs/docs live on main since the BETA merge
 mkdir -p /content/logs
 setsid nohup bash bootstrap/setup.sh > /content/logs/setup.log 2>&1 & disown
 # authenticate vscode.dev in the foreground while setup runs
@@ -100,7 +105,7 @@ python train_ctl.py start --config config/pron_lora_ar_only.yml \
 
 ## Backup
 
-Training checkpoints back up to `<base>/pron_lora_ar_only_r8/output/`:
+Training checkpoints back up to `<base>/pron_lora_ar_only_r8_obsolete/output/` (renamed 2026-09-27):
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning

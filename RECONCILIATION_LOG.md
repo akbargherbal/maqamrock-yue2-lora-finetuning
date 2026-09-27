@@ -62,3 +62,43 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   - `SOURCE_OF_TRUTH.md`: added rows for the long-aya runbook, its configs, and its GCS dataset/cache/checkpoint artifacts.
 - Authority: `skills/docs-reconciler/SKILL.md` (live docs only); `DECISIONS.md` got a dated entry (frozen rule respected).
 - No config or hyperparameter changed.
+
+## 2026-09-27 — BETA merge: README/PROGRESS rewrite + pron-donor supersede rename
+
+- `README.md` rewritten as the statement of record (BETA framing; current artifacts = v2 style LoRA +
+  long-aya Quran pronunciation donor, `qfinal_a0.3/0.5` unselected candidates). Killed two false claims
+  found via local `gsutil`: the v1 run/dataset "GCS archive" is absent from the project prefix (no
+  surviving v1 adapter), and the pron LoRA is not "not scheduled" — it was built and superseded.
+  Authority: the live GCS listing + `docs/LORA_INVENTORY.md`.
+- `PROGRESS.md` compressed from 981 lines of narrative to **numbered milestones** (M1–M11 + open items)
+  under the user-approved frozen-doc exemption; pre-rewrite baseline recorded in the header
+  (`git show 39d1bbd:PROGRESS.md`). No claim inverted; outcomes preserved with evidence pointers.
+  `SOURCE_OF_TRUTH.md` rows split: `PROGRESS.md` = milestones, history = git.
+- Supersede rename applied **repo ⇄ GCS in lockstep**: the `pron_lora_ar_only_r8` family (15 merged
+  `c3050/c4575/cfinal_a0.*` + 3 source pins) moved to GCS `archive/pron_lora_ar_only_legacy/`; run prefix
+  renamed `pron_lora_ar_only_r8_obsolete/`. Repo refs updated: `docs/LORA_INVENTORY.md`, `docs/INFERENCE.md`,
+  `docs/PRON_LORA_MERGE.md`, `docs/PRON_LORA.md`, `docs/PRON_LORA_VERIFICATION.md`, `docs/PRON_LORA_SWEEP.md`,
+  `docs/L4_HANDOFF_TASK14C.md`, `bootstrap/setup.sh`, `SOURCE_OF_TRUTH.md`, `DECISIONS.md` (new entry).
+- De-branched the fresh-VM docs + notebooks (`git checkout main`); `docs/FUTURE_PRONUNCIATION_LORA.md`
+  got a "realized" banner. Reconciler after: 1828 claims / 45 docs, 1139 checkable, 18 flagged (1.6%),
+  all pre-existing benign except one glob in the new README (fixed); `graphify update .` refreshed
+  (956 nodes / 1726 edges).
+- Authority: user-approved consolidation + rename; no config or hyperparameter changed.
+
+## 2026-09-27 — `DECISIONS.md` condensed (second frozen-doc exemption pass)
+
+- `DECISIONS.md`: 46 headings / 370 lines → **11 sections / 88 lines**, grouped by topic instead of
+  chronology. Admission test per the file's charter: keep only what a fresh session would otherwise
+  re-litigate or rediscover (binding rules, verified source quirks, costly traps) — process narrative
+  and incident chronology were folded into their outcomes. Baseline recorded in the header:
+  `git show 39d1bbd:DECISIONS.md`. Compression only: no claim inverted, and the one now-false claim
+  (v1's "185-object GCS archive") was corrected against the live GCS listing.
+- Superseded/updated in place where live state overrode the old text: the LoRA library counts (now
+  style + qfinal; legacy archived), the notebooks' branch (`main`, since the BETA merge), and the donor
+  family (archived — see this session's rename entry above).
+- Citation re-point: `INFERENCE/suno_to_songs.py:18` `DECISIONS.md:111-119` → `DECISIONS.md:25`.
+- Reconciler exposed two `citation_out_of_range` hits — both pre-consolidation `DECISIONS.md:NN`
+  quotes inside this log (history). Doc-scoped them in `references/unverifiable.txt`
+  (`RECONCILIATION_LOG.md :: DECISIONS.md:*`), matching the existing history-quote curations.
+- Authority: user-approved consolidation per `skills/docs-reconciler/SKILL.md`; no config or
+  hyperparameter changed.

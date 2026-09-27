@@ -16,9 +16,6 @@ is out of scope and archived (see the end of this file).
   audio_cpp/
     style/                         # v2 style adapter, audio.cpp-loadable (rank 32)
     pron/
-      c3050_a0.1 … c3050_a0.5/     # pron ckpt 3050 x alpha 0.1-0.5
-      c4575_a0.1 … c4575_a0.5/     # pron ckpt 4575 x alpha 0.1-0.5
-      cfinal_a0.1 … cfinal_a0.5/   # pron ckpt 6100 (final) x alpha 0.1-0.5
       qfinal_a0.3/ qfinal_a0.5/    # quran_long_aya_r8_s10 final x alpha 0.3/0.5
   source/                          # fused ai-toolkit finals the merges are built from
 ```
@@ -28,71 +25,98 @@ are clearly non-canonical (`audiocpp_inference/…_sweep/`, `pron_*_sweep/`, etc
 Local paths under `/content/` are ephemeral and re-staged by `bootstrap/setup.sh`
 each VM.
 
+**2026-09-27 — the `pron_lora_ar_only_r8` donor family was superseded.** The current
+pronunciation donor is the long-aya Quran run (`quran_long_aya_r8_s10`); its 15 merged
+`c3050/c4575/cfinal_a0.*` adapters plus the 3 `pron_lora_ar_only_r8` source pins were
+**archived out of the library** to `<base>/archive/pron_lora_ar_only_legacy/` (original
+paths preserved), and the run prefix was renamed `<base>/pron_lora_ar_only_r8_obsolete/`.
+See "Superseded" below. Only the two `qfinal_a*` merges remain current.
+
 ## Counts
 
 | Class | Count | Notes |
 |---|---|---|
-| Library adapters (AR+NAR pairs) | **18** | style + 15 pron merges (`{3050,4575,6100}` × α 0.1–0.5) + 2 qfinal merges; all unlistened |
-| Fused source adapters (ai-toolkit) | **3 families** | v2 style; pron AR-only r8 (ckpts 3050/4575/6100 pinned); quran_long_aya_r8_s10 (final, AR-only r8) |
+| Current library adapters (AR+NAR pairs) | **3** | style + 2 qfinal merges; qfinal unlistened |
+| Fused source adapter pinned in `loras/source/` | **1** | v2 style only |
+| Superseded — `pron_lora_ar_only_r8` family (archived) | **15 merges + 3 source pins** | `archive/pron_lora_ar_only_legacy/` |
 | Experimental adapters (in scope, α≤0.5) | **1** | `c1525_a0.5` |
 | Archived (α>0.5) | **4 configs** | `c3050_a0.55`, `c3050_a0.65`, `c3050_a1.0`, `cfinal_a1.0` |
-| Objects in `loras/` | **40** | style 2 + pron 30 + qfinal 4 + source 4 (~2.89 GiB) |
+| Objects in `loras/` | **7** | style 2 + qfinal 4 + source 1 |
 
-## Library adapters (`loras/`, audio.cpp-loadable)
+## Current library adapters (`loras/`, audio.cpp-loadable)
 
 Loadable by `audiocpp_cli` via `yue2.ar_lora` / `yue2.nar_lora`, scale 1.0. The
 **converted AR sha256 is the stable identity** (see caveats). Every AR-only merge
-(pron + qfinal) shares the same NAR — `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6`
+shares the same NAR — `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6`
 (copied from v2, independent of α); the style adapter's NAR is `ad2c8d86…`.
 
-| Config | Status | pron ckpt | α | AR rank | converted AR sha256 | Path in `loras/` |
-|---|---|---:|---:|---:|---|---|
+| Config | Status | pron donor | α | AR rank | converted AR sha256 | Path in `loras/` |
+|---|---|---|---:|---:|---:|---|---|
 | style (`a0`) | base style | — | 0 | 32 | `747d5cfe2224b1bae6e582ccf5f2ee2a57e3f030c53d54e134f34a85960426fa` | `audio_cpp/style/` |
-| `c3050_a0.1` | candidate (unlistened) | 3050 | 0.1 | 40 | `184bbd29b552751ded9849429a81f74165ccef13ff82d2befb2978efcbdcbb32` | `audio_cpp/pron/c3050_a0.1/` |
-| `c3050_a0.2` | candidate (unlistened) | 3050 | 0.2 | 40 | `c68217ab619a9cfa992bbba650f03dd19616ea19fd0967060d0a45e9e415d34c` | `audio_cpp/pron/c3050_a0.2/` |
-| `c3050_a0.3` | candidate (unlistened) | 3050 | 0.3 | 40 | `dd0d495924c3b533df2fe89cdb5ff82c5a708047c3e3b0bf6ccec42d6033c6e9` | `audio_cpp/pron/c3050_a0.3/` |
-| `c3050_a0.4` | candidate (unlistened) | 3050 | 0.4 | 40 | `210daf9f1f042d13929fd3be48ebd24c9e76618ce0cf4ba1eb6e555d907c6218` | `audio_cpp/pron/c3050_a0.4/` |
-| `c3050_a0.5` | candidate (unlistened) | 3050 | 0.5 | 40 | `33e824f24f1eec1ab06a45365e93a19b078a2a7cfbea724eba1b908d27360509` | `audio_cpp/pron/c3050_a0.5/` |
-| `c4575_a0.1` | candidate (unlistened) | 4575 | 0.1 | 40 | `98d2d1e01dcd7ef0a6841163cf4ea9facc7780157e9efc781598d76cbff3e4fc` | `audio_cpp/pron/c4575_a0.1/` |
-| `c4575_a0.2` | candidate (unlistened) | 4575 | 0.2 | 40 | `2327270db35ff9e28631bb47f2f381427e14752273d673a6f5fb7c8df1ef94e6` | `audio_cpp/pron/c4575_a0.2/` |
-| `c4575_a0.3` | candidate (unlistened) | 4575 | 0.3 | 40 | `a3aa24ad27ad7bda51892b5acf760f47f379191f3239ec79637d5dd1058d9b14` | `audio_cpp/pron/c4575_a0.3/` |
-| `c4575_a0.4` | candidate (unlistened) | 4575 | 0.4 | 40 | `dfdac71eaaa90da35795e171535be134ca3d96f7f1378d671a7d47c0fa8e6d9d` | `audio_cpp/pron/c4575_a0.4/` |
-| `c4575_a0.5` | candidate (unlistened) | 4575 | 0.5 | 40 | `ebd22026495125e74ab48373ad0ce8a8d767cdb625e018affc38c24b1fc3e56d` | `audio_cpp/pron/c4575_a0.5/` |
-| `cfinal_a0.1` | candidate (unlistened) | 6100 | 0.1 | 40 | `cebe662eab01faba193dc5781656f9f64ce02d5332c4d5505079a51d03619bb2` | `audio_cpp/pron/cfinal_a0.1/` |
-| `cfinal_a0.2` | candidate (unlistened) | 6100 | 0.2 | 40 | `0c14b7ba4daae1e665b9c1f43d05c0b9abe90a8e983dbe64c38c4b7da6b2cabe` | `audio_cpp/pron/cfinal_a0.2/` |
-| `cfinal_a0.3` | candidate (unlistened) | 6100 | 0.3 | 40 | `1c99a1c951acbf1662c5bb3e31f66ec0472dba17c8000ba1fa054a4e6c2e90ec` | `audio_cpp/pron/cfinal_a0.3/` |
-| `cfinal_a0.4` | candidate (unlistened) | 6100 | 0.4 | 40 | `d149360f88108f57a9861fbeace29786057f106eee016a22e0d22e376601c57f` | `audio_cpp/pron/cfinal_a0.4/` |
-| `cfinal_a0.5` | candidate (unlistened) | 6100 | 0.5 | 40 | `525d3af25dfcddabbd587673c36dfaecd148cf97a0dfc6d90cbede15ed700ada` | `audio_cpp/pron/cfinal_a0.5/` |
-| `qfinal_a0.3` | candidate (unlistened) | qfinal 8100 | 0.3 | 40 | `0169e5a0ef7d47349bc707c10b3fbf5d937f941e3d28896e9970f0dc3894bdf6` | `audio_cpp/pron/qfinal_a0.3/` |
-| `qfinal_a0.5` | candidate (unlistened) | qfinal 8100 | 0.5 | 40 | `3a06265f33854825309f1cb10ab4ca5c36acf8692491186321b58c867eca90d2` | `audio_cpp/pron/qfinal_a0.5/` |
+| `qfinal_a0.3` | candidate (unlistened) | quran s10 final 8100 | 0.3 | 40 | `0169e5a0ef7d47349bc707c10b3fbf5d937f941e3d28896e9970f0dc3894bdf6` | `audio_cpp/pron/qfinal_a0.3/` |
+| `qfinal_a0.5` | candidate (unlistened) | quran s10 final 8100 | 0.5 | 40 | `3a06265f33854825309f1cb10ab4ca5c36acf8692491186321b58c867eca90d2` | `audio_cpp/pron/qfinal_a0.5/` |
 
-The full 15-cell grid was completed 2026-09-26 from the pinned `loras/source/` inputs
-with `merge_pron_lora.py` + the converter. Independent reproductions matched the
-earlier records exactly where they overlapped: `c3050_a0.2` `c68217ab…`,
-`c4575_a0.5` `ebd22026…`, `cfinal_a0.5` `525d3af2…` — same data, same pipeline.
-
-The two `qfinal_a*` merges were built 2026-09-27 from a **different source family** —
-`quran_long_aya_r8_s10` (the long-aya Quran pron run's final checkpoint, step 8100),
-not `pron_lora_ar_only_r8`. Source sha256
+The two `qfinal_a*` merges were built 2026-09-27 from `quran_long_aya_r8_s10` (the
+long-aya Quran pron run's final checkpoint, step 8100). Source sha256
 `f8c842e48b93d142bc3cfee6e98f54809020813ae272485a4afb849320b1e2e8`; merged with the same
 v2 style (`b1d09098…`) at α 0.3/0.5, rank 40, NAR zero-padded to the shared `7d9324bf…`.
 Built by `merge_pron_lora.py --pron <quran_long_aya_r8_s10.safetensors> --alpha <a>` +
 the converter, for the Suno/trigger inference sweep (`INFERENCE/qfinal_suno_sweep.sh`).
 
+## Superseded — `pron_lora_ar_only_r8` donor family
+
+The AR-only pronunciation LoRA trained on the Quran-recitation set
+(`pron_lora_ar_only_r8`, 6100/6100) and its 15 merged adapters are **no longer current**:
+the donor was taken over by the long-aya Quran run (`quran_long_aya_r8_s10`). Archived
+2026-09-27 (md5-verified, original paths preserved):
+
+```
+<base>/archive/pron_lora_ar_only_legacy/
+  loras/audio_cpp/pron/{c3050,c4575,cfinal}_a0.{1..5}/   # 15 dirs / 30 files
+  loras/source/pron_lora_ar_only_r8{,_000003050,_000004575}.safetensors   # 3 pins
+<base>/pron_lora_ar_only_r8_obsolete/                     # renamed run prefix (was pron_lora_ar_only_r8/)
+```
+
+Kept for identity (the hashes are stable; the paths above are the archive):
+
+| Config | pron ckpt | α | converted AR sha256 |
+|---|---:|---:|---|
+| `c3050_a0.1` | 3050 | 0.1 | `184bbd29b552751ded9849429a81f74165ccef13ff82d2befb2978efcbdcbb32` |
+| `c3050_a0.2` | 3050 | 0.2 | `c68217ab619a9cfa992bbba650f03dd19616ea19fd0967060d0a45e9e415d34c` |
+| `c3050_a0.3` | 3050 | 0.3 | `dd0d495924c3b533df2fe89cdb5ff82c5a708047c3e3b0bf6ccec42d6033c6e9` |
+| `c3050_a0.4` | 3050 | 0.4 | `210daf9f1f042d13929fd3be48ebd24c9e76618ce0cf4ba1eb6e555d907c6218` |
+| `c3050_a0.5` | 3050 | 0.5 | `33e824f24f1eec1ab06a45365e93a19b078a2a7cfbea724eba1b908d27360509` |
+| `c4575_a0.1` | 4575 | 0.1 | `98d2d1e01dcd7ef0a6841163cf4ea9facc7780157e9efc781598d76cbff3e4fc` |
+| `c4575_a0.2` | 4575 | 0.2 | `2327270db35ff9e28631bb47f2f381427e14752273d673a6f5fb7c8df1ef94e6` |
+| `c4575_a0.3` | 4575 | 0.3 | `a3aa24ad27ad7bda51892b5acf760f47f379191f3239ec79637d5dd1058d9b14` |
+| `c4575_a0.4` | 4575 | 0.4 | `dfdac71eaaa90da35795e171535be134ca3d96f7f1378d671a7d47c0fa8e6d9d` |
+| `c4575_a0.5` | 4575 | 0.5 | `ebd22026495125e74ab48373ad0ce8a8d767cdb625e018affc38c24b1fc3e56d` |
+| `cfinal_a0.1` | 6100 | 0.1 | `cebe662eab01faba193dc5781656f9f64ce02d5332c4d5505079a51d03619bb2` |
+| `cfinal_a0.2` | 6100 | 0.2 | `0c14b7ba4daae1e665b9c1f43d05c0b9abe90a8e983dbe64c38c4b7da6b2cabe` |
+| `cfinal_a0.3` | 6100 | 0.3 | `1c99a1c951acbf1662c5bb3e31f66ec0472dba17c8000ba1fa054a4e6c2e90ec` |
+| `cfinal_a0.4` | 6100 | 0.4 | `d149360f88108f57a9861fbeace29786057f106eee016a22e0d22e376601c57f` |
+| `cfinal_a0.5` | 6100 | 0.5 | `525d3af25dfcddabbd587673c36dfaecd148cf97a0dfc6d90cbede15ed700ada` |
+
+The full 15-cell grid was completed 2026-09-26 from the then-pinned `loras/source/` inputs
+with `merge_pron_lora.py` + the converter; independent reproductions matched the earlier
+records exactly where they overlapped (`c3050_a0.2` `c68217ab…`, `c4575_a0.5` `ebd22026…`,
+`cfinal_a0.5` `525d3af2…`). `c3050_a0.4`'s Task-19 sidecar/record is in an unpushed bundle;
+its hash above is from the GCS object.
+
 ## Fused source adapters (`loras/source/`)
 
 Inputs to `merge_pron_lora.py`. These pinned snapshots (plus the run prefixes) rebuild
-the grid; training runs keep the full numbered checkpoint sets.
+an adapter; training runs keep the full numbered checkpoint sets.
 
 | Adapter | Rank | sha256 | Path |
 |---|---|---:|---|
 | v2 style (AR+NAR, final step 3000) | 32 | `b1d090987355303129a3765d257e61c983b91d48cecb8a30aa424e09cdd24cd4` | `loras/source/akbar_arabic_rock_lora.safetensors` (+ 11 numbered checkpoints in `akbar_arabic_rock_lora/output/`) |
-| pron AR-only r8, ckpt 3050 | 8 | `ead30d5202dec368838304546d5400ce46e4a2da713a19a9236781f575178a21` | `loras/source/pron_lora_ar_only_r8_000003050.safetensors` |
-| pron AR-only r8, ckpt 4575 | 8 | `c78bb5b6ea5abf551a209529bdee4e1b0f5d1ea87f14c3373b2165b1325ea201` | `loras/source/pron_lora_ar_only_r8_000004575.safetensors` |
-| pron AR-only r8, ckpt 6100 (final) | 8 | `0d506719af3b8d5fc7af8dc211baf2767b169d7596d9239f4a2850a4d2d37bf5` | `loras/source/pron_lora_ar_only_r8.safetensors` |
 
-(pron ckpt 1525 `9d8333d9…` stays un-pinned in `pron_lora_ar_only_r8/output/` — not in
-the grid.)
+The three `pron_lora_ar_only_r8` pins (ckpts 3050 `ead30d52…`, 4575 `c78bb5b6…`, 6100
+`0d506719…`) are **archived** — see "Superseded" above. The `quran_long_aya_r8_s10` final
+is **not** pinned in `loras/source/`; it lives in its run prefix
+(`<base>/quran_long_aya_r8_s10/output/`, sha256 `f8c842e4…`). pron ckpt 1525
+(`9d8333d9…`) stays un-pinned in the obsolete run prefix — not in any grid.
 
 ## Experimental adapters (in scope, α≤0.5 — NOT the library)
 
@@ -116,8 +140,6 @@ values remain in the historical records (`results/pron_fine_sweep/`,
 - **Stable identity:** verify with the **converted AR/NAR sha256** or the merged
   tensor digest — never the merged *file* sha256 (`safetensors 0.8.0` writes
   `__metadata__` in nondeterministic order). See `DECISIONS.md`.
-- `c3050_a0.4`'s Task-19 sidecar/record is in the unpushed bundle; its binaries are
-  canonical in `loras/` and the hash above is from the GCS object.
 - **Retired:** the v1 style-only adapter (`akbar_arabic_rock_lora_v1_nolyrics_archived/`)
   is documented in `PROGRESS.md` as a GCS archive but is **absent** from the project
   prefix — no surviving copy.
@@ -128,10 +150,10 @@ values remain in the historical records (`results/pron_fine_sweep/`,
 
 ```bash
 # style (the bootstrap default): loras/audio_cpp/style/ -> /content/converter/out/
-# a library candidate, e.g. c4575_a0.3:
-gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/c4575_a0.3" /content/converter/out/
+# a current candidate, e.g. qfinal_a0.5:
+gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/qfinal_a0.5" /content/converter/out/
 # then run with explicit overrides (or let run_one.sh's defaults use the style pair):
-LORA_AR=/content/converter/out/c4575_a0.3/akbar_arabic_rock_lora_ar.safetensors \
-LORA_NAR=/content/converter/out/c4575_a0.3/akbar_arabic_rock_lora_nar.safetensors \
+LORA_AR=/content/converter/out/qfinal_a0.5/akbar_arabic_rock_lora_ar.safetensors \
+LORA_NAR=/content/converter/out/qfinal_a0.5/akbar_arabic_rock_lora_nar.safetensors \
   bash INFERENCE/run_one.sh Hijaz <seed>
 ```

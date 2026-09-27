@@ -1,17 +1,17 @@
-# Graph Report - maqamrock-yue2-lora-finetuning  (2026-09-26)
+# Graph Report - maqamrock-yue2-lora-finetuning  (2026-09-27)
 
 ## Corpus Check
-- 123 files · ~193,682 words
+- 141 files · ~231,100 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 3 file(s) not represented in the graph (top: (none) 1, .ini 1, .log 1)
+- Unclassified: 4 file(s) not represented in the graph (top: (none) 1, .ipynb 1, .ini 1)
 
 ## Summary
-- 923 nodes · 1635 edges · 60 communities (45 shown, 15 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 60 edges (avg confidence: 0.79)
+- 1006 nodes · 1797 edges · 72 communities (47 shown, 25 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 68 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c5f11dcc`
+- Built from commit: `39d1bbde`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -19,43 +19,43 @@
 - generate.py
 - GCS Backup Tests
 - conftest.py
-- verify_claims.py
-- test_generate.py
-- Repo knowledge graph (graphify)
 - pathlib
+- test_generate.py
+- unverifiable.txt token allowlist
+- sys
 - Offline AR-Loss Replay
-- Dataset Build & Suno Conversion
+- suno_to_songs.py
 - GCS Backup Engine
-- AB Evaluation Packaging
+- prepare_ab_eval.py
 - A/B blind evaluation packaging
 - Training Loss Curves
 - test_merge_pron_lora.py
 - YuE2 Findings & Docs
 - test_prepare_ab_eval.py
-- setup.sh
+- ext_root_secrets_env
 - audiocpp Build Docs
-- generate_plots.py
-- Inference End-to-End Runbook
-- Suno Conversion Tests
+- opencode.json
+- Project Overview
+- test_suno_to_songs.py
 - Held-Out Eval & Dataset v2
 - Training loss/loss Metric
 - Agent Operating Contract
-- Blinded A/B audio evaluation packaging
+- Generated Listening Packages Live in GCS
 - Operations Docs Runbook Index
 - Pron LoRA Training Run
-- LoRA inventory
+- train_ctl.py
 - Observability Sources
 - Training Configs
 - v1 Run Lessons
 - Inference Assets & LoRA Merge
 - L4 vs A100 Decision
 - Crash-Diagnose & Resume Skills
-- maqam_lyric_swap Results
-- pron_knob_probe Results
-- Merge Candidates Results
+- prepare_pron_dataset.py
+- monitor_loss.py
+- Merge-to-main plan (BETA) — decisions locked
+- test_duration_cap.py
 - Repo Audit Backlog
-- pron_ckpt_sweep Results
-- T4 Re-Render
+- Inference End-to-End Runbook
 - Arabic Pron LoRA Research Notes
 - pron_knob_probe Script
 - Merge Regenerate Script
@@ -74,20 +74,32 @@
 - Run Name Reuse
 - Token-Count Check
 - Torch Stack Pin
-- ref_fs Helper
-- ref_path Helper
+- graphify.js
+- Working with the agent — experience checklist
+- PRON LoRA LONG — build & multi-day training plan (`quran_long_aya_r8`)
+- Training analysis — `quran_long_aya_r8_s10` (long-aya Quran pronunciation LoRA, 10% subsample)
+- graphify.serve MCP server
+- qfinal_suno_sweep.sh
+- graphify-out/GRAPH_REPORT.md
+- Graph is branch-specific; dangling-endpoint edges gap
+- graphify explain
+- graphify-out/graph.html
+- graphify install --platform
+- Map, not the territory
+- graphify path
+- Bootstrap Split --training / --inference
 
 ## God Nodes (most connected - your core abstractions)
 1. `FakeGsutil` - 35 edges
 2. `_patch()` - 31 edges
 3. `_invoke()` - 22 edges
-4. `Repo knowledge graph (graphify)` - 21 edges
-5. `Operations Docs Runbook Index` - 19 edges
-6. `main()` - 17 edges
-7. `check()` - 16 edges
-8. `resolve_songs()` - 16 edges
-9. `make()` - 16 edges
-10. `run_batch()` - 15 edges
+4. `Operations Docs Runbook Index` - 18 edges
+5. `main()` - 17 edges
+6. `check()` - 16 edges
+7. `resolve_songs()` - 16 edges
+8. `make()` - 16 edges
+9. `run_batch()` - 15 edges
+10. `setup_ab_evaluation()` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `A/B blind evaluation packaging` --semantically_similar_to--> `Blinded Listening Review`  [INFERRED] [semantically similar]
@@ -96,10 +108,10 @@
   docs/GRAPHIFY.md → RECONCILIATION_LOG.md
 - `v1 to v2 Supersession` --semantically_similar_to--> `Retraction: LoRA Conversion Required`  [INFERRED] [semantically similar]
   verification.md → docs/yue2-gguf-lora-findings.md
+- `Inference Batch Run (YuE2 GGUF + LoRA)` --conceptually_related_to--> `Operations Docs Runbook Index`  [INFERRED]
+  skills/inference-batch-run/SKILL.md → docs/README.md
 - `README Observability Section` --semantically_similar_to--> `Training Observability Sources`  [INFERRED] [semantically similar]
   README.md → AGENTS.md
-- `graphify update .` --semantically_similar_to--> `Drift Reconciliation Pass (live docs)`  [INFERRED] [semantically similar]
-  docs/GRAPHIFY.md → RECONCILIATION_LOG.md
 
 ## Import Cycles
 - None detected.
@@ -110,7 +122,6 @@
 - **Training Observability Stack** — agents_observability_sources, decisions_loss_log_db_metrics, decisions_no_gpu_logging, readme_observability [EXTRACTED 0.85]
 - **he_loss_metric_panel** — training_analysis_v1_nolyrics_archived_01_loss_curves, concept_loss_loss, concept_loss_ar_ce, concept_loss_ar_kl, concept_additional_model_loss [EXTRACTED 1.00]
 - **Docs Reconciliation Workflow** — skills_docs_reconciler_skill, skills_docs_reconciler_scripts_extract_claims, skills_docs_reconciler_scripts_verify_claims, skills_docs_reconciler_skill_human_checkpoint, skills_docs_reconciler_references_example_drift_report [EXTRACTED 1.00]
-- **graphify output artifact set** — docs_graphify_repo_knowledge_graph_graphify, docs_graphify_graph_report, docs_graphify_graph_json, docs_graphify_graph_html, docs_graphify_manifest_json, docs_graphify_cache [EXTRACTED 1.00]
 - **Per-GPU CUDA Build Workflow** — docs_audiocpp_gpu_arch_builds, docs_audiocpp_gpu_arch_builds_cross_compilation, docs_audiocpp_gpu_arch_builds_cuda_arch_flag, docs_audiocpp_gpu_arch_builds_sass_vs_ptx, docs_audiocpp_gpu_arch_builds_per_arch_gcs_staging, docs_audiocpp_gpu_arch_builds_build_verification, docs_audiocpp_gpu_arch_builds_t4_sm75_worked_example [EXTRACTED 1.00]
 - **Pronunciation Alpha Sweep Results** — results_pron_sweep_readme, results_pron_sweep_readme_pron_alpha_sweep, results_pron_sweep_readme_short_collapse [EXTRACTED 1.00]
 - **pron_lora_ar_only_r8_loss_terms** — concept_loss_loss_metric, concept_loss_ar_ce_metric, concept_loss_ar_kl_metric, concept_additional_model_loss_metric [EXTRACTED 1.00]
@@ -123,7 +134,7 @@
 - **Docs reconciliation workflow** — reconciliation_log_docs_reconciler, reconciliation_log_drift_reconciliation, reconciliation_log_unverifiable_allowlist_curation, reconciliation_log_source_of_truth [INFERRED 0.85]
 - **v2 + pron LoRA Merge Pipeline** — docs_pron_lora_merge_offline_merge, docs_pron_lora_merge_scaling_convention, docs_pron_lora_merge_rank_concatenation, results_pron_production_merge_readme_production_merge, docs_lora_inventory_lora_library [INFERRED 0.85]
 
-## Communities (60 total, 15 thin omitted)
+## Communities (72 total, 25 thin omitted)
 
 ### Community 0 - "generate.py"
 Cohesion: 0.10
@@ -137,41 +148,41 @@ Nodes (44): _args(), _close_log_handlers(), _dirs(), FakeGsutil, _invoke(), lg()
 Cohesion: 0.23
 Nodes (15): bak(), dur(), gen(), _load_module(), lyrics_ar(), manifest_path(), _no_vram_sleep(), fixture (+7 more)
 
-### Community 3 - "verify_claims.py"
-Cohesion: 0.09
-Nodes (37): collections, datetime, fnmatch, json, re, Example Drift Report, Missing Path Findings, Unverifiable Counts (+29 more)
+### Community 3 - "pathlib"
+Cohesion: 0.08
+Nodes (44): collections, datetime, fnmatch, pathlib, re, Example Drift Report, Missing Path Findings, Unverifiable Counts (+36 more)
 
 ### Community 4 - "test_generate.py"
 Cohesion: 0.05
-Nodes (23): hashlib, _make_run(), parametrize, Unit tests for INFERENCE/generate.py (GPU-free)., Minimal stand-in for subprocess.CompletedProcess., _Run, _songs_json(), _stub_assets() (+15 more)
+Nodes (23): _make_run(), parametrize, Unit tests for INFERENCE/generate.py (GPU-free)., Minimal stand-in for subprocess.CompletedProcess., _Run, _songs_json(), _stub_assets(), test_cap_parity_with_duration_cap_cli() (+15 more)
 
-### Community 5 - "Repo knowledge graph (graphify)"
-Cohesion: 0.05
-Nodes (45): Graphify Knowledge Graph Usage, Graph is branch-specific; dangling-endpoint edges gap, graphify-out/cache/ per-file extraction cache, Caveats, Enable it in another agent / environment, graphify explain, Extraction cache keyed by version and prompt, graphify-out/graph.html (+37 more)
+### Community 5 - "unverifiable.txt token allowlist"
+Cohesion: 0.09
+Nodes (27): graphify-out/cache/ per-file extraction cache, Extraction cache keyed by version and prompt, graphify-out/manifest.json, Doc/paper semantic extraction assistant skill, Dated snapshot graphify-out/<YYYY-MM-DD>/, graphify update ., Admission Test (keep only what a fresh session would re-litigate), DECISIONS/PROGRESS Consolidation (2026-09-23) (+19 more)
 
-### Community 6 - "pathlib"
+### Community 6 - "sys"
 Cohesion: 0.07
-Nodes (43): argparse, Connection, arabic_letters(), duration_cap(), main(), Dynamic YuE2 `semantic_max_tokens` cap derived from a lyrics file. Canonical…, Return (duration_s, duration_rounded_10s, token_cap, quantile)., main() (+35 more)
+Nodes (43): main(), process(), Path, Append ' \u06dd' (space + ARABIC END OF AYAH) to the aya/lyrics line of each…, argparse, csv, main(), poll() (+35 more)
 
 ### Community 7 - "Offline AR-Loss Replay"
 Cohesion: 0.10
 Nodes (34): dataclasses, attach_adapter(), build_arg_parser(), build_model(), _import_ai_toolkit(), ItemResult, list_val_pairs(), load_config_sections() (+26 more)
 
-### Community 8 - "Dataset Build & Suno Conversion"
-Cohesion: 0.11
-Nodes (32): build_parser(), build_report(), build_style(), canonical_tag(), clean_lyrics(), collect_entries(), dedup(), extract_maqam() (+24 more)
+### Community 8 - "suno_to_songs.py"
+Cohesion: 0.10
+Nodes (34): build_parser(), build_report(), build_style(), canonical_tag(), clean_lyrics(), clean_lyrics_verbatim(), collect_entries(), dedup() (+26 more)
 
 ### Community 9 - "GCS Backup Engine"
 Cohesion: 0.11
 Nodes (32): ensure_manifest(), main(), parse_args(), parse_extra_specs(), parse_watch_specs(), Namespace, Path, Same shape as TRAINING_TARGETS, but for an arbitrary run name. `--run-name`… (+24 more)
 
-### Community 10 - "AB Evaluation Packaging"
-Cohesion: 0.10
-Nodes (28): No Adapter Is Best Before the Blind Listen; alpha <= 0.5, Blinded A/B Listening Package, EVAL.txt / KEYS.txt Public-Secret Split, ab-blind-eval Skill, build_parser(), _discover(), _ffmpeg_convert(), _group_pairs() (+20 more)
+### Community 10 - "prepare_ab_eval.py"
+Cohesion: 0.11
+Nodes (27): No Adapter Is Best Before the Blind Listen; alpha <= 0.5, Blinded A/B Listening Package, EVAL.txt / KEYS.txt Public-Secret Split, ab-blind-eval Skill, build_parser(), _discover(), _ffmpeg_convert(), _group_pairs() (+19 more)
 
 ### Community 11 - "A/B blind evaluation packaging"
-Cohesion: 0.14
-Nodes (21): Alpha Capped at 0.5, LoRA Library, Converted AR/NAR sha256 as Stable Identity, Offline v2 + pron LoRA Merge, Rank Concatenation Merge Method, ai-toolkit Scaling Convention (alpha/rank)*(B@A), Pronunciation LoRA Alpha Sweep, Blinded Listening Review (+13 more)
+Cohesion: 0.13
+Nodes (22): Alpha Capped at 0.5, LoRA Library, Converted AR/NAR sha256 as Stable Identity, Offline v2 + pron LoRA Merge, Rank Concatenation Merge Method, ai-toolkit Scaling Convention (alpha/rank)*(B@A), Pronunciation LoRA Alpha Sweep, Blinded Listening Review (+14 more)
 
 ### Community 12 - "Training Loss Curves"
 Cohesion: 0.13
@@ -179,7 +190,7 @@ Nodes (27): Additional Model Loss, additional_model_loss metric, akbar_arabic_ro
 
 ### Community 13 - "test_merge_pron_lora.py"
 Cohesion: 0.07
-Nodes (36): _ab(), build_metadata(), _check_alpha_keys(), main(), merge(), MergeError, _proj(), Exception (+28 more)
+Nodes (37): hashlib, _ab(), build_metadata(), _check_alpha_keys(), main(), merge(), MergeError, _proj() (+29 more)
 
 ### Community 14 - "YuE2 Findings & Docs"
 Cohesion: 0.16
@@ -187,27 +198,19 @@ Nodes (23): Text Length to Audio Duration Cap (yue2_dataset), Asymmetric Loss Fa
 
 ### Community 15 - "test_prepare_ab_eval.py"
 Cohesion: 0.06
-Nodes (30): importlib_util, pytest, runpy, _invoke_cli(), parametrize, Path, Unit tests for INFERENCE/duration_cap.py (GPU-free). The CLI `main()` is…, test_cli_default_quantile() (+22 more)
-
-### Community 16 - "setup.sh"
-Cohesion: 0.11
-Nodes (6): confirm_hf(), setup.sh script, start_job(), usage(), ext_root_secrets_env, Bootstrap Split --training / --inference
+Nodes (33): importlib_util, os, pytest, signal, Unit tests for offline_ar_loss_replay.py (CPU-only, no model load). The replay…, make(), Path, Unit tests for INFERENCE/prepare_ab_eval.py (GPU-free, ffmpeg-free). The audio… (+25 more)
 
 ### Community 17 - "audiocpp Build Docs"
 Cohesion: 0.19
 Nodes (19): Building audiocpp_cli for a Specific GPU from a CPU-only Colab Runtime, scripts/build_linux.sh, Build Verification Procedure, ccache Build Caching, Compute Capabilities for T4 / A100 / L4, nvcc Cross-Compilation on a CPU Host, --cuda-arch Flag, Per-arch GCS Staging Convention (+11 more)
 
-### Community 18 - "generate_plots.py"
-Cohesion: 0.13
-Nodes (24): csv, main(), poll(), gpu_logger.py -------------- AI Toolkit logs no GPU…, matplotlib, matplotlib_pyplot, ndarray, numpy (+16 more)
+### Community 19 - "Project Overview"
+Cohesion: 0.40
+Nodes (5): Env Vars Staged by Launching Notebook, README Docs Index, Project Overview, Repo Layout, Running on Colab Section
 
-### Community 19 - "Inference End-to-End Runbook"
-Cohesion: 0.10
-Nodes (21): audio.cpp Seeds and Sidecar Policy, audio.cpp Build: --model-set full Was the Cost, audiocpp_inference Staging Rule, Inference Backup Is a Race Against VM Death, T4 VRAM Governed by Attention Kernel, audio.cpp docs/models/yue2.md Is CLI Flag Source of Truth, Env Vars Staged by Launching Notebook, One Shared Rented GPU (+13 more)
-
-### Community 20 - "Suno Conversion Tests"
-Cohesion: 0.21
-Nodes (13): _convert(), parametrize, Unit tests for INFERENCE/suno_to_songs.py (GPU-free)., test_bad_manifests(), test_defaults_and_file_mode(), test_dry_run_writes_nothing_and_determinism(), test_keep_both_and_filters(), test_keep_first() (+5 more)
+### Community 20 - "test_suno_to_songs.py"
+Cohesion: 0.09
+Nodes (28): main(), plan(), Path, Cross-maqam lyric swap: one maqam's caption+tag with the other's held-out…, Resolve each track's inputs + auto cap without touching the GPU., wav_frames(), main(), Path (+20 more)
 
 ### Community 21 - "Held-Out Eval & Dataset v2"
 Cohesion: 0.13
@@ -218,24 +221,20 @@ Cohesion: 0.17
 Nodes (16): additional_model_loss component declining from ~5.8 to ~3.9, loss/ar_ce component (autoregressive cross-entropy) declining from ~5.8 to ~3.6, loss/ar_kl component rising from 0 to ~1.5 (KL divergence term), Per-step loss curves 2x2 panel (loss/loss, loss/ar_ce, loss/ar_kl, additional_model_loss vs step), Per-step training loss metric (raw + 25-step mean), akbar_arabic_rock_lora training run, Primary loss/loss curve vs step with 50-step mean and trend line (-2.14e-04/step), loss_log.db SQLite metrics store (data source for loss curves) (+8 more)
 
 ### Community 23 - "Agent Operating Contract"
-Cohesion: 0.18
-Nodes (14): Agent Operating Contract, Auto-Resume Exception Policy, Backup Responsibility, Colab Is Ephemeral, command-handover Skill, agent_notes/current.md Handoff Surface, Agent Training-Control Policy, Handing Over a Command States Terminal Semantics (+6 more)
-
-### Community 24 - "Blinded A/B audio evaluation packaging"
-Cohesion: 0.25
-Nodes (6): Generated Listening Packages Live in GCS, Blinded A/B audio evaluation packaging, Conventions, Input layout, Usage, What it produces
+Cohesion: 0.16
+Nodes (15): Agent Operating Contract, Auto-Resume Exception Policy, Backup Responsibility, Colab Is Ephemeral, command-handover Skill, agent_notes/current.md Handoff Surface, Graphify Knowledge Graph Usage, Agent Training-Control Policy (+7 more)
 
 ### Community 25 - "Operations Docs Runbook Index"
-Cohesion: 0.19
-Nodes (13): Final backup & push checklist, GCS not append-only for the un-suffixed final adapter, Check how training is going, gpu_usage.csv hardware log, loss_log.db per-step metrics surface, Pause for the night, resume next session, ai-toolkit auto-resume from newest checkpoint, ai-toolkit Auto-Resume Rule (+5 more)
+Cohesion: 0.21
+Nodes (12): Final backup & push checklist, GCS not append-only for the un-suffixed final adapter, Check how training is going, gpu_usage.csv hardware log, loss_log.db per-step metrics surface, Pause for the night, resume next session, ai-toolkit auto-resume from newest checkpoint, ai-toolkit Auto-Resume Rule (+4 more)
 
 ### Community 26 - "Pron LoRA Training Run"
 Cohesion: 0.33
 Nodes (11): L4 handoff after Task 14c, pron-lora-ar-only branch, No _000006100 checkpoint; post-loop save is step 6100, AR-only pronunciation LoRA runbook, pron_lora_ar_only_r8 training run, network_kwargs.ignore_if_contains AR/NAR scoping, Blank trigger_word no-op, AR-only pronunciation LoRA source verification (+3 more)
 
-### Community 27 - "LoRA inventory"
-Cohesion: 0.20
-Nodes (9): Archived — α>0.5 (out of scope), Caveats, Counts, Experimental adapters (in scope, α≤0.5 — NOT the library), Fused source adapters (`loras/source/`), How to stage an adapter, Library adapters (`loras/`, audio.cpp-loadable), Library location (+1 more)
+### Community 27 - "train_ctl.py"
+Cohesion: 0.22
+Nodes (22): _alive(), build_parser(), cmd_start(), cmd_status(), cmd_stop(), _cmdline(), _cmdline_matches(), main() (+14 more)
 
 ### Community 28 - "Observability Sources"
 Cohesion: 0.32
@@ -261,29 +260,29 @@ Nodes (7): L4 vs A100 decision note, A100-SXM4-80GB, A100 measured ~4.3x faster 
 Cohesion: 0.33
 Nodes (7): command-handover Skill, Detached Hygiene Checklist, Foreground vs Detached Decision, crash-diagnose-and-resume Skill, Auto-Resume Policy, Fresh VM Restore Procedure, Stop Classification Table
 
-### Community 34 - "maqam_lyric_swap Results"
-Cohesion: 0.33
-Nodes (5): Blinded review, Configs, Groups, maqam_lyric_swap — cross-maqam lyric swap (Hijaz + Kurd), Tracks
+### Community 34 - "prepare_pron_dataset.py"
+Cohesion: 0.15
+Nodes (21): concurrent_futures, build(), write_one(), choose_splits(), Config, discover_source_audio(), load_tanzil(), main() (+13 more)
 
-### Community 35 - "pron_knob_probe Results"
-Cohesion: 0.33
-Nodes (5): Blinded review, Configs (one knob vs the anchor defaults), pron_knob_probe — request-option knob probe at ckpt 3050, alpha 0.5, Resources per generation, Tracks
+### Community 35 - "monitor_loss.py"
+Cohesion: 0.26
+Nodes (14): Connection, connect_readonly(), history(), latest_step(), list_keys(), main(), metrics_at_step(), Namespace (+6 more)
 
-### Community 36 - "Merge Candidates Results"
-Cohesion: 0.33
-Nodes (5): Large binaries are not committed, Non-obvious: file-level sha256 is not reproducible (tensor digest is), pron_production_merge — v2 + pron merge candidates (checkpoint 3050), Sidecars, Verification performed (2026-09-25, CPU)
+### Community 36 - "Merge-to-main plan (BETA) — decisions locked"
+Cohesion: 0.13
+Nodes (14): agent_notes / current, Corrections the rewrite MUST make (found 2026-09-27 via local `gsutil`), Ground truth (verified 2026-09-27, git + local gsutil), Locked decisions (this session), Merge-to-main plan (BETA) — decisions locked, Phase 1.5 — the supersede rename, repo + GCS in lockstep — **DONE**, Phase 1 — doc rewrite ON `pron-lora-long` — **DONE (uncommitted)**, Phase 2 — skipped (knobs stays on its branch) (+6 more)
+
+### Community 37 - "test_duration_cap.py"
+Cohesion: 0.21
+Nodes (9): runpy, _invoke_cli(), parametrize, Path, Unit tests for INFERENCE/duration_cap.py (GPU-free). The CLI `main()` is…, test_cli_default_quantile(), test_cli_empty_lyrics_uses_floor(), test_cli_explicit_quantile() (+1 more)
 
 ### Community 38 - "Repo Audit Backlog"
 Cohesion: 0.50
 Nodes (5): Repo audit: stale docs, drift & workflow backlog, No restore path for agent_notes/current.md, Flat inference out/ dir mixes unrelated runs, Staged scripts/ drifted from repo and self-perpetuates, Single status command for the whole job
 
-### Community 39 - "pron_ckpt_sweep Results"
-Cohesion: 0.40
-Nodes (4): Blinded review, Configs, pron_ckpt_sweep — pron checkpoints 1525 vs 4575 at alpha 0.5 (Hijaz + Kurd), Tracks
-
-### Community 40 - "T4 Re-Render"
-Cohesion: 0.40
-Nodes (4): Caveats, Result — the outputs differ, T4 re-render of the two lost Kurd WAVs (2026-09-25), Where
+### Community 40 - "Inference End-to-End Runbook"
+Cohesion: 0.13
+Nodes (16): audio.cpp Seeds and Sidecar Policy, audio.cpp Build: --model-set full Was the Cost, audiocpp_inference Staging Rule, Inference Backup Is a Race Against VM Death, T4 VRAM Governed by Attention Kernel, audio.cpp docs/models/yue2.md Is CLI Flag Source of Truth, One Shared Rented GPU, Prebuilt vs Source-Built audiocpp_cli (+8 more)
 
 ### Community 41 - "Arabic Pron LoRA Research Notes"
 Cohesion: 0.83
@@ -305,25 +304,45 @@ Nodes (3): model_kwargs.cot: off, Rank 32 LoRA + EMA 0.999, Rank, EMA, and cot Q
 Cohesion: 0.67
 Nodes (3): log_config Dead Key, log_dir TensorBoard Path, TensorBoard log_dir Writes to Subfolder
 
+### Community 59 - "graphify.js"
+Cohesion: 0.40
+Nodes (3): IMPORTANT: keep the reminder string free of backticks and $(...) constructs., ref_fs, ref_path
+
+### Community 61 - "Working with the agent — experience checklist"
+Cohesion: 0.25
+Nodes (7): 1. The gut read, 2. Score the experience (1 = bad, 5 = great), 3. Pitfalls I hit (tick what's true), 4. Moments, 5. The one thing, 6. Hand this to the agent (copy + fill), Working with the agent — experience checklist
+
+### Community 62 - "PRON LoRA LONG — build & multi-day training plan (`quran_long_aya_r8`)"
+Cohesion: 0.06
+Nodes (33): Checkpoint-eval on a second (T4) VM — while training runs, Commands that matter, Docs, First GPU session only (kickstart; obsolete once a checkpoint exists), Long-aya Quran pronunciation LoRA — runbook (canonical), 1. Objective, 2. Locked decisions, 3.1 Selection (from `selection_report.json`) (+25 more)
+
+### Community 63 - "Training analysis — `quran_long_aya_r8_s10` (long-aya Quran pronunciation LoRA, 10% subsample)"
+Cohesion: 0.29
+Nodes (6): Caveats, Loss trend (per 810-step decile), Next steps, Observations / flags, Run at a glance, Training analysis — `quran_long_aya_r8_s10` (long-aya Quran pronunciation LoRA, 10% subsample)
+
+### Community 71 - "graphify.serve MCP server"
+Cohesion: 0.67
+Nodes (3): graphify-out/graph.json, graphify-out/.graphify_python VM-specific interpreter, graphify.serve MCP server
+
 ## Knowledge Gaps
-- **107 isolated node(s):** `pron_alpha_sweep.sh script`, `pron_fine_sweep.sh script`, `run_one.sh script`, `github_auth.sh script`, `Input contract` (+102 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 318 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **132 isolated node(s):** `$schema`, `plugin`, `pron_alpha_sweep.sh script`, `pron_fine_sweep.sh script`, `run_one.sh script` (+127 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 351 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **25 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Operations Docs Runbook Index` connect `Operations Docs Runbook Index` to `L4 vs A100 Decision`, `Repo Audit Backlog`, `Arabic Pron LoRA Research Notes`, `A/B blind evaluation packaging`, `YuE2 Findings & Docs`, `audiocpp Build Docs`, `Blinded A/B audio evaluation packaging`, `Pron LoRA Training Run`, `LoRA inventory`?**
-  _High betweenness centrality (0.172) - this node is a cross-community bridge._
-- **Why does `Repo knowledge graph (graphify)` connect `Repo knowledge graph (graphify)` to `Operations Docs Runbook Index`, `Observability Sources`?**
-  _High betweenness centrality (0.083) - this node is a cross-community bridge._
-- **Why does `Inference End-to-End Runbook` connect `Inference End-to-End Runbook` to `GCS Backup Engine`, `Observability Sources`, `Inference Assets & LoRA Merge`?**
-  _High betweenness centrality (0.063) - this node is a cross-community bridge._
-- **What connects `pron_alpha_sweep.sh script`, `pron_fine_sweep.sh script`, `run_one.sh script` to the rest of the system?**
-  _107 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `Operations Docs Runbook Index` connect `Operations Docs Runbook Index` to `L4 vs A100 Decision`, `Repo Audit Backlog`, `Arabic Pron LoRA Research Notes`, `A/B blind evaluation packaging`, `YuE2 Findings & Docs`, `audiocpp Build Docs`, `Pron LoRA Training Run`, `Working with the agent — experience checklist`?**
+  _High betweenness centrality (0.116) - this node is a cross-community bridge._
+- **Why does `AR-only pronunciation LoRA runbook` connect `Pron LoRA Training Run` to `GCS Backup Engine`, `Operations Docs Runbook Index`?**
+  _High betweenness centrality (0.054) - this node is a cross-community bridge._
+- **Why does `Inference End-to-End Runbook` connect `Inference End-to-End Runbook` to `GCS Backup Engine`, `Project Overview`, `Observability Sources`, `Inference Assets & LoRA Merge`?**
+  _High betweenness centrality (0.052) - this node is a cross-community bridge._
+- **What connects `$schema`, `plugin`, `pron_alpha_sweep.sh script` to the rest of the system?**
+  _132 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `generate.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.09899749373433583 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10025062656641603 - nodes in this community are weakly interconnected._
 - **Should `GCS Backup Tests` be split into smaller, more focused modules?**
   _Cohesion score 0.1025974025974026 - nodes in this community are weakly interconnected._
-- **Should `verify_claims.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.09358974358974359 - nodes in this community are weakly interconnected._
+- **Should `pathlib` be split into smaller, more focused modules?**
+  _Cohesion score 0.07653061224489796 - nodes in this community are weakly interconnected._

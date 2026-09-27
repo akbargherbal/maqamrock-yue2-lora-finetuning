@@ -114,8 +114,9 @@ AUDIOCPP_PROMPTS_LOCAL="$AUDIOCPP_INFERENCE/prompts"
 AUDIOCPP_SCRIPTS_LOCAL="$AUDIOCPP_INFERENCE/scripts"
 if [ "$MODE" = "inference" ]; then
   # Canonical LoRA library (docs/LORA_INVENTORY.md): the current style adapter.
-  # Production v2+pron merges live under loras/audio_cpp/pron/<cfg>/ and are
-  # staged per-sweep, not by the bootstrap.
+  # Current pron merges (qfinal_a*) live under loras/audio_cpp/pron/<cfg>/ and are
+  # staged per-sweep, not by the bootstrap. The pron_lora_ar_only_r8 family is
+  # superseded/archived (archive/pron_lora_ar_only_legacy/).
   LORA_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/loras/audio_cpp/style"
   CONVERTER_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/audiocpp_inference/converter"
   AUDIOCPP_BIN_GCS="$GCP_BACKUP_BASE/audiocpp_inference/build/audiocpp_cli"

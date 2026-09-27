@@ -1,5 +1,9 @@
 # AR-only pronunciation LoRA — source verification (Task 14)
 
+> **Historical (2026-09-27).** Verifies the `pron_lora_ar_only_r8` donor, since superseded
+> by the long-aya Quran run (`docs/PRON_LORA_LONG.md`). Kept for the source-cited method and
+> the offline AR-loss replay.
+
 Read-only verification against `ostris/ai-toolkit` @ `460c29b` (cloned to
 `/content/ai-toolkit`, source only, no run). File:line citations are for that
 checkout. This is a **separate** AR-only LoRA that will be merged offline with

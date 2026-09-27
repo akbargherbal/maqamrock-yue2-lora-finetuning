@@ -16,12 +16,13 @@ History files are authoritative for what happened, never for what is true now.
 | Long-aya dataset + banked artifacts | GCS `<base>/quran_long_aya_dataset_s10.tar`, `<base>/…_s10/_latent_cache.tar`, `<base>/quran_long_aya_r8_s10/output/` | dataset tar · banked cache · checkpoints+optimizer |
 | Pron LoRA source verification / offline eval | `docs/PRON_LORA_VERIFICATION.md` | A0–A7 + smoke + A100 run + AR-loss replay |
 | v2 + pron merge (scaling, ranks) | `docs/PRON_LORA_MERGE.md` + `merge_pron_lora.py --help` | alpha convention is source-verified there |
-| LoRA library (what exists, how many, where) | `docs/LORA_INVENTORY.md` | canonical: `<base>/loras/`; mechanics stay in `PRON_LORA_MERGE.md` |
+| LoRA library (what exists, how many, where) | `docs/LORA_INVENTORY.md` | canonical: `<base>/loras/` (current: style + qfinal; superseded pron_lora_ar_only_r8 under `<base>/archive/pron_lora_ar_only_legacy/`) |
 | Alpha sweep / listening review | `docs/PRON_LORA_SWEEP.md` | procedure + Rounds 1–5; numbers in `results/{pron_sweep,pron_fine_sweep,pron_ckpt_sweep,maqam_lyric_swap,pron_knob_probe}/` |
 | Blinded listening packages (audio) | GCS `<base>/listening/` | generated mp3 packages; **not repo content** (`.gitignore` `*_INPUT/`) |
 | Blinded A/B listening package | `docs/AB_BLIND_EVAL.md` + `INFERENCE/prepare_ab_eval.py --help` | script flags beat prose; skill `ab-blind-eval` |
 | Why a decision was made | `DECISIONS.md` | read-only; cite, don't rewrite |
-| History / outcomes | `PROGRESS.md` | read-only |
+| Milestones (outcomes) | `PROGRESS.md` | read-only; outcomes, not narrative |
+| Full history | git | `git log`; pre-rewrite narrative `git show 39d1bbd:PROGRESS.md` |
 | Known stale / open items | `docs/IMPROVEMENTS.md` | read-only snapshot |
 | Doc index | `docs/README.md` | must list every live runbook |
 | Repo knowledge graph (graphify) | `docs/GRAPHIFY.md` | generated map; refresh with `graphify update` |

@@ -25,9 +25,13 @@ INFERENCE/run_one.sh Hijaz 1                                          # cap defa
 | `audio.cpp` **source** | GitHub `0xShug0/audio.cpp` (clone only, never built by bootstrap) | `/content/audio.cpp` | No |
 | Prebuilt `audiocpp_cli` (sm_75 / T4) | GCS `audiocpp_inference/build/audiocpp_cli` | `/content/audiocpp_inference/bin/audiocpp_cli` | **Yes** |
 | Converted step-3000 LoRA, unfused (`akbar_arabic_rock_lora_{ar,nar}.safetensors`) | GCS `loras/audio_cpp/style/` (canonical library; see `docs/LORA_INVENTORY.md`) | `/content/converter/out/` | **Yes** |
-| Production v2+pron merges (`c3050_a0.3/0.4/0.5`) | GCS `loras/audio_cpp/pron/<cfg>/` | staged per-sweep to `/content/converter/out/<cfg>/` | **Yes** |
+| Current pron merges (`qfinal_a0.3/0.5`) | GCS `loras/audio_cpp/pron/<cfg>/` | staged per-sweep to `/content/converter/out/<cfg>/` | **Yes** |
 | Prompts (one `*_style.txt` + `*_lyrics.txt` per maqam) | GCS `audiocpp_inference/prompts/` | `/content/audiocpp_inference/prompts/` | **Yes** |
 | Runner + cap script (`run_one.sh`, `duration_cap.py`) | **Repo `INFERENCE/`** (canonical; the GCS `audiocpp_inference/scripts/` copy is a legacy mirror) | `/content/maqamrock-yue2-lora-finetuning/INFERENCE/` | `scripts/` still mirrored, but the repo copy is what runs |
+
+The superseded `pron_lora_ar_only_r8` merges (`c3050/c4575/cfinal_a0.*`) are **archived**
+under GCS `archive/pron_lora_ar_only_legacy/` — nothing stages them; see
+`docs/LORA_INVENTORY.md`.
 
 Consequence: to "use the GGUF from GCP" you can't — there isn't one there. Either
 let `setup.sh` re-fetch it from HF, or copy your local

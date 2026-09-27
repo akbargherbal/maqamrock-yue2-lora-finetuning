@@ -1,6 +1,11 @@
 # Future idea: fix Arabic pronunciation with a second (AR-only) LoRA
 
-Status: **idea / research note — not scheduled, not a plan.** Written
+> **Realized (2026-09-27).** This idea was implemented: an AR-only pronunciation donor was
+> trained and merged with the v2 style LoRA (`merge_pron_lora.py`). The current donor is the
+> long-aya Quran run — see [`PRON_LORA_LONG.md`](PRON_LORA_LONG.md) and
+> [`LORA_INVENTORY.md`](LORA_INVENTORY.md). Kept as the original research note.
+
+Status: **idea / research note — now superseded by the implemented donor.** Written
 2026-09-20, after the completed v2 run. Nothing here has been tried; treat it
 as a starting point for a future session, not a directive. The *why* of the
 current config lives in `../DECISIONS.md`; run history in `../PROGRESS.md`.

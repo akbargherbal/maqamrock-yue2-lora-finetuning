@@ -85,6 +85,8 @@ graphify-out/GRAPH_REPORT.md :: --references--
 # historical quotes inside the reconciliation log (old wrong values, kept as history)
 RECONCILIATION_LOG.md :: ANALYSIS.md
 RECONCILIATION_LOG.md :: docs/lora.md
+# pre-consolidation DECISIONS.md line citations, quoted as history in past log entries
+RECONCILIATION_LOG.md :: *DECISIONS.md*
 
 # prose slash-phrases and placeholders in this skill's own docs
 config/hyperparameter

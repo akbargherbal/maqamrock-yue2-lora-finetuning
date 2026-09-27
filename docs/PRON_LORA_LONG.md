@@ -20,7 +20,7 @@ this doc is the *operating* surface.
 quran_long_aya_r8_s10 — session prime.
 
 If /content/maqamrock-yue2-lora-finetuning is missing, clone it and
-`git checkout pron-lora-long` first.
+`git checkout main` first.
 
 Read, in this order:
   1. docs/PRON_LORA_LONG.md        (canonical runbook)
@@ -62,7 +62,7 @@ state is ambiguous, ask before acting.
 |---|---|
 | Active run | `quran_long_aya_r8_s10` (10% subsample) |
 | Config | `config/quran_long_aya_r8_s10.yml` — steps 8,100 · `save_every` 1500 · `max_step_saves_to_keep` 24 · `cache_text_embeddings: false` · `cache_latents_to_disk: true` |
-| Branch | `pron-lora-long` |
+| Branch | `main` |
 | Dataset | `/content/quran_long_aya_dataset_s10/` — **8,100 train pairs / 352 val / 14 smoke**, 3.0 GiB. **Banked** as `…/quran_long_aya_dataset_s10.tar` (2.94 GiB, sha256 `1bf11f0b…fcc24`) + `…/quran_long_aya_s10_manifest.json`. Built by `sample_pron_dataset.py`, seed 20260927. |
 | Run output | `/content/ai-toolkit/output/quran_long_aya_r8_s10/` → GCS `…/quran_long_aya_r8_s10/output/` |
 | Log / metrics | `/content/logs/train_quran_long_s10.log` · `<output>/loss_log.db` · `/content/logs/gpu_usage.csv` |
@@ -109,7 +109,7 @@ tar -C /content/quran_long_aya_dataset_s10/train -cf - _latent_cache \
 
 | Store | Holds | Survives VM stop? |
 |---|---|---|
-| GitHub (`pron-lora-long`) | code, configs, plan, this doc, `quran_long_aya_s10_manifest.json`, `agent_notes/current.md` | yes |
+| GitHub (`main`) | code, configs, plan, this doc, `quran_long_aya_s10_manifest.json`, `agent_notes/current.md` | yes |
 | GCS | s10 dataset (+ tar), banked cache, checkpoints, `loss_log.db`, **OpenCode session store** | yes |
 | VM `/content` + `/root` | the live run, the conversation, HF cache | **no** |
 
@@ -130,9 +130,9 @@ tar -C /content/quran_long_aya_dataset_s10/train -cf - _latent_cache \
 ### First GPU session only (kickstart; obsolete once a checkpoint exists)
 ```text
 Fresh Colab GPU VM — start the GPU phase for the quran_long_aya_r8_s10 run (branch
-pron-lora-long). Read docs/PRON_LORA_LONG.md + agent_notes/current.md first.
+main). Read docs/PRON_LORA_LONG.md + agent_notes/current.md first.
 
-1. Preflight: confirm branch pron-lora-long + config parses; report nvidia-smi (GPU/VRAM),
+1. Preflight: confirm branch main + config parses; report nvidia-smi (GPU/VRAM),
    disk, and vm-continuity health.
 2. bootstrap/setup.sh --training. Point GCP_QURAN_LONG_DATASET_PATH at the _s10 prefix so
    its opt-in job restores OUR subset — confirm the "[ok] quran-long dataset: 8100 train
@@ -153,7 +153,7 @@ pron-lora-long). Read docs/PRON_LORA_LONG.md + agent_notes/current.md first.
 
 ### Resume after a pause
 ```text
-Resume the multi-day YuE2 run quran_long_aya_r8_s10 (branch pron-lora-long); fresh VM.
+Resume the multi-day YuE2 run quran_long_aya_r8_s10 (branch main); fresh VM.
 Read docs/PRON_LORA_LONG.md + agent_notes/current.md first.
 Before anything else, report live state: nvidia-smi, disk, vm-continuity status, and the
 newest quran_long_aya_r8_s10 checkpoint in GCS with its step (if none exists yet, say so).
@@ -164,7 +164,7 @@ by the identical launch command to type. Do not auto-resume; do not edit the con
 
 ### Status check while running
 ```text
-Check quran_long_aya_r8_s10 (branch pron-lora-long). Read docs/PRON_LORA_LONG.md +
+Check quran_long_aya_r8_s10 (branch main). Read docs/PRON_LORA_LONG.md +
 agent_notes/current.md first. Answer from live artifacts only: latest step + loss
 (monitor_loss.py on the run's loss_log.db), GPU util/mem (gpu_usage.csv), newest checkpoint
 local vs GCS and the drift, and whether backup_to_gcp.py + gpu_logger.py are running.
@@ -178,7 +178,7 @@ untouched on the other VM; **never** run the same training run on two VMs. A
 paste-ready copy also lives at `/content/checkpoint_eval_prompt.md`.
 ```text
 Second-VM checkpoint-eval session for the long-aya Quran pronunciation LoRA
-(branch pron-lora-long, run quran_long_aya_r8_s10).
+(branch main, run quran_long_aya_r8_s10).
 
 SITUATION: training is STILL RUNNING on another Colab (L4). Do NOT train here, and
 do NOT start/stop/resume that run — never run the same run name on two VMs. This VM
@@ -190,7 +190,7 @@ READ FIRST (in this order):
 
 SETUP:
   - git clone https://github.com/akbargherbal/maqamrock-yue2-lora-finetuning.git
-      && cd maqamrock-yue2-lora-finetuning && git checkout pron-lora-long
+      && cd maqamrock-yue2-lora-finetuning && git checkout main
   - export HF_TOKEN and GCP_BACKUP_BASE (from the training VM's notebook).
   - bootstrap/setup.sh --inference     # audiocpp_cli (sm_75) + GGUF model + style LoRA + converter
 

@@ -147,14 +147,21 @@ and **0** `diffusion_model.*`.
   end-to-end invariant runs when the real v2/pron/converter artifacts are staged
   and skips on a clean clone).
 
-## Merge candidates (ckpt 3050)
+## Merge candidates (ckpt 3050) — SUPERSEDED (2026-09-27)
+
+> **Superseded.** The `pron_lora_ar_only_r8` donor was taken over by the long-aya Quran
+> run (`quran_long_aya_r8_s10`): the 15 `c3050/c4575/cfinal_a0.*` merges and the source
+> pins were **archived** to GCS `archive/pron_lora_ar_only_legacy/`, and the run prefix
+> renamed `pron_lora_ar_only_r8_obsolete/`. The current (unlistened) candidates are the
+> two `qfinal_a*` merges — see `docs/LORA_INVENTORY.md`. The paragraph below is kept as
+> history.
 
 Candidate merges of v2 + pron **checkpoint 3050** — `alpha` **0.5**, **0.4**, **0.3** built
 2026-09-25, plus **0.1**/**0.2** added 2026-09-26. **No α is selected**: none has been
 listened to, and α>0.5 is out of scope (archived). Records (manifest, one sidecar per
 output, regeneration script) live in `results/pron_production_merge/`; the converted
-binaries are in the LoRA library under `<base>/loras/audio_cpp/pron/<cfg>/` (see
-`docs/LORA_INVENTORY.md`), and the fused merge intermediates under
+binaries were in the LoRA library under `<base>/loras/audio_cpp/pron/<cfg>/` (now
+archived), and the fused merge intermediates under
 `<base>/pron_production_merge/merged/` (not committed: over GitHub's 100 MiB per-file limit,
 and regenerable in <1 s). `regenerate.sh` reproduces the converted AR/NAR sha256 exactly.
 

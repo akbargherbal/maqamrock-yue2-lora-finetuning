@@ -1,5 +1,9 @@
 # L4 handoff — after Task 14c (AR-only pronunciation LoRA, A100)
 
+> **Historical (2026-09-27).** Task 14c is complete and its donor family
+> (`pron_lora_ar_only_r8`) has been superseded by the long-aya Quran run; the pre-work phase
+> this handoff was written for is done. Kept for context.
+
 **Audience: the next agent session, on a fresh Colab L4 VM.** This file exists so
 context survives the A100→L4 switch (the VM is wiped; only GitHub + GCS persist).
 Read it top to bottom before doing anything. Branch: **`pron-lora-ar-only`**
@@ -81,7 +85,7 @@ missing file.
   ```bash
   mkdir -p /content/ai-toolkit/output/pron_lora_ar_only_r8
   gsutil -m rsync -r \
-    gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/pron_lora_ar_only_r8/output \
+    gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/pron_lora_ar_only_r8_obsolete/output \
     /content/ai-toolkit/output/pron_lora_ar_only_r8
   ```
 - Latent cache and HF cache are **per-VM** and rebuild via `bootstrap/setup.sh`.
