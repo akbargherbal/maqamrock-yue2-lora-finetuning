@@ -5,10 +5,37 @@ what the run is, where it stands, the commands that matter, and the exact prompt
 to paste. The *design/why* lives in [`PRON_LORA_LONG_PLAN.md`](PRON_LORA_LONG_PLAN.md);
 this doc is the *operating* surface.
 
-**Prime prompt** (paste at session start):
+**Canonical session prompt** (paste this at the start of any new session):
 ```text
-Read docs/PRON_LORA_LONG.md and agent_notes/current.md, then report the current
-state of quran_long_aya_r8 from live artifacts (not memory) and propose the next step.
+quran_long_aya_r8 — session prime.
+
+If /content/maqamrock-yue2-lora-finetuning is missing, clone it and
+`git checkout pron-lora-long` first.
+
+Read, in this order:
+  1. docs/PRON_LORA_LONG.md        (canonical runbook)
+  2. agent_notes/current.md        (live next step)
+  3. docs/PRON_LORA_LONG_PLAN.md   (design/why — only if you need to re-derive a decision)
+
+Then verify the ACTUAL state from live sources — do not trust the docs' prose or
+your memory:
+  - git: branch, clean/dirty, ahead/behind, last commit
+  - VM: nvidia-smi (GPU/VRAM), free disk, and what is running
+    (pgrep -af 'run\.py'; pgrep -af backup_to_gcp.py; pgrep -af gpu_logger.py; vm-continuity status)
+  - run: newest checkpoint in
+    gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_r8/output/
+    and its step vs local; loss_log.db step/loss if present
+  - cache: does .../quran_long_aya_dataset/_latent_cache.tar exist?
+  - continuity: vm-continuity status + last ship time
+
+Report briefly:
+  - where we are: steps done, last checkpoint + when, cache built/banked or not
+  - what is running right now, if anything
+  - any divergence between the docs and reality (flag it)
+  - the single next step, with the exact command(s) for me to type
+
+Do not start, resume, stop, or edit anything without me typing the command. If the
+state is ambiguous, ask before acting.
 ```
 
 ## Docs
