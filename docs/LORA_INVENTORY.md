@@ -19,6 +19,7 @@ is out of scope and archived (see the end of this file).
       c3050_a0.1 … c3050_a0.5/     # pron ckpt 3050 x alpha 0.1-0.5
       c4575_a0.1 … c4575_a0.5/     # pron ckpt 4575 x alpha 0.1-0.5
       cfinal_a0.1 … cfinal_a0.5/   # pron ckpt 6100 (final) x alpha 0.1-0.5
+      qfinal_a0.3/ qfinal_a0.5/    # quran_long_aya_r8_s10 final x alpha 0.3/0.5
   source/                          # fused ai-toolkit finals the merges are built from
 ```
 
@@ -31,17 +32,17 @@ each VM.
 
 | Class | Count | Notes |
 |---|---|---|
-| Library adapters (AR+NAR pairs) | **16** | style + 15 pron merges (`{3050,4575,6100}` × α 0.1–0.5); all unlistened |
-| Fused source adapters (ai-toolkit) | **2 families** | v2 style; pron AR-only r8 (ckpts 3050/4575/6100 pinned) |
+| Library adapters (AR+NAR pairs) | **18** | style + 15 pron merges (`{3050,4575,6100}` × α 0.1–0.5) + 2 qfinal merges; all unlistened |
+| Fused source adapters (ai-toolkit) | **3 families** | v2 style; pron AR-only r8 (ckpts 3050/4575/6100 pinned); quran_long_aya_r8_s10 (final, AR-only r8) |
 | Experimental adapters (in scope, α≤0.5) | **1** | `c1525_a0.5` |
 | Archived (α>0.5) | **4 configs** | `c3050_a0.55`, `c3050_a0.65`, `c3050_a1.0`, `cfinal_a1.0` |
-| Objects in `loras/` | **36** | style 2 + pron 30 + source 4 (~2.72 GiB) |
+| Objects in `loras/` | **40** | style 2 + pron 30 + qfinal 4 + source 4 (~2.89 GiB) |
 
 ## Library adapters (`loras/`, audio.cpp-loadable)
 
 Loadable by `audiocpp_cli` via `yue2.ar_lora` / `yue2.nar_lora`, scale 1.0. The
-**converted AR sha256 is the stable identity** (see caveats). Every pron merge shares
-the same NAR — `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6`
+**converted AR sha256 is the stable identity** (see caveats). Every AR-only merge
+(pron + qfinal) shares the same NAR — `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6`
 (copied from v2, independent of α); the style adapter's NAR is `ad2c8d86…`.
 
 | Config | Status | pron ckpt | α | AR rank | converted AR sha256 | Path in `loras/` |
@@ -62,11 +63,21 @@ the same NAR — `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377
 | `cfinal_a0.3` | candidate (unlistened) | 6100 | 0.3 | 40 | `1c99a1c951acbf1662c5bb3e31f66ec0472dba17c8000ba1fa054a4e6c2e90ec` | `audio_cpp/pron/cfinal_a0.3/` |
 | `cfinal_a0.4` | candidate (unlistened) | 6100 | 0.4 | 40 | `d149360f88108f57a9861fbeace29786057f106eee016a22e0d22e376601c57f` | `audio_cpp/pron/cfinal_a0.4/` |
 | `cfinal_a0.5` | candidate (unlistened) | 6100 | 0.5 | 40 | `525d3af25dfcddabbd587673c36dfaecd148cf97a0dfc6d90cbede15ed700ada` | `audio_cpp/pron/cfinal_a0.5/` |
+| `qfinal_a0.3` | candidate (unlistened) | qfinal 8100 | 0.3 | 40 | `0169e5a0ef7d47349bc707c10b3fbf5d937f941e3d28896e9970f0dc3894bdf6` | `audio_cpp/pron/qfinal_a0.3/` |
+| `qfinal_a0.5` | candidate (unlistened) | qfinal 8100 | 0.5 | 40 | `3a06265f33854825309f1cb10ab4ca5c36acf8692491186321b58c867eca90d2` | `audio_cpp/pron/qfinal_a0.5/` |
 
 The full 15-cell grid was completed 2026-09-26 from the pinned `loras/source/` inputs
 with `merge_pron_lora.py` + the converter. Independent reproductions matched the
 earlier records exactly where they overlapped: `c3050_a0.2` `c68217ab…`,
 `c4575_a0.5` `ebd22026…`, `cfinal_a0.5` `525d3af2…` — same data, same pipeline.
+
+The two `qfinal_a*` merges were built 2026-09-27 from a **different source family** —
+`quran_long_aya_r8_s10` (the long-aya Quran pron run's final checkpoint, step 8100),
+not `pron_lora_ar_only_r8`. Source sha256
+`f8c842e48b93d142bc3cfee6e98f54809020813ae272485a4afb849320b1e2e8`; merged with the same
+v2 style (`b1d09098…`) at α 0.3/0.5, rank 40, NAR zero-padded to the shared `7d9324bf…`.
+Built by `merge_pron_lora.py --pron <quran_long_aya_r8_s10.safetensors> --alpha <a>` +
+the converter, for the Suno/trigger inference sweep (`INFERENCE/qfinal_suno_sweep.sh`).
 
 ## Fused source adapters (`loras/source/`)
 

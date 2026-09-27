@@ -471,12 +471,12 @@ def git_commit(path: Path) -> str | None:
         return None
 
 
-def asset_fingerprint(hash_big: bool = True) -> dict:
+def asset_fingerprint(lora_ar: Path, lora_nar: Path, hash_big: bool = True) -> dict:
     if hash_big:
         info("hashing model assets (main GGUF + VAE, ~3.9 GB once per batch)...")
     return {
-        "lora_ar_sha256": sha256_file(LORA_AR),
-        "lora_nar_sha256": sha256_file(LORA_NAR),
+        "lora_ar_sha256": sha256_file(lora_ar),
+        "lora_nar_sha256": sha256_file(lora_nar),
         "model_gguf": MODEL_GGUF,
         "vae_gguf": VAE_GGUF,
         "model_gguf_sha256": sha256_file(MODEL_DIR / MODEL_GGUF) if hash_big else None,
@@ -486,15 +486,15 @@ def asset_fingerprint(hash_big: bool = True) -> dict:
     }
 
 
-def preflight(allow_concurrent: bool) -> dict:
+def preflight(allow_concurrent: bool, lora_ar: Path, lora_nar: Path) -> dict:
     problems = []
     for path, what in [
         (RUN_ONE, "runner"),
         (BIN, "audiocpp_cli binary"),
         (MODEL_DIR / MODEL_GGUF, "main GGUF"),
         (MODEL_DIR / VAE_GGUF, "VAE GGUF"),
-        (LORA_AR, "AR LoRA adapter"),
-        (LORA_NAR, "NAR LoRA adapter"),
+        (lora_ar, "AR LoRA adapter"),
+        (lora_nar, "NAR LoRA adapter"),
     ]:
         if not path.is_file():
             problems.append(f"missing {what}: {path}")
@@ -687,7 +687,7 @@ def _write_sidecar(path: Path, fields: dict) -> None:
 
 
 def run_batch(run_dir: Path, tracks: list[Track], prompt_info: dict, fp: dict,
-              gpu: dict, *, force: bool = False,
+              gpu: dict, lora_ar: Path, lora_nar: Path, *, force: bool = False,
               runner: Callable[[list[str], dict, TextIO], int] = subprocess_runner) -> list[Result]:
     results: list[Result] = []
     failed_log = run_dir / "_failed_runs.log"
@@ -716,6 +716,8 @@ def run_batch(run_dir: Path, tracks: list[Track], prompt_info: dict, fp: dict,
                 "OUT_DIR": str(run_dir),
                 "STYLE_FILE": str(run_dir / prompt_info[t.name]["style_file"]),
                 "LYRICS_FILE": str(run_dir / prompt_info[t.name]["lyrics_file"]),
+                "LORA_AR": str(lora_ar),
+                "LORA_NAR": str(lora_nar),
             })
             cmd = ["bash", str(RUN_ONE), t.name, str(t.seed), str(t.cap)]
 
@@ -837,6 +839,10 @@ def build_parser() -> argparse.ArgumentParser:
                    help="do not auto-prepend 'arabmaqamrock ' to styles")
     p.add_argument("--allow-concurrent", action="store_true",
                    help="allow running even if an ai-toolkit training run is detected")
+    p.add_argument("--lora-ar", default=None,
+                   help="AR adapter path (default: the live converted v2 pair)")
+    p.add_argument("--lora-nar", default=None,
+                   help="NAR adapter path (default: the live converted v2 pair)")
     return p
 
 
@@ -845,6 +851,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         check(args.limit is None or _is_pos_int(args.limit), "--limit must be an integer >= 1")
         input_path = Path(args.json)
+        lora_ar = Path(args.lora_ar).expanduser() if args.lora_ar else LORA_AR
+        lora_nar = Path(args.lora_nar).expanduser() if args.lora_nar else LORA_NAR
         data, raw = load_input(input_path)
         songs = resolve_songs(data, input_path.resolve().parent,
                               args.quantile, trigger=not args.no_trigger)
@@ -863,14 +871,15 @@ def main(argv: list[str] | None = None) -> int:
             print_plan(songs, tracks, run_dir, dry_run=True)
             return 0
 
-        gpu = preflight(args.allow_concurrent)
+        gpu = preflight(args.allow_concurrent, lora_ar, lora_nar)
         run_dir.mkdir(parents=True, exist_ok=True)
-        fp = asset_fingerprint()
+        fp = asset_fingerprint(lora_ar, lora_nar)
         prompt_info = materialize(run_dir, songs, raw, input_path, tracks, fp, gpu)
 
         print_plan(songs, tracks, run_dir, dry_run=False)
         print()
-        results = run_batch(run_dir, tracks, prompt_info, fp, gpu, force=args.force)
+        results = run_batch(run_dir, tracks, prompt_info, fp, gpu, lora_ar, lora_nar,
+                            force=args.force)
 
         try:
             (ROOT / "out").mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,226 @@
+{
+  "generated_at": "2026-09-27T14:59:23Z",
+  "inputs": [
+    "manifests/workspace_manifest.json"
+  ],
+  "filters": {
+    "maqam": null,
+    "status": null,
+    "keep": "downloaded-a",
+    "style": "verbatim",
+    "lyrics_verbatim": true
+  },
+  "entries_total": 16,
+  "songs_kept": 8,
+  "duplicates_dropped": 8,
+  "per_maqam": {
+    "Nahawand": 4,
+    "Kurd": 2,
+    "Hijaz": 2
+  },
+  "dropped_tags": {},
+  "duplicate_groups": [
+    {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "04-مناجاة-الديار-وعهد-الوفاء-والرجاء-الأخير",
+      "kept": {
+        "name": "nahawand_ibn_zuraiq_20082026_001_c116f240",
+        "clip_id": "c116f240-d228-41f7-815b-2251d37c4f04",
+        "assigned_filename": "04-مناجاة-الديار-وعهد-الوفاء-والرجاء-الأخير_SONG_A.mp3",
+        "status": "downloaded"
+      },
+      "dropped": [
+        {
+          "clip_id": "eb22b3f9-a14e-403d-86e9-eef2b104706a",
+          "assigned_filename": "04-مناجاة-الديار-وعهد-الوفاء-والرجاء-الأخير_SONG_B.mp3",
+          "status": "downloaded"
+        }
+      ]
+    },
+    {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "03-مرارة-الندم-وأهوال-السهاد-وفجيعة-الدهر",
+      "kept": {
+        "name": "kurd_ibn_zuraiq_20082026_003_86872e58",
+        "clip_id": "86872e58-967b-4ff7-bbea-fb857cae4a49",
+        "assigned_filename": "03-مرارة-الندم-وأهوال-السهاد-وفجيعة-الدهر_SONG_A.mp3",
+        "status": "downloaded"
+      },
+      "dropped": [
+        {
+          "clip_id": "b0e7b4ce-5a61-4562-b415-69187cde1a3d",
+          "assigned_filename": "03-مرارة-الندم-وأهوال-السهاد-وفجيعة-الدهر_SONG_B.mp3",
+          "status": "downloaded"
+        }
+      ]
+    },
+    {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "02-قمر-بغداد-ولوعة-الفراق-وتضييع-الملك",
+      "kept": {
+        "name": "hijaz_ibn_zuraiq_20082026_005_5c4aa237",
+        "clip_id": "5c4aa237-2d92-42a6-9bae-3d83957498e0",
+        "assigned_filename": "02-قمر-بغداد-ولوعة-الفراق-وتضييع-الملك_SONG_A.mp3",
+        "status": "downloaded"
+      },
+      "dropped": [
+        {
+          "clip_id": "ba64287a-ccc3-48ee-a5e7-6ee30b2d41d5",
+          "assigned_filename": "02-قمر-بغداد-ولوعة-الفراق-وتضييع-الملك_SONG_B.mp3",
+          "status": "downloaded"
+        }
+      ]
+    },
+    {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "01-العذل-ومكابدة-الاغتراب-وفلسفة-الرزق",
+      "kept": {
+        "name": "nahawand_ibn_zuraiq_20082026_007_6ab44190",
+        "clip_id": "6ab44190-bb40-43ac-89b9-250947dad29f",
+        "assigned_filename": "01-العذل-ومكابدة-الاغتراب-وفلسفة-الرزق_SONG_A.mp3",
+        "status": "downloaded"
+      },
+      "dropped": [
+        {
+          "clip_id": "18bb8530-6097-48c3-8d5b-14740e3fcbac",
+          "assigned_filename": "01-العذل-ومكابدة-الاغتراب-وفلسفة-الرزق_SONG_B.mp3",
+          "status": "downloaded"
+        }
+      ]
+    },
+    {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "04-مناجاة-ديار-الأنس-ورجاء-التلاقي",
+      "kept": {
+        "name": "nahawand_ibn_zuraiq_20082026_009_6ec900ab",
+        "clip_id": "6ec900ab-a834-4f38-9c30-b527e99d43ab",
+        "assigned_filename": "04-مناجاة-ديار-الأنس-ورجاء-التلاقي_SONG_A.mp3",
+        "status": "skipped_existing"
+      },
+      "dropped": [
+        {
+          "clip_id": "454821ac-8656-4322-b31f-09094fee22b8",
+          "assigned_filename": "04-مناجاة-ديار-الأنس-ورجاء-التلاقي_SONG_B.mp3",
+          "status": "skipped_existing"
+        }
+      ]
+    },
+    {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "03-تجرع-مرارة-البين-ووخز-الندم",
+      "kept": {
+        "name": "kurd_ibn_zuraiq_20082026_011_9199baa3",
+        "clip_id": "9199baa3-5b69-4b56-b0e4-2cecc222428a",
+        "assigned_filename": "03-تجرع-مرارة-البين-ووخز-الندم_SONG_A.mp3",
+        "status": "skipped_existing"
+      },
+      "dropped": [
+        {
+          "clip_id": "46847936-5154-4c72-b9b1-ec8ee93454a8",
+          "assigned_filename": "03-تجرع-مرارة-البين-ووخز-الندم_SONG_B.mp3",
+          "status": "skipped_existing"
+        }
+      ]
+    },
+    {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "02-استيداع-قمر-بغداد-ولوعة-الوداع",
+      "kept": {
+        "name": "hijaz_ibn_zuraiq_20082026_013_449afa78",
+        "clip_id": "449afa78-590e-4dd9-bd2f-2b309be01282",
+        "assigned_filename": "02-استيداع-قمر-بغداد-ولوعة-الوداع_SONG_A.mp3",
+        "status": "skipped_existing"
+      },
+      "dropped": [
+        {
+          "clip_id": "101835bb-8918-4592-b542-2b13d5d86c2d",
+          "assigned_filename": "02-استيداع-قمر-بغداد-ولوعة-الوداع_SONG_B.mp3",
+          "status": "skipped_existing"
+        }
+      ]
+    },
+    {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "01-العذل-والمطامع-وفلسفة-الرزق",
+      "kept": {
+        "name": "nahawand_ibn_zuraiq_20082026_015_00c6a6c8",
+        "clip_id": "00c6a6c8-ff60-476d-aed1-4d1922a78c74",
+        "assigned_filename": "01-العذل-والمطامع-وفلسفة-الرزق_SONG_A.mp3",
+        "status": "skipped_existing"
+      },
+      "dropped": [
+        {
+          "clip_id": "59573288-fedb-40af-8fb2-2ef3d092b23b",
+          "assigned_filename": "01-العذل-والمطامع-وفلسفة-الرزق_SONG_B.mp3",
+          "status": "skipped_existing"
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "nahawand_ibn_zuraiq_20082026_001_c116f240": {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "04-مناجاة-الديار-وعهد-الوفاء-والرجاء-الأخير",
+      "assigned_filename": "04-مناجاة-الديار-وعهد-الوفاء-والرجاء-الأخير_SONG_A.mp3",
+      "clip_id": "c116f240-d228-41f7-815b-2251d37c4f04",
+      "status": "downloaded",
+      "maqam": "Nahawand"
+    },
+    "kurd_ibn_zuraiq_20082026_003_86872e58": {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "03-مرارة-الندم-وأهوال-السهاد-وفجيعة-الدهر",
+      "assigned_filename": "03-مرارة-الندم-وأهوال-السهاد-وفجيعة-الدهر_SONG_A.mp3",
+      "clip_id": "86872e58-967b-4ff7-bbea-fb857cae4a49",
+      "status": "downloaded",
+      "maqam": "Kurd"
+    },
+    "hijaz_ibn_zuraiq_20082026_005_5c4aa237": {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "02-قمر-بغداد-ولوعة-الفراق-وتضييع-الملك",
+      "assigned_filename": "02-قمر-بغداد-ولوعة-الفراق-وتضييع-الملك_SONG_A.mp3",
+      "clip_id": "5c4aa237-2d92-42a6-9bae-3d83957498e0",
+      "status": "downloaded",
+      "maqam": "Hijaz"
+    },
+    "nahawand_ibn_zuraiq_20082026_007_6ab44190": {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "01-العذل-ومكابدة-الاغتراب-وفلسفة-الرزق",
+      "assigned_filename": "01-العذل-ومكابدة-الاغتراب-وفلسفة-الرزق_SONG_A.mp3",
+      "clip_id": "6ab44190-bb40-43ac-89b9-250947dad29f",
+      "status": "downloaded",
+      "maqam": "Nahawand"
+    },
+    "nahawand_ibn_zuraiq_20082026_009_6ec900ab": {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "04-مناجاة-ديار-الأنس-ورجاء-التلاقي",
+      "assigned_filename": "04-مناجاة-ديار-الأنس-ورجاء-التلاقي_SONG_A.mp3",
+      "clip_id": "6ec900ab-a834-4f38-9c30-b527e99d43ab",
+      "status": "skipped_existing",
+      "maqam": "Nahawand"
+    },
+    "kurd_ibn_zuraiq_20082026_011_9199baa3": {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "03-تجرع-مرارة-البين-ووخز-الندم",
+      "assigned_filename": "03-تجرع-مرارة-البين-ووخز-الندم_SONG_A.mp3",
+      "clip_id": "9199baa3-5b69-4b56-b0e4-2cecc222428a",
+      "status": "skipped_existing",
+      "maqam": "Kurd"
+    },
+    "hijaz_ibn_zuraiq_20082026_013_449afa78": {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "02-استيداع-قمر-بغداد-ولوعة-الوداع",
+      "assigned_filename": "02-استيداع-قمر-بغداد-ولوعة-الوداع_SONG_A.mp3",
+      "clip_id": "449afa78-590e-4dd9-bd2f-2b309be01282",
+      "status": "skipped_existing",
+      "maqam": "Hijaz"
+    },
+    "nahawand_ibn_zuraiq_20082026_015_00c6a6c8": {
+      "workspace": "ibn_zuraiq_20082026",
+      "original_title": "01-العذل-والمطامع-وفلسفة-الرزق",
+      "assigned_filename": "01-العذل-والمطامع-وفلسفة-الرزق_SONG_A.mp3",
+      "clip_id": "00c6a6c8-ff60-476d-aed1-4d1922a78c74",
+      "status": "skipped_existing",
+      "maqam": "Nahawand"
+    }
+  }
+}

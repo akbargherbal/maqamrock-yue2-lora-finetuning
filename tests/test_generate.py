@@ -178,12 +178,14 @@ def test_run_batch_ok_then_skip_then_force_fail(gen, tmp_path, lyrics_ar):
         assert sc["status"] == "started"  # sidecar written before generation
         assert env["STYLE_FILE"].endswith(f"{name}_style.txt")
         assert env["LYRICS_FILE"].endswith(f"{name}_lyrics.txt")
+        assert env["LORA_AR"] == str(gen.LORA_AR) and env["LORA_NAR"] == str(gen.LORA_NAR)
         (out / f"{name}_{seed}.wav").write_bytes(b"RIFF0000WAVEfmt ")
         (out / f"{name}_{seed}_time.txt").write_text("\tExit status: 0\n", encoding="utf-8")
         (out / f"{name}_{seed}.log").write_text("... truncated=1 ...", encoding="utf-8")
         return 0
 
-    results = gen.run_batch(run, tracks, info, FP, GPU, runner=fake_ok)
+    results = gen.run_batch(run, tracks, info, FP, GPU, gen.LORA_AR, gen.LORA_NAR,
+                            runner=fake_ok)
     assert [r.status for r in results] == ["ok", "ok"]
     assert all(r.truncated and r.truncated_source == "log" for r in results)
     sc = json.loads((run / "s1_11.json").read_text(encoding="utf-8"))
@@ -193,7 +195,8 @@ def test_run_batch_ok_then_skip_then_force_fail(gen, tmp_path, lyrics_ar):
     def boom(*_a):
         raise AssertionError("runner called for an already-succeeded track")
 
-    assert [r.status for r in gen.run_batch(run, tracks, info, FP, GPU, runner=boom)] == \
+    assert [r.status for r in gen.run_batch(run, tracks, info, FP, GPU, gen.LORA_AR,
+                                            gen.LORA_NAR, runner=boom)] == \
         ["skipped", "skipped"]
 
     def fake_fail(cmd, env, log):
@@ -203,7 +206,8 @@ def test_run_batch_ok_then_skip_then_force_fail(gen, tmp_path, lyrics_ar):
         (out / f"{name}_{seed}_time.txt").write_text("\tExit status: 1\n", encoding="utf-8")
         return 1
 
-    results = gen.run_batch(run, tracks, info, FP, GPU, force=True, runner=fake_fail)
+    results = gen.run_batch(run, tracks, info, FP, GPU, gen.LORA_AR, gen.LORA_NAR,
+                            force=True, runner=fake_fail)
     assert [r.status for r in results] == ["failed", "failed"]
     assert (run / "_failed_runs.log").read_text(encoding="utf-8").count("FAILED") == 2
     sc = json.loads((run / "s1_11.json").read_text(encoding="utf-8"))
@@ -247,7 +251,7 @@ def test_preflight_missing_assets(gen, tmp_path, monkeypatch):
     monkeypatch.setattr(gen, "LORA_NAR", tmp_path / "nar.safetensors")
     monkeypatch.setattr(gen, "training_active", lambda: None)
     with pytest.raises(gen.PlanError) as ei:
-        gen.preflight(False)
+        gen.preflight(False, gen.LORA_AR, gen.LORA_NAR)
     assert "preflight failed" in str(ei.value)
 
 
@@ -256,7 +260,8 @@ def test_main_refuses_and_writes_nothing_when_preflight_fails(gen, tmp_path, mon
     songs = tmp_path / "songs.json"
     songs.write_text(json.dumps({"songs": [{"name": "x", "style": "s", "lyrics": lyrics_ar}]},
                                 ensure_ascii=False), encoding="utf-8")
-    monkeypatch.setattr(gen, "preflight", lambda allow: gen.fail("preflight failed: test"))
+    monkeypatch.setattr(gen, "preflight",
+                        lambda allow, lora_ar, lora_nar: gen.fail("preflight failed: test"))
     assert gen.main([str(songs)]) == 1
     assert "preflight failed" in capsys.readouterr().err
     assert [p.name for p in tmp_path.iterdir()] == ["songs.json"]
@@ -397,14 +402,12 @@ def test_asset_fingerprint(gen, tmp_path, monkeypatch):
     ar.write_bytes(b"a")
     nar.write_bytes(b"n")
     monkeypatch.setattr(gen, "MODEL_DIR", model)
-    monkeypatch.setattr(gen, "LORA_AR", ar)
-    monkeypatch.setattr(gen, "LORA_NAR", nar)
     monkeypatch.setattr(gen, "git_commit", lambda _p: "deadbeef")
 
-    fp = gen.asset_fingerprint(hash_big=True)
+    fp = gen.asset_fingerprint(ar, nar, hash_big=True)
     assert fp["model_gguf_sha256"] and fp["vae_gguf_sha256"]
     assert fp["lora_ar_sha256"] and fp["audio_cpp_commit"] == "deadbeef"
-    assert gen.asset_fingerprint(hash_big=False)["model_gguf_sha256"] is None
+    assert gen.asset_fingerprint(ar, nar, hash_big=False)["model_gguf_sha256"] is None
 
 
 def _stub_assets(gen, tmp_path, monkeypatch, bin_exec=True):
@@ -424,39 +427,37 @@ def _stub_assets(gen, tmp_path, monkeypatch, bin_exec=True):
     monkeypatch.setattr(gen, "RUN_ONE", run_one)
     monkeypatch.setattr(gen, "BIN", binp)
     monkeypatch.setattr(gen, "MODEL_DIR", model)
-    monkeypatch.setattr(gen, "LORA_AR", ar)
-    monkeypatch.setattr(gen, "LORA_NAR", nar)
     monkeypatch.setattr(gen, "ROOT", tmp_path)
-    return binp
+    return binp, ar, nar
 
 
 def test_preflight_success(gen, tmp_path, monkeypatch):
-    _stub_assets(gen, tmp_path, monkeypatch)
+    _, ar, nar = _stub_assets(gen, tmp_path, monkeypatch)
     monkeypatch.setattr(gen, "training_active", lambda: None)
     monkeypatch.setattr(gen, "gpu_info", lambda: GPU_FULL)
-    assert gen.preflight(False) == GPU_FULL
+    assert gen.preflight(False, ar, nar) == GPU_FULL
 
 
 def test_preflight_not_executable_binary(gen, tmp_path, monkeypatch):
-    _stub_assets(gen, tmp_path, monkeypatch, bin_exec=False)
+    _, ar, nar = _stub_assets(gen, tmp_path, monkeypatch, bin_exec=False)
     with pytest.raises(gen.PlanError) as ei:
-        gen.preflight(False)
+        gen.preflight(False, ar, nar)
     assert "not executable" in str(ei.value)
 
 
 def test_preflight_refuses_active_training_and_gpu_check(gen, tmp_path, monkeypatch):
-    _stub_assets(gen, tmp_path, monkeypatch)
+    _, ar, nar = _stub_assets(gen, tmp_path, monkeypatch)
     monkeypatch.setattr(gen, "training_active", lambda: "python run.py akbar_arabic_rock_lora")
     with pytest.raises(gen.PlanError) as ei:
-        gen.preflight(False)
+        gen.preflight(False, ar, nar)
     assert "training" in str(ei.value)
 
     monkeypatch.setattr(gen, "gpu_info", lambda: GPU_FULL)
-    assert gen.preflight(True) == GPU_FULL
+    assert gen.preflight(True, ar, nar) == GPU_FULL
 
     monkeypatch.setattr(gen, "gpu_info", lambda: None)
     with pytest.raises(gen.PlanError):
-        gen.preflight(True)
+        gen.preflight(True, ar, nar)
 
 
 def test_pick_run_dir_collision(gen, tmp_path, monkeypatch):
@@ -510,7 +511,7 @@ def test_wait_vram_free_paths(gen, monkeypatch, real_wait_vram_free):
 
 def test_main_full_path_with_out_dir(gen, tmp_path, monkeypatch, capsys, lyrics_ar):
     monkeypatch.setattr(gen, "ROOT", tmp_path)
-    monkeypatch.setattr(gen, "preflight", lambda allow: GPU)
+    monkeypatch.setattr(gen, "preflight", lambda allow, lora_ar, lora_nar: GPU)
     monkeypatch.setattr(gen, "asset_fingerprint", lambda *a, **k: FP)
     songs = _songs_json(tmp_path, lyrics_ar, seed=1)
     track = gen.Track(1, "x", 0, 1, 3000, 0.95, 10)
@@ -524,10 +525,43 @@ def test_main_full_path_with_out_dir(gen, tmp_path, monkeypatch, capsys, lyrics_
     assert (tmp_path / "out" / "latest").read_text(encoding="utf-8").strip() == str(run_dir)
 
 
+def test_main_lora_overrides_plumbed(gen, tmp_path, monkeypatch, lyrics_ar):
+    monkeypatch.setattr(gen, "ROOT", tmp_path)
+    captured = {}
+
+    def fake_preflight(allow, lora_ar, lora_nar):
+        captured["preflight"] = (lora_ar, lora_nar)
+        return GPU
+
+    def fake_fp(lora_ar, lora_nar, hash_big=True):
+        captured["fp"] = (lora_ar, lora_nar)
+        return FP
+
+    track = gen.Track(1, "x", 0, 1, 3000, 0.95, 10)
+
+    def fake_run_batch(run_dir, tracks, info, fp, gpu, lora_ar, lora_nar, **kw):
+        captured["run_batch"] = (lora_ar, lora_nar)
+        return [gen.Result(track, "ok", 0, 1.0, 10.0, False, "duration_heuristic")]
+
+    monkeypatch.setattr(gen, "preflight", fake_preflight)
+    monkeypatch.setattr(gen, "asset_fingerprint", fake_fp)
+    monkeypatch.setattr(gen, "run_batch", fake_run_batch)
+    songs = _songs_json(tmp_path, lyrics_ar, seed=1)
+    ar, nar = tmp_path / "my_ar.safetensors", tmp_path / "my_nar.safetensors"
+    ar.write_bytes(b"a")
+    nar.write_bytes(b"n")
+    run_dir = tmp_path / "run"
+    assert gen.main([str(songs), "--out-dir", str(run_dir),
+                     "--lora-ar", str(ar), "--lora-nar", str(nar)]) == 0
+    assert captured["preflight"] == (ar, nar)
+    assert captured["fp"] == (ar, nar)
+    assert captured["run_batch"] == (ar, nar)
+
+
 def test_main_keyboard_interrupt(gen, tmp_path, monkeypatch, capsys, lyrics_ar):
     songs = _songs_json(tmp_path, lyrics_ar)
 
-    def boom(_allow):
+    def boom(_allow, _lora_ar, _lora_nar):
         raise KeyboardInterrupt
 
     monkeypatch.setattr(gen, "preflight", boom)

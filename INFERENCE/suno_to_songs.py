@@ -60,6 +60,7 @@ SECTION_RE = re.compile(
     re.IGNORECASE,
 )
 KEEP_MODES = ("downloaded-a", "a", "b", "first")
+STYLE_MODES = ("canonical", "verbatim", "trigger-only")
 NO_MAQAM = "unknown"
 
 
@@ -111,6 +112,13 @@ def clean_lyrics(raw: str) -> tuple[str, list[str]]:
     return "\n".join(collapsed), dropped
 
 
+def clean_lyrics_verbatim(raw: str) -> tuple[str, list[str]]:
+    """Verbatim lyrics: drop only the `///***///` separator, keep every tag."""
+    text = raw.replace("\r\n", "\n").replace("\r", "\n")
+    lines = [ln for ln in text.split("\n") if ln.strip() != SKIP_LINE]
+    return "\n".join(lines).strip(), []
+
+
 # --- styles -----------------------------------------------------------------
 
 def extract_maqam(track: dict) -> str | None:
@@ -119,14 +127,21 @@ def extract_maqam(track: dict) -> str | None:
     return m.group(1) if m else None
 
 
-def build_style(track: dict, maqam: str | None, trigger: str | None) -> str:
-    fields = pyd.parse_fields(track.get("styles", ""))
-    if fields:
-        style = pyd.build_caption(fields, maqam, None)
-    else:
-        # Legacy/stub entries carry a bare genre string, not the key: "value"
-        # block parse_fields expects; keep it verbatim rather than dropping it.
+def build_style(track: dict, maqam: str | None, trigger: str | None,
+                style_mode: str = "canonical") -> str:
+    if style_mode == "trigger-only":
+        style = gen.TRIGGER.strip()
+    elif style_mode == "verbatim":
+        # Raw Suno styles string, meta tags and all (compatibility probe).
         style = str(track.get("styles", "")).strip()
+    else:
+        fields = pyd.parse_fields(track.get("styles", ""))
+        if fields:
+            style = pyd.build_caption(fields, maqam, None)
+        else:
+            # Legacy/stub entries carry a bare genre string, not the key: "value"
+            # block parse_fields expects; keep it verbatim rather than dropping it.
+            style = str(track.get("styles", "")).strip()
     if trigger:
         style = f"{trigger} {style}"
     return style
@@ -147,7 +162,9 @@ def load_manifest(path: Path) -> dict:
     return data
 
 
-def collect_entries(path: Path, trigger: str | None) -> list[dict]:
+def collect_entries(path: Path, trigger: str | None,
+                    style_mode: str = "canonical",
+                    lyrics_verbatim: bool = False) -> list[dict]:
     data = load_manifest(path)
     workspace = str(data.get("workspace_name") or path.stem)
     entries = []
@@ -162,9 +179,12 @@ def collect_entries(path: Path, trigger: str | None) -> list[dict]:
         if maqam is None:
             gen.warn(f"{path}: tracks[{i}] ({title[:40]}) has no 'Maqam <name>' "
                      f"in styles.vocals; keeping it with the {NO_MAQAM!r} label")
-        style = build_style(track, maqam, trigger)
+        style = build_style(track, maqam, trigger, style_mode)
         gen.check(style.strip(), f"{path}: tracks[{i}] ({title[:40]}) has no usable style text")
-        lyrics, dropped = clean_lyrics(track.get("lyrics", ""))
+        if lyrics_verbatim:
+            lyrics, dropped = clean_lyrics_verbatim(track.get("lyrics", ""))
+        else:
+            lyrics, dropped = clean_lyrics(track.get("lyrics", ""))
         gen.check(lyrics.strip(), f"{path}: tracks[{i}] ({title[:40]}) has no usable lyrics")
         name = pyd.safe_ascii_name(workspace, maqam or NO_MAQAM, i,
                                    str(track.get("clip_id", "noid")))
@@ -327,6 +347,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--trigger", default=None,
                    help="bake this trigger word into the style (default: none; "
                         "generate.py prepends 'arabmaqamrock ')")
+    p.add_argument("--style", choices=STYLE_MODES, default="canonical",
+                   help="style construction: canonical = v2 build_caption (default); "
+                        "verbatim = raw Suno 'styles' incl. meta tags; "
+                        "trigger-only = the trigger word alone")
+    p.add_argument("--lyrics-verbatim", action="store_true",
+                   help="keep the Suno lyric tags verbatim (drop only the ///***/// "
+                        "separator) instead of collapsing to [Verse]/[Chorus]")
     p.add_argument("--style-dir", default=None,
                    help="write styles as files and reference them via style_file")
     p.add_argument("--lyrics-dir", default=None,
@@ -347,7 +374,7 @@ def main(argv: list[str] | None = None) -> int:
 
         entries: list[dict] = []
         for m in manifests:
-            entries.extend(collect_entries(m, args.trigger))
+            entries.extend(collect_entries(m, args.trigger, args.style, args.lyrics_verbatim))
         gen.check(entries, "no usable tracks found in the given manifest(s)")
 
         entries = filter_entries(entries, args.maqam, args.status)
@@ -367,7 +394,8 @@ def main(argv: list[str] | None = None) -> int:
             out_path = Path(entries[0]["manifest"]).parent / f"{ws}_songs.json"
 
         filters = {"maqam": args.maqam, "status": args.status,
-                   "keep": "both" if args.keep_both else args.keep}
+                   "keep": "both" if args.keep_both else args.keep,
+                   "style": args.style, "lyrics_verbatim": args.lyrics_verbatim}
         report = build_report(entries, kept, dropped, filters, [str(m) for m in manifests])
 
         if args.dry_run:

@@ -59,6 +59,23 @@ def test_real_manifest_dedup(sun, manifest_path, tmp_path):
     assert all(v["original_title"] for v in report["provenance"].values())
 
 
+def test_style_modes(sun, manifest_path, tmp_path):
+    doc, report = _convert(sun, manifest_path, tmp_path / "raw.json", "--style", "verbatim")
+    assert all(s["style"].startswith("[Is_MAX_MODE") for s in doc["songs"])
+    assert report["filters"]["style"] == "verbatim"
+
+    doc, _ = _convert(sun, manifest_path, tmp_path / "trig.json", "--style", "trigger-only")
+    assert {s["style"] for s in doc["songs"]} == {"arabmaqamrock"}
+
+
+def test_lyrics_verbatim_keeps_tags(sun, manifest_path, tmp_path):
+    doc, _ = _convert(sun, manifest_path, tmp_path / "v.json", "--lyrics-verbatim")
+    for s in doc["songs"]:
+        assert "///***///" not in s["lyrics"]
+        assert "|" in s["lyrics"]                 # descriptors kept
+        assert "[Intro |" in s["lyrics"]
+
+
 def test_round_trip_through_generate(gen, sun, manifest_path, tmp_path, capsys):
     out = tmp_path / "songs.json"
     assert sun.main([str(manifest_path), "-o", str(out)]) == 0
