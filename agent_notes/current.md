@@ -1,17 +1,10 @@
 # agent_notes / current
 
-**Date:** 2026-09-27 · **State:** Phases 1 + 1.5 + DECISIONS condensation **done and pushed** (`a9112ef` on `origin/pron-lora-long`). Next: **Phase 3** — ff-merge to `main` + tag `v0.9.0-beta`. No run active. Local machine, not Colab.
+**Date:** 2026-09-27 · **State:** DONE — BETA merged to `main` and tagged `v0.9.0-beta`. No run active. Local machine, not Colab.
 
-**Next action (yours) — Phase 3 (fast-forward + tag):**
-```bash
-cd /home/akbar/Jupyter_Notebooks/OpenCode/ostris_prepare_dataset/maqamrock-yue2-lora-finetuning
-git checkout main
-git pull --ff-only origin main
-git merge --ff-only origin/pron-lora-long
-git tag -a v0.9.0-beta -m "BETA: v2 style LoRA + long-aya Quran pronunciation merges (unselected candidates) + audio.cpp inference pipeline"
-git push origin main v0.9.0-beta
-```
-Then Phase 4 (below): branches stay frozen; verify.
+**BETA merge complete.** `pron-lora-long` fast-forwarded into `main`; `v0.9.0-beta` tagged and pushed.
+Branches were **kept, frozen** (`pron-lora-long` @ the pre-tag tip, `pron-lora-ar-only`, `pron-lora-knobs-investigation`).
+Open follow-ups live in `PROGRESS.md` → Open items (pick α by blind listen; long-aya ckpt eval; clean-VM `--inference` proof; per-arch binary auto-selection).
 (qfinal Suno/trigger sweep still awaiting your go-ahead — commands preserved at the bottom.)
 
 ---
