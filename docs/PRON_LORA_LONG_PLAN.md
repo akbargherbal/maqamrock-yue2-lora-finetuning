@@ -1,143 +1,156 @@
-# PRON LoRA LONG — build & multi-day training plan
+# PRON LoRA LONG — build & multi-day training plan (`quran_long_aya_r8`)
 
-Branch: **`pron-lora-long`** (created 2026-09-26 off `pron-lora-ar-only`; nothing
-pushed). Status: **PLANNING ONLY** — no dataset built, no run started, no config
-edited. Companion runbook will be `docs/PRON_LORA_LONG.md` once the run exists.
+Branch: **`pron-lora-long`** (created off `pron-lora-ar-only`). Status as of
+2026-09-27: **dataset built + validated and in GCS; config written; decisions
+locked; no GPU work yet.** Companion runbook: `docs/PRON_LORA_LONG.md` (to be
+written once the run exists). GPU-phase handover: `docs/GPU_OPENING_PROMPT.md`.
+
+> **Provenance note.** The original plan/config/builder were lost with a VM on
+> 2026-09-26 and never pushed. This revision folds in the surviving facts: the
+> `selection_report.json` / `excluded_ayat.jsonl` in GCS, the separately-verified
+> ` ۝` caption edit, and the locked decisions recovered from `GPU_OPENING_PROMPT.md`.
+> `docs/PRON_LORA_LONG_PLAN.md` (this file) is the single source of truth.
 
 ## 1. Objective
 
 Train a new YuE2 pronunciation LoRA on the **quality-filtered** Quran collection,
-this time with **longer ayat and far more data**, and run it **across multiple
-days** (e.g. 5 h today, 8 h tomorrow). Continuity is the primary design
-constraint: because one ~1-epoch run will span many Colab sessions, the plan must
-make *any* interruption cost at most one checkpoint interval.
+with **longer ayat and far more data** than the reference, and run it **across
+multiple days** (e.g. 5 h today, 8 h tomorrow). Continuity is the primary design
+constraint: because one ~1-epoch run spans many Colab sessions, *any* interruption
+must cost at most one checkpoint interval.
 
-## 2. Locked decisions (from this session)
+## 2. Locked decisions
 
-- Filtering: `quran_ayah_filtering_specs.md` as-is — `min_words = 5` (after
-  dropping the end-of-ayah sign U+06DD), `max_repeat = 2` on literal duplicates.
-- Captions: both `_simple` and `_uthmani` variants, matching the reference set.
-- Caption layout (exact): `<prompt>\n[Lyrics]\n[Verse]\n<ayah text>\n`, prompt =
-  `/content/quran_training_data_specs/PROMPT.txt`.
-- Source audio: `gs://sheikh-fitzgerald-backup/ARABIC_DATA/Quran_Filtered_Audio_Data/accepted`
+- **Filtering (final):** `min_words = 6`, `max_words = 60`, `max_repeat = 2` on
+  exact duplicate texts. Word count is taken *after* dropping the end-of-ayah sign
+  U+06DD. (An earlier revision used `min_words = 5` with no cap; that was
+  superseded during the build — see §3.)
+- **Captions:** both `_simple` and `_uthmani` variants. Layout (exact):
+  `<prompt>\n[Lyrics]\n[Verse]\n<ayah text> ۝\n`, prompt =
+  `/content/quran_training_data_specs/PROMPT.txt`:
+  `Solo male voice, unaccompanied. Quran recitation. Clear precise classical Arabic diction. Spoken Words.`
+- **Source audio:** `gs://sheikh-fitzgerald-backup/ARABIC_DATA/Quran_Filtered_Audio_Data/accepted`
   (54,626 mp3, 9 reciters; `review`/`reject` excluded).
-- Splits: train = the rest; val = 20 unique ayat × all 9 reciters; smoke = 4 ayat
-  × 2 reciters (smoke also stays in train, as in the reference).
-- Train as much as possible; storage is cheaper than compute; checkpoint ~every
-  30 min and mirror to GCS; never overwrite the existing `pron_dataset`.
+- **Splits:** train = the rest; val = 20 unique ayat × all 9 reciters; smoke =
+  4 ayat × 2 reciters (smoke also stays in train, as in the reference).
+- **Run identity:** run name **`quran_long_aya_r8`**, config
+  `config/quran_long_aya_r8.yml`, output prefix
+  `<base>/quran_long_aya_r8/output/`, log `<base>/... run>`. Never overwrite the
+  existing `pron_dataset`.
+- **Pair count: A** — keep both text variants (81,006 train pairs).
+- **Caching:** `cache_text_embeddings: false`; `cache_latents_to_disk: true`; the
+  latent cache **is banked** to GCS (§4.3).
+- **Checkpoint cadence:** `save_every: 1500`, `max_step_saves_to_keep: 24`;
+  5-min GCS mirror.
+- **Branch:** `pron-lora-long` off `pron-lora-ar-only`.
 
-## 3. Dataset design
+## 3. Dataset (BUILT, VALIDATED, FINAL)
 
-### 3.1 Selection (verified by dry-run; no audio touched)
-- **5,160 ayat kept** — 1,048 dropped for <5 words, 28 for over-repetition; all
-  114 surahs covered.
-- Word counts: min 5, **median 13, mean 15.3, max 145** → genuinely long clips.
+### 3.1 Selection (from `selection_report.json`)
+- **6,236 ayat in → 4,670 selected / 1,566 excluded**, all 114 surahs covered:
+  - `below_min_words` 1,524 (word counts 1–5),
+  - `above_max_words` 28 (word counts 62–145),
+  - `exact_duplicate_exceeds_threshold` 14.
+- **Dedup rule (verified against `excluded_ayat.jsonl`):** group surviving ayat by
+  exact text; for any group with frequency `f > max_repeat (2)`, keep the first two
+  (lowest `SSSAAA`) and exclude the rest. `4+3+2+1+4 = 14`, matching the report.
+- Bismillah prefix stripped from the first aya of **112** surahs (all but 1 and 9).
 - Reference set for comparison: 350 ayat, 4–13 words, ~4–11 s.
 
 ### 3.2 Output shape (reference-compatible)
 ```
 <dataset>/train/<reciter>_<SSSAAA>_<simple|uthmani>.mp3 + .txt
-<dataset>/val/...
-<dataset>/smoke/...
+<dataset>/val/...   <dataset>/smoke/...
 ```
-Note: `_simple.mp3` and `_uthmani.mp3` are **byte-identical audio** (verified on
-the reference) — the variant only changes the caption. That is intrinsic to how
-AI-Toolkit pairs `<stem>.mp3` with `<stem>.txt`: two scripts ⇒ two files.
+`_simple.mp3` and `_uthmani.mp3` are **byte-identical audio** (verified on the
+reference) — the variant only changes the caption. AI-Toolkit pairs
+`<stem>.mp3` with `<stem>.txt`, so two scripts ⇒ two files.
 
-### 3.3 Scale
+### 3.3 Scale (as built)
 | split | combos | pairs (×2) | objects |
 |---|---|---|---|
-| train | 46,260 | **92,520** | 185,040 |
-| val | 180 | 360 | 720 |
-| smoke | 8 | 16 | 32 |
+| train | 40,503 | **81,006** | 162,012 |
+| val | 176 | 352 | 704 |
+| smoke | 7 | 14 | 28 |
 
-≈28 GB audio, ~185k objects. This is **~15×** the reference (6,100 pairs).
+**28.04 GiB**, ~162.7k objects — ≈13× the reference (6,100 pairs). Combos are
+emitted only where an accepted source file exists (val/smoke lose a few combos:
+176/180 and 7/8). Captions end with ` ۝` (U+06DD).
 
-### 3.4 Build pipeline
+### 3.4 Build pipeline (DONE; builder reconstructed for reproducibility)
 1. Download `accepted/` once (15.77 GiB) to `/content/quran_accepted`.
-2. `prepare_pron_dataset.py` (written, untracked, **not run**) → dataset root +
-   `selection_report.json` + `excluded_ayat.jsonl`.
-3. Validation gates (must all pass before upload):
+2. `prepare_pron_dataset.py` → dataset root + `selection_report.json` +
+   `excluded_ayat.jsonl`. *(The original was lost with the VM; the committed
+   version is a faithful reconstruction of the rules above — reference, not
+   byte-verified provenance.)*
+3. Validation gates (all passed before upload):
    - object counts match the report exactly; every `.mp3` has a same-stem `.txt`;
    - captions byte-equal a fresh re-derivation from the JSON texts;
-   - every selected combo maps to an accepted source file; list any gaps;
+   - every selected combo maps to an accepted source file; gaps listed;
    - decode a random sample (≥50) with `ffprobe` (mp3, 48 kHz-capable, duration > 0);
    - no filename >255 bytes; ASCII-safe reciter names.
-4. Upload to GCS (new prefix, never `pron_dataset`).
+4. Upload to GCS (new prefix, never `pron_dataset`):
+   `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset/`.
 
-## 4. Hidden costs: the per-VM caches (sized from source, 2026-09-26)
+## 4. Caches and their cost
 
-AI-Toolkit writes two caches per run under the dataset folder, **neither mirrored
-to GCS**, so a fresh VM rebuilds them before the first training step:
-`_latent_cache` (`cache_latents_to_disk` is mandatory for YuE2) and, with
-`cache_text_embeddings: true`, `_t_e_cache`. Sized from the actual dataset and the
-YuE2 source (`vae.py`, `model.py`, `tokenizer.py`, `yue2_model.py`):
+AI-Toolkit writes caches under the dataset folder. Neither is mirrored
+automatically, so a fresh VM rebuilds them before the first training step.
 
-Measured inputs: 46,440 train combos; ×2 text variants = **92,520 train files**;
-total audio **513 h** (256.5 h ×2); clip durations median 16 s, mean 19.9 s,
-max 260 s.
+### 4.1 Latent cache (kept; banked)
+`cache_latents_to_disk` is mandatory for YuE2. VAE latents (64 ch × 25 fps × bf16
+= 3.2 KB/s of audio) + codec tokens (int32) ≈ **~5.2 GiB** for the train split.
+**One-time build ≈ 5–9 h** on the first launch, **before step 1**. That build is
+the dominant cost of the first GPU session, not the steps.
 
-- **Latent cache** = VAE latents (64 ch × 25 fps × bf16 = **3.2 KB/s of audio**)
-  + codec tokens (int32) ≈ **~5.7 GiB** for the whole train split.
-- **Text-embedding cache** = the AR prefix embeddings `[L, 2048]` bf16
-  (`yue2_model.py:get_prompt_embeds` → `YuE2TextEncoder`). `L` ≈ 80–150 tokens
-  (instruction + tags + `[Lyrics]` + ayah) → ~0.33–0.61 MB per file →
-  **~28–53 GiB**. It is **9× redundant**: the caption is identical across the 9
-  reciters, but the cache path includes the file stem, so it is stored per file.
-- **Total cache ≈ 34–59 GiB**, rebuilt on every fresh VM.
+### 4.2 Text-embedding cache (disabled)
+`cache_text_embeddings: true` would write AR-prefix embeddings (`[L, 2048]` bf16,
+~0.33–0.61 MB/file ≈ **28–53 GiB**), 9× redundant because the caption is identical
+across the 9 reciters and the cache path includes the file stem. `YuE2TextEncoder`
+is just `ar.embed(ids)` — an embedding-table lookup — so recomputing per step is
+~free. **Decision: `cache_text_embeddings: false`.**
 
-Two findings that shrink this a lot:
-
-1. **`cache_text_embeddings` is nearly pointless here.** `YuE2TextEncoder` is
-   just `ar.embed(ids)` — an embedding-table lookup, no transformer. Disabling it
-   and recomputing per step costs almost nothing and removes ~28–53 GiB and the
-   corresponding rebuild time. *Recommended: set `cache_text_embeddings: false`
-   for this run.*
-2. **The two text variants duplicate identical audio.** `_simple.mp3` and
-   `_uthmani.mp3` are byte-identical, yet each gets its own (expensive) VAE +
-   MERT/codec-token cache entry. Emitting only one audio per combo (e.g.
-   uthmani-only, §7 B) halves the costly cache build.
-
-Remaining mitigation (decide after a Phase-3 smoke that times a small build):
-persist `_latent_cache` to GCS via `backup_to_gcp.py --extra` and restore on boot.
-The expensive part is the per-clip VAE + MERT/head pass, so this is worth it if we
-keep the cache at all.
+### 4.3 Banking the latent cache (decision: YES)
+`backup_to_gcp.py` does not mirror `_latent_cache`, so bank it by hand the moment
+it is complete (one-time expensive artifact):
+```bash
+tar -C /content/quran_long_aya_dataset/train -cf - _latent_cache \
+  | gcloud storage cp - gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset/_latent_cache.tar
+```
+Later VMs untar it into `/content/quran_long_aya_dataset/train/` instead of
+rebuilding.
 
 ## 5. Multi-day continuity design
 
 ### 5.1 Run identity
-- One run name, one config, one GCS prefix for the whole multi-day effort.
+- One run name, one config, one GCS prefix for the whole effort: `quran_long_aya_r8`.
 - `ai-toolkit` auto-resumes: `get_latest_save_path()` picks the newest
   `<name>*.safetensors`, loads its `training_info.step` and `optimizer.pt`, and
   continues. Same name + same config = resume; anything changed = a new run.
 - **Invariant:** never run the same run name on two VMs at once.
 
-### 5.2 Checkpoint cadence (the core of "save every 30 min")
-`save.save_every` is in **steps**, so it is derived after a timing smoke on the
-real dataset:
-```
-save_every = clamp(round(30*60 / s_per_step), 100, 4000)
-```
-`max_step_saves_to_keep` kept high enough that checkpoints survive until the
-5-min GCS mirror lands (e.g. 8–12). Checkpoints are EMA weights; each save also
-writes `optimizer.pt`.
+### 5.2 Checkpoint cadence
+- `save.save_every: 1500` (steps) and `save.max_step_saves_to_keep: 24` — fixed,
+  not smoke-derived. 24 retained checkpoints is the buffer for the 5-min GCS
+  mirror across the multi-day run. Checkpoints are EMA weights; each save also
+  writes `optimizer.pt`.
 
 ### 5.3 Backup cadence
-`backup_to_gcp.py --run-name <run>` runs detached every 5 min (already
-calibrated; it skips `loss_log.db*` and TensorBoard event files when deciding a
-folder has settled). Worst-case loss on VM death = one checkpoint interval.
-Before each pause, force `--once` and confirm the newest checkpoint + optimizer
-are in GCS.
+`backup_to_gcp.py --run-name quran_long_aya_r8` runs detached every 5 min (it
+skips `loss_log.db*` and TensorBoard event files when deciding a folder has
+settled). Worst-case loss on VM death = one checkpoint interval. Before each
+pause, force `--once` and confirm the newest checkpoint + optimizer are in GCS.
 
 ### 5.4 Session lifecycle
 - **Start:** `train_ctl.py start --config <cfg> --run-name <run> --log-name <log>`
   (detached; `start` is Ctrl+C-proof).
 - **Pause:** `train_ctl.py stop --log-name <log>` (checkpoint-safe SIGINT) →
-  `backup_to_gcp.py --run-name <run> --once` → verify GCS has newest ckpt.
-- **Resume (fresh VM):** clone → `bootstrap/setup.sh` → restore dataset →
-  restore run output prefix into `output/<run>/` → start sidecars → relaunch the
-  **identical** command (user-typed). Log must show "Found step N", not step 0.
-- The latent cache rebuilds on every fresh VM (§4) unless we persist it.
+  `backup_to_gcp.py --run-name <run> --once` → verify GCS has the newest ckpt.
+- **Resume (fresh VM):** clone → `bootstrap/setup.sh --training` (opt-in
+  `job_quran_long_dataset` restores the dataset when `GCP_QURAN_LONG_DATASET_PATH`
+  is set) → untar the banked latent cache → restore the run output prefix into
+  `output/quran_long_aya_r8/` → start sidecars → relaunch the **identical**
+  command (user-typed). Log must show "Found step N", not step 0.
 
 ### 5.5 Hazards (from `DECISIONS.md`, verified against ai-toolkit)
 - EMA restarts a fresh average on resume (continues from EMA'd weights). Known,
@@ -149,79 +162,43 @@ are in GCS.
 
 ## 6. Phased execution (gates in brackets)
 
-0. **Plan + branch** (this doc). [user review]
-1. **Build dataset** (download → build → validate). [validation gates pass]
-2. **Upload dataset to GCS + document restore.** [object counts verified]
-3. **Timing/cache smoke** on the `smoke` split (GPU): measure s/step, VRAM, cache
-   bytes/clip, encode rate → finalize `save_every`, `max_step_saves_to_keep`,
-   and decide §4 mitigation. [numbers recorded]
-4. **Write the run config** (new name; dataset path; `steps` = chosen target;
-   save cadence from Phase 3; everything else copied from `pron_lora_ar_only.yml`
-   unless justified). [user approves — config is the user's]
-5. **Launch + monitor** across sessions per §5. [user types the launch]
-6. **Merge / inference** later via the existing pron merge tooling.
+0. **Plan + branch** — this doc; branch `pron-lora-long`. **[done]**
+1. **Build dataset** (download → build → validate). **[done — gates passed]**
+2. **Upload dataset to GCS + document restore.** **[done — 81,006 / 352 / 14 verified]**
+3. **Write the run config** — `config/quran_long_aya_r8.yml`. **[done — decisions locked]**
+4. **First GPU launch:** start sidecars; launch (user-typed); the latent cache
+   builds (~5–9 h) before step 1; **bank it** (§4.3) the moment it completes.
+5. **Measure** s/step, VRAM peak, and wall clock per 1500-step save over ~50 steps
+   (`monitor_loss.py` + `/content/logs/gpu_usage.csv`). Do not edit the config.
+6. **Train across sessions** per §5; **merge / inference** later via the existing
+   pron merge tooling.
 
-## 7. Cost & scope options (decide after Phase 3 timing)
+Optional: a 20-step preflight on the smoke split
+(`config/quran_long_aya_smoke.yml`) to catch VRAM/plumbing issues before the long
+cache build. Not part of the locked sequence.
 
-Full 1 epoch = 92,520 steps. At the reference's short-clip ~0.9 s/step that is
-~23 h, but our clips are ~2× longer, so expect materially more. Options if the
-budget is too large:
-- **A. As-is** — 92,520 pairs (max data).
-- **B. Uthmani-only** — 46,260 pairs, halves steps, cache and disk (no
-  duplicate identical audio).
-- **C. Cap ayah length** (e.g. drop >40 words) — bounds per-step memory/time.
-- **D. Fixed step budget** — keep the full dataset but train to a chosen step
-  count (e.g. 30k) and use the best checkpoint; we do not have to finish an epoch.
+## 7. Cost & scope
 
-"Train as much as possible" + multi-day = A or D; B/C are the cost levers.
+Full 1 epoch = **81,006 steps**. At the reference's short-clip ~0.9 s/step that is
+~20 h, but our clips are ~2× longer, so expect materially more; the exact rate is
+measured in Phase 5. Scope decision: **A (as-is, both variants)**. The cost levers
+(B uthmani-only; C cap ayah length; D fixed step budget) remain available but are
+not chosen. "Train as much as possible" + multi-day = A/D.
 
 ## 8. Risks
-- **Per-VM cache rebuild** (§4) is the main time cost; must measure.
-- Longest clips (145 words) — memory/time outliers; verify no OOM, consider cap.
-- Colab 12 h session limits / reclaims — mitigated by detached run + 30-min saves.
-- Disk is **not** a binding constraint: the target VM has ~220 GB, and the whole
-  set (28 GB audio + ≤60 GB cache + ~20 GB model caches) fits. Rebuild *time* is
-  the constraint, not space.
-- Naming: dataset/run/GCS prefixes are provisional until you set them (§9).
 
-## 9. Open decisions
-1. **Pair count:** A / B / C / D (§7)?
-2. Persist the latent cache to GCS (yes/no)?
-3. Exact run name + GCS prefixes (local dataset root, dataset prefix, run prefix)
-   — currently provisional (`pron_lora_long_r8`, `quran_pron_long_dataset/`).
-4. Commit this plan + `prepare_pron_dataset.py` on `pron-lora-long`? (local only;
-   no push without your auth)
+- **First-launch latent-cache build (~5–9 h)** is the main time cost; bank it (§4.3).
+- Per-VM cache rebuild on later sessions — mitigated by the banked tar.
+- Colab 12 h session limits / reclaims — mitigated by detached run + 1500-step
+  saves + 24 retained checkpoints.
+- Disk is **not** binding: ~28 GB audio + ~5.2 GiB latent cache + model caches fit
+  the ~220 GB target VM. *Time* is the constraint, not space.
 
----
+## 9. Decisions (resolved — formerly "open")
 
-## 10. As-built addendum (2026-09-27)
-
-Reconstructed after the VM loss. **The plan body above is the pre-build revision;
-the dataset on GCS is FINAL and supersedes §3's numbers.**
-
-- Filtering actually applied: `min_words=6`, `max_words=60` (long ayat above 60
-  words were discarded), `max_repeat=2`. Plan §3.1/§3.3 said `min_words=5` and no
-  cap; that revision was superseded during the build.
-- Built dataset (verified): **4,670 ayat selected**, 1,566 excluded
-  (1,524 below / 28 above / 14 duplicate). **81,006 train pairs**, val 352,
-  smoke 14 → 28.04 GiB.
-- Captions end with ` ۝` (U+06DD ARABIC END OF AYAH) — appended in a later,
-  separately-verified step.
-- Location (final): `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset/`
-- Lost with the VM (reconstructed now): `prepare_pron_dataset.py`, the run config,
-  and the specs files. Recovered from the surviving report: prompt + all params.
-
-### §9 open decisions — RESOLVED (locked; recovered from `GPU_OPENING_PROMPT.md`)
-1. **Pair count: A** — keep both `simple` and `uthmani` (81,006 train pairs).
-2. **Persist the latent cache to GCS: YES** — bank it once complete as
-   `gs://.../quran_long_aya_dataset/_latent_cache.tar` (one-time, ~5.2 GiB).
-3. **Run name / prefixes:** run `quran_long_aya_r8`; local dataset
+1. **Pair count:** **A** — both variants, 81,006 pairs.
+2. **Persist the latent cache:** **yes** — bank as `_latent_cache.tar` (§4.3).
+3. **Run name + prefixes:** `quran_long_aya_r8`; local dataset
    `/content/quran_long_aya_dataset`; dataset prefix `.../quran_long_aya_dataset/`;
    run output prefix `.../quran_long_aya_r8/output/`.
-4. **Commit on `pron-lora-long`:** yes — branch `pron-lora-long` off
-   `pron-lora-ar-only` (not `main`).
-- Config: `config/quran_long_aya_r8.yml` — steps 81,006 · `save_every: 1500` ·
-  `max_step_saves_to_keep: 24` · `cache_text_embeddings: false` ·
-  `cache_latents_to_disk: true`; else identical to `pron_lora_ar_only.yml`.
-- First launch pays the one-time latent-cache build (~5–9 h) before step 1; the
-  training config must not be edited after launch (see `GPU_OPENING_PROMPT.md`).
+4. **Commit on `pron-lora-long`:** yes.
