@@ -42,3 +42,14 @@ python INFERENCE/generate.py INFERENCE/songs.qfinal_trigger.json \
 ## Sidecars
 - `backup_to_gcp.py --inference` daemon running (pid 25014) → mirrors `out/` to GCS.
 - Code/tooling committed & pushed: `c89665d` on `pron-lora-long`.
+
+## Session continuity (vm-continuity) — 2026-09-27
+- Installed (shim `/usr/local/bin/vm-continuity`, global skill symlink, AGENTS hint) and
+  the watch loop is **healthy**: `loop=running state=OK last_ship_ok=16:25:33 failures=0`.
+- Store: `gs://akbar-december-2024-backup/opencode_sessions/by_host/2ec7900a2206/`.
+- **Fixed an opencode-1.18.x incompatibility** (tool otherwise captured 0 sessions):
+  sessions table `session_v2` → `session` (now auto-detected), and `opencode session
+  export/import` → top-level `opencode export`/`import`. Pushed upstream:
+  `akbargherbal/vm-continuity@35b3b4b` (README has a compatibility table). Fresh VMs get
+  it via `setup.sh`'s clone/pull.
+
