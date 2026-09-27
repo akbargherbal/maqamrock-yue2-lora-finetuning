@@ -1,8 +1,9 @@
 # `quran_long_aya_r8` — runbook (canonical)
 
-This is the **entry point for the multi-day, multi-VM long-aya pronunciation
-LoRA**. Point the agent here at the start of a session and it should be able to
-say what the run is, where it stands, and what the next step is.
+Single entry point for the **multi-day, multi-VM long-aya pronunciation LoRA**:
+what the run is, where it stands, the commands that matter, and the exact prompts
+to paste. The *design/why* lives in [`PRON_LORA_LONG_PLAN.md`](PRON_LORA_LONG_PLAN.md);
+this doc is the *operating* surface.
 
 **Prime prompt** (paste at session start):
 ```text
@@ -10,23 +11,19 @@ Read docs/PRON_LORA_LONG.md and agent_notes/current.md, then report the current
 state of quran_long_aya_r8 from live artifacts (not memory) and propose the next step.
 ```
 
-## Canonical docs — read in this order
+## Docs
+| Doc | Answers |
+|---|---|
+| **this runbook** | run identity, current state, commands, session prompts |
+| [`../agent_notes/current.md`](../agent_notes/current.md) | the live *next step* (updated every session close) |
+| [`PRON_LORA_LONG_PLAN.md`](PRON_LORA_LONG_PLAN.md) | design + locked decisions (*why*) |
+| [`PAUSE_RESUME.md`](PAUSE_RESUME.md) · [`MONITOR.md`](MONITOR.md) · [`BACKUP_RESTORE.md`](BACKUP_RESTORE.md) | generic run mechanics |
 
-| # | Doc | Answers |
-|---|---|---|
-| 1 | **this runbook** | what the run is, where it stands, the commands that matter |
-| 2 | [`../agent_notes/current.md`](../agent_notes/current.md) | the live *next step* (updated every session close) |
-| 3 | [`PRON_LORA_LONG_PLAN.md`](PRON_LORA_LONG_PLAN.md) | the design and locked decisions (*why*) |
-| 4 | [`SESSION_PROTOCOL.md`](SESSION_PROTOCOL.md) | how to prime/resume the agent across VMs; the opening/closing ritual |
-| 5 | [`GPU_OPENING_PROMPT.md`](GPU_OPENING_PROMPT.md) | **first session only** (no checkpoints yet) — obsolete afterwards |
-| — | [`PAUSE_RESUME.md`](PAUSE_RESUME.md) · [`MONITOR.md`](MONITOR.md) · [`BACKUP_RESTORE.md`](BACKUP_RESTORE.md) | generic run mechanics |
-
-## Snapshot (updated each session; facts, not narrative)
-
+## Snapshot (facts; update each session)
 | | |
 |---|---|
 | Run name | `quran_long_aya_r8` |
-| Config | `config/quran_long_aya_r8.yml` (steps 81,006 · `save_every` 1500 · `max_step_saves_to_keep` 24 · `cache_text_embeddings: false` · `cache_latents_to_disk: true`) |
+| Config | `config/quran_long_aya_r8.yml` — steps 81,006 · `save_every` 1500 · `max_step_saves_to_keep` 24 · `cache_text_embeddings: false` · `cache_latents_to_disk: true` |
 | Branch | `pron-lora-long` |
 | Dataset | `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset/` — 81,006 train pairs / 352 val / 14 smoke; 28.04 GiB |
 | Local dataset | `/content/quran_long_aya_dataset/` |
@@ -36,7 +33,6 @@ state of quran_long_aya_r8 from live artifacts (not memory) and propose the next
 | Status | **GPU work not started.** 0 steps. No checkpoints. Cache not built. Dataset uploaded; branch pushed. |
 
 ## Commands that matter
-
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
 
@@ -44,28 +40,87 @@ cd /content/maqamrock-yue2-lora-finetuning
 python train_ctl.py start --config config/quran_long_aya_r8.yml \
   --run-name quran_long_aya_r8 --log-name train_quran_long
 
-# pause cleanly (checkpoint-safe)
+# pause cleanly (checkpoint-safe SIGINT)
 python train_ctl.py stop --log-name train_quran_long
-
-# is it healthy? / progress
+# progress / health
 python train_ctl.py status --log-name train_quran_long
 python monitor_loss.py /content/ai-toolkit/output/quran_long_aya_r8/loss_log.db
-
-# mirror to GCS now
+# mirror now
 python backup_to_gcp.py --run-name quran_long_aya_r8 --once
 
-# restore on a fresh VM (dataset; the run output prefix; then the banked cache)
+# restore on a fresh VM (dataset; run output prefix; then untar the banked cache)
 gcloud storage rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset /content/quran_long_aya_dataset
 mkdir -p /content/ai-toolkit/output/quran_long_aya_r8
 gsutil -m rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_r8/output /content/ai-toolkit/output/quran_long_aya_r8
-# tar the cache when built (one-time): see PRON_LORA_LONG_PLAN.md §4.3
+
+# bank the latent cache once built (one-time)
+tar -C /content/quran_long_aya_dataset/train -cf - _latent_cache \
+  | gcloud storage cp - gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset/_latent_cache.tar
+```
+
+## Session continuity (across VMs)
+
+| Store | Holds | Survives VM stop? |
+|---|---|---|
+| GitHub (`pron-lora-long`) | code, config, plan, this doc, `agent_notes/current.md` | yes |
+| GCS | dataset, banked cache, checkpoints, `loss_log.db`, **OpenCode session store** | yes |
+| VM `/content` + `/root` | the live run, the conversation, HF cache | **no** |
+
+- **Restore the conversation** (if captured): `vm-continuity hosts` → `vm-continuity pull --host <H>` → `vm-continuity restore opencode -- --mode db`, then reopen the session. Only sessions captured *while the loop ran* come back; the loop is started early by `setup.sh` on every VM.
+- **Cold start** (always works): the repo + GCS carry the state — paste the prime prompt above.
+- **Opening:** restore the session, else paste a prompt below; ensure the notebook exported `HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_BACKUP_BASE`.
+- **Closing (before you disconnect):** stop training → `backup_to_gcp.py --run-name quran_long_aya_r8 --once` and confirm the newest `*.safetensors` **+** `optimizer.pt` in GCS → bank the cache if pending → agent updates `current.md` + pushes → confirm `vm-continuity status` / last ship.
+- **Loss window:** checkpoints every 1500 steps, mirror every 5 min → lose at most the steps since the last 1500-multiple, plus ≤5 min.
+- **Never** run the same run name on two VMs; **never** edit the config mid-run; **no** auto-resume of a planned pause.
+
+## Prompts to paste
+
+### First GPU session only (kickstart; obsolete once a checkpoint exists)
+```text
+Fresh Colab GPU VM — start the GPU phase for the quran_long_aya_r8 run (branch
+pron-lora-long). Read docs/PRON_LORA_LONG.md + agent_notes/current.md first.
+
+1. Preflight: confirm branch pron-lora-long + config parses; report nvidia-smi (GPU/VRAM),
+   disk, and vm-continuity health.
+2. bootstrap/setup.sh --training (it may also pull the old v2 dataset — ignore that), then
+   restore OUR dataset and verify 81,006 train .mp3 + 81,006 .txt, 352/352 val, 14/14 smoke:
+     gcloud storage rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset /content/quran_long_aya_dataset
+3. Start sidecars: backup_to_gcp.py --run-name quran_long_aya_r8 ; gpu_logger.py.
+4. The first launch builds the latent cache (~5-9 h) before step 1. Give me the exact
+   detached launch command to type (python train_ctl.py start --config config/quran_long_aya_r8.yml --run-name quran_long_aya_r8 --log-name train_quran_long).
+5. After I launch: watch /content/quran_long_aya_dataset/train/_latent_cache/*.safetensors
+   until ~81,006; the MOMENT it completes, bank it and report the tar size.
+6. Once steps run, measure ~50 steps (s/step, VRAM peak, wall clock per 1500-step save).
+   Do not change the config.
+7. Do not edit the config or auto-resume anything; I pause with train_ctl.py stop.
+8. Continuity check before I disconnect: update agent_notes/current.md, commit+push, confirm
+   this session shipped (vm-continuity status; ship if needed).
+```
+
+### Resume after a pause
+```text
+Resume the multi-day YuE2 run quran_long_aya_r8 (branch pron-lora-long); fresh VM.
+Read docs/PRON_LORA_LONG.md + agent_notes/current.md first.
+Before anything else, report live state: nvidia-smi, disk, vm-continuity status, and the
+newest quran_long_aya_r8 checkpoint in GCS with its step (if none exists yet, say so).
+Then give me the exact commands to restore the dataset + banked latent cache + run output
+prefix (only what exists) and start the sidecars, followed by the identical launch command
+to type. Do not auto-resume; do not edit the config.
+```
+
+### Status check while running
+```text
+Check quran_long_aya_r8 (branch pron-lora-long). Read docs/PRON_LORA_LONG.md +
+agent_notes/current.md first. Answer from live artifacts only: latest step + loss
+(monitor_loss.py on the run's loss_log.db), GPU util/mem (gpu_usage.csv), newest checkpoint
+local vs GCS and the drift, and whether backup_to_gcp.py + gpu_logger.py are running.
+Make no changes.
 ```
 
 ## Progress log (append one row per session)
-
 | Date | Session | Steps (from→to) | Approx wall | How it ended | Notes |
 |---|---|---|---|---|---|
 | 2026-09-27 | planning/recovery | 0 → 0 | — | n/a | recovered builder+config+plan after VM loss; dataset uploaded; decisions locked |
 
-Keep this row-per-session: it is the durable "how much training have we done"
-record. `agent_notes/current.md` holds only the live next step.
+The progress log is the durable "how much training have we done" record;
+`agent_notes/current.md` holds only the live next step.

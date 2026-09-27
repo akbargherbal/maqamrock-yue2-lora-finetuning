@@ -3,12 +3,13 @@
 Branch: **`pron-lora-long`** (created off `pron-lora-ar-only`). Status as of
 2026-09-27: **dataset built + validated and in GCS; config written; decisions
 locked; no GPU work yet.** Canonical entry point: `docs/PRON_LORA_LONG.md` (run
-hub). GPU-phase handover: `docs/GPU_OPENING_PROMPT.md` (first session only).
+hub, which includes the kickstart/resume/status prompts).
 
 > **Provenance note.** The original plan/config/builder were lost with a VM on
 > 2026-09-26 and never pushed. This revision folds in the surviving facts: the
 > `selection_report.json` / `excluded_ayat.jsonl` in GCS, the separately-verified
-> ` ۝` caption edit, and the locked decisions recovered from `GPU_OPENING_PROMPT.md`.
+> ` ۝` caption edit, and the locked decisions recovered from the original
+> GPU-phase opening prompt.
 > `docs/PRON_LORA_LONG_PLAN.md` (this file) is the single source of truth.
 
 ## 1. Objective
@@ -169,7 +170,7 @@ pause, force `--once` and confirm the newest checkpoint + optimizer are in GCS.
 2. Upload dataset to GCS + document restore. *[81,006 / 352 / 14 verified]*
 3. Write the run config — `config/quran_long_aya_r8.yml`. *[decisions locked]*
 
-**GPU phase — the exact sequence (`docs/GPU_OPENING_PROMPT.md`):**
+**GPU phase — the exact sequence (kickstart prompt in `docs/PRON_LORA_LONG.md`):**
 
 1. **Preflight.** Confirm the branch is `pron-lora-long` and the config parses;
    report `nvidia-smi` (GPU/VRAM), disk, and `vm-continuity` health.

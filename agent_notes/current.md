@@ -4,7 +4,7 @@
 
 **Date:** 2026-09-27 · **State:** nothing training. Repo aligned to the locked prompt. **This VM has NO GPU.**
 
-## Locked (matches `docs/GPU_OPENING_PROMPT.md` step for step)
+## Locked (matches the kickstart prompt in `docs/PRON_LORA_LONG.md`)
 - Run **`quran_long_aya_r8`** · branch **`pron-lora-long`** · config **`config/quran_long_aya_r8.yml`**.
 - steps **81,006** · `save_every: 1500` · `max_step_saves_to_keep: 24` ·
   `cache_text_embeddings: false` · `cache_latents_to_disk: true`.
@@ -13,10 +13,9 @@
 
 ## Repo state
 - Pushed: `origin/pron-lora-long` (tracked). Files: `config/quran_long_aya_r8.yml`,
-  `prepare_pron_dataset.py`, `append_ayah_symbol.py`, `docs/PRON_LORA_LONG_PLAN.md`,
-  `docs/GPU_OPENING_PROMPT.md`, `docs/SESSION_PROTOCOL.md` (multi-VM context protocol).
-  `bootstrap/setup.sh` is **unmodified** (the prompt restores the dataset by hand).
-  `agent_notes/current.md` is now tracked so the GPU session can read it.
+  `prepare_pron_dataset.py`, `append_ayah_symbol.py`, `docs/PRON_LORA_LONG.md` (canonical
+  runbook), `docs/PRON_LORA_LONG_PLAN.md` (design). `bootstrap/setup.sh` is **unmodified**
+  (the runbook restores the dataset by hand). `agent_notes/current.md` is tracked.
 - This CPU session was captured to GCS: `opencode_sessions/by_host/87f6392cc09a/`
   (pull + `restore opencode` to recover it; loop left running, 5-min interval).
 
