@@ -1,17 +1,17 @@
 # agent_notes / current
 
-**Date:** 2026-09-27 · **State:** BETA merge — Phases 1 + 1.5 **DONE** (docs rewritten; GCS renamed + md5-verified). Nothing committed yet; `commit` + `ff-merge` await your go. No run active. Local machine, not Colab.
+**Date:** 2026-09-27 · **State:** Phases 1 + 1.5 + DECISIONS condensation **done and pushed** (`a9112ef` on `origin/pron-lora-long`). Next: **Phase 3** — ff-merge to `main` + tag `v0.9.0-beta`. No run active. Local machine, not Colab.
 
-**Next action (yours).** Review, then commit + push on `pron-lora-long`:
+**Next action (yours) — Phase 3 (fast-forward + tag):**
 ```bash
 cd /home/akbar/Jupyter_Notebooks/OpenCode/ostris_prepare_dataset/maqamrock-yue2-lora-finetuning
-git status -s && git diff --stat          # review
-git add -A
-git commit -m "beta: consolidate to main — README statement of record, PROGRESS milestones, pron-donor supersede rename (repo+GCS)"
-bash bootstrap/github_auth.sh             # PAT, in your terminal (never in chat)
-git push origin pron-lora-long
+git checkout main
+git pull --ff-only origin main
+git merge --ff-only origin/pron-lora-long
+git tag -a v0.9.0-beta -m "BETA: v2 style LoRA + long-aya Quran pronunciation merges (unselected candidates) + audio.cpp inference pipeline"
+git push origin main v0.9.0-beta
 ```
-Then Phase 3 (below) ff-merges + tags.
+Then Phase 4 (below): branches stay frozen; verify.
 (qfinal Suno/trigger sweep still awaiting your go-ahead — commands preserved at the bottom.)
 
 ---
