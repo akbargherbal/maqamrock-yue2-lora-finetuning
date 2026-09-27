@@ -1,8 +1,8 @@
 # 2026-09-26 — quran_long_aya_dataset / run `quran_long_aya_r8`
 
-State: dataset built + validated (81,006 train pairs, 29 GB) and **uploading** to
-GCS; config written; no GPU work yet. Branch `pron-lora-long` (NOT pushed yet).
-Plan: `docs/PRON_LORA_LONG_PLAN.md`.
+State: dataset built + validated (**uploaded** to GCS, 81,006 train pairs, 28.04 GiB);
+config written; branch `pron-lora-long` **pushed**; no GPU work yet.
+Plan: `docs/PRON_LORA_LONG_PLAN.md`. Continuity: `docs/SESSION_PROTOCOL.md`.
 
 ## PREREQUISITE before the GPU session — push the branch (agent can't push)
 ```bash
@@ -42,13 +42,26 @@ checkpoints exist yet.
 7. Do not edit the config or auto-resume anything. I'll pause with train_ctl.py stop. Later
    fresh VM = restore dataset, untar the banked cache, restore the run output prefix, relaunch
    the identical command.
+8. Continuity check BEFORE I disconnect: update agent_notes/current.md, commit + push, and
+   confirm this session shipped (vm-continuity status; run vm-continuity ship if needed so the
+   conversation is recoverable on the next VM). See docs/SESSION_PROTOCOL.md.
 ```
 
 ## State / next steps
 - GCS dataset: gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset/
-  (uploading now; ~162,746 objects).
+  (complete: 81,006 train pairs / 352 val / 14 smoke; 28.04 GiB).
 - Config: `config/quran_long_aya_r8.yml` — steps 81006, save_every 1500,
   max_step_saves_to_keep 24, cache_text_embeddings false; else identical to
   `pron_lora_ar_only.yml`.
 - Cache: latent ~5.2 GiB; one-time build ~5–9 h; bank it (step 5 above).
 - Queue after GPU: multi-day training at 1500-step saves, GCS mirror 5 min.
+
+## Before you disconnect — continuity check
+Run this before you let the VM go (it is also step 8 of the copy-paste message):
+1. `vm-continuity status` — exit 0 = the session-backup loop is healthy.
+2. `vm-continuity ship` — force one pass so the latest conversation is in GCS
+   (`<CONTINUITY_GCS>/opencode_sessions/by_host/<host>/`); confirm the ship time.
+3. Confirm the run mirror is current:
+   `backup_to_gcp.py --run-name quran_long_aya_r8 --once`, and that
+   `agent_notes/current.md` was updated and pushed.
+Full detail: `docs/SESSION_PROTOCOL.md`.
