@@ -16,7 +16,7 @@ operating contract is `../AGENTS.md`.
 | Build `audiocpp_cli` for a target GPU on a CPU-only runtime | [audiocpp_gpu_arch_builds.md](audiocpp_gpu_arch_builds.md) |
 | Run inference (YuE2 GGUF + LoRA) on a fresh VM | [INFERENCE.md](INFERENCE.md) |
 | Train the AR-only pronunciation LoRA | [PRON_LORA.md](PRON_LORA.md) |
-| **Run / resume the long-aya Quran LoRA (`quran_long_aya_r8`) — canonical hub** | [PRON_LORA_LONG.md](PRON_LORA_LONG.md) |
+| **Run / resume the long-aya Quran LoRA (`quran_long_aya_r8_s10`) — canonical hub** | [PRON_LORA_LONG.md](PRON_LORA_LONG.md) |
 | Verify / offline-eval the pronunciation LoRA (source + AR-loss replay) | [PRON_LORA_VERIFICATION.md](PRON_LORA_VERIFICATION.md) |
 | Merge v2 + pron at a chosen alpha | [PRON_LORA_MERGE.md](PRON_LORA_MERGE.md) |
 | Alpha sweep + blinded listening review | [PRON_LORA_SWEEP.md](PRON_LORA_SWEEP.md) |
@@ -56,6 +56,10 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 | Inference prompts | `/content/audiocpp_inference/prompts/<Maqam>_{style,lyrics}.txt` |
 | Converted LoRA | `/content/converter/out/akbar_arabic_rock_lora_{ar,nar}.safetensors` |
 | Handoff notes | `agent_notes/current.md` (tracked in git; also GCS-mirrored) |
+
+**Long-aya Quran run (`quran_long_aya_r8_s10`) has different names/paths** — see the
+Snapshot in [PRON_LORA_LONG.md](PRON_LORA_LONG.md): dataset `/content/quran_long_aya_dataset_s10`
+(restored from a GCS tar), latent cache banked as a tar, output `…/quran_long_aya_r8_s10/`.
 
 Env vars are staged by the launching notebook before any terminal command; a
 terminal that can't see them means the notebook cell hasn't run yet.

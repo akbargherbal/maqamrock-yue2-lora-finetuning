@@ -51,3 +51,14 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
 - Small real fix (Batch C): `docs/GRAPHIFY.md` refresh comment cited bare `manifest.json`; qualified to `graphify-out/manifest.json` (authority: the file's real location, and the doc's own layout table).
 - False positives (Batch D), curated in `skills/docs-reconciler/references/unverifiable.txt`: the `ab-blind-eval` package outputs `EVAL.txt` / `KEYS.txt` / `key.json` / `KEY_open_after_listening.txt` / `config/per-track` (written by `prepare_ab_eval.py` into GCS `listening/` packages; doc-scoped per file); sweep/runtime illustrations `_failed.log`, `__Kurd.json`, `json/log/gpu.csv/time.txt`; the external audio.cpp doc `docs/models/yue2.md` and the absolute runtime converter path `*/convert_aitoolkit_yue2_lora.py`; and external CLI flags `docs/GRAPHIFY.md :: --update` (graphify skill) and `:: --from` (uv).
 - No frozen doc touched; no config or hyperparameter changed.
+
+## 2026-09-27 — drift reconciliation (live docs) after the 10% subsample pivot
+
+- Reconciler run after the s10 pivot: 1790 claims / 44 live docs, 1105 checkable, **10 flagged (0.9%), all benign** — runtime/example tokens (`selection_report.json`, `dataloader_mixins.py`, `<log-name>_state.json`), external vm-continuity flags (`--host`, `--mode`), and `EXPERIENCE_CHECKLIST.md` prose "config/data/course" misread as a path. No real contradiction; left uncurated.
+- The real gap was **semantic** (the pivot), not mechanical: the authority/index docs still spoke v2/full-set. User-approved edits:
+  - `docs/README.md`: hub row label `quran_long_aya_r8` → `quran_long_aya_r8_s10`; added a Constants note that the long-aya run's names/paths live in its Snapshot (the table is v2).
+  - `docs/PRON_LORA_LONG.md`: added the resume check — after restoring the run output, the log must print `Found step N`, not step 0.
+  - `docs/PAUSE_RESUME.md`: top note that the long-aya run uses `PRON_LORA_LONG.md`'s names/paths and its latent cache is banked (the "~12 min rebuild" line is v2).
+  - `SOURCE_OF_TRUTH.md`: added rows for the long-aya runbook, its configs, and its GCS dataset/cache/checkpoint artifacts.
+- Authority: `skills/docs-reconciler/SKILL.md` (live docs only); `DECISIONS.md` got a dated entry (frozen rule respected).
+- No config or hyperparameter changed.

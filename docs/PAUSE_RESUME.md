@@ -5,6 +5,12 @@ Colab is ephemeral: stopping the runtime (or it being reclaimed) wipes
 checkpoint*. Resume tomorrow = fresh VM + restore the run folder + relaunch; it
 continues from the last checkpoint.
 
+> **Long-aya Quran run:** use the concrete names/paths in
+> [`PRON_LORA_LONG.md`](PRON_LORA_LONG.md) (Snapshot + Commands) — active run
+> `quran_long_aya_r8_s10`, dataset `/content/quran_long_aya_dataset_s10`, and its
+> latent cache is **banked as a GCS tar** (not the ~12 min rebuild the notes below
+> describe for v2). The mechanics here still apply; only the names/paths differ.
+
 ## Why this works
 
 `ai-toolkit` auto-resumes from the newest checkpoint in the run's output folder:

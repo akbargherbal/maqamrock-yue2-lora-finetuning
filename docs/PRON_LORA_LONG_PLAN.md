@@ -5,6 +5,17 @@ Branch: **`pron-lora-long`** (created off `pron-lora-ar-only`). Status as of
 locked; no GPU work yet.** Canonical entry point: `docs/PRON_LORA_LONG.md` (run
 hub, which includes the kickstart/resume/status prompts).
 
+> **⚠ Direction change (2026-09-27) — subsample pivot.** The full set's
+> latent-cache step measured **~1.1 files/s on an L4 ⇒ ~20 h** (the §4.1 "5–9 h"
+> was an A100 estimate), which does not fit a Colab 12 h session. The active GPU
+> run is now a **frozen, seeded 10% sample of train combos**:
+> **`quran_long_aya_r8_s10`** (`config/quran_long_aya_r8_s10.yml`, 8,100 pairs,
+> ~3.0 GiB, cache ~2 h). Built by `sample_pron_dataset.py` (seed 20260927);
+> selection locked in `docs/quran_long_aya_s10_manifest.json`; transport archive
+> `quran_long_aya_dataset_s10.tar`. The full set and the identity
+> `quran_long_aya_r8` remain the plan for future high-end hardware. Sections below
+> describe the full set; read them with that pivot in mind.
+
 > **Provenance note.** The original plan/config/builder were lost with a VM on
 > 2026-09-26 and never pushed. This revision folds in the surviving facts: the
 > `selection_report.json` / `excluded_ayat.jsonl` in GCS, the separately-verified
@@ -101,8 +112,16 @@ automatically, so a fresh VM rebuilds them before the first training step.
 ### 4.1 Latent cache (kept; banked)
 `cache_latents_to_disk` is mandatory for YuE2. VAE latents (64 ch × 25 fps × bf16
 = 3.2 KB/s of audio) + codec tokens (int32) ≈ **~5.2 GiB** for the train split.
-**One-time build ≈ 5–9 h** on the first launch, **before step 1**. That build is
-the dominant cost of the first GPU session, not the steps.
+
+**Measured (2026-09-27, L4) — supersedes the earlier estimate.** The encode runs
+at **~1.1 files/s** on this L4 (live tqdm + cache-file counts, two windows) ⇒
+**~20 h for the full 81,006 files**. The previous "one-time build ≈ 5–9 h" was
+implicitly an **A100** figure — the reference cached 6,100 short clips in 12:26 on
+an A100-SXM4 — and clip length matters: this set averages **~23 s** vs the
+reference's 4–11 s. **Consequence:** the full-set build does not fit a Colab 12 h
+session and is not resumable unless partial progress is banked, so the GPU run was
+pivoted to a **10% subsample** (8,100 pairs ⇒ ~2 h; §9.5). The full set stays
+reserved for high-end hardware.
 
 **What the cache does *not* replace — the dataset is still needed every VM.** The
 loader enumerates items from the folder by filename (`toolkit/data_loader.py` →
@@ -242,3 +261,10 @@ not chosen. "Train as much as possible" + multi-day = A/D.
    `/content/quran_long_aya_dataset`; dataset prefix `.../quran_long_aya_dataset/`;
    run output prefix `.../quran_long_aya_r8/output/`.
 4. **Commit on `pron-lora-long`:** yes.
+5. **Subsample pivot (2026-09-27):** the active GPU run trains on a frozen,
+   seeded **10% combo sample** — `quran_long_aya_r8_s10`, 8,100 pairs, cache ~2 h
+   — because the full set's L4 cache (~20 h) does not fit a session. Selection
+   locked in `docs/quran_long_aya_s10_manifest.json`; dataset transport archive
+   `quran_long_aya_dataset_s10.tar`, **banked in GCS** (2.94 GiB at the backup
+   prefix root, 2026-09-27). Full set + `quran_long_aya_r8` reserved for
+   high-end hardware.

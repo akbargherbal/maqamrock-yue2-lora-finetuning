@@ -95,3 +95,21 @@ human and invisible to the agent — so they get written down here.
 
 - The auto-resume trap: relaunching a run name with checkpoints present resumes
   instead of starting fresh — `docs/README.md`, "The one rule that bites people".
+
+## 2026-09-27 — `train_ctl.py stop`/`status` need the same `--config` as the launch
+
+- **Fact:** `stop`/`status` verify the target pid with
+  `_cmdline_matches(cmdline, config, run_name)`, where `config`/`run_name` come
+  from the *stop command's own args* — `--config` defaults to
+  `config/akbar_arabic_rock_lora.yml` (run name `akbar_arabic_rock_lora`). A side
+  run launched with `--config config/quran_long_aya_r8.yml` does not match that
+  default, so `stop --log-name train_quran_long` (no `--config`) refuses with
+  `refusing to signal pid N: not our training run`. Reproduced 2026-09-27 while
+  stopping the full-set quran cache build.
+- **Failure prevented:** a stop that silently does nothing (the run keeps burning
+  GPU), or a panicked `kill -9` fallback that loses progress.
+- **Correct pattern:** mirror the launch's `--config` (or `--run-name`) on
+  stop/status:
+  `python train_ctl.py stop --config config/<run>.yml --log-name <log>`.
+- **Possible hardening (not done):** `cmd_stop`/`cmd_status` could fall back to the
+  `run_name`/`config` recorded in `<log-name>_state.json` when the flags are omitted.

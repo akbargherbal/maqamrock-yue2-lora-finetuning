@@ -1,50 +1,67 @@
 # agent_notes / current
 
-**Prime with:** `docs/PRON_LORA_LONG.md` (canonical hub) + this file.
+**Prime with:** `docs/PRON_LORA_LONG.md` + this file.
 
-**Date:** 2026-09-27 · **State:** nothing training. Repo aligned to the locked prompt. **This VM has NO GPU.**
+**Date:** 2026-09-27 · **State:** s10 run **TRAINING** (pid 76687). Latent cache built (8,100) **+ banked** (541.69 MiB). Step **~330/8100**, ~1.35 s/it ⇒ ~3 h for the configured 8,100; first checkpoint at step 1500. Sidecars: backup `quran_long_aya_r8_s10` (73836), `gpu_logger` (34038). No errors.
 
-## Locked (matches the kickstart prompt in `docs/PRON_LORA_LONG.md`)
-- Run **`quran_long_aya_r8`** · branch **`pron-lora-long`** · config **`config/quran_long_aya_r8.yml`**.
-- steps **81,006** · `save_every: 1500` · `max_step_saves_to_keep: 24` ·
-  `cache_text_embeddings: false` · `cache_latents_to_disk: true`.
-- Pair count **A** (both variants). **Bank the latent cache** (~5.2 GiB, one-time build ~5–9 h before step 1).
-- Dataset FINAL: `quran_long_aya_dataset/` — 81,006 train pairs, 352 val, 14 smoke, 28.04 GiB (verified).
+## What changed and why
+The full 81,006-pair set's latent-cache step measures **~1.1 files/s on this L4** →
+**~20 h** (live: 974/81,006 after ~15 min), which cannot fit a Colab session. Decision:
+train a **frozen 10% random sample of train COMBOS** (both `_simple`/`_uthmani` variants
+paired) → **8,100 pairs**, ~3.0 GiB, cache **~2 h** — at the scale of the working reference
+(6,100 pairs). Full set + identity `quran_long_aya_r8` stay reserved for high-end hardware.
+The prior "5–9 h" figure was an A100 estimate; ignore it.
 
-## Repo state
-- Pushed: `origin/pron-lora-long` (tracked). Files: `config/quran_long_aya_r8.yml`,
-  `prepare_pron_dataset.py`, `append_ayah_symbol.py`, `docs/PRON_LORA_LONG.md` (canonical
-  runbook), `docs/PRON_LORA_LONG_PLAN.md` (design). `bootstrap/setup.sh` gains the opt-in
-  `job_quran_long_dataset` (marker-guarded, logged, verified). `agent_notes/current.md` is tracked.
-- This CPU session was captured to GCS: `opencode_sessions/by_host/87f6392cc09a/`
-  (pull + `restore opencode` to recover it; loop left running, 5-min interval).
-- Launcher: `notebooks/L4_QPRON_ArabicSuno_vscode_anywhere.ipynb` (copy also at `/content/`)
-  checks out `pron-lora-long`, exports `GCP_QURAN_LONG_DATASET_PATH`, and launches
-  `setup.sh` detached; setup's opt-in job pulls the 28 GiB dataset **in parallel** with the
-  vscode.dev tunnel auth (log `/content/logs/quran_long_dataset.log`). No hand-rolled rsync.
+## Done this turn
+- Built `/content/quran_long_aya_dataset_s10/` via `sample_pron_dataset.py` (seed **20260927**):
+  **8,100 train pairs, 352 val, 14 smoke**; 9 reciters, 2,779 distinct ayat.
+- Locked selection: `docs/quran_long_aya_s10_manifest.json` (all 4,050 stems).
+- New config: `config/quran_long_aya_r8_s10.yml` (parses; steps 8,100; folder `..._s10/train`).
+- Archived for fast future restores: `/content/quran_long_aya_dataset_s10.tar` (3.0 G, plain tar;
+  mp3 is incompressible) + `.sha256` sidecar = `1bf11f0bd5079a44024522b55af4220591350776897da85c0d7984afedafcc24`.
+- **Cleanup done:** removed the aborted full run's dead local artifacts — `quran_long_aya_dataset/train/_latent_cache`
+  (126 MB), `ai-toolkit/output/quran_long_aya_r8/` (20 KB), stale `train_quran_long.pid`, `train/.aitk_size.json`.
+  Kept logs (in GCS) + the GCS `quran_long_aya_r8/` prefix (reserved identity) + the 29 GB full dataset.
+- **Backup daemon re-pointed** to `quran_long_aya_r8_s10` (pid 73836); `gpu_logger` (34038) still running.
 
-## GPU phase — the exact sequence
-1. **Preflight:** confirm branch `pron-lora-long` + config parses; report `nvidia-smi`, disk, `vm-continuity` health.
-2. **Bootstrap + restore:**
+## Next steps (in order; you type each)
+
+1. Stop the full-set cache build (frees the L4).
+   **terminal: foreground** — sends the checkpoint-safe SIGINT and waits for `Job stopped`.
+   Nothing to lose: the run is at **0 steps** (still caching), so no checkpoint is at risk.
+   The partial `_latent_cache` stays on disk — valid for the full set reserved for high-end hardware.
    ```bash
    cd /content/maqamrock-yue2-lora-finetuning
-   git checkout pron-lora-long
-   bootstrap/setup.sh --training          # may also pull the v2 dataset — ignore that
-   gcloud storage rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset \
-     /content/quran_long_aya_dataset
+   python train_ctl.py stop --config config/quran_long_aya_r8.yml --log-name train_quran_long
    ```
-   Verify 81,006 train `.mp3` + 81,006 `.txt`, 352/352 val, 14/14 smoke.
-3. **Sidecars:** `backup_to_gcp.py --run-name quran_long_aya_r8` + `gpu_logger.py`.
-4. **Launch (you type it; detached):**
+   Confirm it's gone:
    ```bash
-   python train_ctl.py start --config config/quran_long_aya_r8.yml \
-     --run-name quran_long_aya_r8 --log-name train_quran_long
+   pgrep -af 'run\.py'                       # expect empty
+   python train_ctl.py status --config config/quran_long_aya_r8.yml --log-name train_quran_long
    ```
-5. **Bank the cache** when `_latent_cache` reaches ~81,006 (watch `train_quran_long.log`):
+   Leave the backup daemon (34037, still on `quran_long_aya_r8`) and `gpu_logger` running —
+   step 2 re-points the daemon.
+
+2. ~~Re-point the backup daemon~~ **DONE** — now running `--run-name quran_long_aya_r8_s10` (pid 73836).
+   (If it ever needs a restart: `pkill -f '[b]ackup_to_gcp.py'` then relaunch as in git history.)
+
+3. ~~Upload the subset~~ **DONE** — banked the archive (one object, 101 MiB/s in 40 s):
+   - `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset_s10.tar` (2.94 GiB)
+   - `…/quran_long_aya_dataset_s10.tar.sha256` · `…/quran_long_aya_s10_manifest.json`
+   Fresh-VM restore (fast, single object; NOT the ~17k loose files):
    ```bash
-   tar -C /content/quran_long_aya_dataset/train -cf - _latent_cache \
-     | gcloud storage cp - gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset/_latent_cache.tar
+   gcloud storage cp gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_long_aya_dataset_s10.tar - \
+     | tar -C /content -xf -
    ```
-6. **Measure** ~50 steps (s/step, VRAM peak, wall clock per 1500-step save). **Do not edit the config.**
-7. **Pause** only with `python train_ctl.py stop --log-name train_quran_long`. **No auto-resume.**
-   Later fresh VM = restore dataset → untar banked cache → restore run output prefix → relaunch identical command.
+
+4. ~~Launch the s10 run~~ **DONE** — pid 76687, detached (`--log-name train_quran_long_s10`). First launch caches ~2 h before step 1.
+
+5. ~~Bank the latent cache~~ **DONE** — `quran_long_aya_dataset_s10/_latent_cache.tar` (541.69 MiB). Future VMs untar instead of re-encoding (~1 h).
+
+6. Fresh-VM restore is now via the **archive**, not the rsync job. Either stream it by hand
+   (`gcloud storage cp gs://…/quran_long_aya_dataset_s10.tar - | tar -C /content -xf -`) or update
+   the notebook / `setup.sh` opt-in job to fetch+extract the tar. Only point
+   `GCP_QURAN_LONG_DATASET_PATH` at a loose `_s10` prefix if one is ever uploaded.
+
+7. Pause only with `python train_ctl.py stop --config config/quran_long_aya_r8_s10.yml --log-name train_quran_long_s10`.
+   Continuity: `vm-continuity status` is STALE — must read OK before you disconnect.

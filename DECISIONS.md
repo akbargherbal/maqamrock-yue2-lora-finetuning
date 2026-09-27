@@ -339,3 +339,25 @@ Where a claim below says "verified against source," it means the actual `ostris/
 - The notebooks `git checkout pron-lora-ar-only` on every run **until `main` is merged** —
   the early-loop fix, `restore --mode`, and the 5-min cadence currently live only on that
   branch (`origin/main` still carries the stale `setup.sh`).
+
+## Long-aya full set does not fit a session on an L4 → 10% subsample pivot (2026-09-27)
+
+- The full `quran_long_aya_dataset` (81,006 pairs) latent-cache encode was measured
+  live on the L4 at **~1.1 files/s** (two windows; tqdm + cache-file counts) ⇒
+  **~20 h**. The plan's earlier "5–9 h" was implicitly an **A100** figure (the
+  reference cached 6,100 short clips in 12:26 on an A100; this set's clips average
+  ~23 s vs the reference's 4–11 s). Corrected in the plan §4.1.
+- **Why it matters:** a Colab session is ≤12 h, and `backup_to_gcp.py` does **not**
+  mirror `_latent_cache`. The encoder skips files whose cache exists
+  (`toolkit/dataloader_mixins.py:1994`), so the build is resumable *only if* partial
+  progress is banked. As-is, the full set can never reach step 1 on an L4.
+- **Decision:** the active GPU run is a frozen, seeded **10% sample of train combos**
+  (`quran_long_aya_r8_s10`, 8,100 pairs, ~2 h cache). Sampling unit is the combo, so
+  each clip's `_simple`/`_uthmani` variants stay paired. Built by
+  `sample_pron_dataset.py` (seed 20260927); selection locked in
+  `docs/quran_long_aya_s10_manifest.json`. The full set + identity `quran_long_aya_r8`
+  are reserved for high-end hardware.
+- **Transport:** the dataset is archived as a single `tar` (mp3 is incompressible, so
+  no gzip) — `quran_long_aya_dataset_s10.tar` — so a fresh VM restores by streaming one
+  object instead of ~17k small-file round trips. Banked 2026-09-27 at the backup prefix
+  root (2.94 GiB, uploaded at 101 MiB/s) with its `.sha256` and `quran_long_aya_s10_manifest.json`.
