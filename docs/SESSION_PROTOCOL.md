@@ -77,18 +77,19 @@ Checkpoints every **1500 steps**; GCS mirror every **5 min**. A disconnect loses
 most the steps since the last 1500-multiple, plus ≤5 min of a completed checkpoint.
 (The wall-clock minutes depend on s/step, measured in the first GPU session.)
 
-## Copy-paste — first GPU launch
-See the code block in `docs/GPU_OPENING_PROMPT.md`.
+## Copy-paste — first GPU launch (once only)
+See the code block in `docs/GPU_OPENING_PROMPT.md`. After the first checkpoint
+exists, that file is obsolete — use the resume prompt below.
 
 ## Copy-paste — resume after a pause
 ```text
 Resume the multi-day YuE2 run quran_long_aya_r8 (branch pron-lora-long); fresh VM.
-Read agent_notes/current.md, docs/PRON_LORA_LONG_PLAN.md, docs/GPU_OPENING_PROMPT.md first.
+Read agent_notes/current.md, docs/PRON_LORA_LONG_PLAN.md first.
 Before anything else, report live state: nvidia-smi, disk, vm-continuity status, and the
-newest quran_long_aya_r8 checkpoint in GCS with its step number. Then give me the exact
-commands to restore the dataset + banked latent cache + run output prefix and start the
-sidecars, followed by the identical launch command to type. Do not auto-resume; do not
-edit the config.
+newest quran_long_aya_r8 checkpoint in GCS with its step number (if none exists yet, say so).
+Then give me the exact commands to restore the dataset + banked latent cache + run output
+prefix (only what exists) and start the sidecars, followed by the identical launch command
+to type. Do not auto-resume; do not edit the config.
 ```
 
 ## Copy-paste — status check while running

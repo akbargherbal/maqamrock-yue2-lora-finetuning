@@ -1,5 +1,11 @@
 # 2026-09-26 — quran_long_aya_dataset / run `quran_long_aya_r8`
 
+> **First GPU session only — this file goes obsolete afterwards.** It is the
+> kickstart for a run that has *no checkpoints yet* (steps 5–6, banking the cache
+> and the first speed measurement, are one-time). For every **subsequent** session
+> use the **resume prompt** in `docs/SESSION_PROTOCOL.md`; only two things here
+> still apply then — restore the dataset, and relaunch the identical command.
+
 State: dataset built + validated (**uploaded** to GCS, 81,006 train pairs, 28.04 GiB);
 config written; branch `pron-lora-long` **pushed**; no GPU work yet.
 Plan: `docs/PRON_LORA_LONG_PLAN.md`. Continuity: `docs/SESSION_PROTOCOL.md`.
