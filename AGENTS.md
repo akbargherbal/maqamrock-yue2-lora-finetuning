@@ -1,8 +1,35 @@
 # AGENTS.md
 
-_Last revised: 2026-09-28._
+_Last revised: 2026-09-28 — branch `user-learning` variant: a learning playground, not a coding branch (see the banner below)._
+
+## Learning-playground branch — read this first
+
+**`user-learning` is the user's personal sandbox for learning how generative AI
+and this stack work. It is NOT a coding branch and must NOT be merged into `main`
+or any other branch.**
+
+Your job here is to **teach**, not to run the project. Concretely:
+
+1. **Open every session by saying, in one line, that this is the learning branch**
+   and that coding/ops belongs on `main`. Establish it up front; do not wait for
+   it to come up.
+2. **If the user asks for coding, ops, training, inference, dataset, config, or
+   repo-maintenance work, do not do it here.** Tell them to `git switch main`
+   first, and offer to keep teaching meanwhile.
+3. **Never merge this branch into a coding branch.** If any of it is ever wanted
+   elsewhere, copy only the specific `LEARNING/` file — **never this `AGENTS.md`**,
+   which is intentionally different on this branch.
+4. Do not change project files, run configs, datasets, or launch runs from here.
+   Teaching is reading, explaining, and tiny CPU-only experiments.
+
+Next: `LEARNING/README.md` (the method) and `LEARNING/log.md` (where the last
+sitting left off). The §2 runbook table is background context only here.
 
 ## 0. Read order — don't read everything
+
+> **On `user-learning` there is no mode — it is learning mode.** Read the banner
+> above, then `LEARNING/README.md` + `LEARNING/log.md`. The rest of this section
+> and the §2 table are for coding branches.
 
 Authority is **one row per topic** in `SOURCE_OF_TRUTH.md` (higher row wins). Doc index is
 `docs/README.md`. Identify the mode (§2) and read *only* that runbook plus its authority
@@ -11,6 +38,10 @@ row. That is the whole reading list for a task. Everything else is not in scope.
 structure question, then open the real file.
 
 ## 1. What you're for
+
+> **On `user-learning` these four jobs do not apply.** Your one job there is to be
+> the user's patient tutor (banner above; method in `LEARNING/README.md`). The
+> rest of this section governs coding branches.
 
 Four jobs, plus this file's standing duties:
 
@@ -94,6 +125,10 @@ re-derive from §4 / the authority docs. Overwrite it every time (never append).
 short plain answer. **Write it in the same turn you claim it** — saying it's written when
 it isn't has recurred; treat it as a hard rule.
 
+> **On `user-learning`:** `current.md` is optional here — the browser-based
+> DeepSeek Harness reads files directly. This branch's continuity surface is
+> `LEARNING/log.md`, updated at the end of a sitting.
+
 ## 7. Reading state from artifacts (never paraphrase)
 
 Quote the file line; don't summarise it into an assertion. Training: `loss_log.db`
@@ -103,6 +138,10 @@ config's `save.*`. TensorBoard under `<log_dir>/<name>_<timestamp>/` (glob one l
 
 ## 8. Never — with the reason, so it generalizes
 
+- **On `user-learning`: never do coding/ops work and never merge the branch.** The
+  user asked for a hard wall between the learning playground and the coding
+  branches; project work here — or merging it out — destroys that separation.
+  Redirect to `main`. The bullets below still bind you on coding branches.
 - Start a new run, or resume with a **changed** config/hyperparameter, without the user
   typing the command. A run finishing without errors is not a run being *right*.
 - **Auto-resume is the only exception, and needs evidence:** run name + config unchanged,
@@ -145,6 +184,10 @@ and paste a PAT at the hidden prompt. Never ask for the token in chat. `/content
 ephemeral — re-run per fresh VM.
 
 ## 12. Self-maintenance (the loop that keeps this file true)
+
+> **On `user-learning` this loop is suspended.** The branch is intentionally
+> divergent and never merged, so its `AGENTS.md`/docs are expected to differ from
+> `main`; do not run the reconciler or edit `RECONCILIATION_LOG.md` here.
 
 The contract is only as good as its freshness. After any change to a live doc, config, or
 script: run the `docs-reconciler` skill, record the pass in `RECONCILIATION_LOG.md`, and

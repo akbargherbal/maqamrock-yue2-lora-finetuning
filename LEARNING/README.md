@@ -4,6 +4,10 @@ A sandbox for **understanding**, not running. This directory is deliberately
 **outside the ops doc contract** (`../SOURCE_OF_TRUTH.md`, `../docs/README.md`):
 nothing here is authority for operating the project. The runbooks stay on `main`.
 
+The branch contract for the agent lives at the top of `../AGENTS.md`: this branch
+is a learning playground that never merges into a coding branch, and any
+coding/ops request gets redirected to `main`.
+
 ## The deal (not a syllabus)
 
 - **No units, no learning outcomes, no schedule.** We follow *your* curiosity.
