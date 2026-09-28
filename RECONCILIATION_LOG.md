@@ -169,3 +169,29 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   existing rows.
 - Authority: `skills/docs-reconciler/SKILL.md` (live docs only); no config or hyperparameter
   changed; no frozen doc rewritten.
+
+## 2026-09-28 — `status.py` built + `AGENTS.md` graphify corrections
+
+- Added `status.py` (the §4 "ground truth in one move" tool) and `tests/test_status.py`
+  (6 GPU-free tests; suite 165 green, the torch module excluded locally, as usual).
+  Read-only and environment-aware: Colab reads the full picture; a local checkout reports the
+  `/content` surfaces as `n/a` rather than "not running". Reports training step/rate + pid,
+  inference batch `n/N` + failures, sidecar pids, last-backup age, local-vs-GCS drift, disk
+  free, the run folder, and graph staleness (`built_at_commit` vs HEAD). §4's
+  `docs/IMPROVEMENTS.md` #11 "proposed, not built" note was removed; `IMPROVEMENTS.md` itself
+  left frozen.
+- `AGENTS.md` corrections — the graphify shortcomings traced back to the file:
+  - §0: added "a `graphify query` is a locator, not a read", resolving the tension between
+    §12 recommending the graph and §0 declaring "everything else is not in scope".
+  - §1: "Three jobs" → "Four jobs", adding "Stay oriented" — the missing job that left any
+    orientation tool without a purpose in the contract.
+  - §12: fixed the refresh instruction. `graphify update .` is code/AST-only; doc/semantic
+    edges need `/graphify --update`. The old line ("refresh with `graphify update .`") was
+    what *caused* the semantic staleness the earlier review flagged. Also added the authority
+    rule (orientation only, never authority; quote `built_at_commit`).
+- Reconciler after the changes: 1723 claims / 44 docs, 1061 checkable, **0 flagged**.
+  Reworded `config/code/docs` → "the config, code, or docs" (a false missing-path token) and
+  curated two external graphify flags (`AGENTS.md :: --budget`, `AGENTS.md :: --update`)
+  beside the existing `docs/GRAPHIFY.md` entries.
+- Authority: user-directed implementation of the reviewed plan; no run config or
+  hyperparameter changed; no frozen doc rewritten.

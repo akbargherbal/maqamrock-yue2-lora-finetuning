@@ -118,6 +118,9 @@ docs/models/yue2.md
 # uv's `tool run --from`)
 docs/GRAPHIFY.md :: --update
 docs/GRAPHIFY.md :: --from
+# graphify flags quoted in AGENTS.md §12 (external tool, not this repo's code)
+AGENTS.md :: --budget
+AGENTS.md :: --update
 
 # 2026-09-28 — RECONCILIATION_LOG.md is now excluded from extraction outright
 # (history: it quotes past drift reports verbatim, so every old run's flagged

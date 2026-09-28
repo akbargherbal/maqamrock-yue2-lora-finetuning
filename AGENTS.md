@@ -6,16 +6,20 @@ _Last revised: 2026-09-28._
 
 Authority is **one row per topic** in `SOURCE_OF_TRUTH.md` (higher row wins). Doc index is
 `docs/README.md`. Identify the mode (§2) and read *only* that runbook plus its authority
-row. That is the whole reading list for a task. Everything else is not in scope.
+row. That is the whole reading list for a task. Everything else is not in scope. A
+`graphify query` (§12) is a **locator, not a read**: use it to find candidate files for a
+structure question, then open the real file.
 
 ## 1. What you're for
 
-Three jobs, plus this file's standing duties:
+Four jobs, plus this file's standing duties:
 
 1. **Get a task ready** before launch — confirm the mode's prerequisites (§2); sanity-check
    any YAML against `DECISIONS.md` (dead keys, paths that differ from what they appear to say).
 2. **Answer "how's it going"** from live artifacts only (§4) — never by recalling a turn.
 3. **On a crash** — find the cause, then auto-resume (§8) or hand over the exact command.
+4. **Stay oriented** — for structure questions (not a §2 mode), locate via `graphify query`
+   (§12), then verify in source; cite `file:line`, never the graph.
 
 Standing duties: the backup/continuity checks (§10) and the handoff surface (§6). These are
 recurring, not optional. **Scope = the above + the task's runbook. In scope, be thorough;
@@ -55,18 +59,14 @@ per mode (pron, long-aya). Read the constants in `docs/README.md` and the mode's
 
 ## 4. Ground truth in one move
 
-"State" means one deterministic read, never memory. **Target:** `python status.py` prints,
-in one call — training step/rate + pid, inference batch `n/N` + failures, sidecar pids,
-last successful backup age, local-vs-GCS drift, disk free, and the current run folder.
-*(`status.py` is proposed, not built — `docs/IMPROVEMENTS.md` #11. Until it exists, run this
-one block and read it as a unit; do not answer from a previous turn.)*
-
-```bash
-python train_ctl.py status; pgrep -af 'run\.py'
-python monitor_loss.py <run>/loss_log.db --total-steps <N>
-tail -n 5 /content/logs/train.log
-pgrep -af 'backup_to_gcp.py|gpu_logger.py'; vm-continuity status
-```
+"State" means one deterministic read, never memory. **Run `python status.py`** — in one
+read-only call it prints training step/rate + pid, inference batch `n/N` + failures, sidecar
+pids, last backup age, local-vs-GCS drift, disk free, the current run folder, and graph
+staleness (`built_at_commit` vs HEAD). It is environment-aware: on Colab it reads the full
+picture; on a local checkout the `/content` surfaces report `n/a` (never apply Colab paths
+locally), and it exits non-zero only when a sidecar is down while a run is active. Fallback
+by hand: `train_ctl.py status`; `monitor_loss.py <run>/loss_log.db`; `tail train.log`;
+`pgrep -af 'backup_to_gcp.py|gpu_logger.py'`; `vm-continuity status`.
 
 Primary sources, mode-specific: `docs/MONITOR.md` (training), `docs/INFERENCE.md`
 (inference). **Not a source:** `aitk_db.db` (Web-UI-only status row).
@@ -153,6 +153,10 @@ reconciled:** when its claims drift, fix it in the same change and bump the revi
 Persistence rule: an experience lesson only survives if it lands here (or in a skill) in
 the same turn — otherwise the next session re-earns it. Skills: `crash-diagnose-and-resume`,
 `inference-batch-run`, `command-handover`, `docs-reconciler`, `ab-blind-eval`; the runbooks
-stay the source of truth. Knowledge graph: prefer `graphify-out/GRAPH_REPORT.md` /
-`graphify query "<q>"` for architecture questions; refresh with `graphify update .`
+stay the source of truth. Knowledge graph — **orientation only, never authority** (not in §4's ground-truth set;
+never outranks the config, code, or docs). For "how does X relate to Y", prefer
+`graphify query "<q>" --budget 1500` over reading the tree. `graphify-out/GRAPH_REPORT.md`
+is a dated snapshot — quote its `built_at_commit`, never cite it as fact. Refresh is
+**two-tier**: `graphify update .` is free but code/AST-only; doc/semantic edges need
+`/graphify --update` (LLM) — free tier after code changes, semantic tier before merges
 (portability: `docs/GRAPHIFY.md`).
