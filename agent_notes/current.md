@@ -1,42 +1,44 @@
 # current
 
-## 1. Plan — corrected 2026-09-28 (cover = Python SheetSage2 + existing yue2 binary)
-
+## 1. Plan (corrected 2026-09-28)
 **Transcription (audio → ABC): official Python `m-a-p/SheetSage2`** — no audio.cpp,
 no GGUF, no build. `model.transcribe(wav, output_dir=…, melody_only=True)` → `score.abc`.
-Own env: torch 2.8 / torchaudio 2.8 (cu126), transformers 4.45.2, ffmpeg 6.1 + shared
-libs, mir_eval/pretty_midi/mido. Backbone `MERT-v2-FullSong` (632 M, ~2.5 GB) not cached.
-GPU or CPU. The audio.cpp GGUF was validated to match this reference's ABC, so the ABC
-drops straight into `--request-option abc_file=`.
+**Generation (cover render): the EXISTING `bin/audiocpp_cli`** — verified it has
+`cot`/`abc_file`/`melody`; no rebuild. (It lacks `semantic_prefix` — Form ② needs ≥v0.8.2.)
 
-**Generation (cover render): the EXISTING `/content/audiocpp_inference/bin/audiocpp_cli`** —
-verified it already has `cot` / `abc_file` / `melody` (so `cot=melody` + `abc_file=<score.abc>`
-works). **No rebuild.** It lacks `semantic_prefix` (Form ②, needs ≥v0.8.2) — Form ① does not.
+## 2. Smoke — transcription PASSED (2026-09-28)
+Env `/content/.venv-sheetsage2` (uv, py3.11, torch 2.8.0+cu126, transformers 4.45.2) —
+build log `/content/logs/sheetsage2_env.log`. One **v2** wav
+(`01-…_4032407937`) → `melody_only=True`:
+`/content/audiocpp_inference/out/ss2_smoke/score.abc` — **1888 B**, `V: Vocal` + `V: Ins`,
+`% intro`/`% chorus`, **0 chord symbols**. T4, ~11 GiB. Log `/content/logs/ss2_smoke.log`.
+**Timing:** cold (incl. 2.7 GB download) **136 s**; warm (cached) **82 s/track**, max RSS
+3.4 GB, ABC byte-identical on re-run. ⇒ 12 v2 tracks ≈ **16 min** (under the 20-min budget);
+all 36 ≈ 50 min (over it).
 
-## 2. Why we are NOT rebuilding audio.cpp (finding, 2026-09-28)
-Smoke #1 failed in 3 s: `unsupported model family hint: sheetsage2`. Root cause: the staged
-binary was built `--model-set custom --models yue2` (`DECISIONS.md` build entry); `strings`
-show **0** `sheetsage`. Upstream releases ship **only `audiocpp_server`** (HTTP, no CLI mode)
-— no prebuilt `audiocpp_cli`. A sheetsage2-only rebuild was started per
-`docs/audiocpp_gpu_arch_builds.md` and **stopped at 88/413** once we saw the existing binary
-already has the generation knobs and Python SheetSage2 covers transcription.
-**Do not restart the build.** Log: `/content/logs/build_sheetsage2.log`.
+## 3. Next — cover-render smoke (needs qfinal_a0.3 staged)
+qfinal_a0.3 adapters (87 MB each):
+`gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/loras/audio_cpp/pron/qfinal_a0.3/akbar_arabic_rock_lora_{ar,nar}.safetensors`.
+Call the binary **directly** (`run_one.sh:79` hardcodes `cot=off`): existing `audiocpp_cli`,
+qfinal_a0.3 AR+NAR scale 1.0, `--request-option cot=melody --request-option abc_file=<score.abc>`,
+same lyrics/style, seed = the v2 track's (`4032407937`). This is the real test of the
+`cot=off`-trained adapters under ABC conditioning.
 
-## 3. Next steps
-1. One-track smoke: official Python SheetSage2 (`melody_only=True`) on a v2 wav → `score.abc`.
-2. Cover smoke: existing `audiocpp_cli`, `qfinal_a0.3` LoRA, `cot=melody` + `abc_file`,
-   same lyrics/seed.
-3. If it holds: transcribe the v2 arm → persist ABCs to GCS → batch covers →
-   blind A/B vs the `batch_36_songs` qfinal_a0.3 controls (`INFERENCE/prepare_ab_eval.py`).
-4. `INFERENCE/abc_transcribe.py` targets the *audio.cpp* path — re-point/replace it for the
-   Python route before any batch.
+Then: transcribe the v2 arm → persist ABCs to GCS → batch covers → blind A/B vs the
+`batch_36_songs` qfinal_a0.3 controls (`INFERENCE/prepare_ab_eval.py`).
+`INFERENCE/abc_transcribe.py` targets the *audio.cpp* path — replace with a Python-route
+driver before any batch.
 
-## 4. VM / artifacts
-Branch `music-cover`. Staged: `models/SheetSage2-GGUF/sheetsage2-orig.gguf` (2.71 GB, now
-unused), 36 wavs in `out/batch_36_songs/`, `bin/audiocpp_cli`. GPU T4, 0 MiB used.
-Session-restore JSON (conversation continuity) imported successfully:
+## 4. Why we are NOT rebuilding audio.cpp (2026-09-28)
+Smoke #1 failed in 3 s: `unsupported model family hint: sheetsage2` — the staged binary was
+built `--models yue2` (`DECISIONS.md`); releases ship only `audiocpp_server` (no CLI). Rebuild
+abandoned at 88/413. **Do not restart.** Log `/content/logs/build_sheetsage2.log`.
+
+## 5. VM / artifacts
+Branch `music-cover`. Staged: SheetSage2-GGUF (2.71 GB, unused), 36 wavs,
+`model/Yue2-3B-GGUF`, `bin/audiocpp_cli`, `converter/out/` (v2 pair only). GPU T4.
+Session-restore JSON imported:
 `gs://akbar-december-2024-backup/opencode_sessions/by_id/ses_f17ef5af2ffeK15W1EBgAHpDJT.json`.
 
-## 5. Still pending
-`manifests/batch_36_rock.json` (Measure A prompt arm). Feasibility record:
-`docs/music-cover-feasibility.md`.
+## 6. Still pending
+`manifests/batch_36_rock.json` (Measure A). Record: `docs/music-cover-feasibility.md`.

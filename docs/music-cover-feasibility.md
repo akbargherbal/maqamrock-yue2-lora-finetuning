@@ -3,7 +3,8 @@
 _Last revised: 2026-09-28 (route corrected: transcribe with the **official Python
 SheetSage2**, no audio.cpp rebuild; binary capability verified). Investigation &
 discussion record — **not a runbook**.
-No experiment described here has been run yet; hypotheses are marked as such.
+The transcription front end (route B2) has been smoke-tested and works; the
+generation experiments remain unrun — hypotheses are marked as such.
 Authority for procedures stays with `docs/INFERENCE.md`, `docs/PRON_LORA_MERGE.md`,
 `docs/LORA_INVENTORY.md`, and `config/akbar_arabic_rock_lora.yml`._
 
@@ -52,8 +53,9 @@ Gaps in this repo (as of 2026-09-28; SheetSage2 status re-verified 2026-09-28):
   no build. It is the reference the audio.cpp GGUF was validated against (ABC parity),
   so its `score.abc` drops straight into `--request-option abc_file=`. Needs its own
   env (torch 2.8/torchaudio 2.8 cu126, transformers 4.45.2, ffmpeg 6.1 + shared libs)
-  and the MERT-v2-FullSong backbone (632 M, downloaded separately). `INFERENCE/abc_transcribe.py`
-  targets the *audio.cpp* path and would be re-pointed/replaced for this route.
+  and the MERT-v2-FullSong backbone (632 M, downloaded separately). The Python-route
+  driver is `INFERENCE/sheetsage2_transcribe.py`; the audio.cpp-path
+  `INFERENCE/abc_transcribe.py` is superseded for this route.
 - The fine-tuned adapters were trained `cot: "off"` (`config/akbar_arabic_rock_lora.yml:106`,
   "your captions carry no melodic/ABC info"), so ABC conditioning is **off-distribution**
   for them — a first-order unknown, hence a 1-track smoke before any batch.
@@ -176,8 +178,9 @@ investigating, look at decoding/sampling knobs (e.g. `semantic_repetition_penalt
   `https://github.com/0xShug0/audio.cpp/blob/main/docs/models/yue2.md`
 - audio.cpp MuScriptor (audio→MIDI/note-JSON):
   `https://github.com/0xShug0/audio.cpp/blob/main/docs/models/muscriptor.md`
-- Repo driver for the cover front end: `INFERENCE/abc_transcribe.py`;
-  session handoff: `agent_notes/current.md`.
+- Repo drivers: `INFERENCE/sheetsage2_transcribe.py` (Python route, used) and
+  `INFERENCE/abc_transcribe.py` (audio.cpp path, superseded); handoff:
+  `agent_notes/current.md`.
 - Repo: `docs/LORA_INVENTORY.md`, `docs/PRON_LORA_MERGE.md`,
   `config/akbar_arabic_rock_lora.yml:106`, `INFERENCE/run_one.sh:79`,
   `INFERENCE/generate.py`, `manifests/batch_36_songs.json`.
