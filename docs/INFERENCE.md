@@ -150,7 +150,7 @@ Per-song fields (unknown keys are a hard error):
 
 | Field | Meaning |
 |---|---|
-| `name` | required, ASCII slug `[A-Za-z0-9][A-Za-z0-9_-]*`; output prefix. A repeated name is renamed `_2`, `_3`, … (with a warning), so it never collides |
+| `name` | required slug: Unicode letters/digits with `-`/`_` (`[^\W_][\w-]*`, e.g. `my_song` or `07-الحر-الشديد`); output prefix. No spaces/dots/slashes. A repeated name is renamed `_2`, `_3`, … (with a warning), so it never collides |
 | `style` / `style_file` | exactly one; inline text or path (relative to the JSON) |
 | `lyrics` / `lyrics_file` | exactly one |
 | `repeat` | takes with fresh random seeds (`< 2^32`), default 1 |

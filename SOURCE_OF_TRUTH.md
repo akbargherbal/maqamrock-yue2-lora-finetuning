@@ -25,6 +25,7 @@ History files are authoritative for what happened, never for what is true now.
 | Full history | git | `git log`; pre-rewrite narrative `git show 39d1bbd:PROGRESS.md` |
 | Known stale / open items | `docs/IMPROVEMENTS.md` | read-only snapshot |
 | Doc index | `docs/README.md` | must list every live runbook |
+| User cheat-sheet (copy-paste commands) | `user_cheatsheet.md` | index only; the runbooks above are authority |
 | Repo knowledge graph (graphify) | `docs/GRAPHIFY.md` | generated map; refresh with `graphify update` |
 | Agent contract | `AGENTS.md` | |
 | Archived / superseded | `docs/investigation.md`, `docs/yue2-gguf-lora-findings.md`, `verification.md`, `docs/LIVE_STATUS.md` | banners are correct; don't "fix" |

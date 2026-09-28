@@ -195,3 +195,44 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   beside the existing `docs/GRAPHIFY.md` entries.
 - Authority: user-directed implementation of the reviewed plan; no run config or
   hyperparameter changed; no frozen doc rewritten.
+
+## 2026-09-28 — `generate.py` names: ASCII-only slug → Unicode slug
+
+- `generate.NAME_RE` widened from `^[A-Za-z0-9][A-Za-z0-9_-]*$` to
+  `^[^\W_][\w-]*$` (Unicode letters/digits + `-`/`_`; still rejects spaces, dots,
+  slashes and leading punctuation). Hand-authored Arabic names in
+  `manifests/batch_36_songs.json` now validate; repeats still dedup to `_2`/`_3`.
+  Names reach `run_one.sh` as quoted argv and are used as path components, so
+  Unicode is safe end-to-end.
+- Docs: `docs/INFERENCE.md` `name` row and the `generate.py` module docstring
+  updated to match; `tests/test_generate.py` gained a Unicode-accept test and
+  `../evil` / `.hidden` reject cases (fragment `ASCII slug` → `required name slug`).
+- Reconciler after the change: 1722 claims / 44 docs, 1061 checkable, **6 flagged**;
+  all 6 are the pre-existing missing `manifests/workspace_manifest.json` fixture
+  (same cause as the `test_suno_to_songs` failures) — **0 new drift**.
+- Authority: user-directed ("fix the script, not the batch; Arabic names should
+  work"); no run config or hyperparameter changed; no frozen doc rewritten.
+
+## 2026-09-28 — `user_cheatsheet.md` (user-facing copy-paste index)
+
+- Added `user_cheatsheet.md` at the repo root: copy-paste commands grouped by task
+  (ground-truth `status.py`, sidecars, fresh-VM setup + GH auth, train
+  start/status/stop, monitoring, inference LoRA staging + `generate.py`, backup /
+  verify / restore, pause-resume, finish + push, gotchas). Explicitly marked
+  **index, not authority**; every command is sourced from a runbook
+  (`START.md`, `PAUSE_RESUME.md`, `MONITOR.md`, `INFERENCE.md`,
+  `BACKUP_RESTORE.md`, `FINAL_BACKUP.md`) and the scripts' `--help`.
+- Indexed it in `docs/README.md` (task table) and `SOURCE_OF_TRUTH.md`
+  (row: index only; the runbooks above are authority).
+- Two script/tool false positives fixed during the pass (`$OUT/loss_log.db` and
+  `*_ctl.py` tokens → literal path / `train_ctl.py`).
+- Reconciler after the change: 1835 claims / 45 docs, 1129 checkable, **6 flagged**;
+  all 6 are the pre-existing missing `manifests/workspace_manifest.json` fixture —
+  **0 new drift**.
+- Authority: user request (avoid re-asking the agent for recurring commands); no
+  run config or hyperparameter changed; no frozen doc rewritten.
+- Follow-up: clarified in `user_cheatsheet.md` that `gpu_logger.py` is a
+  **training-only** sidecar — inference needs no global logger because
+  `run_one.sh` writes a per-track `<name>_<seed>_gpu.csv` at 1 Hz. Reconciler:
+  1837 claims / 45 docs, 1130 checkable, **6 flagged** (same pre-existing
+  fixture) — 0 new drift.

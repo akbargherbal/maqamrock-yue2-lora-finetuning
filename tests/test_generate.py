@@ -55,6 +55,21 @@ def test_resolve_duplicate_names_get_suffix(gen, tmp_path, capsys):
     assert "already used; renamed to 'x_3'" in err
 
 
+def test_resolve_unicode_names(gen, tmp_path, capsys):
+    data = {"songs": [
+        {"name": "07-الحر-الشديد-وقطع-القفر-والوعول", "style": "s", "lyrics": "ي"},
+        {"name": "07-الحر-الشديد-وقطع-القفر-والوعول", "style": "s2", "lyrics": "ي2"},
+        {"name": "لیلة_الرعب", "style": "s3", "lyrics": "ي3"},
+    ]}
+    songs = gen.resolve_songs(data, tmp_path)
+    assert [s.name for s in songs] == [
+        "07-الحر-الشديد-وقطع-القفر-والوعول",
+        "07-الحر-الشديد-وقطع-القفر-والوعول_2",
+        "لیلة_الرعب",
+    ]
+    assert "already used; renamed" in capsys.readouterr().err
+
+
 def test_resolve_file_refs_and_no_trigger(gen, tmp_path, lyrics_ar):
     (tmp_path / "my_style.txt").write_text("dark rock ballad", encoding="utf-8")
     (tmp_path / "my_lyrics.txt").write_text(lyrics_ar, encoding="utf-8")
@@ -101,8 +116,10 @@ VALID = {"name": "x", "style": "s", "lyrics": "y"}
     ({"songs": [{"name": "x", "style": "s", "lyric": "y"}]}, "unknown key(s): lyric"),
     ([1, 2], "top level must be"),
     ({"songs": []}, "non-empty array"),
-    ({"songs": [{"name": "has space", "style": "s", "lyrics": "y"}]}, "ASCII slug"),
-    ({"songs": [{"style": "s", "lyrics": "y"}]}, "ASCII slug"),
+    ({"songs": [{"name": "has space", "style": "s", "lyrics": "y"}]}, "required name slug"),
+    ({"songs": [{"style": "s", "lyrics": "y"}]}, "required name slug"),
+    ({"songs": [{"name": "../evil", "style": "s", "lyrics": "y"}]}, "required name slug"),
+    ({"songs": [{"name": ".hidden", "style": "s", "lyrics": "y"}]}, "required name slug"),
     ({"songs": [{"name": "x", "style": "s", "style_file": "f", "lyrics": "y"}]},
      "mutually exclusive"),
     ({"songs": [{"name": "x", "lyrics": "y"}]}, "needs 'style'"),

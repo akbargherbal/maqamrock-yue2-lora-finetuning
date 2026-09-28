@@ -1,75 +1,87 @@
-# agent_notes / current
+# current
 
-**Date:** 2026-09-28 · **State:** no run active. Local machine (DELL), not Colab.
-**Changed:** critique of `AGENTS.md` — what is actually wrong with the agent's operating
-contract, written here for reading/TTS (not a command handoff). Replaces the mixed-LoRA
-inference handoff (recoverable from git; the feature itself is in `INFERENCE/generate.py`
-+ `docs/INFERENCE.md`).
+## Stage the LoRAs for `batch_36_songs.json` (2026-09-28)
 
----
+The manifest uses three adapter aliases: `v2` (style pair), `qfinal_a0.3`,
+`qfinal_a0.5`. GCS has all three under `loras/audio_cpp/`. Local check just now:
+the `v2` style pair is **already present** in `/content/converter/out/`; the two
+`qfinal_a0.*/` subdirs are **missing** and must be pulled. The `style` rsync is
+idempotent (no-op if current), so the block below stages all three.
 
-# What's wrong with AGENTS.md
+terminal: foreground — you watch it; Ctrl+C stops it. Idempotent: re-run the
+same block to finish/resume (gsutil skips objects already matching). ~280 MiB
+(4 files), no GPU.
 
-Ranked by cost to agent quality (not style). Line refs are to the file as read.
+```bash
+export GCP_BACKUP_BASE=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning
+mkdir -p /content/converter/out
+gsutil -m rsync -r "$GCP_BACKUP_BASE/loras/audio_cpp/style" /content/converter/out
+gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/qfinal_a0.3" /content/converter/out/
+gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/qfinal_a0.5" /content/converter/out/
+```
 
-### 1. It forbids guessing, then makes ground truth expensive
-Lines 8 and 26 say never answer from an earlier turn — but the Observability section
-(58-68) hands me **seven** sources and no single command. "How's it going" = pid +
-`monitor_loss` + two logs + CSV + sidecar pids + GCS freshness. The contract names the
-exact failure mode and then does nothing to prevent it. Cheap ground truth *is* honest
-ground truth; this is the highest-leverage gap, and it is upstream of every other finding.
+Verify (6 files must all list):
 
-### 2. It claims inference scope but has no inference contract
-Line 13 lists inference/merge/pron as first-class modes and line 8 references inference
-artifacts — yet there is no section on `audiocpp_inference`, `run_one.sh`, `_runs_status.log`,
-per-track JSON sidecars, or the **manual-execution / report-from-files** policy that
-`DECISIONS.md` records (and `IMPROVEMENTS.md` #10 flagged). A fresh agent honours the
-declared scope and still gets inference wrong. Declared scope > delivered scope.
+```bash
+ls /content/converter/out/akbar_arabic_rock_lora_{ar,nar}.safetensors \
+   /content/converter/out/qfinal_a0.3/akbar_arabic_rock_lora_{ar,nar}.safetensors \
+   /content/converter/out/qfinal_a0.5/akbar_arabic_rock_lora_{ar,nar}.safetensors
+```
 
-### 3. Internal contradictions
-- Line 11: "**Nothing else.** Not a monitor… not a companion" — directly contradicted by
-  the standing backup/continuity/listening duties (96-104), which are recurring companion
-  work. Taken literally, I'd skip the session-end backup check.
-- Line 56 permits running tests/smoke checks (only "check `nvidia-smi` first"); line 76
-  says "**Never** run GPU-heavy work while a run *might* be active." "Might be active" is
-  unbounded, so it forbids all my GPU work — the permission and the prohibition don't
-  reconcile.
+`generate.py` preflight existence-checks every referenced pair before any GPU
+work, so a missing file fails fast (before the batch starts).
 
-### 4. Duplication → drift, in the file a fresh agent trusts most
-- The canonical-docs list appears twice (22 and 112), plus a third "consult the index"
-  (26). Redundant when correct, silently conflicting when one is edited.
-- Lines 83-92 restate `docs/START.md`; 96-104 restate `docs/BACKUP_RESTORE.md`. Copies
-  of live docs go stale the moment the doc changes.
-- `_Last revised: 2026-09-26_` (line 3) already predates `DECISIONS.md`'s 2026-09-27
-  condensation — evidence the file is not reconciled, while being the most-trusted file.
+## Run the batch (after the LoRAs are staged)
 
-### 5. Hardcoded facts that silently don't generalize
-Line 60 asserts everything lives under `output/akbar_arabic_rock_lora/` — true only for
-the main run. The pron run and `quran_long_aya_r8_s10` have different names/paths
-(`docs/README.md` says so explicitly). And the whole file assumes Colab `/content` +
-GCS + `nvidia-smi`, while current state is a local DELL box. Mode-dependence is declared
-for *tasks* (line 13) but not for *environment*, so outside the main run the contract
-quietly lies.
+terminal: detached — survives Ctrl+C / closing the tab.
+log: the run's own `_driver.log`, mirrored to `/content/logs/batch_36_songs.log`.
+Full output dir: `/content/audiocpp_inference/out/batch_36_songs`.
+stop: `pkill -f 'generate.py manifests/batch_36_songs.json'`
+resume: re-run the exact same command (completed tracks are skipped).
+Ctrl+C / closing the tab will NOT stop it.
 
-### 6. Unanchored thresholds → non-reproducible behaviour
-"long-running" (49), "cheaply" (100, 104), "~5 lines" / "a few lines" (30), "might be
-active" (76) have no anchors. I will interpret each differently per session; the same
-situation yields different behaviour. That's the opposite of a contract.
+```bash
+mkdir -p /content/logs
+setsid nohup python INFERENCE/generate.py manifests/batch_36_songs.json \
+  --out-dir /content/audiocpp_inference/out/batch_36_songs \
+  > /content/logs/batch_36_songs.log 2>&1 & disown
+```
 
-### 7. No positive norm — what a good turn produces
-The file is all "never" and where-to-look; it never says a claim must be falsifiable, that
-I must state what I **verified vs assumed**, or what "done" means for a problem-solver.
-Except for the narrow current.md rule, agents can fully comply while overclaiming — the
-"Trust"/"Honesty" axes of `EXPERIENCE_CHECKLIST.md` are left unhooked by the contract.
+Progress: `tail -f /content/audiocpp_inference/out/batch_36_songs/_driver.log`
+(or `tail -f /content/audiocpp_inference/out/latest/_driver.log`).
 
-### 8. No self-maintenance hook
-No reconciliation step, no owner, no cadence. The most load-bearing doc is the only one
-with no process for staying true — which is exactly why the experience lesson (checklist →
-lowest scores → durable edit) dies each session. Lesson persistence has no mechanism here.
+## Back up to GCS every 5 minutes (detached daemon)
 
-### Meta (self-implicating)
-The current.md rules (28-33) say "copy/paste surface, not documentation… no narrative,"
-and then the same file is git-tracked, GCS-mirrored, and the fresh-VM handoff target
-(26). It's scoped as ephemeral, backed up as durable. This critique is itself the proof:
-you asked for narrative analysis, and the only sanctioned place to put it is a file that
-forbids narrative.
+terminal: detached — survives Ctrl+C / closing the tab.
+log: `/content/logs/gcp_backup_stdout.log` (stdout) + `/content/logs/gcp_backup.log`
+(daemon's own pass log).
+stop: `pkill -f backup_to_gcp.py`
+resume: re-run the exact same command (rsync is append/update-only, nothing is
+ever deleted remotely).
+Ctrl+C / closing the tab will NOT stop it.
+
+`--inference` mirrors `/content/audiocpp_inference/{out,prompts,scripts}` +
+`/content/logs` + `agent_notes/` to
+`gs://…/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/`. Interval default is
+already 5; passed explicitly for clarity.
+
+```bash
+export GCP_BACKUP_BASE=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning
+cd /content/maqamrock-yue2-lora-finetuning
+setsid nohup python backup_to_gcp.py --inference --interval-minutes 5 \
+  > /content/logs/gcp_backup_stdout.log 2>&1 & disown
+```
+
+Confirm alive / watch progress:
+
+```bash
+pgrep -af backup_to_gcp.py
+tail -f /content/logs/gcp_backup.log
+```
+
+## Earlier fix (2026-09-28)
+
+`generate.py` had an ASCII-only `name` regex; now `^[^\W_][\w-]*$` accepts
+Unicode/Arabic names (spaces/dots/slashes still rejected). `batch_36_songs.json`
+unchanged; dry-run validates 36 songs / 36 tracks. Tests + `docs/INFERENCE.md`
+updated; reconciler pass = 0 new drift.

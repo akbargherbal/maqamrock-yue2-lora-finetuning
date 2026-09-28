@@ -23,7 +23,7 @@ Schema (strict: unknown keys are an error)
       },
       "songs": [
         {
-          "name":    "my_song",            # required, ASCII slug; duplicates get _2/_3...
+          "name":    "my_song",            # required slug (Unicode letters/digits, '-'/'_'); duplicates get _2/_3...
           "style":   "arabmaqamrock ...",  # inline  xor style_file
           "style_file": "prompts/Hijaz_style.txt",
           "lyrics":  "[Verse 1]\n...",     # inline  xor lyrics_file
@@ -105,7 +105,7 @@ TRIGGER = "arabmaqamrock "
 MAX_SEED = 2 ** 32
 QUANTILES = sorted(COEFFS)
 DEFAULT_QUANTILE = 0.95
-NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
+NAME_RE = re.compile(r"^[^\W_][\w-]*$", re.UNICODE)
 LORA_ALIAS_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 TRUNC_RE = re.compile(r"truncated\s*[=:]\s*([01])", re.IGNORECASE)
 SEC_PER_TRACK = 389.6  # T4 mean wall/track, docs/INFERENCE.md benchmark
@@ -407,7 +407,8 @@ def resolve_songs(data: dict, base_dir: Path, cli_quantile: float | None = None,
 
         name = raw.get("name")
         check(isinstance(name, str) and NAME_RE.match(name),
-              f"{where}.name: required ASCII slug matching {NAME_RE.pattern}")
+              f"{where}.name: required name slug (Unicode letters/digits, "
+              f"'-' or '_'; no spaces/dots/slashes), matching {NAME_RE.pattern}")
         base = name
         n = 2
         while name in seen:

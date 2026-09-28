@@ -7,6 +7,7 @@ operating contract is `../AGENTS.md`.
 
 | Task | Doc |
 |---|---|
+| Quick copy-paste commands for common ops (index, not authority) | [../user_cheatsheet.md](../user_cheatsheet.md) |
 | Get training running on a fresh Colab VM | [START.md](START.md) |
 | Stop for the night and resume next session | [PAUSE_RESUME.md](PAUSE_RESUME.md) |
 | GCS mirror layout, verify a backup, restore from it | [BACKUP_RESTORE.md](BACKUP_RESTORE.md) |
