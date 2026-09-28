@@ -1,120 +1,158 @@
 # AGENTS.md
 
-_Last revised: 2026-09-26._
+_Last revised: 2026-09-28._
 
-## What you're for
+## 0. Read order — don't read everything
 
-- Get a task ready before the user launches: confirm that task's prerequisites are in place — training (dataset, model assets, config), inference (GGUF assets, converted LoRA, prompts), a merge, a pron run — and sanity-check any YAML against `DECISIONS.md` (fields that look real but are dead, paths that differ from what they appear to say).
-- While a task is running, answer "how's it going" from the active job's artifacts — training: `loss_log.db` (`monitor_loss.py`) + the GPU CSV; inference: the batch log and `out/latest` — never by recalling an earlier turn.
-- When a run crashes, find the cause, and either auto-resume (conditions below) or hand over the exact resume command.
+Authority is **one row per topic** in `SOURCE_OF_TRUTH.md` (higher row wins). Doc index is
+`docs/README.md`. Identify the mode (§2) and read *only* that runbook plus its authority
+row. That is the whole reading list for a task. Everything else is not in scope.
 
-Nothing else. Not a monitor running in a loop, not a companion — a problem solver, called in when needed.
+## 1. What you're for
 
-**Run readiness is mode-dependent.** Don't apply a generic checklist: identify the mode from the request and read its runbook — the `docs/README.md` table maps task → doc (training `docs/START.md`; inference `docs/INFERENCE.md`; merge `docs/PRON_LORA_MERGE.md`; pron training run `docs/PRON_LORA.md`). Confirm its prerequisites; if one is missing, say so and name the doc — never hand over a command that will fail.
+Three jobs, plus this file's standing duties:
 
-## The essentials (why this file exists)
+1. **Get a task ready** before launch — confirm the mode's prerequisites (§2); sanity-check
+   any YAML against `DECISIONS.md` (dead keys, paths that differ from what they appear to say).
+2. **Answer "how's it going"** from live artifacts only (§4) — never by recalling a turn.
+3. **On a crash** — find the cause, then auto-resume (§8) or hand over the exact command.
 
-Two facts drive everything; missing them costs real compute:
+Standing duties: the backup/continuity checks (§10) and the handoff surface (§6). These are
+recurring, not optional. **Scope = the above + the task's runbook. In scope, be thorough;
+outside it, don't invent work.**
 
-1. **Colab is ephemeral; storage is far cheaper than GPU time.** Losing the VM wipes `/content`; only GitHub + GCS persist. Bias hard toward persisting anything expensive to regenerate, and keep the backup sidecar running.
-2. **Don't block the session.** Anything slow runs in the background with a log so the user can keep interacting. **Training is detached too** — a stray Ctrl+C (the Linux copy-paste habit) then can't kill it; stop it deliberately with `train_ctl.py stop` (SIGINT).
+## 2. Identify the mode and the environment — before acting
 
-**Canonical docs** — consult the one that matches the task, not all of them: `DECISIONS.md` (why), `README.md` (what / how), `docs/START.md` (fresh VM), `docs/MONITOR.md` (is it healthy), `docs/PAUSE_RESUME.md` (stop / resume). `PROGRESS.md` is the milestone trail: background reading, only when you need history — not a spec.
+**Mode** (from the request):
 
-## Durable decisions & progress
+| Mode | Runbook | Authority (per `SOURCE_OF_TRUTH.md`) |
+|---|---|---|
+| Start / pause / resume training | `docs/START.md`, `docs/PAUSE_RESUME.md` | config YAML |
+| How's it going | `docs/MONITOR.md` | `loss_log.db` + `train.log` + GPU csv |
+| Inference (GGUF + LoRA) | `docs/INFERENCE.md` | repo `INFERENCE/` scripts |
+| Build the inference binary (new arch) | `docs/audiocpp_gpu_arch_builds.md` | `docs/models/yue2.md` |
+| Merge v2 + pron | `docs/PRON_LORA_MERGE.md` | `merge_pron_lora.py --help` |
+| Pron / long-aya training | `docs/PRON_LORA.md`, `docs/PRON_LORA_LONG.md` | its config + GCS tar |
+| Verify / offline-eval pron | `docs/PRON_LORA_VERIFICATION.md` | replay script |
+| Listening / blind eval | `docs/PRON_LORA_SWEEP.md`, `docs/AB_BLIND_EVAL.md` | `prepare_ab_eval.py --help` |
+| Backup / restore | `docs/BACKUP_RESTORE.md` | `backup_to_gcp.py --help` |
 
-For a training/tooling task, read `DECISIONS.md` first — it records cross-session decisions and non-obvious facts verified against actual `ai-toolkit` source, the things a fresh session must not re-litigate. Consult the one runbook that matches the task (index: `docs/README.md`); read `PROGRESS.md` only for history. Routine, per-session state goes in `agent_notes/current.md`.
+**Environment** (check, don't assume): is `/content` present (Colab) or not (localhost)?
+The `/content/...` paths, GCS, `nvidia-smi`, and `vm-continuity` are **Colab-only**. On a
+local box use the repo's relative paths and skip backup/continuity. Never apply Colab
+paths locally. **Never assume the main run** — run name, dataset, and output paths differ
+per mode (pron, long-aya). Read the constants in `docs/README.md` and the mode's runbook.
 
-**`agent_notes/current.md` is a copy/paste surface, not documentation.** The user drives OpenCode over `vscode.dev`, where selecting text out of the chat is glitchy; `current.md` exists so they can copy commands from a file — or read longer text in a browser / via TTS — instead of from the terminal.
+## 3. The two essentials (why this file exists)
 
-- **Write it when** the reply is long or copy-hostile: commands to run, or more than a few lines to read. If it's ~5 lines of plain text with no commands, don't create a file.
-- **Contents:** a one-line header (date, current run state, what changed) + the exact commands / payload. No narrative.
-- **Overwrite it — never append.** Every write replaces it with the current state.
-- **Write it in the same turn you claim it.** Never say it was written unless the write actually succeeded in that turn; running a shell command is not writing the file. This has recurred — treat it as a hard rule.
+1. **Colab is ephemeral; storage is far cheaper than GPU time.** Losing the VM wipes
+   `/content`; only GitHub + GCS persist. Bias hard toward persisting anything expensive to
+   regenerate.
+2. **Don't block the session.** Slow work runs detached with a log. **Training is detached
+   too** — a stray Ctrl+C can't kill it; stop it deliberately with `train_ctl.py stop`
+   (SIGINT). Plain `kill` / `kill -9` skip the clean stop and lose progress since the last
+   checkpoint — last resort. `start` refuses a second copy; `stop` verifies the PID.
 
-## The stack
+## 4. Ground truth in one move
 
-`ostris/ai-toolkit`, launched via its real CLI — not the Web UI (see `DECISIONS.md`). Run-control goes through **`train_ctl.py`**: `start` launches training **detached** (its own session, so a stray Ctrl+C can't kill it; it resets SIGINT in the child so the clean stop works even when a script or the agent launches it), and `stop` sends a checkpoint-safe SIGINT. `docs/START.md` carries the full fresh-VM sequence.
-
-```bash
-python train_ctl.py start     # detached, Ctrl+C-proof; writes a pid + state file
-python train_ctl.py status    # running? pid? log tail
-python train_ctl.py stop      # SIGINT; waits for "Job stopped"
-```
-
-`start` refuses a second copy of the same run; `stop` verifies the PID is our `run.py` before signalling. Plain `kill` (SIGTERM) and `kill -9` skip the clean `Job stopped` path and lose progress since the last checkpoint — last resort only.
-
-## Handing over a command / running things yourself
-
-The user runs commands by hand in a real terminal (vscode.dev). For any long-running, background/detached, or state-changing command, load the `command-handover` skill first:
-
-- Say whether it runs **foreground** (Ctrl+C stops it) or **detached** (survives Ctrl+C / closing the tab).
-- Detached: give the output-log path and the exact stop command; for long jobs, the progress check and resume command.
-- **Training is detached on purpose** — launch and stop it via `train_ctl.py`; plain `kill` / `kill -9` are not the clean stop.
-- New terminal gotchas are appended to `docs/COMMAND_HANDOVER_GOTCHAS.md`. A short read-only one-liner needs no annotation.
-
-**When *you* run something slow** (tests, smoke checks, debugging): background it with a log, don't block the session or poll in a tight loop, and report when it finishes so the user can keep interacting. You don't need permission to run tests or debugging in your own shell — that freedom catches problems before a real run — **but check `nvidia-smi` before anything GPU-heavy**.
-
-## Observability & where to look
-
-Everything for the run lives under `/content/ai-toolkit/output/akbar_arabic_rock_lora/` (the config's `training_folder`): checkpoints, `loss_log.db`, `config.yaml`, samples, `tensorboard/`.
-
-1. **`loss_log.db`** — the primary source. SQLite/WAL, safe to read while training writes. Use `monitor_loss.py <path>`; don't hand-write SQL.
-2. **`/content/logs/train.log`** (the `-l` file) — the training log and tracebacks. **`/content/logs/train_stdout.log`** holds stdout/stderr from before that file is set up (e.g. an import-time crash) — check it if `train.log` looks truncated.
-3. **`/content/logs/gpu_usage.csv`** — util/memory/temp/power from `gpu_logger.py` (every 10s). AI Toolkit logs no GPU stats, so confirm `gpu_logger.py` is running before believing "the GPU looks idle."
-
-**Not a source:** `aitk_db.db` (the config's `sqlite_db_path`) — only populated under the Web UI, and only a status string.
-
-Also: `pgrep -af 'run\.py'` for liveness; checkpoints per `save.*` in the config; TensorBoard under `<log_dir>/akbar_arabic_rock_lora_<timestamp>/` (glob the timestamped subfolder; `<log_dir>` is the config's `log_dir`, `output/akbar_arabic_rock_lora/tensorboard`); base assets in the HF cache (`~/.cache/huggingface/hub`).
-
-## Never
-
-- Start a new run, or resume with a **changed** config/hyperparameter, without the user typing the command. Give the exact command every time.
-- **Auto-resume is the one exception — with evidence.** Resume it yourself only when the run name and config are unchanged, it looks crashed (traceback / OOM / VM reclaimed), and nothing signals a deliberate stop (no `Job stopped` at the end of `train.log`, no "stopped on purpose" note). Log what you did in `current.md`. **If you can't tell a crash from a deliberate stop, ask the user — don't guess.**
-- Modify `/content/yue2_dataset` or re-run a dataset build script. If a data change is genuinely needed (e.g. the dataset silently lacks something the run depends on), **stop and explain the necessity** — don't silently proceed, and don't silently accept degraded training.
-- Edit a run config on your own initiative. Config/hyperparameters are the user's: measure, report, recommend.
-- **Never** run GPU-heavy work while a run might be active — check `nvidia-smi` first. One GPU, shared, rented.
-- Claim to have written `agent_notes/current.md` without writing it that turn.
-
-## Runtime reality — Colab is ephemeral, storage is cheap
-
-Colab wipes `/content` when the VM dies; only GitHub + GCS persist. Bias hard toward persisting anything expensive to regenerate (checkpoints, `loss_log.db`, prepared dataset, logs, notes). Layout and restore: `docs/BACKUP_RESTORE.md`.
-
-**Restore the repo on a fresh VM** (details: `docs/START.md`):
+"State" means one deterministic read, never memory. **Target:** `python status.py` prints,
+in one call — training step/rate + pid, inference batch `n/N` + failures, sidecar pids,
+last successful backup age, local-vs-GCS drift, disk free, and the current run folder.
+*(`status.py` is proposed, not built — `docs/IMPROVEMENTS.md` #11. Until it exists, run this
+one block and read it as a unit; do not answer from a previous turn.)*
 
 ```bash
-git clone https://github.com/akbargherbal/maqamrock-yue2-lora-finetuning.git \
-  /content/maqamrock-yue2-lora-finetuning
-cd /content/maqamrock-yue2-lora-finetuning
-mkdir -p /content/logs
-setsid nohup bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 & disown
-# then authenticate vscode.dev in the foreground while setup.sh runs.
+python train_ctl.py status; pgrep -af 'run\.py'
+python monitor_loss.py <run>/loss_log.db --total-steps <N>
+tail -n 5 /content/logs/train.log
+pgrep -af 'backup_to_gcp.py|gpu_logger.py'; vm-continuity status
 ```
 
-`setup.sh` is idempotent and does **not** restore checkpoints or `loss_log.db` — pull those from the run's GCS prefix (`<base>/<run-name>/output/`; `<base>` = `$GCP_BACKUP_BASE`, e.g. `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`) before resuming (`docs/PAUSE_RESUME.md`).
+Primary sources, mode-specific: `docs/MONITOR.md` (training), `docs/INFERENCE.md`
+(inference). **Not a source:** `aitk_db.db` (Web-UI-only status row).
 
-## Backup responsibility
+## 5. Handing over a command
 
-`backup_to_gcp.py` mirrors the run output, `/content/logs`, and `agent_notes/` to GCS in training mode, and the audio.cpp inference workspace with `--inference`. Commands, layout, verification, and restore: `docs/BACKUP_RESTORE.md`.
+The user runs commands by hand in a real terminal; your shell is a different session. Load
+the `command-handover` skill first. **Anchors (use these, don't re-judge):** annotate a
+command as *long-running* when it exceeds ~60 s, runs detached/background, touches the GPU,
+or changes state. For those, state: **foreground vs detached**, output-log path, exact stop
+command, and resume command. A short read-only one-liner needs no annotation. New gotchas
+append to `docs/COMMAND_HANDOVER_GOTCHAS.md`.
 
-- Before the user starts a run, confirm the sidecars are up: `pgrep -af backup_to_gcp.py`, `pgrep -af gpu_logger.py` (or freshness of `/content/logs/gcp_backup.log`), and the session-backup loop via `vm-continuity status` (one line; exit 0 = healthy). If one is down, give the exact start command — but do not let backup repair become the session's work; if it can't be fixed cheaply, note it and continue.
-- "Is my progress backed up?" → compare GCS object timestamps under the run's prefix with local ones and report the actual drift.
-- **OpenCode sessions** are backed up separately by `vm-continuity` (installed and loop-started by `setup.sh` — now started early and independent of setup success; one namespace per host). Check health with `vm-continuity status`; restart with `vm-continuity watch --interval-minutes 5` (log `/content/logs/vm_continuity.log`). Recover a past session: `vm-continuity hosts` → `vm-continuity pull [--host H]` → `vm-continuity restore opencode -- --mode db|export`. A global reminder lives at `~/.config/opencode/AGENTS.md`.
-- **At session end**, before handing off, re-check `vm-continuity status` (and `/content/logs/gcp_backup.log` freshness if a run was active) and state plainly whether the last successful backup is current — the user must not have to ask whether their work was saved. Report it; don't silently proceed and don't turn it into a repair project.
-- **Continuity is idle-time work:** never spend GPU-paid session time on it (Milestone 1, restore tests, polish) while the project has training/inference to run. Pick it up on a busy GPU or a CPU VM.
+**When you run something slow yourself** (tests, smoke, debugging): background it with a
+log; don't block or tight-poll; report when it finishes. No permission needed for non-GPU
+work — but see §8 for the GPU rule.
 
-## GitHub pushes
+## 6. Handoff surface — `agent_notes/current.md`
 
-Pushing needs auth the user supplies, never the agent. Ask them to run `bash bootstrap/github_auth.sh` in their own terminal and paste a PAT at the hidden prompt; it validates the token and runs `gh auth setup-git`. Never ask for the token in chat. `/content` is ephemeral — re-run on every fresh VM.
+It is a **copy/read surface for the user** (vscode.dev text selection is glitchy): a file
+they can copy commands from and read in a browser / via TTS. **It is not documentation and
+not a source of truth** — never cite it as authority, never rely on it as durable state;
+re-derive from §4 / the authority docs. Overwrite it every time (never append).
+**Write it when** the reply carries commands to run or is long/read-hostile; skip it for a
+short plain answer. **Write it in the same turn you claim it** — saying it's written when
+it isn't has recurred; treat it as a hard rule.
 
-## Repo docs & checks
+## 7. Reading state from artifacts (never paraphrase)
 
-- **Canonical docs:** `DECISIONS.md`, `README.md`, `docs/START.md`, `docs/MONITOR.md`, `docs/PAUSE_RESUME.md`.
-- Dataset build + independent verification: `README.md`'s Dataset section and `verification.md`. Build/promotion history and open items: `DECISIONS.md` / `PROGRESS.md`.
-- Config: `config/akbar_arabic_rock_lora.yml` — read the inline comments before "fixing" anything; several apparent issues are already resolved in `DECISIONS.md`.
-- Metrics: `monitor_loss.py <loss_log.db>`; GPU: `gpu_logger.py`. Runbooks: `docs/` (`docs/README.md` is the index).
-- **Skills** (reusable procedures; canonical in `skills/<name>/SKILL.md`, symlinked under `.claude/skills/`): `crash-diagnose-and-resume`, `inference-batch-run`, `command-handover`, `docs-reconciler`, `ab-blind-eval`. Load with the skill tool when a task matches; the runbooks stay the source of truth.
+Quote the file line; don't summarise it into an assertion. Training: `loss_log.db`
+(`monitor_loss.py`), `train.log`, `gpu_usage.csv`. Inference: `out/*.log`,
+`_runs_status.log`, per-track JSON sidecars, `out/latest`. Checkpoint cadence from the
+config's `save.*`. TensorBoard under `<log_dir>/<name>_<timestamp>/` (glob one level down).
 
-## Knowledge graph (graphify)
+## 8. Never — with the reason, so it generalizes
 
-`graphify-out/` is a prebuilt, committed map of this repo — prefer `graphify-out/GRAPH_REPORT.md` or `graphify query "<q>"` for architecture / "what's load-bearing" questions over grepping the tree, but open the real files before editing. Refresh with `graphify update .` after meaningful changes and before merging. On a fresh VM, install the CLI (`uv tool install graphifyy`); setup and portability are in `docs/GRAPHIFY.md`.
+- Start a new run, or resume with a **changed** config/hyperparameter, without the user
+  typing the command. A run finishing without errors is not a run being *right*.
+- **Auto-resume is the only exception, and needs evidence:** run name + config unchanged,
+  it looks crashed (traceback / OOM / VM reclaimed), and nothing signals a deliberate stop
+  (no `Job stopped` at the end of `train.log`). Log it in `current.md`. **Can't tell crash
+  from deliberate stop? Ask — don't guess.**
+- Modify `/content/yue2_dataset` or re-run a dataset build. If a data change is genuinely
+  needed, **stop and explain why** — don't proceed silently, don't silently accept degraded
+  training.
+- Edit a run config on your own initiative. Configs/hyperparameters are the user's:
+  measure, report, recommend.
+- **GPU rule:** one GPU, shared, rented. Before *any* GPU work run `nvidia-smi`. If a run
+  is active, or you can't confirm none is, **do not start GPU work** — no overlap, ever.
+  Non-GPU work (docs, backup, CPU tests) is always fine. A GPU smoke test while a run is
+  active waits or gets asked about.
+- Claim to have written `current.md` without writing it that turn.
+
+## 9. Honesty and "done"
+
+Every claim must map to an artifact the user can check. State plainly **what you verified
+vs what you assumed**. **A turn is done** when the user can act on it as-is: the claim is
+checkable, state is current (§4), and any uncertainty is named. Prefer a file/sidecar/log
+line over prose you can't be held to.
+
+## 10. Backup & continuity
+
+`backup_to_gcp.py` mirrors run output + `/content/logs` + `agent_notes/` (training) or the
+inference workspace (`--inference`). Before a run, confirm the sidecars: `pgrep -af
+backup_to_gcp.py`, `pgrep -af gpu_logger.py`, `vm-continuity status` (exit 0 = healthy). If
+one is down, give the exact start command — but if it can't be fixed in ≤1 command, note it
+and continue; backup repair is not the session's work. "Is it backed up?" → compare GCS
+timestamps with local and report the drift. **At session end**, re-check and state plainly
+whether the last backup is current. Continuity is **idle-time** work — never spend GPU-paid
+time on it. Layout/restore: `docs/BACKUP_RESTORE.md`.
+
+## 11. GitHub pushes
+
+Auth comes from the user, never the agent: ask them to run `bash bootstrap/github_auth.sh`
+and paste a PAT at the hidden prompt. Never ask for the token in chat. `/content` is
+ephemeral — re-run per fresh VM.
+
+## 12. Self-maintenance (the loop that keeps this file true)
+
+The contract is only as good as its freshness. After any change to a live doc, config, or
+script: run the `docs-reconciler` skill, record the pass in `RECONCILIATION_LOG.md`, and
+keep `SOURCE_OF_TRUTH.md` + the `docs/README.md` index current. **`AGENTS.md` is itself
+reconciled:** when its claims drift, fix it in the same change and bump the revision line.
+Persistence rule: an experience lesson only survives if it lands here (or in a skill) in
+the same turn — otherwise the next session re-earns it. Skills: `crash-diagnose-and-resume`,
+`inference-batch-run`, `command-handover`, `docs-reconciler`, `ab-blind-eval`; the runbooks
+stay the source of truth. Knowledge graph: prefer `graphify-out/GRAPH_REPORT.md` /
+`graphify query "<q>"` for architecture questions; refresh with `graphify update .`
+(portability: `docs/GRAPHIFY.md`).

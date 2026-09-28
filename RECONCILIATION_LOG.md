@@ -127,3 +127,45 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
 - Re-run after the edits: 1750 claims / 44 docs, 1080 checkable, **0 flagged (0.0%)**.
 - Authority: user-approved reconciliation per `skills/docs-reconciler/SKILL.md`; no config or
   hyperparameter changed; no frozen doc rewritten.
+
+## 2026-09-28 — `AGENTS.md` rewritten (agent-contract revision, user-approved)
+
+- Rewrote `AGENTS.md` from a critique of the prior contract; user approved the draft and it
+  replaced the live file. Structural changes, not fact changes:
+  - **§0** authority now via `SOURCE_OF_TRUTH.md` + `docs/README.md` (one row per topic),
+    replacing the three duplicated canonical-docs lists.
+  - **§2** adds an explicit mode→runbook→authority table and an **environment check**
+    (Colab vs local; never assume the main run — constants live in `docs/README.md`).
+  - **§4** "Ground truth in one move": `status.py` named as the target (not built;
+    `docs/IMPROVEMENTS.md` #11) with an interim one-block read.
+  - **§6** redefines `agent_notes/current.md` as a copy/read surface only — explicitly not
+    documentation and not a source of truth (removes the prior "routine per-session state"
+    framing).
+  - **§8** reconciles the GPU rule with the permission to run (non-GPU) tests; **§9** adds
+    the verified-vs-assumed + definition-of-done norm; **§12** adds the self-maintenance loop
+    (`docs-reconciler` → this log → `SOURCE_OF_TRUTH.md` / `docs/README.md`).
+  - Dropped the repo-restore and backup-layout prose (delegated to `docs/START.md` /
+    `docs/BACKUP_RESTORE.md`); removed the "Nothing else" scope line.
+- Proposal file `AGENTS.proposed.md` deleted after approval.
+- Authority: user-approved contract revision; no config or hyperparameter changed; no frozen
+  doc (DECISIONS/PROGRESS) touched. `status.py` is a named gap, not yet created.
+
+## 2026-09-28 — drift reconciliation (live docs) after the `AGENTS.md` rewrite
+
+- Reconciler run after the contract revision: 1723 claims / 44 docs, 1064 checkable,
+  **2 flagged (0.2%), both benign** — `AGENTS.md:58` and `AGENTS.md:61` name `status.py`,
+  which is a deliberate forward reference (§4 marks it "proposed, not built"). No real
+  contradiction; **no live doc edited.**
+- Judgment call: `status.py` is **not** curated into `references/unverifiable.txt`. It is a
+  planned repo file, not an external/runtime token — hiding it would mask real drift if it
+  lands (or keeps failing to). The flag should disappear when the script is built; if it
+  isn't, the flag is a correct reminder.
+- Semantic spot-check (the half scripts can't do), since `AGENTS.md` was just rewritten:
+  every runbook in the §2 mode table resolves (`docs/{START,PAUSE_RESUME,MONITOR,INFERENCE,
+  audiocpp_gpu_arch_builds,PRON_LORA_MERGE,PRON_LORA,PRON_LORA_LONG,PRON_LORA_VERIFICATION,
+  PRON_LORA_SWEEP,AB_BLIND_EVAL,BACKUP_RESTORE}.md`); all five named skills exist under
+  `skills/`; `SOURCE_OF_TRUTH.md`, `RECONCILIATION_LOG.md`, `graphify-out/GRAPH_REPORT.md`,
+  `docs/GRAPHIFY.md` all resolve. The authority map's "one row per topic" matches the file's
+  existing rows.
+- Authority: `skills/docs-reconciler/SKILL.md` (live docs only); no config or hyperparameter
+  changed; no frozen doc rewritten.
