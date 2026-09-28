@@ -236,3 +236,13 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   `run_one.sh` writes a per-track `<name>_<seed>_gpu.csv` at 1 Hz. Reconciler:
   1837 claims / 45 docs, 1130 checkable, **6 flagged** (same pre-existing
   fixture) — 0 new drift.
+
+## 2026-09-28 — `user-learning` branch: learning sandbox outside the doc contract
+
+- New branch `user-learning` carrying a personal learning workspace `LEARNING/`
+  (README = the method; `map.md`, `glossary.md`, `log.md`). User-owned; nothing
+  in it is authority for operating the project.
+- Added `LEARNING` to the reconciler's `DEFAULT_EXCLUDES` (personal prose, not
+  ops docs — same rationale as `agent_notes`). No ops doc/config/run changed.
+- Authority: user request (learn the stack as a case study, on its own branch,
+  not a rigid curriculum).

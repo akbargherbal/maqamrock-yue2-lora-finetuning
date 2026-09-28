@@ -41,6 +41,10 @@ DEFAULT_EXCLUDES = (
     "__pycache__",
     "node_modules",
     "agent_notes",
+    # The user's learning sandbox (branch `user-learning`): personal prose and
+    # half-formed notes, not ops docs. Reconciling it would flag questions, not
+    # drift (2026-09-28).
+    "LEARNING",
     # graphify's generated output (graph.json / GRAPH_REPORT.md / the dated
     # snapshot) is rebuilt by `graphify update`, not a live doc — reconciling it
     # would flag regenerated text, never real drift.
