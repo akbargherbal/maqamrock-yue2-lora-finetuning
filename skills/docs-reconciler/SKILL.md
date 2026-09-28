@@ -19,6 +19,7 @@ runbooks in `docs/` (`START.md`, `MONITOR.md`, `PAUSE_RESUME.md`,
 `GPU_L4_VS_A100.md`), and `INFERENCE/` help text.
 
 Frozen (read-only; never "corrected"): `DECISIONS.md`, `PROGRESS.md`,
+`RECONCILIATION_LOG.md` (append-only; quotes past drift reports verbatim),
 `docs/IMPROVEMENTS.md`, `docs/LIVE_STATUS.md`, `verification.md`,
 `docs/investigation.md`, `docs/yue2-gguf-lora-findings.md`,
 `TRAINING_ANALYSIS/v1_nolyrics_archived/`, `agent_notes/`. History stays history:

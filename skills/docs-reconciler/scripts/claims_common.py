@@ -54,6 +54,10 @@ DEFAULT_EXCLUDES = (
     "docs/investigation.md",
     "docs/yue2-gguf-lora-findings.md",
     "skills/docs-reconciler/references/example_drift_report.md",
+    # The append-only reconciliation log quotes past drift reports verbatim, so
+    # every old run's "flagged tokens" re-surface as fresh findings. History, not
+    # a live doc (2026-09-28).
+    "RECONCILIATION_LOG.md",
 )
 
 CODE_SUFFIXES = (".py", ".sh")

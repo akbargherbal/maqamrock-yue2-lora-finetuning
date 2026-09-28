@@ -68,9 +68,6 @@ results/pron_sweep/README.md :: KEY_open_after_listening.txt
 results/pron_fine_sweep/README.md :: KEY_open_after_listening.txt
 results/pron_ckpt_sweep/README.md :: KEY_open_after_listening.txt
 results/maqam_lyric_swap/README.md :: KEY_open_after_listening.txt
-RECONCILIATION_LOG.md :: KEY_open_after_listening.txt
-RECONCILIATION_LOG.md :: sweep_manifest.json
-RECONCILIATION_LOG.md :: KEY.json
 
 # flags of external tools quoted in commands (git log --left-right/--count, cmake)
 --left-right
@@ -81,12 +78,6 @@ docs/GRAPHIFY.md :: --platform
 
 # generated graph edge-arrow notation in graphify output (not a CLI flag)
 graphify-out/GRAPH_REPORT.md :: --references--
-
-# historical quotes inside the reconciliation log (old wrong values, kept as history)
-RECONCILIATION_LOG.md :: ANALYSIS.md
-RECONCILIATION_LOG.md :: docs/lora.md
-# pre-consolidation DECISIONS.md line citations, quoted as history in past log entries
-RECONCILIATION_LOG.md :: *DECISIONS.md*
 
 # prose slash-phrases and placeholders in this skill's own docs
 config/hyperparameter
@@ -128,15 +119,24 @@ docs/models/yue2.md
 docs/GRAPHIFY.md :: --update
 docs/GRAPHIFY.md :: --from
 
-# foreign/old names quoted as history inside the reconciliation log itself
-RECONCILIATION_LOG.md :: GRAPH_REPORT.md
-RECONCILIATION_LOG.md :: manifest.json
-RECONCILIATION_LOG.md :: EVAL.txt
-RECONCILIATION_LOG.md :: KEYS.txt
-RECONCILIATION_LOG.md :: key.json
-RECONCILIATION_LOG.md :: config/per-track
-RECONCILIATION_LOG.md :: _failed.log
-RECONCILIATION_LOG.md :: __Kurd.json
-RECONCILIATION_LOG.md :: json/log/gpu.csv/time.txt
-RECONCILIATION_LOG.md :: --update
-RECONCILIATION_LOG.md :: --from
+# 2026-09-28 — RECONCILIATION_LOG.md is now excluded from extraction outright
+# (history: it quotes past drift reports verbatim, so every old run's flagged
+# tokens resurfaced as fresh findings). Its former per-token curations were
+# dropped; see claims_common.py DEFAULT_EXCLUDES.
+
+# external vm-continuity tool flags (cloned to /content/vm-continuity by setup.sh,
+# not this repo's code)
+AGENTS.md :: --host
+AGENTS.md :: --mode
+docs/PRON_LORA_LONG.md :: --host
+docs/PRON_LORA_LONG.md :: --mode
+
+# runtime state file written by train_ctl.py (`logs/<log-name>_state.json`)
+*_state.json
+
+# prose in the experience checklist ("config / data / course"), not a path
+docs/EXPERIENCE_CHECKLIST.md :: config/data/course
+
+# pron-dataset build artifacts + ai-toolkit internals (live in /content, not the repo)
+docs/PRON_LORA_LONG_PLAN.md :: selection_report.json
+docs/PRON_LORA_LONG_PLAN.md :: dataloader_mixins.py

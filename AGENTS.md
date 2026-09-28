@@ -117,4 +117,4 @@ Pushing needs auth the user supplies, never the agent. Ask them to run `bash boo
 
 ## Knowledge graph (graphify)
 
-`graphify-out/` is a prebuilt, committed map of this repo — prefer `GRAPH_REPORT.md` or `graphify query "<q>"` for architecture / "what's load-bearing" questions over grepping the tree, but open the real files before editing. Refresh with `graphify update .` after meaningful changes and before merging. On a fresh VM, install the CLI (`uv tool install graphifyy`); setup and portability are in `docs/GRAPHIFY.md`.
+`graphify-out/` is a prebuilt, committed map of this repo — prefer `graphify-out/GRAPH_REPORT.md` or `graphify query "<q>"` for architecture / "what's load-bearing" questions over grepping the tree, but open the real files before editing. Refresh with `graphify update .` after meaningful changes and before merging. On a fresh VM, install the CLI (`uv tool install graphifyy`); setup and portability are in `docs/GRAPHIFY.md`.

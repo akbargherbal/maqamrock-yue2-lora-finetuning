@@ -102,3 +102,28 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   (`RECONCILIATION_LOG.md :: DECISIONS.md:*`), matching the existing history-quote curations.
 - Authority: user-approved consolidation per `skills/docs-reconciler/SKILL.md`; no config or
   hyperparameter changed.
+
+## 2026-09-28 — drift reconciliation (live docs) after the graphify refresh
+
+- Reconciler run: 1866 claims / 45 docs, 1157 checkable, **18 flagged (1.6%)** — no structural
+  warning, and on inspection **no real contradiction**: 12 missing paths + 6 unknown flags, all
+  either runtime artifacts, external-tool flags, or the log's own quotes of past runs.
+- Judgment calls (user-approved, `AGENTS.md:120` aside, no live doc text changed):
+  - `AGENTS.md:120`: bare `GRAPH_REPORT.md` → `graphify-out/GRAPH_REPORT.md` (made resolvable).
+  - `RECONCILIATION_LOG.md` is now **excluded from extraction outright** (`claims_common.py`
+    `DEFAULT_EXCLUDES` + `SKILL.md` scope): an append-only log that quotes past drift reports
+    verbatim re-flags every old finding forever. Its former per-token curations in
+    `references/unverifiable.txt` were removed with it.
+  - Curated in `references/unverifiable.txt` (doc-scoped, nothing global hid real drift):
+    `--host`/`--mode` as external `vm-continuity` flags (`setup.sh:87-88` clones it to
+    `/content/vm-continuity`); `*_state.json` (`train_ctl.py:53` runtime file);
+    `docs/EXPERIENCE_CHECKLIST.md` prose "config / data / course"; the pron build's
+    `selection_report.json` / `dataloader_mixins.py` (live in `/content`, not the repo).
+- Semantic spot-check against source (the half scripts can't do): `docs/INFERENCE.md` (09-28)
+  matches `INFERENCE/generate.py` (09-28); LoRA library path agrees across `setup.sh:120`,
+  `docs/LORA_INVENTORY.md:17`, `docs/INFERENCE.md:27`; the `<dir>/akbar_arabic_rock_lora_{ar,nar}
+  .safetensors` registry convention matches the inventory; the two docs missing from
+  `docs/README.md`'s index are linked from their hubs (intentional).
+- Re-run after the edits: 1750 claims / 44 docs, 1080 checkable, **0 flagged (0.0%)**.
+- Authority: user-approved reconciliation per `skills/docs-reconciler/SKILL.md`; no config or
+  hyperparameter changed; no frozen doc rewritten.
