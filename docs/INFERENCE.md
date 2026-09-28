@@ -128,13 +128,19 @@ python INFERENCE/generate.py my_songs.json                            # real run
 
 ```json
 {
-  "defaults": { "style": "arabmaqamrock ...", "repeat": 2, "quantile": 0.95 },
+  "loras": {
+    "v2":          { "dir": "/content/converter/out" },
+    "qfinal_a0.3": { "dir": "/content/converter/out/qfinal_a0.3" },
+    "qfinal_a0.5": { "dir": "/content/converter/out/qfinal_a0.5" }
+  },
+  "defaults": { "style": "arabmaqamrock ...", "repeat": 2, "quantile": 0.95, "lora": "v2" },
   "songs": [
     { "name": "my_song", "lyrics": "[Verse 1]\n..." },
     { "name": "kurd_night",
       "style_file": "/content/audiocpp_inference/prompts/Kurd_style.txt",
       "lyrics_file": "../my_lyrics/kurd_night.txt",
-      "seeds": [101, 202, 303] },
+      "seeds": [101, 202, 303],
+      "lora": "qfinal_a0.5" },
     { "name": "quick_smoke", "style": "...", "lyrics": "...", "seed": 7, "cap": 750 }
   ]
 }
@@ -150,11 +156,20 @@ Per-song fields (unknown keys are a hard error):
 | `repeat` | takes with fresh random seeds (`< 2^32`), default 1 |
 | `seeds` / `seed` | explicit seed list, or one seed; mutually exclusive with `repeat` |
 | `cap` / `quantile` | explicit `semantic_max_tokens`, or 0.90/0.95/0.975 (default 0.95) |
+| `lora` | optional alias into `loras`; selects this song's AR+NAR pair. Falls back to `defaults.lora`, then the `--lora-ar`/`--lora-nar` pair |
 
-`defaults` supplies `style`/`style_file`, `repeat`, and `quantile` for every song;
-precedence is song > CLI flag > `defaults` > built-in. If a style lacks the
+`defaults` supplies `style`/`style_file`, `repeat`, `quantile`, and `lora` for every
+song; precedence is song > CLI flag > `defaults` > built-in (for `lora`: song >
+`defaults.lora` > the `--lora-ar`/`--lora-nar` pair). If a style lacks the
 `arabmaqamrock` trigger it is prepended (every training caption has it);
 `--no-trigger` disables that.
+
+The optional top-level `loras` maps an alias to an adapter pair — `{"v2": {"dir":
+"/content/converter/out"}}` resolves to
+`<dir>/akbar_arabic_rock_lora_{ar,nar}.safetensors`, or give explicit `{"ar": …,
+"nar": …}`. Paths are relative to the JSON file. **Every pair referenced by the
+batch is existence-checked in preflight, before any GPU work** (a wrong or un-staged
+path fails within seconds; stage adapters per `docs/LORA_INVENTORY.md`).
 
 Output: one folder `out/<YYYYMMDD-HHMMSS>_<label>/` with `input.json`,
 `batch_manifest.json` (resolved seeds/caps/hashes, written **before** generation),
@@ -165,6 +180,7 @@ skipped and the manifest's seeds are reused; `--force` regenerates.
 
 At ~6.5 min/track on a T4 (benchmark above), `--dry-run` prints the projected
 total. Other flags: `--limit N` (smoke tests), `--label`, `--quantile`,
+`--lora-ar` / `--lora-nar` (default adapter pair for songs without a `lora` alias),
 `--allow-concurrent` (overrides the refusal when an ai-toolkit training run is
 detected).
 

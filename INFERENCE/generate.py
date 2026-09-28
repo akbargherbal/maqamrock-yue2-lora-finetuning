@@ -9,10 +9,17 @@ folder under out/. Random seeds by default.
 Schema (strict: unknown keys are an error)
 
     {
+      "loras": {                            # optional alias registry, per-song adapters
+        "v2":          { "dir": "/content/converter/out" },
+        "qfinal_a0.3": { "dir": "/content/converter/out/qfinal_a0.3" },
+        "custom":      { "ar": "my_ar.safetensors", "nar": "my_nar.safetensors" }
+      },                                    # "dir" -> <dir>/akbar_arabic_rock_lora_{ar,nar}.safetensors,
+                                            # or explicit "ar"+"nar"; relative paths resolve here
       "defaults": {                        # optional; per-song fields win
         "style":      "arabmaqamrock ...", # or "style_file": "prompts/Hijaz_style.txt"
         "repeat":     2,                   # takes per song, fresh random seeds
-        "quantile":   0.95                 # cap quantile: 0.90 / 0.95 / 0.975
+        "quantile":   0.95,                # cap quantile: 0.90 / 0.95 / 0.975
+        "lora":       "v2"                 # alias for songs with no 'lora'
       },
       "songs": [
         {
@@ -21,6 +28,7 @@ Schema (strict: unknown keys are an error)
           "style_file": "prompts/Hijaz_style.txt",
           "lyrics":  "[Verse 1]\n...",     # inline  xor lyrics_file
           "lyrics_file": "my_lyrics.txt",
+          "lora":    "qfinal_a0.5",        # optional alias; else defaults.lora, else the CLI pair
           "repeat":  3,                    # -> 3 fresh random seeds
           "seeds":   [1, 2, 3],            # or explicit, all < 2^32
           "seed":    42,                   # or exactly one render
@@ -30,7 +38,9 @@ Schema (strict: unknown keys are an error)
       ]
     }
 
-Precedence: song field > CLI flag > "defaults" > built-in default.
+Precedence: song field > CLI flag > "defaults" > built-in default. For `lora`
+there is no CLI flag: song > `defaults.lora` > the `--lora-ar`/`--lora-nar` pair.
+Every referenced pair is existence-checked in preflight before any GPU work.
 
 Seeds default to `secrets.randbelow(2**32)`; values >= 2^32 alias because
 audio.cpp seeds a uint32 (DECISIONS.md). The trigger "arabmaqamrock " is
@@ -84,8 +94,11 @@ BIN = ROOT / "bin" / "audiocpp_cli"
 MODEL_DIR = ROOT / "models" / "Yue2-3B-GGUF"
 MODEL_GGUF = "yue2-3b-bf16.gguf"
 VAE_GGUF = "yue2-vae-f16.gguf"
-LORA_AR = Path("/content/converter/out/akbar_arabic_rock_lora_ar.safetensors")
-LORA_NAR = Path("/content/converter/out/akbar_arabic_rock_lora_nar.safetensors")
+LORA_AR_NAME = "akbar_arabic_rock_lora_ar.safetensors"
+LORA_NAR_NAME = "akbar_arabic_rock_lora_nar.safetensors"
+LORA_DIR = Path("/content/converter/out")
+LORA_AR = LORA_DIR / LORA_AR_NAME
+LORA_NAR = LORA_DIR / LORA_NAR_NAME
 AUDIO_CPP = Path("/content/audio.cpp")
 
 TRIGGER = "arabmaqamrock "
@@ -93,13 +106,15 @@ MAX_SEED = 2 ** 32
 QUANTILES = sorted(COEFFS)
 DEFAULT_QUANTILE = 0.95
 NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
+LORA_ALIAS_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 TRUNC_RE = re.compile(r"truncated\s*[=:]\s*([01])", re.IGNORECASE)
 SEC_PER_TRACK = 389.6  # T4 mean wall/track, docs/INFERENCE.md benchmark
 CHECKPOINT_STEP = 3000
 
 SONG_KEYS = {"name", "style", "style_file", "lyrics", "lyrics_file",
-             "repeat", "seeds", "seed", "cap", "quantile"}
-DEFAULT_KEYS = {"style", "style_file", "repeat", "quantile"}
+             "repeat", "seeds", "seed", "cap", "quantile", "lora"}
+DEFAULT_KEYS = {"style", "style_file", "repeat", "quantile", "lora"}
+LORA_SPEC_KEYS = {"dir", "ar", "nar"}
 
 
 class PlanError(Exception):
@@ -115,6 +130,7 @@ class Song:
     quantile: float
     n_letters: int
     seed_spec: tuple  # ("list", (int,...)) | ("single", int) | ("random", count)
+    lora: str | None = None  # alias into input.loras, or None for the CLI/default pair
 
 
 @dataclass
@@ -126,6 +142,9 @@ class Track:
     cap: int
     quantile: float
     n_letters: int
+    lora: str | None = None  # alias, for the sidecar
+    lora_ar: Path | None = None  # resolved AR adapter (None -> run_batch's default)
+    lora_nar: Path | None = None  # resolved NAR adapter
 
 
 @dataclass
@@ -225,6 +244,43 @@ def load_input(path: Path) -> tuple[dict, bytes]:
     return data, raw
 
 
+def _abs_path(value, base_dir: Path, where: str) -> Path:
+    check(isinstance(value, str) and value.strip(), f"{where}: non-empty string required")
+    p = Path(value).expanduser()
+    return p if p.is_absolute() else base_dir / p
+
+
+def resolve_loras(data: dict, base_dir: Path) -> dict[str, tuple[Path, Path]]:
+    """Resolve the optional 'loras' alias registry to (AR, NAR) path pairs.
+
+    Existence is NOT checked here (dry-run must work off-VM); preflight checks
+    every referenced pair before any GPU work.
+    """
+    loras_raw = data.get("loras", {})
+    check(isinstance(loras_raw, dict), "input.loras: must be an object")
+    registry: dict[str, tuple[Path, Path]] = {}
+    for alias, spec in loras_raw.items():
+        where = f"input.loras[{alias!r}]"
+        check(isinstance(alias, str) and LORA_ALIAS_RE.match(alias),
+              f"{where}: alias must match {LORA_ALIAS_RE.pattern}")
+        check(isinstance(spec, dict), f"{where}: must be an object")
+        _unknown_keys(spec, LORA_SPEC_KEYS, where)
+        has_dir = "dir" in spec
+        has_pair = "ar" in spec or "nar" in spec
+        check(has_dir != has_pair,
+              f"{where}: use either 'dir' or both 'ar' and 'nar' (not both forms)")
+        if has_dir:
+            d = _abs_path(spec["dir"], base_dir, f"{where}.dir")
+            ar, nar = d / LORA_AR_NAME, d / LORA_NAR_NAME
+        else:
+            check("ar" in spec and "nar" in spec,
+                  f"{where}: 'ar' and 'nar' must both be given")
+            ar = _abs_path(spec["ar"], base_dir, f"{where}.ar")
+            nar = _abs_path(spec["nar"], base_dir, f"{where}.nar")
+        registry[alias] = (ar, nar)
+    return registry
+
+
 def _resolve_string(obj: dict, inline_key: str, file_key: str,
                     base_dir: Path, where: str) -> tuple[str | None, Path | None]:
     has_inline = inline_key in obj
@@ -310,11 +366,24 @@ def _seed_spec(raw: dict, defaults: dict, where: str) -> tuple:
     return ("random", rep)
 
 
+def _lora_alias(raw: dict, defaults: dict, loras: dict, where: str) -> str | None:
+    for obj, label in ((raw, where), (defaults, "input.defaults")):
+        if "lora" in obj:
+            v = obj["lora"]
+            check(isinstance(v, str) and v.strip(), f"{label}.lora: non-empty string required")
+            known = ', '.join(sorted(loras)) if loras else None
+            check(v in loras,
+                  f"{label}.lora: unknown alias '{v}'"
+                  + (f" (known: {known})" if known else " (no input.loras registry defined)"))
+            return v
+    return None
+
+
 def resolve_songs(data: dict, base_dir: Path, cli_quantile: float | None = None,
-                  trigger: bool = True) -> list[Song]:
+                  trigger: bool = True, loras: dict | None = None) -> list[Song]:
     """Validate the input JSON and resolve every song (no writes, no GPU)."""
     check(isinstance(data, dict), "input: top level must be a JSON object")
-    _unknown_keys(data, {"defaults", "songs"}, "input")
+    _unknown_keys(data, {"defaults", "songs", "loras"}, "input")
     defaults = data.get("defaults", {})
     check(isinstance(defaults, dict), "input.defaults: must be an object")
     _unknown_keys(defaults, DEFAULT_KEYS, "input.defaults")
@@ -356,7 +425,8 @@ def resolve_songs(data: dict, base_dir: Path, cli_quantile: float | None = None,
                  f"the auto cap falls back to the quantile floor")
         quantile, cap = _cap_settings(raw, base_q, n_letters, where)
         songs.append(Song(name, style_text, lyrics_text, cap, quantile, n_letters,
-                          _seed_spec(raw, defaults, where)))
+                          _seed_spec(raw, defaults, where),
+                          _lora_alias(raw, defaults, loras or {}, where)))
     return songs
 
 
@@ -374,7 +444,8 @@ def draw_seeds(count: int) -> list[int]:
 
 
 def build_tracks(songs: list[Song], limit: int | None = None,
-                 seed_lookup: dict | None = None, draw: bool = True) -> list[Track]:
+                 seed_lookup: dict | None = None, draw: bool = True,
+                 loras: dict | None = None) -> list[Track]:
     tracks: list[Track] = []
     idx = 0
     for song in songs:
@@ -385,6 +456,7 @@ def build_tracks(songs: list[Song], limit: int | None = None,
             seeds = [val]
         else:
             seeds = draw_seeds(val) if draw else [None] * val
+        ar, nar = loras[song.lora] if (song.lora and loras) else (None, None)
         for take, seed in enumerate(seeds):
             if seed_lookup:
                 seed = seed_lookup.get((song.name, take), seed)
@@ -392,7 +464,7 @@ def build_tracks(songs: list[Song], limit: int | None = None,
             if limit is not None and idx > limit:
                 return tracks
             tracks.append(Track(idx, song.name, take, seed, song.cap,
-                                song.quantile, song.n_letters))
+                                song.quantile, song.n_letters, song.lora, ar, nar))
     return tracks
 
 
@@ -471,10 +543,11 @@ def git_commit(path: Path) -> str | None:
         return None
 
 
-def asset_fingerprint(lora_ar: Path, lora_nar: Path, hash_big: bool = True) -> dict:
+def asset_fingerprint(lora_ar: Path, lora_nar: Path, hash_big: bool = True,
+                      loras: dict | None = None) -> dict:
     if hash_big:
         info("hashing model assets (main GGUF + VAE, ~3.9 GB once per batch)...")
-    return {
+    fp = {
         "lora_ar_sha256": sha256_file(lora_ar),
         "lora_nar_sha256": sha256_file(lora_nar),
         "model_gguf": MODEL_GGUF,
@@ -484,18 +557,30 @@ def asset_fingerprint(lora_ar: Path, lora_nar: Path, hash_big: bool = True) -> d
         "audio_cpp_commit": git_commit(AUDIO_CPP),
         "checkpoint_step": CHECKPOINT_STEP,
     }
+    if loras:
+        fp["loras"] = {
+            alias: {"ar": str(ar), "nar": str(nar),
+                    "ar_sha256": sha256_file(ar), "nar_sha256": sha256_file(nar)}
+            for alias, (ar, nar) in loras.items()
+        }
+    return fp
 
 
-def preflight(allow_concurrent: bool, lora_ar: Path, lora_nar: Path) -> dict:
+def preflight(allow_concurrent: bool, lora_ar: Path, lora_nar: Path,
+              loras: dict | None = None) -> dict:
     problems = []
-    for path, what in [
+    checks = [
         (RUN_ONE, "runner"),
         (BIN, "audiocpp_cli binary"),
         (MODEL_DIR / MODEL_GGUF, "main GGUF"),
         (MODEL_DIR / VAE_GGUF, "VAE GGUF"),
         (lora_ar, "AR LoRA adapter"),
         (lora_nar, "NAR LoRA adapter"),
-    ]:
+    ]
+    for alias, (ar, nar) in (loras or {}).items():
+        checks.append((ar, f"AR LoRA adapter [{alias}]"))
+        checks.append((nar, f"NAR LoRA adapter [{alias}]"))
+    for path, what in checks:
         if not path.is_file():
             problems.append(f"missing {what}: {path}")
     if BIN.is_file() and not os.access(BIN, os.X_OK):
@@ -504,7 +589,8 @@ def preflight(allow_concurrent: bool, lora_ar: Path, lora_nar: Path) -> dict:
         problems.append(f"missing sidecars dir: {MODEL_DIR / 'sidecars'}")
     if problems:
         fail("preflight failed:\n  - " + "\n  - ".join(problems)
-             + "\n  fix (fresh VM): bash bootstrap/setup.sh --inference  (docs/INFERENCE.md)")
+             + "\n  stage the missing file(s) from GCS (docs/LORA_INVENTORY.md), or run"
+             + " `bash bootstrap/setup.sh --inference` on a fresh VM (docs/INFERENCE.md).")
 
     active = training_active()
     check(not active or allow_concurrent,
@@ -652,6 +738,7 @@ def wait_vram_free(max_seconds: float = 60.0) -> None:
 
 def sidecar_fields(t: Track, prompt_info: dict, fp: dict, gpu: dict) -> dict:
     p = prompt_info[t.name]
+    entry = (fp.get("loras") or {}).get(t.lora) if t.lora else None
     return {
         "idx": t.idx,
         "name": t.name,
@@ -666,8 +753,9 @@ def sidecar_fields(t: Track, prompt_info: dict, fp: dict, gpu: dict) -> dict:
         "lyrics_sha256": p["lyrics_sha256"],
         "style_file": p["style_file"],
         "style_sha256": p["style_sha256"],
-        "lora_ar_sha256": fp["lora_ar_sha256"],
-        "lora_nar_sha256": fp["lora_nar_sha256"],
+        "lora_alias": t.lora,
+        "lora_ar_sha256": entry["ar_sha256"] if entry else fp["lora_ar_sha256"],
+        "lora_nar_sha256": entry["nar_sha256"] if entry else fp["lora_nar_sha256"],
         "model_gguf": fp["model_gguf"],
         "vae_gguf": fp["vae_gguf"],
         "model_gguf_sha256": fp["model_gguf_sha256"],
@@ -695,6 +783,8 @@ def run_batch(run_dir: Path, tracks: list[Track], prompt_info: dict, fp: dict,
     total = len(tracks)
     try:
         for t in tracks:
+            ar = t.lora_ar or lora_ar
+            nar = t.lora_nar or lora_nar
             wav = run_dir / f"{t.name}_{t.seed}.wav"
             time_file = run_dir / f"{t.name}_{t.seed}_time.txt"
             log_file = run_dir / f"{t.name}_{t.seed}.log"
@@ -706,8 +796,9 @@ def run_batch(run_dir: Path, tracks: list[Track], prompt_info: dict, fp: dict,
                 results.append(Result(t, "skipped"))
                 continue
 
+            lora_tag = f" lora={t.lora}" if t.lora else ""
             print(f"[{t.idx}/{total}] {t.name} take={t.take} seed={t.seed} cap={t.cap} "
-                  f"(q={t.quantile}, N={t.n_letters}) start={utcnow()}")
+                  f"(q={t.quantile}, N={t.n_letters}){lora_tag} start={utcnow()}")
             fields = sidecar_fields(t, prompt_info, fp, gpu)
             _write_sidecar(sidecar, fields)
 
@@ -716,8 +807,8 @@ def run_batch(run_dir: Path, tracks: list[Track], prompt_info: dict, fp: dict,
                 "OUT_DIR": str(run_dir),
                 "STYLE_FILE": str(run_dir / prompt_info[t.name]["style_file"]),
                 "LYRICS_FILE": str(run_dir / prompt_info[t.name]["lyrics_file"]),
-                "LORA_AR": str(lora_ar),
-                "LORA_NAR": str(lora_nar),
+                "LORA_AR": str(ar),
+                "LORA_NAR": str(nar),
             })
             cmd = ["bash", str(RUN_ONE), t.name, str(t.seed), str(t.cap)]
 
@@ -807,10 +898,11 @@ def print_plan(songs: list[Song], tracks: list[Track], run_dir: Path, dry_run: b
     print(f"plan: {len(songs)} song(s), {len(tracks)} track(s); "
           f"projected ~{est_min:.0f} min on a T4 (~{SEC_PER_TRACK:.0f} s/track)")
     print(f"run dir: {run_dir}" + ("   [dry-run: nothing will be written]" if dry_run else ""))
-    print(f"{'idx':>4}  {'name':<28}  {'take':>4}  {'seed':>10}  {'cap':>5}  {'q':>5}")
+    print(f"{'idx':>4}  {'name':<28}  {'take':>4}  {'seed':>10}  {'cap':>5}  {'q':>5}  lora")
     for t in tracks:
         seed = str(t.seed) if t.seed is not None else "<random>"
-        print(f"{t.idx:>4}  {t.name:<28}  {t.take:>4}  {seed:>10}  {t.cap:>5}  {t.quantile:>5}")
+        print(f"{t.idx:>4}  {t.name:<28}  {t.take:>4}  {seed:>10}  {t.cap:>5}  {t.quantile:>5}  "
+              f"{t.lora or '-'}")
 
 
 # --- CLI -------------------------------------------------------------------
@@ -840,9 +932,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--allow-concurrent", action="store_true",
                    help="allow running even if an ai-toolkit training run is detected")
     p.add_argument("--lora-ar", default=None,
-                   help="AR adapter path (default: the live converted v2 pair)")
+                   help="default AR adapter for songs with no 'lora' alias "
+                        "(built-in default: the live converted v2 pair)")
     p.add_argument("--lora-nar", default=None,
-                   help="NAR adapter path (default: the live converted v2 pair)")
+                   help="default NAR adapter for songs with no 'lora' alias "
+                        "(built-in default: the live converted v2 pair)")
     return p
 
 
@@ -853,9 +947,11 @@ def main(argv: list[str] | None = None) -> int:
         input_path = Path(args.json)
         lora_ar = Path(args.lora_ar).expanduser() if args.lora_ar else LORA_AR
         lora_nar = Path(args.lora_nar).expanduser() if args.lora_nar else LORA_NAR
+        base_dir = input_path.resolve().parent
         data, raw = load_input(input_path)
-        songs = resolve_songs(data, input_path.resolve().parent,
-                              args.quantile, trigger=not args.no_trigger)
+        loras = resolve_loras(data, base_dir)
+        songs = resolve_songs(data, base_dir, args.quantile,
+                              trigger=not args.no_trigger, loras=loras)
 
         if args.out_dir:
             run_dir = Path(args.out_dir)
@@ -864,16 +960,17 @@ def main(argv: list[str] | None = None) -> int:
 
         seed_lookup = load_manifest_seeds(run_dir)
         tracks = build_tracks(songs, limit=args.limit,
-                              seed_lookup=seed_lookup, draw=not args.dry_run)
+                              seed_lookup=seed_lookup, draw=not args.dry_run,
+                              loras=loras)
         check(tracks, "no tracks to run (check --limit)")
 
         if args.dry_run:
             print_plan(songs, tracks, run_dir, dry_run=True)
             return 0
 
-        gpu = preflight(args.allow_concurrent, lora_ar, lora_nar)
+        gpu = preflight(args.allow_concurrent, lora_ar, lora_nar, loras)
         run_dir.mkdir(parents=True, exist_ok=True)
-        fp = asset_fingerprint(lora_ar, lora_nar)
+        fp = asset_fingerprint(lora_ar, lora_nar, loras=loras)
         prompt_info = materialize(run_dir, songs, raw, input_path, tracks, fp, gpu)
 
         print_plan(songs, tracks, run_dir, dry_run=False)

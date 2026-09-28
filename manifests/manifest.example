@@ -1,0 +1,52 @@
+{
+  "loras": {
+    "v2": {
+      "dir": "/content/converter/out"
+    },
+    "qfinal_a0.3": {
+      "dir": "/content/converter/out/qfinal_a0.3"
+    },
+    "qfinal_a0.5": {
+      "dir": "/content/converter/out/qfinal_a0.5"
+    },
+    "qfinal_a0.5_explicit": {
+      "ar": "/content/converter/out/qfinal_a0.5/akbar_arabic_rock_lora_ar.safetensors",
+      "nar": "/content/converter/out/qfinal_a0.5/akbar_arabic_rock_lora_nar.safetensors"
+    }
+  },
+  "defaults": {
+    "style": "arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Hijaz. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, precise Arabic diction, melismatic phrasing with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, large dynamic range. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: Poignant, Chivalric, Emotional.",
+    "lora": "v2",
+    "repeat": 1,
+    "quantile": 0.95
+  },
+  "songs": [
+    {
+      "name": "smoke_one_take",
+      "lyrics": "[Verse 1]\nيا لَيلُ هُدْ هُدْ ... يا لَيلُ ...",
+      "seed": 7,
+      "cap": 750
+    },
+    {
+      "name": "pure_style_alias",
+      "lora": "v2",
+      "style_file": "/content/audiocpp_inference/prompts/Hijaz_style.txt",
+      "lyrics_file": "/content/audiocpp_inference/prompts/Hijaz_lyrics.txt"
+    },
+    {
+      "name": "pron_a03_two_takes",
+      "lora": "qfinal_a0.3",
+      "style": "arabmaqamrock Heavy rock ballad, driving distorted guitars, weighty acoustic drums, close-miked lead vocals, Maqam Kurd. deep male vocals with precise Arabic diction and long sustained phrase endings. Audiophile recording, punchy centered mix, forward vocals, large dynamic range. Mood: Defiant, Nocturnal.",
+      "lyrics": "[Intro]\nيا صَباحَ الوَطَنِ المَشدودِ بِالأَلَمِ\n\n[Verse 1]\nنادِ الفَجْرَ وَخُذْ بِيَ إلى النَّدَى\n\n[Chorus]\nوَإِذا ما سَأَلوني عَن حَبيبي\nقُلتُ: ذاكَ الصَّوتُ في قَلبِ المَدى\n\n[Outro]\nيا صَباحَ الوَطَنِ المَشدودِ بِالأَلَمِ",
+      "repeat": 2
+    },
+    {
+      "name": "pron_a05_explicit_pair",
+      "lora": "qfinal_a0.5_explicit",
+      "style_file": "/content/audiocpp_inference/prompts/Kurd_style.txt",
+      "lyrics_file": "/content/audiocpp_inference/prompts/Kurd_lyrics.txt",
+      "seeds": [101, 202, 303],
+      "quantile": 0.975
+    }
+  ]
+}

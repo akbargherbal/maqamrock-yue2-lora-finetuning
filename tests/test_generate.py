@@ -127,6 +127,54 @@ def test_validation_errors(gen, tmp_path, data, frag):
     assert frag in str(ei.value)
 
 
+def test_resolve_loras_registry_and_per_song_alias(gen, tmp_path, lyrics_ar):
+    data = {
+        "loras": {"v2": {"dir": "adapters/v2"}, "q03": {"dir": "adapters/q03"}},
+        "defaults": {"lora": "v2"},
+        "songs": [
+            {"name": "a", "style": "s", "lyrics": lyrics_ar},
+            {"name": "b", "style": "s", "lyrics": lyrics_ar, "lora": "q03"},
+        ],
+    }
+    loras = gen.resolve_loras(data, tmp_path)
+    songs = gen.resolve_songs(data, tmp_path, loras=loras)
+    assert [s.lora for s in songs] == ["v2", "q03"]
+    tracks = gen.build_tracks(songs, loras=loras)
+    assert [t.lora for t in tracks] == ["v2", "q03"]
+    assert tracks[0].lora_ar == tmp_path / "adapters/v2" / gen.LORA_AR_NAME
+    assert tracks[1].lora_ar == tmp_path / "adapters/q03" / gen.LORA_AR_NAME
+    assert tracks[1].lora_nar == tmp_path / "adapters/q03" / gen.LORA_NAR_NAME
+
+
+def test_resolve_loras_explicit_pair_and_errors(gen, tmp_path, lyrics_ar):
+    loras = gen.resolve_loras(
+        {"loras": {"qfinal_a0.3": {"dir": "adapters/q03"},
+                   "p": {"ar": "A.safetensors", "nar": "N.safetensors"}}}, tmp_path)
+    assert loras["qfinal_a0.3"] == (tmp_path / "adapters/q03" / gen.LORA_AR_NAME,
+                                    tmp_path / "adapters/q03" / gen.LORA_NAR_NAME)
+    assert loras["p"] == (tmp_path / "A.safetensors", tmp_path / "N.safetensors")
+    with pytest.raises(gen.PlanError) as ei:
+        gen.resolve_songs({"songs": [{"name": "x", "style": "s", "lyrics": lyrics_ar,
+                                      "lora": "nope"}]}, tmp_path, loras=loras)
+    assert "unknown alias 'nope'" in str(ei.value)
+    with pytest.raises(gen.PlanError) as ei:
+        gen.resolve_loras({"loras": {"p": {}}}, tmp_path)
+    assert "use either 'dir' or both" in str(ei.value)
+    with pytest.raises(gen.PlanError) as ei:
+        gen.resolve_loras({"loras": {"p": {"dir": "d", "ar": "a"}}}, tmp_path)
+    assert "use either 'dir' or both" in str(ei.value)
+    with pytest.raises(gen.PlanError) as ei:
+        gen.resolve_loras({"loras": {"bad alias": {"dir": "d"}}}, tmp_path)
+    assert "alias must match" in str(ei.value)
+
+
+def test_build_tracks_without_registry_has_no_lora(gen, tmp_path, lyrics_ar):
+    songs = gen.resolve_songs({"songs": [{"name": "x", "style": "s",
+                                          "lyrics": lyrics_ar}]}, tmp_path)
+    t = gen.build_tracks(songs)[0]
+    assert t.lora is None and t.lora_ar is None and t.lora_nar is None
+
+
 # --- planning ---------------------------------------------------------------
 
 def test_build_tracks(gen, tmp_path, lyrics_ar):
@@ -216,6 +264,33 @@ def test_run_batch_ok_then_skip_then_force_fail(gen, tmp_path, lyrics_ar):
     assert "failed: 2" in summary and "possibly truncated" not in summary
 
 
+def test_run_batch_uses_per_song_lora(gen, tmp_path, lyrics_ar):
+    run = tmp_path / "run"
+    run.mkdir()
+    songs = gen.resolve_songs({"songs": [{"name": "s1", "style": "s",
+                                          "lyrics": lyrics_ar, "seed": 1}]}, tmp_path)
+    tracks = gen.build_tracks(songs)
+    ar, nar = tmp_path / "q_ar.safetensors", tmp_path / "q_nar.safetensors"
+    tracks[0].lora, tracks[0].lora_ar, tracks[0].lora_nar = "q", ar, nar
+    fp = dict(FP)
+    fp["loras"] = {"q": {"ar": str(ar), "nar": str(nar),
+                         "ar_sha256": "QA", "nar_sha256": "QN"}}
+    info = gen.materialize(run, songs, b"{}", tmp_path / "in.json", tracks, fp, GPU)
+    seen = {}
+
+    def runner(cmd, env, log):
+        seen["ar"], seen["nar"] = env["LORA_AR"], env["LORA_NAR"]
+        name, seed = cmd[2], cmd[3]
+        (run / f"{name}_{seed}.wav").write_bytes(b"RIFF")
+        (run / f"{name}_{seed}_time.txt").write_text("Exit status: 0", encoding="utf-8")
+        return 0
+
+    gen.run_batch(run, tracks, info, fp, GPU, gen.LORA_AR, gen.LORA_NAR, runner=runner)
+    assert seen == {"ar": str(ar), "nar": str(nar)}              # track pair wins over default
+    sc = json.loads((run / "s1_1.json").read_text(encoding="utf-8"))
+    assert sc["lora_alias"] == "q" and sc["lora_ar_sha256"] == "QA"
+
+
 def test_truncation_info(gen, tmp_path):
     log = tmp_path / "x.log"
     log.write_text("truncated=1\n", encoding="utf-8")
@@ -261,7 +336,7 @@ def test_main_refuses_and_writes_nothing_when_preflight_fails(gen, tmp_path, mon
     songs.write_text(json.dumps({"songs": [{"name": "x", "style": "s", "lyrics": lyrics_ar}]},
                                 ensure_ascii=False), encoding="utf-8")
     monkeypatch.setattr(gen, "preflight",
-                        lambda allow, lora_ar, lora_nar: gen.fail("preflight failed: test"))
+                        lambda allow, lora_ar, lora_nar, loras=None: gen.fail("preflight failed: test"))
     assert gen.main([str(songs)]) == 1
     assert "preflight failed" in capsys.readouterr().err
     assert [p.name for p in tmp_path.iterdir()] == ["songs.json"]
@@ -410,6 +485,22 @@ def test_asset_fingerprint(gen, tmp_path, monkeypatch):
     assert gen.asset_fingerprint(ar, nar, hash_big=False)["model_gguf_sha256"] is None
 
 
+def test_asset_fingerprint_includes_lora_registry(gen, tmp_path, monkeypatch):
+    model = tmp_path / "model"
+    model.mkdir()
+    (model / gen.MODEL_GGUF).write_bytes(b"m")
+    (model / gen.VAE_GGUF).write_bytes(b"v")
+    monkeypatch.setattr(gen, "MODEL_DIR", model)
+    monkeypatch.setattr(gen, "git_commit", lambda _p: "c")
+    ar, nar = tmp_path / "ar", tmp_path / "nar"
+    ar.write_bytes(b"a")
+    nar.write_bytes(b"n")
+    fp = gen.asset_fingerprint(ar, nar, hash_big=False, loras={"q": (ar, nar)})
+    assert fp["loras"]["q"]["ar"] == str(ar)
+    assert fp["loras"]["q"]["ar_sha256"] == hashlib.sha256(b"a").hexdigest()
+    assert "loras" not in gen.asset_fingerprint(ar, nar, hash_big=False)
+
+
 def _stub_assets(gen, tmp_path, monkeypatch, bin_exec=True):
     run_one = tmp_path / "run_one.sh"
     run_one.write_text("#!/bin/sh\n", encoding="utf-8")
@@ -436,6 +527,18 @@ def test_preflight_success(gen, tmp_path, monkeypatch):
     monkeypatch.setattr(gen, "training_active", lambda: None)
     monkeypatch.setattr(gen, "gpu_info", lambda: GPU_FULL)
     assert gen.preflight(False, ar, nar) == GPU_FULL
+
+
+def test_preflight_checks_every_registered_pair(gen, tmp_path, monkeypatch):
+    _, ar, nar = _stub_assets(gen, tmp_path, monkeypatch)
+    monkeypatch.setattr(gen, "training_active", lambda: None)
+    monkeypatch.setattr(gen, "gpu_info", lambda: GPU_FULL)
+    loras = {"q": (tmp_path / "missing_ar", tmp_path / "missing_nar")}
+    with pytest.raises(gen.PlanError) as ei:
+        gen.preflight(False, ar, nar, loras)
+    msg = str(ei.value)
+    assert "missing AR LoRA adapter [q]" in msg
+    assert "missing NAR LoRA adapter [q]" in msg
 
 
 def test_preflight_not_executable_binary(gen, tmp_path, monkeypatch):
@@ -511,7 +614,7 @@ def test_wait_vram_free_paths(gen, monkeypatch, real_wait_vram_free):
 
 def test_main_full_path_with_out_dir(gen, tmp_path, monkeypatch, capsys, lyrics_ar):
     monkeypatch.setattr(gen, "ROOT", tmp_path)
-    monkeypatch.setattr(gen, "preflight", lambda allow, lora_ar, lora_nar: GPU)
+    monkeypatch.setattr(gen, "preflight", lambda allow, lora_ar, lora_nar, loras=None: GPU)
     monkeypatch.setattr(gen, "asset_fingerprint", lambda *a, **k: FP)
     songs = _songs_json(tmp_path, lyrics_ar, seed=1)
     track = gen.Track(1, "x", 0, 1, 3000, 0.95, 10)
@@ -529,11 +632,11 @@ def test_main_lora_overrides_plumbed(gen, tmp_path, monkeypatch, lyrics_ar):
     monkeypatch.setattr(gen, "ROOT", tmp_path)
     captured = {}
 
-    def fake_preflight(allow, lora_ar, lora_nar):
+    def fake_preflight(allow, lora_ar, lora_nar, loras=None):
         captured["preflight"] = (lora_ar, lora_nar)
         return GPU
 
-    def fake_fp(lora_ar, lora_nar, hash_big=True):
+    def fake_fp(lora_ar, lora_nar, hash_big=True, loras=None):
         captured["fp"] = (lora_ar, lora_nar)
         return FP
 
@@ -561,7 +664,7 @@ def test_main_lora_overrides_plumbed(gen, tmp_path, monkeypatch, lyrics_ar):
 def test_main_keyboard_interrupt(gen, tmp_path, monkeypatch, capsys, lyrics_ar):
     songs = _songs_json(tmp_path, lyrics_ar)
 
-    def boom(_allow, _lora_ar, _lora_nar):
+    def boom(_allow, _lora_ar, _lora_nar, _loras=None):
         raise KeyboardInterrupt
 
     monkeypatch.setattr(gen, "preflight", boom)
