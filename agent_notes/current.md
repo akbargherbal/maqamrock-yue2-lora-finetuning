@@ -1,87 +1,60 @@
 # current
 
-## Stage the LoRAs for `batch_36_songs.json` (2026-09-28)
+## 1. Smoke test — ABC extraction (SheetSage2) — **needs the script on the VM first**
 
-The manifest uses three adapter aliases: `v2` (style pair), `qfinal_a0.3`,
-`qfinal_a0.5`. GCS has all three under `loras/audio_cpp/`. Local check just now:
-the `v2` style pair is **already present** in `/content/converter/out/`; the two
-`qfinal_a0.*/` subdirs are **missing** and must be pulled. The `style` rsync is
-idempotent (no-op if current), so the block below stages all three.
+New driver: `INFERENCE/abc_transcribe.py` (untracked). audio.cpp path
+(`--task midi --family sheetsage2`), sequential, resumable, `--limit` +
+`--time-budget`, writes `<stem>.abc` + `_timings.csv` + `transcribe_manifest.json`.
+`ruff check` clean; dry-run + resume + fail-fast + budget verified locally on fakes.
+**Exact sheetsage2 flags are unverified** (no upstream doc) — the smoke run is the test;
+if a track yields no ABC the script prints the log tail and stops.
 
-terminal: foreground — you watch it; Ctrl+C stops it. Idempotent: re-run the
-same block to finish/resume (gsutil skips objects already matching). ~280 MiB
-(4 files), no GPU.
-
+Prereqs on the VM (Colab):
 ```bash
-export GCP_BACKUP_BASE=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning
-mkdir -p /content/converter/out
-gsutil -m rsync -r "$GCP_BACKUP_BASE/loras/audio_cpp/style" /content/converter/out
-gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/qfinal_a0.3" /content/converter/out/
-gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/qfinal_a0.5" /content/converter/out/
+# weights: 2.71 GB, self-contained FP32 (Q8 is NOT safe for this task)
+hf download audio-cpp/SheetSage2-GGUF sheetsage2-orig.gguf \
+  --local-dir /content/audiocpp_inference/models/SheetSage2-GGUF
+# inputs — only if this VM did not render batch_36_songs
+ls /content/audiocpp_inference/out/batch_36_songs/*.wav | wc -l   # expect 36
+# binary present?
+ls -l /content/audiocpp_inference/bin/audiocpp_cli
 ```
 
-Verify (6 files must all list):
-
+Smoke — terminal: **foreground** (watch it; Ctrl+C is safe, rerun resumes).
 ```bash
-ls /content/converter/out/akbar_arabic_rock_lora_{ar,nar}.safetensors \
-   /content/converter/out/qfinal_a0.3/akbar_arabic_rock_lora_{ar,nar}.safetensors \
-   /content/converter/out/qfinal_a0.5/akbar_arabic_rock_lora_{ar,nar}.safetensors
+python /content/maqamrock-yue2-lora-finetuning/INFERENCE/abc_transcribe.py --limit 1
 ```
 
-`generate.py` preflight existence-checks every referenced pair before any GPU
-work, so a missing file fails fast (before the batch starts).
-
-## Run the batch (after the LoRAs are staged)
-
-terminal: detached — survives Ctrl+C / closing the tab.
-log: the run's own `_driver.log`, mirrored to `/content/logs/batch_36_songs.log`.
-Full output dir: `/content/audiocpp_inference/out/batch_36_songs`.
-stop: `pkill -f 'generate.py manifests/batch_36_songs.json'`
-resume: re-run the exact same command (completed tracks are skipped).
-Ctrl+C / closing the tab will NOT stop it.
-
+Full batch — terminal: **detached** (survives Ctrl+C / closing the tab); stop:
+`pkill -f abc_transcribe.py`; resume: rerun same command (done ABCs are skipped).
 ```bash
 mkdir -p /content/logs
-setsid nohup python INFERENCE/generate.py manifests/batch_36_songs.json \
-  --out-dir /content/audiocpp_inference/out/batch_36_songs \
-  > /content/logs/batch_36_songs.log 2>&1 & disown
+python /content/maqamrock-yue2-lora-finetuning/INFERENCE/abc_transcribe.py \
+  --time-budget 1200 \
+  --gcs gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/out/sheetsage2_abc \
+  2>&1 | tee /content/logs/abc_transcribe.log
 ```
+(Run it under `setsid nohup … & disown` for a true detach.)
 
-Progress: `tail -f /content/audiocpp_inference/out/batch_36_songs/_driver.log`
-(or `tail -f /content/audiocpp_inference/out/latest/_driver.log`).
-
-## Back up to GCS every 5 minutes (detached daemon)
-
-terminal: detached — survives Ctrl+C / closing the tab.
-log: `/content/logs/gcp_backup_stdout.log` (stdout) + `/content/logs/gcp_backup.log`
-(daemon's own pass log).
-stop: `pkill -f backup_to_gcp.py`
-resume: re-run the exact same command (rsync is append/update-only, nothing is
-ever deleted remotely).
-Ctrl+C / closing the tab will NOT stop it.
-
-`--inference` mirrors `/content/audiocpp_inference/{out,prompts,scripts}` +
-`/content/logs` + `agent_notes/` to
-`gs://…/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/`. Interval default is
-already 5; passed explicitly for clarity.
-
+## 2. Pending — rock-forward arm for the `batch_36_songs` controls
+`manifests/batch_36_rock.json` (untracked, dry-run-validated): 12 songs, `qfinal_a0.3`,
+**same seeds+caps as the controls**, rock-forward style. Run (detached):
 ```bash
-export GCP_BACKUP_BASE=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning
-cd /content/maqamrock-yue2-lora-finetuning
-setsid nohup python backup_to_gcp.py --inference --interval-minutes 5 \
-  > /content/logs/gcp_backup_stdout.log 2>&1 & disown
+setsid nohup python INFERENCE/generate.py manifests/batch_36_rock.json \
+  --out-dir /content/audiocpp_inference/out/batch_36_rock \
+  > /content/logs/batch_36_rock.log 2>&1 & disown
 ```
+Stop: `pkill -f 'generate.py manifests/batch_36_rock.json'`. Resume: rerun.
 
-Confirm alive / watch progress:
+## 3. Approach 2 (audio-guided) — verdict 2026-09-28
+No audio2audio input exists (verified upstream). YuE2 "cover" = symbolic: audio → ABC →
+`cot=melody`. SheetSage2 is now in-stack (audio.cpp v0.8.0). Two forms: (①) **ABC cover** =
+existing v2 wav → SheetSage2 → `melody.abc` → qfinal_a0.3 `cot=melody` + `abc_file` — preferred;
+(②) `semantic_prefix` token transfer — but pron is **AR-only** (`config/pron_lora_ar_only.yml:38`,
+`merge_pron_lora.py:20`), so a full prefix freezes the very stream the fix lives in. Risk: adapters
+were trained `cot=off` → ABC off-distribution (that's what the smoke tests).
 
-```bash
-pgrep -af backup_to_gcp.py
-tail -f /content/logs/gcp_backup.log
-```
-
-## Earlier fix (2026-09-28)
-
-`generate.py` had an ASCII-only `name` regex; now `^[^\W_][\w-]*$` accepts
-Unicode/Arabic names (spaces/dots/slashes still rejected). `batch_36_songs.json`
-unchanged; dry-run validates 36 songs / 36 tracks. Tests + `docs/INFERENCE.md`
-updated; reconciler pass = 0 new drift.
+## Staging
+Untracked: `manifests/batch_36_rock.json`, `INFERENCE/abc_transcribe.py`. Branches: `music-cover`
+has `docs/music-cover-feasibility.md` (its "SheetSage2 not ported" line is now stale — to fix).
+No audio downloaded locally.

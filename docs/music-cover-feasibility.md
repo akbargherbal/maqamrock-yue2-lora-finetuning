@@ -1,6 +1,7 @@
 # Music cover / guide-conditioned generation — feasibility
 
-_Last revised: 2026-09-28. Investigation & discussion record — **not a runbook**.
+_Last revised: 2026-09-28 (SheetSage2-in-stack status + AR-only caveat re-verified
+against upstream 2026-09-28). Investigation & discussion record — **not a runbook**.
 No experiment described here has been run yet; hypotheses are marked as such.
 Authority for procedures stays with `docs/INFERENCE.md`, `docs/PRON_LORA_MERGE.md`,
 `docs/LORA_INVENTORY.md`, and `config/akbar_arabic_rock_lora.yml`._
@@ -30,15 +31,19 @@ what carries song identity.
 `abc=` / `abc_file=`, `semantic_prefix[_file]`, and it **exports the generated
 score** as `score.abc` under `--out-dir` (`docs/models/yue2.md`, audio.cpp).
 
-Gaps in this repo (as of 2026-09-28):
+Gaps in this repo (as of 2026-09-28; SheetSage2 status re-verified 2026-09-28):
 - `INFERENCE/run_one.sh:79` hardcodes `--request-option cot=off`; `INFERENCE/generate.py`
-  has no `abc`/`abc_file` field. Covers are not wired into the drivers.
-- No transcription stage is staged. SheetSage2 is **not** ported to audio.cpp (no
-  model doc); audio.cpp's **MuScriptor** (`--task midi --family muscriptor`) does
-  audio→MIDI/note-JSON, not ABC.
+  has no `abc`/`abc_file` field. Covers are not wired into the *generation* drivers —
+  a cover render must call the binary directly.
+- **Correction (earlier claim was wrong):** SheetSage2 **is** now in audio.cpp —
+  merged in v0.8.0 (PR #553, 2026-09-15); the README lists family `sheetsage2`, task
+  MIDI. Weights: `audio-cpp/SheetSage2-GGUF` → `sheetsage2-orig.gguf`, **2.71 GB FP32,
+  self-contained** (backbone merged; Q8 is documented as unsafe for transcription
+  parity). No separate MERT download needed at inference. Repo driver added:
+  `INFERENCE/abc_transcribe.py`.
 - The fine-tuned adapters were trained `cot: "off"` (`config/akbar_arabic_rock_lora.yml:106`,
   "your captions carry no melodic/ABC info"), so ABC conditioning is **off-distribution**
-  for them — a first-order unknown.
+  for them — a first-order unknown, hence a 1-track smoke before any batch.
 
 ## 3. The tradeoff being worked around (α)
 
@@ -55,6 +60,12 @@ Gaps in this repo (as of 2026-09-28):
 - Because pron and the arrangement live in the **same AR branch** and there is one
   LoRA slot per expert, pron cannot be applied without its AR perturbation. Lowering
   α only reduces the perturbation's magnitude — it does not separate the two.
+- **Consequence for any token-level guide:** the pron fix is **AR-only**
+  (`config/pron_lora_ar_only.yml:38` `ignore_if_contains: ["transformer.nar"]`;
+  `merge_pron_lora.py:20` copies v2 through every NAR key). So forcing an external
+  AR plan — ABC, or the newer `semantic_prefix[_file]` (audio.cpp v0.8.2, 2026-09-24)
+  — trades arrangement control against exactly the stream the pronunciation fix lives
+  in. A *partial* prefix may thread it; a full override likely reverts pronunciation.
 
 ## 4. Measure A — the style-text (prompt) lever — cheapest, in-distribution
 
@@ -135,10 +146,15 @@ investigating, look at decoding/sampling knobs (e.g. `semantic_repetition_penalt
 ## 8. Provenance
 
 - YuE2 model card, cover section + SHS100K benchmark: <https://huggingface.co/m-a-p/YuE2-3B>
+- SheetSage2 (upstream) + GGUF: <https://huggingface.co/m-a-p/SheetSage2>,
+  <https://huggingface.co/audio-cpp/SheetSage2-GGUF>
+- audio.cpp SheetSage2 merge (v0.8.0): <https://github.com/0xShug0/audio.cpp/pull/553>
 - audio.cpp YuE2 options (`cot`, `abc`/`abc_file`, `score.abc`, `semantic_prefix`):
   `https://github.com/0xShug0/audio.cpp/blob/main/docs/models/yue2.md`
 - audio.cpp MuScriptor (audio→MIDI/note-JSON):
   `https://github.com/0xShug0/audio.cpp/blob/main/docs/models/muscriptor.md`
+- Repo driver for the cover front end: `INFERENCE/abc_transcribe.py`;
+  session handoff: `agent_notes/current.md`.
 - Repo: `docs/LORA_INVENTORY.md`, `docs/PRON_LORA_MERGE.md`,
   `config/akbar_arabic_rock_lora.yml:106`, `INFERENCE/run_one.sh:79`,
   `INFERENCE/generate.py`, `manifests/batch_36_songs.json`.
