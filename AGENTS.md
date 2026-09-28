@@ -5,22 +5,36 @@ _Last revised: 2026-09-28 — branch `user-learning` variant: a learning playgro
 ## Learning-playground branch — read this first
 
 **`user-learning` is the user's personal sandbox for learning how generative AI
-and this stack work. It is NOT a coding branch and must NOT be merged into `main`
-or any other branch.**
+and this stack work — including the code and tooling around it. It is NOT a
+coding branch and must NOT be merged into `main` or any other branch.**
 
 Your job here is to **teach**, not to run the project. Concretely:
 
 1. **Open every session by saying, in one line, that this is the learning branch**
-   and that coding/ops belongs on `main`. Establish it up front; do not wait for
-   it to come up.
-2. **If the user asks for coding, ops, training, inference, dataset, config, or
-   repo-maintenance work, do not do it here.** Tell them to `git switch main`
-   first, and offer to keep teaching meanwhile.
+   and that project coding/ops belongs on `main`. Establish it up front.
+2. **Only *project* work is redirected.** If the user asks to change project files,
+   configs or datasets, or to run a real/long training or batch job, tell them to
+   `git switch main` first (and offer to keep teaching meanwhile). But **teaching
+   the code is in scope** — read and explain any script, and write toy
+   bash/python/CLI examples to demonstrate.
 3. **Never merge this branch into a coding branch.** If any of it is ever wanted
    elsewhere, copy only the specific `LEARNING/` file — **never this `AGENTS.md`**,
    which is intentionally different on this branch.
-4. Do not change project files, run configs, datasets, or launch runs from here.
-   Teaching is reading, explaining, and tiny CPU-only experiments.
+
+### Allowed here (learning by doing)
+
+- **Reading and explaining** project code, scripts, configs, and commands —
+  bash/tooling included (e.g. `setsid nohup … & disown`, `gsutil`, `pgrep`).
+- **Scratch scripts and toy examples** — write them under `LEARNING/` (e.g.
+  `LEARNING/scratch/`), never over a committed project file.
+- **CPU-only experiments and `--dry-run`** (e.g. `generate.py … --dry-run`) are
+  always fine — they change nothing and use no GPU.
+- **A single short GPU smoke test** is allowed *when the GPU is free* (run
+  `nvidia-smi` first; never overlap an active run). **Prompt the user that for
+  anything real — a full track, a batch, tuning — switching to `main` is the
+  better move.**
+- **Never:** edit committed project files/configs/datasets, launch real or long
+  runs, push project changes, or merge. Those belong on `main`.
 
 Next: `LEARNING/README.md` (the method) and `LEARNING/log.md` (where the last
 sitting left off). The §2 runbook table is background context only here.
@@ -138,10 +152,12 @@ config's `save.*`. TensorBoard under `<log_dir>/<name>_<timestamp>/` (glob one l
 
 ## 8. Never — with the reason, so it generalizes
 
-- **On `user-learning`: never do coding/ops work and never merge the branch.** The
-  user asked for a hard wall between the learning playground and the coding
-  branches; project work here — or merging it out — destroys that separation.
-  Redirect to `main`. The bullets below still bind you on coding branches.
+- **On `user-learning`: never do *project* coding/ops work and never merge the
+  branch.** The hard wall is around changing the project and merging it out —
+  **not** around teaching. Reading/explaining code, toy scripts in `LEARNING/`,
+  CPU experiments, `--dry-run`, and a short GPU smoke test on a free GPU are all
+  allowed (see the banner). Real runs and project edits go to `main`. The bullets
+  below still bind you on coding branches.
 - Start a new run, or resume with a **changed** config/hyperparameter, without the user
   typing the command. A run finishing without errors is not a run being *right*.
 - **Auto-resume is the only exception, and needs evidence:** run name + config unchanged,

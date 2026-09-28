@@ -25,13 +25,17 @@ coding/ops request gets redirected to `main`.
   detour.
 - **Teach-back.** You explain it in your words; I correct. That is the only real
   progress signal (reading feels good but doesn't stick).
-- **GPU etiquette.** Hands-on GPU experiments wait for a free GPU. Concept work
-  and CPU toys run anytime.
+- **CPU toys anytime; GPU only when free.** `--dry-run`, scratch scripts, and
+  CPU experiments always run. A single short GPU smoke test is fine *when no run
+  is active* (`nvidia-smi` first) — but for anything real, we switch to `main`.
+- **We learn the code too.** Bash, Python, CLI — read and explained by example,
+  with toy scripts kept in `scratch/` (never over a project file).
 
 ## Files here
 - `map.md` — the living picture of the whole machine, with "you are here".
 - `glossary.md` — terms met in this project, in *your* words.
 - `log.md` — one entry per sitting + the parking lot.
+- `scratch/` — toy scripts and throwaway experiments (never project files).
 
 ## North star (not a test)
 You have "learned enough" when you can tell the story of how one of *your* songs
