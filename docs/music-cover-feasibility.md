@@ -1,7 +1,8 @@
 # Music cover / guide-conditioned generation — feasibility
 
-_Last revised: 2026-09-28 (SheetSage2-in-stack status + AR-only caveat re-verified
-against upstream 2026-09-28). Investigation & discussion record — **not a runbook**.
+_Last revised: 2026-09-28 (route corrected: transcribe with the **official Python
+SheetSage2**, no audio.cpp rebuild; binary capability verified). Investigation &
+discussion record — **not a runbook**.
 No experiment described here has been run yet; hypotheses are marked as such.
 Authority for procedures stays with `docs/INFERENCE.md`, `docs/PRON_LORA_MERGE.md`,
 `docs/LORA_INVENTORY.md`, and `config/akbar_arabic_rock_lora.yml`._
@@ -35,12 +36,24 @@ Gaps in this repo (as of 2026-09-28; SheetSage2 status re-verified 2026-09-28):
 - `INFERENCE/run_one.sh:79` hardcodes `--request-option cot=off`; `INFERENCE/generate.py`
   has no `abc`/`abc_file` field. Covers are not wired into the *generation* drivers —
   a cover render must call the binary directly.
-- **Correction (earlier claim was wrong):** SheetSage2 **is** now in audio.cpp —
-  merged in v0.8.0 (PR #553, 2026-09-15); the README lists family `sheetsage2`, task
-  MIDI. Weights: `audio-cpp/SheetSage2-GGUF` → `sheetsage2-orig.gguf`, **2.71 GB FP32,
-  self-contained** (backbone merged; Q8 is documented as unsafe for transcription
-  parity). No separate MERT download needed at inference. Repo driver added:
-  `INFERENCE/abc_transcribe.py`.
+- SheetSage2 **is** in audio.cpp (v0.8.0, PR #553, 2026-09-15), but **our staged
+  `bin/audiocpp_cli` does not contain it**: it was built `--model-set custom
+  --models yue2` (`DECISIONS.md` build entry) and its strings show **0** `sheetsage`
+  (verified 2026-09-28). Upstream releases ship **only `audiocpp_server`** (HTTP, no
+  CLI mode) — **no prebuilt `audiocpp_cli`** exists. So the audio.cpp transcription
+  route requires a rebuild (`docs/audiocpp_gpu_arch_builds.md`; add `sheetsage2` to
+  `--models`). We started that rebuild and **abandoned it as unnecessary**.
+- **The generation side needs no rebuild** (verified 2026-09-28): the existing binary
+  already carries the cover knobs `abc_file` (×6), `cot` (×18), `melody` (×6), so a
+  `cot=melody` + `abc_file` render works today. It does **not** carry `semantic_prefix`
+  (×0; landed v0.8.2) — Form ② would need a newer binary; Form ① does not.
+- **Chosen transcription route: the *official Python* model** `m-a-p/SheetSage2`
+  (`transformers` + `trust_remote_code`, `melody_only=True`) — no audio.cpp, no GGUF,
+  no build. It is the reference the audio.cpp GGUF was validated against (ABC parity),
+  so its `score.abc` drops straight into `--request-option abc_file=`. Needs its own
+  env (torch 2.8/torchaudio 2.8 cu126, transformers 4.45.2, ffmpeg 6.1 + shared libs)
+  and the MERT-v2-FullSong backbone (632 M, downloaded separately). `INFERENCE/abc_transcribe.py`
+  targets the *audio.cpp* path and would be re-pointed/replaced for this route.
 - The fine-tuned adapters were trained `cot: "off"` (`config/akbar_arabic_rock_lora.yml:106`,
   "your captions carry no melodic/ABC info"), so ABC conditioning is **off-distribution**
   for them — a first-order unknown, hence a 1-track smoke before any batch.
@@ -108,9 +121,11 @@ Two ways to obtain the score:
   `--request-option cot=full --request-option abc_file=<score.abc>` + same style/lyrics/seed.
   No SheetSage2, no transcription loss. Caveat: the guide is v2's *full-mode* plan, a
   different render from the `cot=off` v2 track that is liked.
-- **B2 (faithful but fragile):** liked `cot=off` v2 wav → SheetSage2 → `melody.abc` →
-  `qfinal_a0.3` with `cot=melody`. Requires SheetSage2 in a separate env (not staged);
-  transcription is lossy.
+- **B2 (faithful; now the chosen transcription route):** liked `cot=off` v2 wav →
+  **official Python SheetSage2** (`transcribe(wav, output_dir=…, melody_only=True)`) →
+  `melody.abc` → `qfinal_a0.3` with `cot=melody` + `abc_file`. No audio.cpp for this
+  step; runs on GPU or CPU; needs its own env. Transcription is lossy vs an exact
+  exported plan.
 
 Caveats: adapters trained `cot=off` (off-distribution ABC); α is unchanged (this does
 not touch pronunciation, it tries to out-vote the arrangement drift with v2's plan);
@@ -139,8 +154,13 @@ investigating, look at decoding/sampling knobs (e.g. `semantic_repetition_penalt
 
 1. **Measure A** (minutes, no new deps): rock-forward style text, same seed/adapter;
    then optionally `guidance_scale=1.3–1.5`.
-2. If the arrangement still collapses: **Measure B1** (score export + `abc_file`),
-   1-track smoke first.
+2. If the arrangement still collapses: **Measure B**, 1-track smoke first.
+   - Transcribe the liked `cot=off` v2 wav with the **official Python SheetSage2**
+     (`melody_only=True`) → `melody.abc` — route B2, no audio.cpp build.
+   - Cover render on the **existing** `audiocpp_cli`: `qfinal_a0.3`, `cot=melody` +
+     `abc_file`, same lyrics/seed.
+   - (B1 — export v2's own `score.abc` via `cot=full --out-dir` — stays exact but is a
+     different v2 render.)
 3. Blinded A/B each against the α0.3 control; keep α0.3 fixed throughout.
 
 ## 8. Provenance
@@ -149,6 +169,9 @@ investigating, look at decoding/sampling knobs (e.g. `semantic_repetition_penalt
 - SheetSage2 (upstream) + GGUF: <https://huggingface.co/m-a-p/SheetSage2>,
   <https://huggingface.co/audio-cpp/SheetSage2-GGUF>
 - audio.cpp SheetSage2 merge (v0.8.0): <https://github.com/0xShug0/audio.cpp/pull/553>
+- audio.cpp releases ship `audiocpp_server` only (no prebuilt `audiocpp_cli`):
+  <https://github.com/0xShug0/audio.cpp/releases/tag/v0.8.2-audio8-perf-hotfix>
+- Python SheetSage2 cover mode (`melody_only=True`): <https://huggingface.co/m-a-p/SheetSage2>
 - audio.cpp YuE2 options (`cot`, `abc`/`abc_file`, `score.abc`, `semantic_prefix`):
   `https://github.com/0xShug0/audio.cpp/blob/main/docs/models/yue2.md`
 - audio.cpp MuScriptor (audio→MIDI/note-JSON):

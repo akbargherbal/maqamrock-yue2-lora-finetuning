@@ -1,70 +1,42 @@
 # current
 
-## 0. Resume this session on the VM (conversation continuity)
-The conversation (not just the repo) is archived — the exact OpenCode session JSON:
-```
-gs://akbar-december-2024-backup/opencode_sessions/by_id/ses_f17ef5af2ffeK15W1EBgAHpDJT.json
-```
-2,323,607 B, md5 `s3fHuoDGomE0v0bcDH+Hkg==` (uploaded 2026-09-28; re-export + re-cp to refresh).
+## 1. Plan — corrected 2026-09-28 (cover = Python SheetSage2 + existing yue2 binary)
 
-Restore on the VM (terminal: foreground, quick):
-```bash
-gsutil cp gs://akbar-december-2024-backup/opencode_sessions/by_id/ses_f17ef5af2ffeK15W1EBgAHpDJT.json /content/
-cd /content/maqamrock-yue2-lora-finetuning          # import target = cwd (there is NO --directory flag)
-opencode import /content/ses_f17ef5af2ffeK15W1EBgAHpDJT.json
-opencode -s ses_f17ef5af2ffeK15W1EBgAHpDJT          # or pick it in the session list
-```
-Restores the **conversation** (turns + tool calls + outputs); does **not** restore the
-environment — repo/model/GPU must exist on the VM, and history paths are the local box's
-(`/home/akbar/…`). The repo carries the *work*; this JSON carries the *chat*. (`opencode
-export --sanitize` exists if a less-private copy is ever needed.)
+**Transcription (audio → ABC): official Python `m-a-p/SheetSage2`** — no audio.cpp,
+no GGUF, no build. `model.transcribe(wav, output_dir=…, melody_only=True)` → `score.abc`.
+Own env: torch 2.8 / torchaudio 2.8 (cu126), transformers 4.45.2, ffmpeg 6.1 + shared
+libs, mir_eval/pretty_midi/mido. Backbone `MERT-v2-FullSong` (632 M, ~2.5 GB) not cached.
+GPU or CPU. The audio.cpp GGUF was validated to match this reference's ABC, so the ABC
+drops straight into `--request-option abc_file=`.
 
-## 1. Smoke test — ABC extraction (SheetSage2)
-Driver `INFERENCE/abc_transcribe.py` (committed on `music-cover` @ 985db9e). audio.cpp path
-(`--task midi --family sheetsage2`), sequential, resumable, `--limit` + `--time-budget`;
-writes `<stem>.abc` + `_timings.csv` + `transcribe_manifest.json`. `ruff check` clean;
-dry-run/resume/fail-fast/budget verified locally on fakes. **Exact sheetsage2 flags are
-unverified** (no upstream doc) — the smoke is the test; no ABC ⇒ prints the log tail and stops.
+**Generation (cover render): the EXISTING `/content/audiocpp_inference/bin/audiocpp_cli`** —
+verified it already has `cot` / `abc_file` / `melody` (so `cot=melody` + `abc_file=<score.abc>`
+works). **No rebuild.** It lacks `semantic_prefix` (Form ②, needs ≥v0.8.2) — Form ① does not.
 
-Prereqs on the VM:
-```bash
-hf download audio-cpp/SheetSage2-GGUF sheetsage2-orig.gguf \
-  --local-dir /content/audiocpp_inference/models/SheetSage2-GGUF   # 2.71 GB FP32; Q8 unsafe
-ls /content/audiocpp_inference/out/batch_36_songs/*.wav | wc -l    # expect 36
-ls -l /content/audiocpp_inference/bin/audiocpp_cli
-```
-Smoke — terminal: **foreground** (Ctrl+C safe; rerun resumes):
-```bash
-cd /content/maqamrock-yue2-lora-finetuning
-python INFERENCE/abc_transcribe.py --limit 1
-```
-Full batch — terminal: **detached**; stop `pkill -f abc_transcribe.py`; resume = rerun:
-```bash
-mkdir -p /content/logs
-setsid nohup python INFERENCE/abc_transcribe.py --time-budget 1200 \
-  --gcs gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/out/sheetsage2_abc \
-  > /content/logs/abc_transcribe.log 2>&1 & disown
-```
+## 2. Why we are NOT rebuilding audio.cpp (finding, 2026-09-28)
+Smoke #1 failed in 3 s: `unsupported model family hint: sheetsage2`. Root cause: the staged
+binary was built `--model-set custom --models yue2` (`DECISIONS.md` build entry); `strings`
+show **0** `sheetsage`. Upstream releases ship **only `audiocpp_server`** (HTTP, no CLI mode)
+— no prebuilt `audiocpp_cli`. A sheetsage2-only rebuild was started per
+`docs/audiocpp_gpu_arch_builds.md` and **stopped at 88/413** once we saw the existing binary
+already has the generation knobs and Python SheetSage2 covers transcription.
+**Do not restart the build.** Log: `/content/logs/build_sheetsage2.log`.
 
-## 2. Rock-forward arm for the `batch_36_songs` controls
-`manifests/batch_36_rock.json` (committed): 12 songs, `qfinal_a0.3`, **same seeds+caps as the
-controls**, rock-forward style. Run (detached):
-```bash
-setsid nohup python INFERENCE/generate.py manifests/batch_36_rock.json \
-  --out-dir /content/audiocpp_inference/out/batch_36_rock \
-  > /content/logs/batch_36_rock.log 2>&1 & disown
-```
-Stop: `pkill -f 'generate.py manifests/batch_36_rock.json'`. Resume: rerun.
+## 3. Next steps
+1. One-track smoke: official Python SheetSage2 (`melody_only=True`) on a v2 wav → `score.abc`.
+2. Cover smoke: existing `audiocpp_cli`, `qfinal_a0.3` LoRA, `cot=melody` + `abc_file`,
+   same lyrics/seed.
+3. If it holds: transcribe the v2 arm → persist ABCs to GCS → batch covers →
+   blind A/B vs the `batch_36_songs` qfinal_a0.3 controls (`INFERENCE/prepare_ab_eval.py`).
+4. `INFERENCE/abc_transcribe.py` targets the *audio.cpp* path — re-point/replace it for the
+   Python route before any batch.
 
-## 3. Approach 2 (audio-guided) — verdict 2026-09-28
-No audio2audio input exists (verified upstream). YuE2 "cover" = symbolic: audio → ABC →
-`cot=melody`. SheetSage2 is now in-stack (audio.cpp v0.8.0). Forms: (①) **ABC cover**
-(preferred) = v2 wav → SheetSage2 → `melody.abc` → qfinal_a0.3 `cot=melody` + `abc_file`;
-(②) `semantic_prefix` token transfer — but pron is **AR-only** (`config/pron_lora_ar_only.yml:38`,
-`merge_pron_lora.py:20`), so a full prefix freezes the very stream the fix lives in. Risk:
-adapters trained `cot=off` → ABC off-distribution (that's what the smoke tests).
+## 4. VM / artifacts
+Branch `music-cover`. Staged: `models/SheetSage2-GGUF/sheetsage2-orig.gguf` (2.71 GB, now
+unused), 36 wavs in `out/batch_36_songs/`, `bin/audiocpp_cli`. GPU T4, 0 MiB used.
+Session-restore JSON (conversation continuity) imported successfully:
+`gs://akbar-december-2024-backup/opencode_sessions/by_id/ses_f17ef5af2ffeK15W1EBgAHpDJT.json`.
 
-## Staging
-Branch `music-cover` @ 049df65 carries: `INFERENCE/abc_transcribe.py`, `manifests/batch_36_rock.json`,
-`docs/music-cover-feasibility.md` (SheetSage2-in-stack + AR-only caveat corrected), this file.
-No audio downloaded locally. vm-continuity cloned to `/tmp/opencode/vm-continuity` (examined only).
+## 5. Still pending
+`manifests/batch_36_rock.json` (Measure A prompt arm). Feasibility record:
+`docs/music-cover-feasibility.md`.
