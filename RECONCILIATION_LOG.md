@@ -489,3 +489,20 @@ covers both._
   §11.5 "what would settle it" forward and annotated the §11.1 "not stored (B1)" row.
 - Authority: §12's own result (the B1 guide ran and held). Narrative-only; no config,
   hyperparameter, or script touched — **0 new drift**.
+
+## 2026-09-29 — condense `music-cover-feasibility.md` into a topical reference
+
+- The doc had grown to a 12-section dated journal (529 lines). Rewritten as a condensed
+  topical record (~10 sections): status → question → cover mechanics → α tradeoff → levers →
+  measured v2 training-set facts → round 1 (verbatim) → round 2 (guide-conditioned) → open
+  questions (checkbox list) → sources. Addendum/"session" narrative removed; every fact kept.
+- **Sections renumbered** (old → new): §3→§3, §4→§4.1, §5→§4.2, §9.4→§4.3, §9.1–9.3→§5,
+  §10→§6, §11+§12→§7, §9.6→§8. Every live inbound reference updated: `SOURCE_OF_TRUTH.md`
+  (3 rows), `docs/README.md` blurb, `agent_notes/current.md`,
+  `skills/ab-blind-eval/SKILL.md`, and the `INFERENCE/{test_batch,v2_abc_to_qfinal,screen_arms}.sh`
+  comments. `RECONCILIATION_LOG.md` history left intact (history, not current truth).
+- `skills/docs-reconciler/references/unverifiable.txt`: dropped the `KEY.json` doc-scoped
+  entry (the doc no longer cites that deleted decoder); `workflow.md`, `Quick_Guide.md`, and
+  `tokens.json` are all retained by the rewrite.
+- Authority: the doc's own measured facts + round scores, unchanged; narrative-only
+  restructure — no config, hyperparameter, or script behaviour touched.

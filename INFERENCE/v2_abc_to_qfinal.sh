@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Hypothesis test: v2's own plan (exported as score.abc, route B1) used as the
 # melody condition for qfinal_a0.3 -> does it keep v2's maqamrock arrangement
-# while keeping qfinal's pronunciation? (docs/music-cover-feasibility.md §3, §5)
+# while keeping qfinal's pronunciation? (docs/music-cover-feasibility.md §3, §4.2)
 #
 # Phase 1: v2, cot=full, stop_after=semantic, --out-dir -> writes v2's score.abc.
 # Phase 2: four arms, same style/lyrics/seed, so the ONLY variable is the arm:

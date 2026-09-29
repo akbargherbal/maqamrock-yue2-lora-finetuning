@@ -177,8 +177,7 @@ SOURCE_OF_TRUTH.md :: LAYOUT.json
 # Contextual, non-repo mentions (each scoped to its doc, so the suppression stays narrow).
 # `_failed_runs.log` is written into a run's out-dir by the sweep drivers at runtime.
 docs/COMMAND_HANDOVER_GOTCHAS.md :: _failed_runs.log
-# research record (docs/music-cover-feasibility.md): `KEY.json` was the previous build's
-# decoder, deleted 2026-09-29 and documented as such in §10; `tokens.json` is a GCS-side
-# artifact under workspace/out/abc_v2/<track>/, not a repo file.
-docs/music-cover-feasibility.md :: KEY.json
+# research record (docs/music-cover-feasibility.md): `tokens.json` is a GCS-side artifact
+# under workspace/out/abc_v2/<track>/, not a repo file. (The prior `KEY.json` entry was
+# dropped 2026-09-29 when the doc was condensed and stopped citing that deleted decoder.)
 docs/music-cover-feasibility.md :: tokens.json

@@ -63,7 +63,7 @@ Key flags: `--variants` (2+; default = all detected leaf folders), `--categories
   `20260929` verbatim/lyric-adherence, `20260931` guide-conditioned (built — the
   GCS/committed package, superseded, *not* the one scored) and `20260932`
   guide-conditioned (the build that was actually scored — see
-  `docs/music-cover-feasibility.md` §12.4) (the `20260930` shuffle was discarded
+  `docs/music-cover-feasibility.md` §7) (the `20260930` shuffle was discarded
   because its mapping got printed — see below). Take the next unused integer.
 - **Never print the mapping while the round is live.** `prepare_ab_eval.py`'s
   stdout, its `--dry-run` plan and its `--json` all reveal label→variant. Echoing

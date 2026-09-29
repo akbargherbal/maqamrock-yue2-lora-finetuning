@@ -3,7 +3,7 @@
 _Updated 2026-09-29 (local). **Guide-conditioned round scored + decoded — the idea works:
 `a2` (`qfinal_a0.3` `cot=full` + v2's `score.abc`) wins arrangement AND pronunciation, and
 beats the `cot=full`-no-plan arm (`a1`) decisively.** Recorded in
-`docs/music-cover-feasibility.md` **§12**; authority
+`docs/music-cover-feasibility.md` **§7**; authority
 `manifests/evaluation_v2_abc_to_qfinal/MY_EVALUATION.txt` (+ `KEYS.txt`). Next: replicate on
 the other two seeds. Branch `music-cover`._
 
@@ -18,7 +18,7 @@ the other two seeds. Branch `music-cover`._
 | duration (log) | 271.9 s | 256.8 s | 310.0 s (cap) | 282.2 s |
 
 - **Same clip wins both axes: D (`a2_cotfull_abc`).** Arrangement 5 ≥ v2's 4.5; pronunciation
-  4.5 > v2's 4.0 — the hypothesis of §11.5 is supported.
+  4.5 > v2's 4.0 — §7's hypothesis is supported.
 - **D vs C is the controlled proof:** both qfinal `cot=full`, only D got v2's ABC. Adding the
   guide: arrangement `3 → 5`, pace `2 → 5`, and it *finishes* — C's 310.0 s is the
   `7750`-token auto cap (the "didn't finish" the listener heard).
@@ -78,8 +78,9 @@ are both taken) and mirror with `python3 backup_to_gcp.py --inference --once`.
 
 ## 3. Pointers
 
-- Feasibility: `docs/music-cover-feasibility.md` §12 (this round) · §11 (§11.3 risks, §11.5
-  verdict criterion) · §10 (verbatim round) · §3 (α tradeoff) · §5 (B1/B2).
+- Feasibility: `docs/music-cover-feasibility.md` §7 (this round) · §3 (α tradeoff / AR
+  conflict) · §4.2 (B1/B2) · §5 (v2 training-set facts) · §6 (verbatim round) · §8 (open
+  questions).
 - Adapters/identity: `docs/LORA_INVENTORY.md`, `docs/PRON_LORA_MERGE.md`; runbook
   `docs/INFERENCE.md`. Blind packaging: `skills/ab-blind-eval/SKILL.md`.
 - This file is a handoff surface, not authority — re-derive state from the artifacts/logs.

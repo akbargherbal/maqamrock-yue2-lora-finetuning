@@ -27,7 +27,7 @@
 #   ABC_FILE   melody.abc for the cover arms. Required for 'abc'/'all' unless
 #              you only want the cot=melody-no-abc arm. Make it with
 #              INFERENCE/sheetsage2_transcribe.py from the V2 guide wav
-#              (docs/music-cover-feasibility.md §5 route B2), or export v2's own
+#              (docs/music-cover-feasibility.md §4.2 route B2), or export v2's own
 #              plan via 'cot=full --out-dir' (route B1).
 #   OUT_DIR    default $ROOT/out/test_verbatim_hijaz
 #   CAP        default auto (INFERENCE/duration_cap.py, 95th pct)
@@ -124,7 +124,7 @@ abc() {
   [ -e "$RAW_STYLE" ] || { echo "missing: $RAW_STYLE" >&2; exit 1; }
   if [ -z "$ABC_FILE" ] && [ "$DRY" != "--dry-run" ]; then
     echo "[warn] ABC_FILE unset — running only the cot=melody-no-abc control arms." >&2
-    echo "       set ABC_FILE=<melody.abc> (see docs/music-cover-feasibility.md §5)." >&2
+    echo "       set ABC_FILE=<melody.abc> (see docs/music-cover-feasibility.md §4.2)." >&2
   fi
   echo "== C. ABC arms (cot=melody) seed=$SEED out=$OUT_DIR"
   _abc_one c0_cotonly    "$STYLE"     noabc

@@ -18,7 +18,7 @@
 #   * per-arm, same seed, so arms are comparable.
 # The actual "did it sing the sheet verbatim" verdict still needs the rendered
 # audio (listening, or ASR of the output vs the sheet). See
-# docs/music-cover-feasibility.md §9.4/§9.6.
+# docs/music-cover-feasibility.md §4.3/§8.
 #
 # Usage: bash INFERENCE/screen_arms.sh <core|abc|all> [--dry-run]
 #
