@@ -60,9 +60,11 @@ Key flags: `--variants` (2+; default = all detected leaf folders), `--categories
 
 - **New blinding seed every round.** Prior rounds: `20260925` fine sweep,
   `20260926` ckpt sweep, `20260927` lyric swap, `20260928` knob probe,
-  `20260929` verbatim/lyric-adherence, `20260931` guide-conditioned (the
-  `20260930` shuffle was discarded because its mapping got printed — see below).
-  Take the next unused integer.
+  `20260929` verbatim/lyric-adherence, `20260931` guide-conditioned (built — the
+  GCS/committed package, superseded, *not* the one scored) and `20260932`
+  guide-conditioned (the build that was actually scored — see
+  `docs/music-cover-feasibility.md` §12.4) (the `20260930` shuffle was discarded
+  because its mapping got printed — see below). Take the next unused integer.
 - **Never print the mapping while the round is live.** `prepare_ab_eval.py`'s
   stdout, its `--dry-run` plan and its `--json` all reveal label→variant. Echoing
   any of them into chat, a log the evaluator reads, or

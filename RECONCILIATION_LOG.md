@@ -454,3 +454,29 @@ covers both._
   `graphify-out/cache/` (46 deletions + a new untracked dir).
 - Authority: git history (the file existed at `528f573^`), the test suite, on-disk state;
   no run config or hyperparameter changed; no frozen doc rewritten.
+
+## 2026-09-29 — guide-conditioned round scored/decoded; §12 added
+
+- The user's blind evaluation (`manifests/evaluation_v2_abc_to_qfinal/MY_EVALUATION.txt`)
+  was decoded against `KEYS.txt` and documented as `docs/music-cover-feasibility.md` **§12**
+  (design, scores, verdict, caveats, provenance); the header revision line now names §12.
+- Resolved §11.5's open question: the guided arm `a2` (`qfinal_a0.3`, `cot=full` + v2's
+  `score.abc`) wins both arrangement and pronunciation — the ABC guide is what makes
+  `cot=full` usable. §11.4/§11.5 are left as the dated plan and cross-referenced.
+- `docs/README.md`: the not-a-runbook blurb now names §12.
+- `SOURCE_OF_TRUTH.md`: new row — round outcome, authority
+  `manifests/evaluation_v2_abc_to_qfinal/MY_EVALUATION.txt` (+ `KEYS.txt`).
+- **Provenance corrected mid-pass.** The tracked manifest and the GCS package are a
+  *different shuffle* (`20260931`, `.mp3`, `A=a2, B=ref_v2, C=a0, D=a1`) from the build the
+  listener actually scored (`20260932`, `.wav` working tree, `A=ref_v2, B=a0, C=a1, D=a2`).
+  The sheet's "C is the longest and didn't finish" requires `C=a1` (310.0 s, capped); under
+  `20260931` `C=a0` is 256.8 s, the shortest. Every seed reference in §12 / `SOURCE_OF_TRUTH.md`
+  / `agent_notes/current.md` now says `20260932`, with a §12.4 note; the `ab-blind-eval`
+  seed registry records both. **Open item (user call): the GCS package is stale and the
+  scored build is uncommitted.**
+- **Confirmed against the listener's copy** (`…\Downloads\v2abc_blind\`, `.wav`): byte sizes
+  match the per-arm render logs one-to-one (`ref` 52,208,428 / `a0` 49,313,068 / `a1`
+  59,519,788 / `a2` 54,182,188), so the `20260932` mapping is established mechanically.
+- Reconciler: narrative-only change; no config, hyperparameter, or script touched; no other
+  live doc asserts this round's outcome — **the only "drift" found was the manifest/package
+  mismatch above, now documented, not silently fixed**.

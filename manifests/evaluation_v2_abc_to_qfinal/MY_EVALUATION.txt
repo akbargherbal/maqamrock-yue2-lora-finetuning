@@ -24,81 +24,81 @@ round stays comparable to the verbatim round (§10).
 
 --------------------------------------------------------------------------
 INTRO MUSIC — when do the vocals start? (not bad in itself; observe only)
-	A: ~ ___ sec
-	B: ~ ___ sec
-	C: ~ ___ sec
-	D: ~ ___ sec
+	A: ~ 19 sec
+	B: ~ 14 sec
+	C: ~ 28 sec
+	D: ~ 3 sec
 
 INTRO VERSE VOCAL QUALITY
-	A:
-	B:
-	C:
-	D:
+	A: 4
+	B: 4.5
+	C: 3.5
+	D: 4.5
 
 MAQAM ROCK (arrangement fidelity) — is it a full maqamrock band, or has it drifted
 to a sparse, voice-forward hymn-like ballad?
-	A:
-	B:
-	C:
-	D:
+	A: 4.5
+	B: 3.5
+	C: 3
+	D: 5
 
 ARRANGEMENT DENSITY — 5 = full rock band throughout (drums / guitars / bass
 prominent), 1 = sparse, percussion-led, voice-forward
-	A:
-	B:
-	C:
-	D:
+	A: 4.5
+	B: 4
+	C: 3.5
+	D: 4
 
 OVERALL VOCAL QUALITY
-	A:
-	B:
-	C:
-	D:
+	A: 4
+	B: 4
+	C: 3.5
+	D: 4.5
 
 OVERALL PRONUNCIATION QUALITY
 	(note any tajweed/Quranic-cadence leakage, e.g. a ت with qalqalah, or a letter
 	emphasised the way a reciter would — as you caught in the earlier rounds)
-	A:
-	B:
-	C:
-	D:
+	A: 4
+	B: 4.5
+	C: 5
+	D: 4.5
 
 --------------------------------------------------------------------------
 LYRICS ADHERENCE   — how faithfully the clip sings its own sheet (wording, order,
 completeness)
-	A:
-	B:
-	C:
-	D:
+	A: 5
+	B: 4.5
+	C:  5 (FOR THE PART IT SANG!); BUT IT DID NOT FINISH.
+	D: 5
 
 EXTRA / MISSING REPEATS — did the clip add a repeat the sheet does not have, or drop
 one it does? (the sheet repeats a couplet once by design; say "same as sheet" if it
 matches)
-	A:
-	B:
-	C:
-	D:
+	A: "same as sheet"
+	B: "same as sheet"
+	C: DIDN'T RPEAT; CAUSE IT NEVER FINISHED.
+	D: "same as sheet"
 
 PACE
-	A:
-	B:
-	C:
-	D:
+	A: 4.5
+	B: 4
+	C: 2 (fail cause it didn't finish the song!)
+	D: 5
 
 FREE NOTES — artifacts, mix, arrangement, whether the melody/arrangement resembles
 the guide track, anything that does not fit the sections above:
-	A:
-	B:
-	C:
-	D:
+	A: It's not wow; it's not bad.. but not getting excellent vocals and pronunciation mean it's underwhelming.
+	B: Don't like this level of pronunciation slopiness; like ع is way softer than it should be; it started good but didn't uphold its leve!
+	C: More like Islamic Nasheed; percussion is the only instrument present; with sparse intermittent here and there; feels like poem recitation. (nothing like maqamrock); definitely what we're trying to avoid. Pronunciation is good; and it could be the Quran lora doing its job and dominating; but it could be also pulling the music from away from rock/western feel to its gravitational field of Islmaic nasheed; ends suddenly without even finishing; it's the longest track; yet it didn't even finish the song.
+	D: It's sort of the best; but not wow; cause I wanted more crisp pronunciation.
 
 --------------------------------------------------------------------------
 SUMMARY (fill after scoring, before opening the key)
-	Fullest maqamrock band arrangement (v2-like): ______
-	Best / least Quranic-cadence pronunciation: ______
-	Best-sounding overall: ______
-	Do arrangement and pronunciation land on the SAME clip? (yes -> which; or no): ______
-	Any clip you would reject outright, and why: ______
+	Fullest maqamrock band arrangement (v2-like): D
+	Best / least Quranic-cadence pronunciation: D
+	Best-sounding overall: D
+	Do arrangement and pronunciation land on the SAME clip? (yes -> which; or no): D
+	Any clip you would reject outright, and why: C
 
 If the other seeds are rendered too, duplicate this whole block per seed and label
 the tracks (seed 1029169725, seed 1938238049). Do not carry a label from one seed

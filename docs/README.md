@@ -40,8 +40,10 @@ is an investigation record (2026-09-28 covers/ABC conditioning, α tradeoff, sty
 lever; **2026-09-29 §9** characterises the v2 training set and resolves the outro-repeat as
 a trained convention; **§10** records the verbatim/lyric-adherence blind round — no repeats,
 baseline / baseline+`110 BPM` win; **§11** stages the guide-conditioned batch against
-`qfinal_a0.3`, with the verified bucket inventory and the AR-conflict risk) — hypotheses
-unverified; procedures stay with the runbooks above.
+`qfinal_a0.3`, with the verified bucket inventory and the AR-conflict risk; **§12** scores
+and decodes that round — v2's `score.abc` steers `qfinal_a0.3` into v2's arrangement without
+losing its pronunciation) — §12 is one blind n=1 listen; other hypotheses unverified;
+procedures stay with the runbooks above.
 
 ## Constants (memorize / copy)
 

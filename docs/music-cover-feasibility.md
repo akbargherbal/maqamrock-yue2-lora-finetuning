@@ -1,6 +1,8 @@
 # Music cover / guide-conditioned generation — feasibility
 
-_Last revised: 2026-09-29 (**§11 addendum**: guide-conditioned batch staged for Colab,
+_Last revised: 2026-09-29 (**§12 addendum**: the guide-conditioned round is scored and
+decoded — v2's `score.abc` steers `qfinal_a0.3` into v2's arrangement without losing its
+pronunciation; **§11 addendum**: guide-conditioned batch staged for Colab,
 with the verified bucket inventory; **§10 addendum**: the verbatim/lyric-adherence blind
 round is scored and decoded — no repeats, baseline / baseline+`110 BPM` win; **§9
 addendum**: v2 training set characterised, outro-repeat resolved, ABC/cover batch
@@ -433,3 +435,89 @@ guide did nothing. Blind the arms for a fair call.
 - Driver: `INFERENCE/v2_abc_to_qfinal.sh` (`bash -n` + `--dry-run` checked; `--stage` pulls
   `qfinal_a0.3`).
 - Handoff: `agent_notes/current.md`.
+
+---
+
+## 12. Addendum — 2026-09-29: the guide-conditioned round (scored + decoded)
+
+_§11's hypothesis is now tested by listening: passing **v2's own `score.abc`** (route B1) to
+`qfinal_a0.3` at `cot=full`. Scores:
+`manifests/evaluation_v2_abc_to_qfinal/MY_EVALUATION.txt`; decoder: same dir `KEYS.txt`
+(**blinding seed `20260932`** — see §12.4 for why this is *not* the package on GCS). One
+track, one seed, one listener — a signal, not proof._
+
+### 12.1 Design (decoded)
+
+One track (`01-نسيب…_4148240095`, **Hijaz**), render seed `4148240095`; the four arms share
+style/lyrics/seed and differ only in the adapter and whether a plan was given. Blinded with
+`INFERENCE/prepare_ab_eval.py`; scored blind, then decoded:
+
+| label | arm | adapter | cot / guide |
+|---|---|---|---|
+| A | `ref_v2_cotoff` | v2 | `cot=off` (v2 reference) |
+| B | `a0_cotoff` | qfinal_a0.3 | `cot=off` (qfinal control) |
+| C | `a1_cotfull_noabc` | qfinal_a0.3 | `cot=full`, **no plan** |
+| D | `a2_cotfull_abc` | qfinal_a0.3 | `cot=full` **+ v2's `score.abc`** (the idea) |
+
+### 12.2 Result
+
+| section | A v2 | B a0 | C a1 (no abc) | D a2 (+abc) |
+|---|---:|---:|---:|---:|
+| intro-verse vocal | 4 | 4.5 | 3.5 | 4.5 |
+| maqam rock (arrangement fidelity) | 4.5 | 3.5 | 3 | **5** |
+| arrangement density | 4.5 | 4 | 3.5 | 4 |
+| overall vocal | 4 | 4 | 3.5 | **4.5** |
+| overall pronunciation | 4 | 4.5 | 5\* | 4.5 |
+| lyrics adherence | 5 | 4.5 | 5 (partial) | 5 |
+| pace | 4.5 | 4 | 2 | **5** |
+| vocal start | 19 s | 14 s | 28 s | 3 s |
+| duration (log) | 271.9 s | 256.8 s | 310.0 s (cap) | 282.2 s |
+
+\*C's pronunciation 5 is **reciter / Quranic cadence** — the Quran LoRA dominating, the exact
+leak the section warns about; the listener's summary names **D** the "least Quranic-cadence
+pronunciation", i.e. D is the best *sung* pronunciation and C's 5 is pyrrhic.
+
+- **The idea works: D (`a2`) wins.** Highest arrangement fidelity (5 ≥ v2's 4.5), best pace
+  (5), best overall vocal (4.5), joint-best pronunciation (4.5 > v2's 4.0). **Arrangement
+  and pronunciation land on the same clip — §11.5's hypothesis is supported.**
+- **The decisive pair is D vs C** — both `qfinal_a0.3` `cot=full`, identical except D got
+  v2's `score.abc`. Adding the guide takes arrangement `3 → 5`, pace `2 → 5`, and turns a
+  non-finishing take into a complete one. **The `score.abc` is exactly what rescues
+  `cot=full`.**
+- **`cot=full` without a plan (C) is the failure mode:** sparse, percussion-only, "Islamic
+  Nasheed … feels like poem recitation", 28 s intro, and it **did not finish** — its 310.0 s
+  duration is the `7750`-token auto cap (the truncation warning in `agent_notes/current.md`).
+  v2's plan fits under the cap; the bare-plan one does not.
+- **`cot=off` with qfinal (B)** is the safe baseline (arrangement 3.5, pronunciation 4.5);
+  v2 (A) remains the arrangement reference with the softer pronunciation (4).
+
+### 12.3 Caveats
+
+n=1 track/seed/listener, subjective 1–5; the winner's pronunciation is still "not wow" (the
+listener wanted more crispness), and D's 3 s intro is the shortest of the four (an outlier,
+not judged bad). The verdict is a listening call — there is **no objective arrangement
+metric**; the only mechanical cross-check is that C's non-finish equals the token cap. The
+sheet asks for replication on seeds `1029169725` and `1938238049`.
+
+### 12.4 Provenance
+
+- Scores + sheet: `manifests/evaluation_v2_abc_to_qfinal/MY_EVALUATION.txt`; decoder
+  `manifests/evaluation_v2_abc_to_qfinal/KEYS.txt` (**blinding seed `20260932`** — the
+  build in the working tree / repo record).
+- **Two shuffles exist; the scores match only one.** The GCS package
+  `listening/V2_ABC_TO_QFINAL_INPUT/` (and the copy committed at `HEAD`) is a *different*
+  build — seed `20260931`, `.mp3`, mapping `A=a2, B=ref_v2, C=a0, D=a1`. The listener's
+  sheet cannot come from it: it calls `C` "the longest track; it didn't even finish", and
+  under `20260931` `C` is `a0_cotoff` = 256.8 s, the **shortest** arm (only `a1` is 310.0 s
+  and capped). It matches the seed `20260932` `.wav` build (mapping in §12.1). **The GCS
+  package is stale/unused for this verdict and should be refreshed or removed before it is
+  mistaken for the record; the evaluated build is uncommitted in the working tree.**
+- **Verified mechanically** (2026-09-29): the listener's copy
+  (`…\Downloads\v2abc_blind\`, `.wav`) has byte sizes matching the per-arm render logs
+  one-to-one — `ref_v2_cotoff` 52,208,428 B, `a0_cotoff` 49,313,068 B, `a1_cotfull_noabc`
+  59,519,788 B, `a2_cotfull_abc` 54,182,188 B. No label inference left in the decode.
+- Render dir `/content/audiocpp_inference/out/v2_abc_to_qfinal_seed4148240095/` (durations
+  from the per-arm logs; all `truncated 0`, 48 kHz stereo). Phase-1 `score.abc` (3275 B,
+  sha256 `b08427f1…`) fed `a2`.
+- Driver `INFERENCE/v2_abc_to_qfinal.sh`; packaging `INFERENCE/prepare_ab_eval.py`.
+- Session notes: `agent_notes/current.md`.
