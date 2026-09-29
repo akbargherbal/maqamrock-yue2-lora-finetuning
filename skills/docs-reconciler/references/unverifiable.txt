@@ -150,3 +150,26 @@ docs/music-cover-feasibility.md :: Quick_Guide.md
 
 # git flag (external tool), not a repo CLI flag
 docs/COMMAND_HANDOVER_GOTCHAS.md :: --branch
+
+# --bind is a python3 -m http.server (stdlib) flag quoted in the tunnel gotcha;
+# not repo code. Same doc as --branch above.
+docs/COMMAND_HANDOVER_GOTCHAS.md :: --bind
+
+# GCS bucket objects described by the reorganisation plan. The doc describes the
+# BUCKET, not the repo, so these are not repo paths. Reviewed one-by-one 2026-09-29
+# against each line: README.txt/LAYOUT.json are <base>/ and
+# <base>/audiocpp_inference/ objects, RETIRED.txt is a proposed _legacy/ object,
+# and WHERE_ARE_THE_KURD_WAVS.txt is the existing GCS breadcrumb.
+docs/GCP_ORGANIZATION_PLAN.md :: README.txt
+docs/GCP_ORGANIZATION_PLAN.md :: LAYOUT.json
+docs/GCP_ORGANIZATION_PLAN.md :: RETIRED.txt
+docs/GCP_ORGANIZATION_PLAN.md :: WHERE_ARE_THE_KURD_WAVS.txt
+
+# a tool the plan PROPOSES (plan item 13) and has deliberately not written yet
+docs/GCP_ORGANIZATION_PLAN.md :: INFERENCE/gcs_layout.py
+# same GCS object, but cited as a full path / with a literal ellipsis
+docs/GCP_ORGANIZATION_PLAN.md :: audiocpp_inference/WHERE_ARE_THE_KURD_WAVS.txt
+docs/GCP_ORGANIZATION_PLAN.md :: .../LAYOUT.json
+# `<base>`-relative GCS object names: the extractor strips the "<base>/" prefix and
+# then reports the bare filename as a missing repo path. Same class as above.
+SOURCE_OF_TRUTH.md :: LAYOUT.json

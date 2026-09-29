@@ -73,7 +73,7 @@ Read-only (`gsutil -m du -s`, `gsutil ls -r`), taken 2026-09-29T08:42Z:
 
 | prefix | size | objects | note |
 |---|---:|---:|---|
-| `quran_long_aya_dataset/` | **30.1 GB** | **162,746** | **93% of all objects** |
+| `quran_long_aya_dataset/` | **30.1 GB** | **162,746** | **90.7% of all objects** |
 | `audiocpp_inference/` | 9.41 GB | 1,561 | workspace + pinned tooling, mixed |
 | `archive/` | 4.26 GB | 117 | legacy |
 | `akbar_arabic_rock_lora/` | 1.75 GB | 150 | the v2 training run |
@@ -93,7 +93,7 @@ Read-only (`gsutil -m du -s`, `gsutil ls -r`), taken 2026-09-29T08:42Z:
 | `akbar_arabic_rock_lora_smoketest_archived/` | 17 MB | 13 | legacy |
 | **total** | **≈52 GB** | **≈178,000** | |
 
-**The decisive number:** `quran_long_aya_dataset/` alone is 93% of the objects. Migrating it means
+**The decisive number:** `quran_long_aya_dataset/` alone is 90.7% of the objects. Migrating it means
 a 30 GB copy *plus* a 162,746-object integrity check — a long listing on both sides, a real
 interruption risk, and non-trivial GCS operation cost — all to buy a path rename. **Excluding it,
 everything else is ≈22 GB / ≈15,000 objects**, which migrates in minutes. That is the whole basis
@@ -263,7 +263,7 @@ is safe to prune** (nothing there is precious — if it were, it belongs in `run
 
 ## 9. Decisions — settled 2026-09-29 (no longer open)
 
-1. **`quran_long_aya_dataset/` — FROZEN, not migrated.** 162,746 objects / 30.1 GB = 93% of the
+1. **`quran_long_aya_dataset/` — FROZEN, not migrated.** 162,746 objects / 30.1 GB = 90.7% of the
    prefix. It is *documented* instead (`<prefix>/README.txt`, `LAYOUT.json`), which fixes
    "I can't find it" without a 30 GB copy and a 162,746-object verification.
 2. **`backup_to_gcp.py` — MAY change its write paths.** Done: `INFERENCE_TARGETS` now writes

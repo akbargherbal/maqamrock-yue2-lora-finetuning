@@ -308,3 +308,52 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   block (branch, `setup.sh --inference`, the `generate.py` + `test_batch.sh` detached
   commands with stop/resume) so `@agent_notes/current.md` alone primes the next
   session. Reconciler: 6 flagged (same pre-existing fixture) — 0 new drift.
+
+## 2026-09-29 — GCS `audiocpp_inference/` reorganisation: doc consequences + drift pass
+
+_Belated: the reorganisation itself landed in `d46c8c6` without a log entry. This pass
+covers both._
+
+- **The change.** `tools/` (pinned: `build/`, `converter/`, `prompts/`,
+  `scripts/`), `workspace/` (`out/`, `out_archive/`), `evals/` (8 sweep dirs).
+  **Local paths unchanged** — only the remote subfolder moved. Data copied, never
+  moved; verified 14/14 MATCH on object count + bytes + CRC32C multiset.
+- `docs/BACKUP_RESTORE.md`: inference target table → `workspace/out`,
+  `tools/{prompts,scripts}`; added a sectioned-layout paragraph. Authority:
+  `backup_to_gcp.py` `INFERENCE_TARGETS`.
+- `docs/INFERENCE.md`: 5 GCS path citations → `tools/…`. Authority: same constant +
+  `bootstrap/setup.sh`.
+- `docs/audiocpp_gpu_arch_builds.md`: staging convention → `tools/build/`; **rewrote the
+  stale Note** that said `setup.sh` "pulls only that flat path" (it now probes
+  `tools/build/` and falls back) and added "stage new builds to `tools/build/`",
+  otherwise a fresh build lands where `setup.sh` no longer looks.
+- `skills/inference-batch-run/SKILL.md`, `docs/PRON_LORA_MERGE.md`,
+  `docs/LORA_INVENTORY.md` (×2, incl. the `pron_ckpt_sweep` provenance pointer),
+  `results/pron_knob_probe/T4_REGEN.md`,
+  `results/pron_production_merge/regenerate.sh`: GCS paths → `tools/` / `evals/`.
+- **The verifier could not have caught any of those**: it tests existence, and the old
+  paths still exist by design (they are the rollback), so every stale citation passed
+  as clean. Found by a semantic sweep, not by the scripts.
+- **`docs/README.md` + `SOURCE_OF_TRUTH.md`**: added the missing index row for
+  `GCP_ORGANIZATION_PLAN.md` (the index's own rule is "must list every live runbook")
+  and a source-of-truth row for prefix organisation; corrected the constants row that
+  the reorganisation itself had made stale.
+- **Claim corrected, not invented.** The plan/GCS `README.txt`/`LAYOUT.json` said
+  `quran_long_aya_dataset/` was "93% of all objects" — an estimate. The new inventory
+  measures it: **162,746 of 179,493 = 90.7%** (bytes 30,111,258,977, confirmed
+  exactly). All four occurrences corrected, on the bucket too. New artifact
+  `results/gcs_inventory_20260929.txt` (179,493 objects / 64.8 GB total), closing the
+  dangling reference the plan had promised.
+- `skills/docs-reconciler/references/unverifiable.txt`: doc-scoped curation for GCS
+  bucket objects read as repo paths (`docs/GCP_ORGANIZATION_PLAN.md ::`
+  `README.txt`/`LAYOUT.json`/`RETIRED.txt`/`WHERE_ARE_THE_KURD_WAVS.txt`/`.../LAYOUT.json`,
+  the proposed `INFERENCE/gcs_layout.py`, and `SOURCE_OF_TRUTH.md :: LAYOUT.json` —
+  the extractor strips `<base>/` and then reports the bare filename), plus
+  `docs/COMMAND_HANDOVER_GOTCHAS.md :: --bind` (a stdlib `http.server` flag).
+- Reconciler: 2009 claims / 47 docs, 1252 checkable, **6 flagged (0.5%)** — exactly the
+  pre-existing `manifests/workspace_manifest.json` fixture — **0 new drift**.
+- **Deliberately not touched:** `docs/IMPROVEMENTS.md` (frozen) and
+  `INFERENCE/yue2_eval_heldout/heldout_eval_report.md` (a dated 2026-09-22 record; it
+  cites the then-current flat prompt path, which is history, not a live instruction).
+- Authority: verified GCS state (copy + CRC32C verification, `gsutil` listings) and
+  `backup_to_gcp.py` / `bootstrap/setup.sh`; no run config or hyperparameter changed.

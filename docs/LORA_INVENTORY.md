@@ -21,7 +21,7 @@ is out of scope and archived (see the end of this file).
 ```
 
 Sweep/prototype adapters are **not** here — they stay under their round's prefix and
-are clearly non-canonical (`audiocpp_inference/…_sweep/`, `pron_*_sweep/`, etc.).
+are clearly non-canonical (`audiocpp_inference/evals/…_sweep/`, `pron_*_sweep/`, etc.).
 Local paths under `/content/` are ephemeral and re-staged by `bootstrap/setup.sh`
 each VM.
 
@@ -122,7 +122,7 @@ is **not** pinned in `loras/source/`; it lives in its run prefix
 
 | Config | pron ckpt | α | converted AR sha256 | Where |
 |---|---|---:|---|---|
-| `c1525_a0.5` | 1525 | 0.5 | `3324b63706a3a58ea89159250850a3bcab1fbcb851abcaffb7ae0d9d260f534c` | `audiocpp_inference/pron_ckpt_sweep/` |
+| `c1525_a0.5` | 1525 | 0.5 | `3324b63706a3a58ea89159250850a3bcab1fbcb851abcaffb7ae0d9d260f534c` | `audiocpp_inference/evals/pron_ckpt_sweep/` |
 
 (`t08`/`t10` temperature rounds reuse library configs — no new adapters.)
 

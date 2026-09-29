@@ -11,6 +11,7 @@ operating contract is `../AGENTS.md`.
 | Get training running on a fresh Colab VM | [START.md](START.md) |
 | Stop for the night and resume next session | [PAUSE_RESUME.md](PAUSE_RESUME.md) |
 | GCS mirror layout, verify a backup, restore from it | [BACKUP_RESTORE.md](BACKUP_RESTORE.md) |
+| GCS prefix organisation: sections, the frozen dataset, migration state | [GCP_ORGANIZATION_PLAN.md](GCP_ORGANIZATION_PLAN.md) |
 | Check how training is going | [MONITOR.md](MONITOR.md) |
 | Decide L4 vs A100 (cost/time) | [GPU_L4_VS_A100.md](GPU_L4_VS_A100.md) |
 | Finish a run: final backup + push checklist | [FINAL_BACKUP.md](FINAL_BACKUP.md) |
@@ -56,7 +57,7 @@ with the runbooks above.
 | LoRA library | `<GCS base>/loras/` (see [LORA_INVENTORY.md](LORA_INVENTORY.md)) |
 | Listening packages | `<GCS base>/listening/<PACKAGE>_INPUT/` (audio; not in the repo) |
 | Secrets/env | `/root/.secrets.env` (exports `HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_BACKUP_BASE`) |
-| Inference workspace | `/content/audiocpp_inference/` (GCS `<base>/audiocpp_inference/`) |
+| Inference workspace | `/content/audiocpp_inference/` (GCS `<base>/audiocpp_inference/`, sectioned `tools/` `workspace/` `evals/`) |
 | Inference output | `/content/audiocpp_inference/out/` (`_runs_status.log`, `*_time.txt`, `*.json`) |
 | Inference prompts | `/content/audiocpp_inference/prompts/<Maqam>_{style,lyrics}.txt` |
 | Converted LoRA | `/content/converter/out/akbar_arabic_rock_lora_{ar,nar}.safetensors` |

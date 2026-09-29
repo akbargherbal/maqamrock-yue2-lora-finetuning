@@ -38,7 +38,7 @@ integer to override. `generate.py` batches accept `--out-dir` to resume a run an
   mirror. The repo copy is what runs.
 - The bootstrap stages the sm_75 / T4 build. On an L4 (or another arch) stage the
   prebuilt per-arch object from GCS (e.g.
-  `$GCP_BACKUP_BASE/audiocpp_inference/build/sm89-l4/audiocpp_cli`) — a source
+  `$GCP_BACKUP_BASE/audiocpp_inference/tools/build/sm89-l4/audiocpp_cli`) — a source
   build is not required (`docs/audiocpp_gpu_arch_builds.md`).
 - `run_one.sh` needs GNU `time` (`/usr/bin/time`); bootstrap installs it.
 - Outputs land per-run under `out/`; `out/latest` points at the newest batch.

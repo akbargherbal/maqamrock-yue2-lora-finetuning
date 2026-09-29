@@ -3,7 +3,7 @@
 Task 15. How to combine the frozen v2 style adapter and the AR-only pronunciation
 adapter into one fused LoRA, and the exact scaling convention this depends on.
 Tool: `merge_pron_lora.py` (repo root). Converter: `converter/convert_aitoolkit_yue2_lora.py`
-(canonical copy lives in GCS `audiocpp_inference/converter/`; locally
+(canonical copy lives in GCS `audiocpp_inference/tools/converter/`; locally
 `/content/converter/out/`). CPU-only.
 
 ## Why a file merge, not a runtime flag

@@ -9,6 +9,7 @@ History files are authoritative for what happened, never for what is true now.
 | Start / pause / resume training | `docs/START.md`, `docs/PAUSE_RESUME.md` | |
 | Run metrics & liveness | `loss_log.db` via `monitor_loss.py` | files, not prose |
 | Backup layout / restore | `docs/BACKUP_RESTORE.md` + `backup_to_gcp.py --help` | script flags beat prose |
+| GCS prefix organisation (sections, frozen dataset, migration state) | `docs/GCP_ORGANIZATION_PLAN.md` + the on-bucket `<base>/LAYOUT.json` | the plan is authority for *intent*; the bucket is the fact. `quran_long_aya_dataset/` frozen 2026-09-29 |
 | Inference procedure / provenance | `docs/INFERENCE.md` | repo `INFERENCE/` scripts are canonical |
 | Pron LoRA training | `docs/PRON_LORA.md` | runbook; opt-in via `GCP_PRON_DATASET_PATH` |
 | Long-aya Quran LoRA (run / resume) | `docs/PRON_LORA_LONG.md` | canonical hub; active run `quran_long_aya_r8_s10`, full set reserved |

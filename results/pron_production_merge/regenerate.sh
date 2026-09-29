@@ -57,7 +57,7 @@ fetch "$BASE/pron_lora_ar_only_r8/output/pron_lora_ar_only_r8_000003050.safetens
 
 if [ ! -f "$CONVERTER" ]; then
   echo "[FAIL] converter not found: $CONVERTER" >&2
-  echo "       fetch it: gcloud storage cp $BASE/audiocpp_inference/converter/convert_aitoolkit_yue2_lora.py $CONVERTER" >&2
+  echo "       fetch it: gcloud storage cp $BASE/audiocpp_inference/tools/converter/convert_aitoolkit_yue2_lora.py $CONVERTER" >&2
   exit 1
 fi
 
