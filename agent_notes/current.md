@@ -457,5 +457,30 @@ done
 > which arm you are hearing, which destroys the point of the round. Use this sync to watch progress
 > only; **score from §6.1's blind package**, whose files are `nesib_4148240095_A.mp3 … _E.mp3`.
 
+### 6.3 `*_gpu.csv` now has a header (fixed 2026-09-29)
+
+`run_one.sh` wrote its 1 Hz `nvidia-smi` CSV with `--format=csv,noheader,nounits`, so the column
+meaning was recorded nowhere. Fixed at the writer; this round's files were backfilled
+(header-only). Columns, in order:
+
+```
+gpu_util_pct,mem_used_mib,power_draw_w,temp_c
+```
+
+**Anything parsing it must skip row 1** — `pron_knob_probe.sh`'s `_gpu_stats` now does so
+explicitly. If an older headerless file turns up, this helper is idempotent:
+
+```bash
+# terminal: foreground, instant; re-runnable (skips files that already have the header)
+bash /tmp/opencode/add_gpu_csv_header.sh /content/audiocpp_inference/out
+```
+
+`/tmp/opencode/` does **not** survive a VM reset — the content is reproducible from the message
+of commit `34d84cc`.
+
+**Gap, not fixed:** `screen_arms.sh` runs the binary directly rather than through `run_one.sh`,
+so the 16 screened arms wrote `_time.txt` + `.log` but **no `_gpu.csv`** — the screen has no GPU
+telemetry. Wiring in the sampler needs a real GPU run to test, and the GPU is busy with the render.
+
 
 

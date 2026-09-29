@@ -357,3 +357,29 @@ covers both._
   cites the then-current flat prompt path, which is history, not a live instruction).
 - Authority: verified GCS state (copy + CRC32C verification, `gsutil` listings) and
   `backup_to_gcp.py` / `bootstrap/setup.sh`; no run config or hyperparameter changed.
+
+## 2026-09-29 — `*_gpu.csv` had no header (`run_one.sh`)
+
+- `INFERENCE/run_one.sh`: the per-track 1 Hz `nvidia-smi` CSV was written with
+  `--format=csv,noheader,nounits`, so the column meaning existed only in the query
+  argument string (and units only in the query's field names, which never reach the
+  file). Now writes a header row first; the docstring names the columns and units.
+- `INFERENCE/pron_knob_probe.sh` (`_gpu_stats`, the only code reader): it skipped a
+  header row only *by accident* (`float()` raised and the row was dropped). Now skips
+  it explicitly.
+- `docs/INFERENCE.md`: the artifact table named no columns; it now lists
+  `gpu_util_pct,mem_used_mib,power_draw_w,temp_c`.
+- Names mirror `gpu_logger.py`'s `FIELDS` rather than inventing a second convention.
+  That logger **already** wrote a header, and its reader
+  (`TRAINING_ANALYSIS/generate_plots.py`, `csv.DictReader`) *requires* one — so the two
+  writers disagreed and only the inference side was wrong.
+- Existing files backfilled, header-only (4 files, 0 skipped). Safe on a file being
+  appended to: the sampler's `>> "$csv"` sits inside its loop body, so it reopens the
+  path every second; verified live on an in-flight file (89 → 94 lines across the swap).
+- **Noted, not fixed:** `screen_arms.sh` runs the binary directly instead of via
+  `run_one.sh`, so the 16 screened arms wrote `_time.txt` + `.log` but **no `gpu.csv`** —
+  the screen has no GPU telemetry at all.
+- Reconciler: 1252 checkable, **6 flagged** (the pre-existing
+  `manifests/workspace_manifest.json` fixture) — **0 new drift**.
+- Authority: the writer's own `nvidia-smi` query plus `gpu_logger.py`'s `FIELDS`; no run
+  config or hyperparameter changed.
