@@ -480,3 +480,12 @@ covers both._
 - Reconciler: narrative-only change; no config, hyperparameter, or script touched; no other
   live doc asserts this round's outcome — **the only "drift" found was the manifest/package
   mismatch above, now documented, not silently fixed**.
+
+## 2026-09-29 — §12 follow-up: stale "unrun" claims in `music-cover-feasibility.md`
+
+- Post-commit re-read found **5 pre-§12 sentences now false** (§13–14 blurb, §5 "Unverified",
+  §9.6 Q1 "Unrun", §10 intro + §10.2 "Q1 (ABC) remains unrun"). Fixed with forward
+  cross-references to §12 (dated snapshots not rewritten — repo convention); also pointed
+  §11.5 "what would settle it" forward and annotated the §11.1 "not stored (B1)" row.
+- Authority: §12's own result (the B1 guide ran and held). Narrative-only; no config,
+  hyperparameter, or script touched — **0 new drift**.

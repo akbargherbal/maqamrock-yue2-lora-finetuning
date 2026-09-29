@@ -11,7 +11,7 @@ re-scoped). Earlier,
 audio.cpp rebuild; binary capability verified). Investigation & discussion record — **not a
 runbook**.
 The transcription front end (route B2) has been smoke-tested and works; the **ABC**
-generation experiments remain unrun — hypotheses are marked as such.
+generation experiment (route B1) has since run and holds — see §12.
 Authority for procedures stays with `docs/INFERENCE.md`, `docs/PRON_LORA_MERGE.md`,
 `docs/LORA_INVENTORY.md`, and `config/akbar_arabic_rock_lora.yml`._
 
@@ -143,7 +143,8 @@ this path calls the binary directly (the hardcoded `cot=off` at `run_one.sh:79` 
 otherwise conflict).
 
 Hypothesis: forcing the melody+chords of the richer v2 full-mode plan into the AR stage
-should suppress the pron-induced sparsity. **Unverified.**
+should suppress the pron-induced sparsity. **Supported 2026-09-29 — see §12** (route B1;
+the guide raised arrangement fidelity without losing pronunciation).
 
 ## 6. Note on Suno descriptors and lyrics (user observation, 2026-09-28)
 
@@ -290,7 +291,7 @@ Proposed guide = `01-نسيب-وظعن-الحي-ونخيل-يامن-وعرائس
 ### 9.6 Open questions for the next session
 
 1. Does ABC (`cot=melody|full`) help or hurt (a) lyric adherence, (b) v2 arrangement
-   fidelity? **Unrun.**
+   fidelity? **Answered §12 (route B1): arrangement fidelity rose, adherence held at 5/5.**
 2. Does the **descriptor-tag** mismatch (bare tags in training vs descriptor tags at
    inference) explain the extra repeat? Test: same track, bare-tag vs descriptor sheet.
    **§10: no extra repeat was observed in any arm — not implicated on this track.**
@@ -310,7 +311,8 @@ Proposed guide = `01-نسيب-وظعن-الحي-ونخيل-يامن-وعرائس
 
 ## 10. Addendum — 2026-09-29: the verbatim / lyric-adherence blind round (scored)
 
-_The §9.6 repeat questions (Q2, Q4) are answered here by listening; Q1 (ABC) stays unrun.
+_The §9.6 repeat questions (Q2, Q4) are answered here by listening; Q1 (ABC) is answered in
+§12 (route B1).
 Scores: `manifests/evaluation_verbatim_hijaz/MY_EVALUATION.txt`; decoder: same dir
 `KEYS.txt` (the earlier build's `KEY.json` was deleted 2026-09-29). The audio package
 lives on GCS (`listening/VERBATIM_HIJAZ_LYRIC_ADHERENCE_INPUT/`). One track, one seed, one
@@ -354,7 +356,8 @@ sheet, so a difference is attributable to that change. Blinded + shuffled with
   counts (5/5) and none truncated — an injected repeat lengthens the plan, and the guide's
   natural plan (7743) sits 7 frames under the 7750 cap. Ears and length agree.
 - **§9.6 Q2** (descriptor-tag mismatch → extra repeat): no extra repeat anywhere, so it is
-  not implicated here. **Q1 (ABC) remains unrun** — every arm in this round was `cot=off`.
+  not implicated here. **Q1 (ABC) remained unrun here** — every arm in this round was
+  `cot=off`; §12 later runs it (route B1).
 
 ### 10.3 Caveats
 
@@ -394,7 +397,7 @@ Commands + verified paths: `agent_notes/current.md`; driver:
 | guide WAV | `…/workspace/out/batch_36_songs/01-نسيب…_4148240095.wav` | B2 source / reference |
 | today's 5 arms | `…/workspace/out/verbatim_hijaz_seed4148240095/*.wav` | re-listenable |
 | pinned tooling | `audiocpp_inference/tools/{build,converter,prompts,scripts}` | |
-| **not stored** | v2's own `cot=full` `score.abc` (B1) | phase 1 generates it on Colab |
+| **not stored** | v2's own `cot=full` `score.abc` (B1) | phase 1 generates it on Colab — generated 2026-09-29 (§12.4) |
 
 ### 11.2 Guide options
 
@@ -428,6 +431,9 @@ is listening/blind.
 Listen `a0` vs `a2`: if `a2` keeps v2's arrangement but pronounces like v2, the AR-override
 conflict is real and only the prefix route (blocked) can thread it; if `a2` ≈ `a0`, the
 guide did nothing. Blind the arms for a fair call.
+
+**Settled 2026-09-29 — §12:** `a2` kept v2's arrangement and pronounced *better* than v2, so
+the guide does **not** simply revert pronunciation; the blocked prefix route was not needed.
 
 ### 11.6 Provenance
 
