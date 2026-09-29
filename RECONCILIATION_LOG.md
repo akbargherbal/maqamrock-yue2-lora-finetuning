@@ -411,3 +411,16 @@ covers both._
   decoder; the mapping lives in `KEYS.txt` and in git history at `6443287`.
 - Reconciler: narrative-only change; no config, hyperparameter, or script touched, and no
   other live doc asserts this round's outcome — **0 new drift**.
+
+## 2026-09-29 — guide-conditioned batch staged; §11 added
+
+- New driver `INFERENCE/v2_abc_to_qfinal.sh` — four arms (qfinal `cot=off`; qfinal
+  `cot=full` no-abc; qfinal `cot=full` + `abc_file` = v2's exported `score.abc`; v2
+  `cot=off`), plus a `--stage` mode that pulls `qfinal_a0.3`. `bash -n` + `--dry-run`
+  checked. **Not run** — needs a Colab GPU (this box is localhost).
+- `docs/music-cover-feasibility.md` **§11**: verified bucket inventory (read-only
+  `gsutil ls`), the guide-route options table, the three risks, and what would settle it;
+  header revision line updated. `docs/README.md` blurb names §11.
+- `agent_notes/current.md` rewritten as the Colab handoff (verified paths + commands).
+- Reconciler: bucket access was read-only (no writes); no config, hyperparameter, or
+  training artifact changed; no other live doc asserts the batch exists — **0 new drift**.

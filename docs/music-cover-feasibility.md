@@ -1,8 +1,10 @@
 # Music cover / guide-conditioned generation — feasibility
 
-_Last revised: 2026-09-29 (**§10 addendum**: the verbatim/lyric-adherence blind round is
-scored and decoded — no repeats, baseline / baseline+`110 BPM` win; **§9 addendum**: v2
-training set characterised, outro-repeat resolved, ABC/cover batch re-scoped). Earlier,
+_Last revised: 2026-09-29 (**§11 addendum**: guide-conditioned batch staged for Colab,
+with the verified bucket inventory; **§10 addendum**: the verbatim/lyric-adherence blind
+round is scored and decoded — no repeats, baseline / baseline+`110 BPM` win; **§9
+addendum**: v2 training set characterised, outro-repeat resolved, ABC/cover batch
+re-scoped). Earlier,
 2026-09-28: route corrected to transcribe with the **official Python SheetSage2** (no
 audio.cpp rebuild; binary capability verified). Investigation & discussion record — **not a
 runbook**.
@@ -368,3 +370,66 @@ adapter.
 - Render run dir: `out/verbatim_hijaz_seed4148240095` (5/5 durations matched the screen);
   round uploaded in commit `6443287`.
 - Session notes + knob tables: `agent_notes/current.md`.
+
+---
+
+## 11. Addendum — 2026-09-29: guide-conditioned batch, staged for Colab
+
+_The feasibility question — "can v2's plan guide `qfinal_a0.3` into v2's maqamrock
+arrangement while keeping its pronunciation?" — is now a runnable batch. This is the
+durable state: what exists, the guide choices, the risks, and what the run would settle.
+Commands + verified paths: `agent_notes/current.md`; driver:
+`INFERENCE/v2_abc_to_qfinal.sh`._
+
+### 11.1 Verified inventory (bucket read-only, `gsutil ls`, 2026-09-29)
+
+| asset | bucket path (under `…/OSTRIS_Arabic_Suno_Finetuning/`) | note |
+|---|---|---|
+| candidate adapter | `loras/audio_cpp/pron/qfinal_a0.3/akbar_arabic_rock_lora_{ar,nar}.safetensors` | AR rank 40 |
+| v2 style pair | `loras/audio_cpp/style/…` | staged by `setup.sh` |
+| guide ABC (B2) | `audiocpp_inference/workspace/out/abc_v2/01-نسيب…_4148240095/score.abc` | + `chords.mid`, `melody_vocal.mid`, `tokens.json` |
+| 11 more v2 ABCs | `…/workspace/out/abc_v2/` | 12 dirs total |
+| guide WAV | `…/workspace/out/batch_36_songs/01-نسيب…_4148240095.wav` | B2 source / reference |
+| today's 5 arms | `…/workspace/out/verbatim_hijaz_seed4148240095/*.wav` | re-listenable |
+| pinned tooling | `audiocpp_inference/tools/{build,converter,prompts,scripts}` | |
+| **not stored** | v2's own `cot=full` `score.abc` (B1) | phase 1 generates it on Colab |
+
+### 11.2 Guide options
+
+| guide | route | what it carries | availability |
+|---|---|---|---|
+| SheetSage2 ABC | B2 (`abc_v2/…/score.abc`) | melody (+ `chords.mid` sidecar); `melody_only=True` | present now |
+| v2's own `score.abc` | B1 (`cot=full --out-dir`) | v2's *full-mode* plan, melody + chords | generate on Colab |
+| v2 `cot=off` semantic plan | `semantic_prefix[_file]` | the **exact** plan of the liked render | **blocked** — binary < v0.8.2 |
+
+### 11.3 The three risks (unchanged from §3)
+
+1. **AR conflict** — the pron fix lives in the AR stream; any guide overrides it.
+2. **Off-distribution** — adapters trained `cot=off`; `abc_file` forces `cot=melody|full`
+   (a `cot`-only arm is required to separate the effects).
+3. **Melody ≠ arrangement** — the stored ABCs are melody-only; only B1 (`score.abc`) or
+   `semantic_prefix` carry chords/plan.
+
+Plus two practicals: the guide must match the prompt's maqam (Hijaz ABC + Hijaz prompt, not
+the Ajam "winning" prompt); and there is **no objective arrangement metric** — the verdict
+is listening/blind.
+
+### 11.4 The batch (four arms, one track/seed)
+
+`INFERENCE/v2_abc_to_qfinal.sh` — phase 1 exports v2's `score.abc`; phase 2 renders
+`a0_cotoff` (qfinal control), `a1_cotfull_noabc` (cot-only), `a2_cotfull_abc` (the idea),
+`ref_v2_cotoff` (v2 reference), all at the same style/lyrics/seed. Set
+`ABC_SCORE=<abc_v2 score.abc>` to use B2 and skip phase 1. ~35 min on a T4.
+
+### 11.5 What would settle it
+
+Listen `a0` vs `a2`: if `a2` keeps v2's arrangement but pronounces like v2, the AR-override
+conflict is real and only the prefix route (blocked) can thread it; if `a2` ≈ `a0`, the
+guide did nothing. Blind the arms for a fair call.
+
+### 11.6 Provenance
+
+- Bucket listing: read-only `gsutil ls`, 2026-09-29.
+- Driver: `INFERENCE/v2_abc_to_qfinal.sh` (`bash -n` + `--dry-run` checked; `--stage` pulls
+  `qfinal_a0.3`).
+- Handoff: `agent_notes/current.md`.

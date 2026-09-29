@@ -39,8 +39,9 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 is an investigation record (2026-09-28 covers/ABC conditioning, α tradeoff, style-text
 lever; **2026-09-29 §9** characterises the v2 training set and resolves the outro-repeat as
 a trained convention; **§10** records the verbatim/lyric-adherence blind round — no repeats,
-baseline / baseline+`110 BPM` win, ABC arms unrun) — hypotheses unverified; procedures stay
-with the runbooks above.
+baseline / baseline+`110 BPM` win; **§11** stages the guide-conditioned batch against
+`qfinal_a0.3`, with the verified bucket inventory and the AR-conflict risk) — hypotheses
+unverified; procedures stay with the runbooks above.
 
 ## Constants (memorize / copy)
 
