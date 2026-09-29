@@ -22,21 +22,60 @@ stereo; `truncated 0` in every log):
   reports `truncated 0` — flag it if it sounds cut off.
 - Binary sha256 `7ad69d1c…` (sm_75 / T4).
 
-## 1. Listen blind
+## 1. Listen blind — the two prefixes are different
 
-- **Audio (GCS):** `listening/V2_ABC_TO_QFINAL_INPUT/` — `EVAL.txt`,
-  `KEY_open_after_listening.txt`, `nesib_4148240095_{A,B,C,D}.mp3`.
-- **Repo (text only):** `manifests/evaluation_v2_abc_to_qfinal/` — `EVAL.txt`, `KEYS.txt`
-  (secret), `MY_EVALUATION.txt` (the sheet to fill).
-- **Seed `20260931`.** Do **not** open the key until every section is scored. (The
-  `20260930` shuffle was discarded after its mapping got printed — the lesson is now in
-  `skills/ab-blind-eval/SKILL.md`.)
+| what | GCS prefix | contents |
+|---|---|---|
+| **blinded package** (what you want) | `listening/V2_ABC_TO_QFINAL_INPUT/` | `EVAL.txt`, `KEY_open_after_listening.txt`, `nesib_4148240095_{A,B,C,D}.mp3` |
+| raw render (not needed to listen) | `audiocpp_inference/workspace/out/v2_abc_to_qfinal_seed4148240095/` | 4 WAVs + logs + `score.abc` |
 
-Pull the package to the local machine:
+Repo text (committed, no audio): `manifests/evaluation_v2_abc_to_qfinal/` — `EVAL.txt`,
+`KEYS.txt` (secret decoder), `MY_EVALUATION.txt` (the sheet to fill).
 
-```bash
-gsutil -m rsync -r 'gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/listening/V2_ABC_TO_QFINAL_INPUT' ./v2abc_blind
+**Seed `20260931`.** Do **not** open the key until every section is scored. (The `20260930`
+shuffle was discarded after its mapping got printed — lesson now in
+`skills/ab-blind-eval/SKILL.md`.)
+
+### Pull the blind package (Powershell)
+
+```powershell
+cd $HOME\Downloads
+gsutil -m rsync -r 'gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/listening/V2_ABC_TO_QFINAL_INPUT' .\v2abc_blind
+dir .\v2abc_blind
 ```
+
+### Get the score sheet into your local clone (Powershell)
+
+```powershell
+cd C:\Users\DELL\Jupyter_Notebooks\maqamrock-yue2-lora-finetuning
+git pull origin music-cover
+```
+
+Sheet to fill: `manifests\evaluation_v2_abc_to_qfinal\MY_EVALUATION.txt`.
+
+### Regenerate it locally (optional — only if you want your own shuffle)
+
+`prepare_ab_eval.py` needs `<root>/<variant>/<track>.<ext>`, so stage the four raw WAVs into
+variant folders and pass a **fresh** seed (the committed `KEYS.txt` already owns
+`20260931`). Powershell:
+
+```powershell
+$repo = "C:\Users\DELL\Jupyter_Notebooks\maqamrock-yue2-lora-finetuning"
+$src  = "$HOME\Downloads\v2abc_tracks"
+$root = "$HOME\Downloads\v2abc_root"
+"a0_cotoff","a1_cotfull_noabc","a2_cotfull_abc","ref_v2_cotoff" | % { New-Item -ItemType Directory -Force -Path "$root\$_" | Out-Null }
+Copy-Item "$src\a0_cotoff_hijaz_win_4148240095.wav"        "$root\a0_cotoff\nesib_4148240095.wav"
+Copy-Item "$src\a1_cotfull_noabc_hijaz_win_4148240095.wav" "$root\a1_cotfull_noabc\nesib_4148240095.wav"
+Copy-Item "$src\a2_cotfull_abc_hijaz_win_4148240095.wav"   "$root\a2_cotfull_abc\nesib_4148240095.wav"
+Copy-Item "$src\ref_v2_cotoff_hijaz_win_4148240095.wav"    "$root\ref_v2_cotoff\nesib_4148240095.wav"
+python "$repo\INFERENCE\prepare_ab_eval.py" --root "$root" --output "$HOME\Downloads\v2abc_blind" `
+  --variants a0_cotoff a1_cotfull_noabc a2_cotfull_abc ref_v2_cotoff `
+  --seed 20260932 --audio-format copy   # `--audio-format mp3 --bitrate 192k` needs ffmpeg
+```
+
+The tool prints the label→variant map on stdout — that **is** the decoder; don't read it
+before scoring (redirect to a file to stay blind). `--audio-format copy` avoids needing
+ffmpeg.
 
 ## 2. Then — the verdict
 
@@ -53,10 +92,11 @@ cross-check: the guided arm is *not* obviously longer/shorter).
   (`manifests/workspace_manifest.json`) — 10 tests were failing; now 17/17 pass. Also
   qualified `SOURCE_OF_TRUTH.md`'s `KEYS.txt` path and added 3 doc-scoped
   `unverifiable.txt` entries. Re-verify **11 → 1 flagged**. See `RECONCILIATION_LOG.md`.
-- **Graph:** `graphify update .` → `status.py` reports **`graph: fresh at HEAD`**; semantic
+- **Graph:** `graphify update .` rebuilt the graph; it now reads a few commits behind again
+  (the 4 commits after the build are docs/notes/eval text only, no code). Semantic
   `/graphify --update` not run (no skill on this VM).
-- **Backup daemon** running (`backup_to_gcp.py --inference`, 5-min passes); arms already on
-  GCS under `audiocpp_inference/workspace/out/v2_abc_to_qfinal_seed4148240095/`.
+- **Backup daemon** running (`backup_to_gcp.py --inference`, 5-min passes; 5/5 folders);
+  arms already on GCS under `audiocpp_inference/workspace/out/v2_abc_to_qfinal_seed4148240095/`.
 
 ## 4. Pointers
 
