@@ -114,6 +114,33 @@ human and invisible to the agent — so they get written down here.
 - **Possible hardening (not done):** `cmd_stop`/`cmd_status` could fall back to the
   `run_name`/`config` recorded in `<log-name>_state.json` when the flags are omitted.
 
+## 2026-09-29 — to show the user a local HTML file, serve it and hand over the tunnel URL
+
+- **Fact:** `browser.preview` and `browser.tabs.open` both fail with
+  `[browser.disconnected] No desktop browser is connected to this session` unless the
+  OpenCode **desktop app** is attached — on a Colab VM it usually is not. `file://` URLs
+  are rejected outright (`Paths and file:// URLs are not browser URLs`). So the agent
+  cannot present a generated HTML artifact through the browser tools, however correct
+  the file is.
+- **Failure prevented:** concluding the artifact is broken, or retrying browser tools
+  in a loop, when only the *presentation* path is unavailable.
+- **Correct pattern:** serve the directory and hand over the forwarded URL.
+  `cd /content/webshare && python3 -m http.server 8765 --bind 0.0.0.0` (detached; log
+  `/content/logs/http.log`; stop `pkill -f 'http.server 8765'`). The running
+  `code tunnel` (`/root/.vscode/cli/code_tunnel.json` → name `inference_akbar`,
+  id `amusing-dog-glt654t`, cluster `asse`) forwards any localhost port at
+  `https://<tunnel-id>-<port>.<cluster>.devtunnels.ms`, i.e.
+  `https://amusing-dog-glt654t-8765.asse.devtunnels.ms`. Verify with
+  `curl -s -o /dev/null -w '%{http_code}'` before handing it over.
+- **Two traps:** (a) the URL returns **302/404 for the first few seconds** after the
+  server starts while the tunnel re-registers the port — retry before declaring
+  failure; (b) **killing or restarting the server breaks the page already open in the
+  user's tab** — restore service in the same turn and keep the same path working
+  (`curl` the tunnel URL to confirm 200, not just the local port).
+- **Security note:** serve a dedicated directory (e.g. `/content/webshare`), not the
+  repo root, so the tunnel does not expose the whole checkout. Checkout copies go
+  stale — re-copy after editing the source file.
+
 ## 2026-09-29 — a fresh Colab clone lands on `main`, not the working branch
 
 - **Fact:** the repo's default branch is `main`; session work lives on other

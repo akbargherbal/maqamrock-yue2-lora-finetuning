@@ -1,0 +1,103 @@
+VERBATIM / LYRIC-ADHERENCE ROUND — blind listening — fill this in
+2026-09-29
+
+Track: 01-نسيب-وظعن-الحي-ونخيل-يامن-وعرائس-النعمة
+Maqam Hijaz · LoRA v2 (step 3000) · seed 4148240095 · one track, 5 clips.
+
+Labels A–E are RANDOMLY assigned. The five clips differ ONLY in the style prompt
+and/or the lyric sheet handed to the model — same track, same seed, same adapter,
+same sampler settings. So any difference you hear is attributable to the prompt or
+the sheet. A is not "the baseline"; do not try to guess which is which.
+
+Scale: 5 = best, 1 = worst. Leave a line blank if you genuinely cannot judge it.
+Do NOT open KEYS.txt until every section is scored.
+
+Today's main question is the bottom half: LYRICS ADHERENCE and REPEAT COUNT.
+The top half is your usual set, so the round stays comparable to yesterday's.
+
+--------------------------------------------------------------------------
+INTRO MUSIC — when do the vocals start? (not bad in itself; observe only)
+	A: ~ ____ sec
+	B: ~ ____ sec
+	C: ~ ____ sec
+	D: ~ ____ sec
+	E: ~ ____ sec
+
+INTRO VERSE VOCAL QUALITY
+	A:
+	B:
+	C:
+	D:
+	E:
+
+MAQAM ROCK (v2) — is it maqamrock, or has it drifted to ballad / poem recitation?
+	A:
+	B:
+	C:
+	D:
+	E:
+
+OVERALL VOCAL QUALITY
+	A:
+	B:
+	C:
+	D:
+	E:
+
+OVERALL PRONUNCIATION QUALITY
+	(note any tajweed/Quranic-cadence leakage, e.g. a ت with qalqalah, or a
+	 letter emphasised the way a reciter would — as you caught yesterday)
+	A:
+	B:
+	C:
+	D:
+	E:
+
+--------------------------------------------------------------------------
+LYRICS ADHERENCE   ← main question
+	Rate 1–5 for how faithfully the clip sings its own sheet (wording, order,
+	completeness). Caveat: one of the five was given a DIFFERENT sheet — the same
+	lyrics with its built-in intro/outro repeats removed — so a low score there may
+	mean the model re-inserted what the sheet deliberately dropped. Judge each clip
+	against what it is actually singing, and use REPEAT COUNT below to compare
+	across clips.
+	A:
+	B:
+	C:
+	D:
+	E:
+
+REPEAT COUNT of the final (outro) couplet — the crux. How many times is it sung?
+	A: ____×
+	B: ____×
+	C: ____×
+	D: ____×
+	E: ____×
+	(2× is the sheet's own design — the training songs repeat a couplet once.
+	 3× or more is the model adding a repeat that was not asked for.)
+
+PACE
+	A:
+	B:
+	C:
+	D:
+	E:
+
+FREE NOTES — artifacts, mix, arrangement, whether the melody/arrangement resembles
+the guide track, anything that does not fit the sections above:
+	A:
+	B:
+	C:
+	D:
+	E:
+
+--------------------------------------------------------------------------
+SUMMARY (fill after scoring, before opening the key)
+	Most faithful to its sheet: ______
+	Least added-repeat: ______
+	Best-sounding overall: ______
+	Any clip you would reject outright, and why: ______
+
+If you rendered the other two seeds too, duplicate this whole block per seed and
+label the tracks (seed 1029169725, seed 1938238049). Do not carry a label from one
+seed to another — labels are per track.
