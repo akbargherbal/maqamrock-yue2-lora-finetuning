@@ -5,6 +5,17 @@ not narrative. One block per milestone. *Why* things are the way they are lives 
 `DECISIONS.md`; per-session state lives in `agent_notes/current.md`; the full chronological
 narrative lives in git — pre-rewrite history at `git show 39d1bbd:PROGRESS.md` (and `git log`).
 
+> **Consolidate before merging to `main` — rule agreed 2026-09-29.** Anything this branch
+> (`music-cover`) adds here must be **consolidated into milestones** before the final merge:
+> a few outcome blocks, **not** a chronological log of every change, test or experiment we ran.
+> If an entry does not change *what was run or what it produced*, it does not belong in this
+> file — put it in `agent_notes/current.md`, or leave it in git. Write the branch's contribution
+> as one or two milestones, in the same shape as M1–M11.
+>
+> **Status: the branch's milestones are deliberately unwritten.** They are to be added as
+> consolidated blocks before the merge — not appended turn by turn. Per the `docs-reconciler`
+> skill's consolidation mode, that runs as its own pass and needs the user's approval.
+
 ## M1 — Dataset v1 built and independently verified · 2026-09-19
 
 - 267 audio/caption pairs (native `mp3, 48000 Hz, stereo`) from the `min_4stars_ai_music` tree;
