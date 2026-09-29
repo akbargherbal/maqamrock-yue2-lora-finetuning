@@ -424,3 +424,33 @@ covers both._
 - `agent_notes/current.md` rewritten as the Colab handoff (verified paths + commands).
 - Reconciler: bucket access was read-only (no writes); no config, hyperparameter, or
   training artifact changed; no other live doc asserts the batch exists — **0 new drift**.
+
+## 2026-09-29 — Colab reconcile: deleted test fixture restored; graph refreshed
+
+- First pass: 2043 claims / 47 docs, 1274 checkable, **11 flagged (0.9 %)** — all
+  `missing_path`; no structural warning.
+- **Root cause (previously logged as "pre-existing … 0 new drift" and left):**
+  `manifests/workspace_manifest.json` was **deleted in `528f573`** ("Add new suno
+  manifests") while `tests/test_suno_to_songs.py` (10 tests) and 3 live docs still
+  referenced it — the tests were failing (`[error] manifest not found`). Restored the
+  70 KB, 16-track fixture from `528f573^`; all 17 tests in that file now pass, and the 6
+  doc claims (`README.md:76`, `docs/INFERENCE.md:187,190,196,198`,
+  `skills/inference-batch-run/SKILL.md:25`) resolve to a real file — **no doc prose
+  edited**. Authority: `suno_to_songs.py --help` + `tests/conftest.py:59`; the restored
+  content reproduces the tests' asserted 16→8 / `{Nahawand 4, Kurd 2, Hijaz 2}`.
+- `SOURCE_OF_TRUTH.md:33`: bare `KEYS.txt` → `manifests/evaluation_verbatim_hijaz/KEYS.txt`.
+- `skills/docs-reconciler/references/unverifiable.txt`: 3 new doc-scoped entries —
+  `docs/COMMAND_HANDOVER_GOTCHAS.md :: _failed_runs.log` (runtime out-dir artifact);
+  `docs/music-cover-feasibility.md :: KEY.json` (deleted 2026-09-29, documented in §10);
+  `docs/music-cover-feasibility.md :: tokens.json` (a GCS-side `abc_v2` artifact).
+- Re-verify: **11 → 1 flagged (0.1 %)**. Residual: `docs/music-cover-feasibility.md:313`
+  `KEYS.txt` — a real file cited by relative context ("same dir"); left as-is (the
+  qualify-the-path option was declined), resolvable by naming the path or scoping it.
+- Graph: `uv tool install graphifyy` + wrote `graphify-out/.graphify_python`;
+  `graphify update .` rebuilt 1125 nodes / 2207 edges / 73 communities at HEAD `5ca4c71`
+  (was `2f35c76`, 38 commits behind); curated snapshot `graphify-out/2026-09-29/`.
+  Free/AST tier only — the semantic `/graphify --update` needs the assistant skill (not
+  installed here). The graphify 0.9.70→0.9.71 cache-version bump churns the tracked
+  `graphify-out/cache/` (46 deletions + a new untracked dir).
+- Authority: git history (the file existed at `528f573^`), the test suite, on-disk state;
+  no run config or hyperparameter changed; no frozen doc rewritten.

@@ -173,3 +173,12 @@ docs/GCP_ORGANIZATION_PLAN.md :: .../LAYOUT.json
 # `<base>`-relative GCS object names: the extractor strips the "<base>/" prefix and
 # then reports the bare filename as a missing repo path. Same class as above.
 SOURCE_OF_TRUTH.md :: LAYOUT.json
+
+# Contextual, non-repo mentions (each scoped to its doc, so the suppression stays narrow).
+# `_failed_runs.log` is written into a run's out-dir by the sweep drivers at runtime.
+docs/COMMAND_HANDOVER_GOTCHAS.md :: _failed_runs.log
+# research record (docs/music-cover-feasibility.md): `KEY.json` was the previous build's
+# decoder, deleted 2026-09-29 and documented as such in §10; `tokens.json` is a GCS-side
+# artifact under workspace/out/abc_v2/<track>/, not a repo file.
+docs/music-cover-feasibility.md :: KEY.json
+docs/music-cover-feasibility.md :: tokens.json
