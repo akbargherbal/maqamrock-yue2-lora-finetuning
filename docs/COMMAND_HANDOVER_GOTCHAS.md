@@ -123,8 +123,10 @@ human and invisible to the agent — so they get written down here.
   `manifests/test_verbatim_hijaz/`, the updated `docs/music-cover-feasibility.md`).
 - **Failure prevented:** "the new files aren't there" confusion on a fresh VM, or
   silently running an older manifest.
-- **Correct pattern:** after the clone,
-  `git fetch origin <branch> && git checkout <branch>` — or merge the branch into
-  `main` if it should be the default.
+- **Correct pattern:** clone with `--branch <name>`
+  (`git clone --branch music-cover <url>`), or `git fetch origin <branch> &&
+  git checkout <branch>` after a default clone. **Do not merge to `main`** —
+  decision 2026-09-29: all work stays on `music-cover`; `main` is intentionally
+  not updated.
 - **Possible hardening (not done):** add `--branch <name>` to the clone lines in
   `START.md`/`INFERENCE.md`, or state the branch explicitly.

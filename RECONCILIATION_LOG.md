@@ -300,3 +300,7 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
 - Reconciler: 1916 claims / 46 docs, 1192 checkable, **6 flagged** (same pre-existing
   `manifests/workspace_manifest.json` fixture) — **0 new drift**.
 - Authority: user question (fresh-VM readiness); no run config or hyperparameter changed.
+- Follow-up (same day): decision recorded — all work stays on `music-cover`; **do not
+  merge to `main`**. `COMMAND_HANDOVER_GOTCHAS.md` + `agent_notes/current.md` now say
+  to clone with `--branch music-cover`. Reconciler: 6 flagged (same pre-existing
+  fixture) — 0 new drift.
