@@ -1,8 +1,9 @@
 # current
 
 _Updated 2026-09-29 (localhost). Purpose of this page: the two paste-ready style
-prompts from the Ajam style ablation, the repetition cause (from the v2 dataset),
-and the dataset findings._
+prompts from the Ajam style ablation, the repetition cause (from the v2 dataset), the
+dataset findings, and the test-batch artifacts + run commands for the next session.
+Durable record: `docs/music-cover-feasibility.md` §9._
 
 ## 1. Overall winning prompt — `l2_target_off` (label D)
 
@@ -200,3 +201,32 @@ the v2 **arrangement import** — ABC steers melody, not words.
     `score.abc` via `cot=full --out-dir`.
   - Foreground & sequential; `SEED`/`STYLE`/`LYRICS`/`ABC_FILE`/`OUT_DIR` env-overridable;
     refuses if a training run is active and if `nvidia-smi` is absent.
+
+## Run (next Colab session)
+
+Branch `music-cover` (see the Fresh VM note above). GPU work — check `nvidia-smi` first.
+
+```bash
+# assets: prebuilt binary (sm_75/T4) + v2 LoRA -> /content/converter/out + GGUFs from HF
+bash bootstrap/setup.sh --inference > /content/logs/setup.log 2>&1   # wait for "done"
+
+# 1) generate.py arms (cot=off) — DETACHED, ~97 min, 15 tracks
+python3 INFERENCE/generate.py manifests/test_verbatim_hijaz/batch.json --dry-run   # instant
+setsid nohup python3 INFERENCE/generate.py manifests/test_verbatim_hijaz/batch.json \
+  > /content/logs/tv_batch.log 2>&1 & disown
+#   watch:  tail -f /content/logs/tv_batch.log ; cat /content/audiocpp_inference/out/latest
+#   stop:   pkill -f 'generate.py manifests/test_verbatim_hijaz'
+#   resume: re-run the same command (skips tracks already done)
+
+# 2) B knob arms — DETACHED
+setsid nohup bash INFERENCE/test_batch.sh knobs > /content/logs/tv_knobs.log 2>&1 & disown
+#   stop:   pkill -f 'test_batch.sh knobs'
+
+# 3) C ABC arms — needs the SheetSage2 env (NOT staged by setup.sh) + ABC_FILE
+ABC_FILE=/path/to/melody.abc setsid nohup bash INFERENCE/test_batch.sh abc \
+  > /content/logs/tv_abc.log 2>&1 & disown
+#   stop:   pkill -f 'test_batch.sh abc'
+```
+
+Before the `mod_*` / `c2_abc_mod` arms: revise
+`manifests/test_verbatim_hijaz/styles/hijaz_modified.txt`.

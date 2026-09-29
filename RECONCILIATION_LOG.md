@@ -304,3 +304,7 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   merge to `main`**. `COMMAND_HANDOVER_GOTCHAS.md` + `agent_notes/current.md` now say
   to clone with `--branch music-cover`. Reconciler: 6 flagged (same pre-existing
   fixture) — 0 new drift.
+- Follow-up: `agent_notes/current.md` now ends with a **Run (next Colab session)**
+  block (branch, `setup.sh --inference`, the `generate.py` + `test_batch.sh` detached
+  commands with stop/resume) so `@agent_notes/current.md` alone primes the next
+  session. Reconciler: 6 flagged (same pre-existing fixture) — 0 new drift.
