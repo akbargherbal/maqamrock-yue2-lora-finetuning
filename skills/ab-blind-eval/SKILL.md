@@ -59,7 +59,17 @@ Key flags: `--variants` (2+; default = all detected leaf folders), `--categories
 ## Repo conventions (follow these)
 
 - **New blinding seed every round.** Prior rounds: `20260925` fine sweep,
-  `20260926` ckpt sweep, `20260927` lyric swap. Take the next unused integer.
+  `20260926` ckpt sweep, `20260927` lyric swap, `20260928` knob probe,
+  `20260929` verbatim/lyric-adherence, `20260931` guide-conditioned (the
+  `20260930` shuffle was discarded because its mapping got printed — see below).
+  Take the next unused integer.
+- **Never print the mapping while the round is live.** `prepare_ab_eval.py`'s
+  stdout, its `--dry-run` plan and its `--json` all reveal label→variant. Echoing
+  any of them into chat, a log the evaluator reads, or
+  `agent_notes/current.md` de-blinds the round. Pipe the run's stdout to a file
+  and verify programmatically (`EVAL.txt` contains no variant names; `KEYS.txt`
+  decodes every label) without echoing the mapping. If it leaks, re-shuffle with
+  a fresh seed: the audio is identical, only the labels change.
 - **Per-category labels are consistent** (`--shuffle-per category`): "A" is the
   same variant for every track in a category, which matches the sweep packages
   (`PRON_FINE_SWEEP_INPUT/`, `MAQAM_LYRIC_SWAP_INPUT/`). Use `pair` only when
