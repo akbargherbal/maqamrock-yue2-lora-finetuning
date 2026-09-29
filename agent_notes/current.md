@@ -1,89 +1,104 @@
 # current
 
-## Next session — do this
+_Updated 2026-09-29 (localhost). Step 1 of the style-ablation plan is DONE; the
+render below is the next action and is **Colab/GPU only** — this box has no `/content`._
 
-**Decision (2026-09-28):** fix the **style prompt only**; lyrics stay verbatim. Targets
-`arabmaqamrock Maqam <M>. Mood: <mood>.` — drop every constant clause (rationale below).
+## Done this session — style-ablation manifest built
 
-1. Build **style-only** variant manifests for the worked track: L0–L4 from the ladder
-   below (lyrics identical). Smallest test = the single smoked Maqam-Ajam track.
-2. Stage `qfinal_a0.3`:
-   `gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/qfinal_a0.3" /content/converter/out/`
-   — check `python status.py` first (no GPU overlap).
-3. Render L0–L4 at α0.3, same seed, same lyrics → blind A/B (`INFERENCE/prepare_ab_eval.py`).
-4. The ladder answers one question: **does the trigger alone hold the MUST features?**
-   If the arrangement stays sparse at L3/L4, it lives in the adapter → Branch B (ABC),
-   not more words.
+- New tool `INFERENCE/build_style_ablation.py` (self-validates via
+  `generate.resolve_songs`); ruff clean; `generate.py --dry-run` passes.
+- Artifact `manifests/style_ablation_ajam.json`: 5 levels L0–L4, lyrics **verbatim
+  and byte-identical across levels** (sha256 == source), one fixed seed
+  `298970020`, cap `7500` (q0.95, 605 ar letters), lora alias `qfinal_a0.3`.
+- Ladder report (full strings): `manifests/style_ablation_ajam.report.json`.
+- Source: `manifests/batch_36_songs.json` → `07-الحر-الشديد-وقطع-القفر-والوعول`,
+  Maqam Ajam. Lyrics identical to the source entry.
 
-## Style prompt — classify by product features (must / should / nice)
+Ladder (style is the only variable):
+| | style | isolates |
+|---|---|---|
+| l0_raw | raw Suno block, verbatim | control (what we send today) |
+| l1_full | trained flat shape, every clause | format |
+| l2_target_off | L1 − vocals/instrumentation | redundancy rule |
+| l3_anti_off | L1 − genre/production | truth rule |
+| l4_min | `arabmaqamrock Maqam Ajam. Mood: Epic, Enduring, Triumphant.` | minimal |
 
-Lyrics stay **verbatim** (as in Suno) — no tag normalization. Work is on the `style`
-string only. α fixed at 0.3. Worked example: `07-الحر-الشديد…`, Maqam Ajam.
+Reproduce/rebuild: `python INFERENCE/build_style_ablation.py`
+(`--dry-run` to print only).
 
-### The two rules
+### Full style strings (the only thing that varies; lyrics identical)
 
-1. **Redundancy rule.** A clause *constant across all 267 training captions* is fully
-   predicted by the trigger (`P(clause | arabmaqamrock) = 1`) ⇒ it carries **zero
-   information**; restating it can only re-anchor. Only `Maqam` (4 values) and `Mood`
-   (120) ever varied ⇒ the only live text levers.
-2. **Truth rule (new).** Constant ≠ safe. If the clause was a *Suno instruction the
-   audio ignored*, restating it anchors a **false** constraint. Proof: every caption
-   says `110 BPM`; measured on a 28-track sample, the audio is **86–162 BPM, median
-   123** (librosa; octave-ambiguous, but decisively not 110). Drop is not just safe
-   here — it's beneficial. (Also: BPM is a Western frame, weak for this material.)
+**l0_raw** — control, what we send today (verbatim Suno block incl. header + meta tags):
+```
+[Is_MAX_MODE: MAX](MAX) [QUALITY: MAX](MAX) [REALISM: MAX](MAX)
+[START_ON: TRUE]
+[START_ON: "وَيَوْمٍ مِنَ الشِّعْرَى"]
 
-### Feature classification
+genre: "arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM."
+vocals: "deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Ajam with unhurried phrase-ending sustains."
+production: "Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases."
+instrumentation: "Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section."
+mood: "Epic, Enduring, Triumphant"
+```
 
-| Product feature | Needed in output | Text needed? | Clause | Verdict |
-|---|---|---|---|---|
-| `arabmaqamrock` identity | MUST | no — trigger+LoRA | trigger | **keep** (the handle) |
-| **Maqam** (mode/identity per song) | MUST | **yes** (only trained variable) | `Maqam Ajam.` | **KEEP** |
-| Arabic pronunciation | MUST | no — α adapter | (lyrics) | α, not prompt |
-| male melismatic vocal | MUST | no — LoRA | `vocals:` desc | drop |
-| rock band (gtr/drums/bass) | MUST | no — LoRA | `instrumentation:` | drop |
-| symphonic/orchestral layer | SHOULD | no — LoRA | `Symphonic…orchestral` | drop |
-| mix aesthetic (centered/audiophile) | SHOULD | no — LoRA | `production:` | drop |
-| **emotional arc** | SHOULD | **yes** (variable) | `Mood:` | **KEEP** (curate) |
-| tempo | SHOULD | no reliable text; false anchor | `110 BPM` | **DROP** |
-| "ballad / hymn-like / stately" | nice→harmful | no — LoRA; anchors slow/sparse | `genre` | **DROP** |
-| "vocals pulling instrumentation down…" | nice→harmful | no — LoRA; anchors ducking | `production` | **DROP** |
+**l1_full** — trained flat shape, every clause (build_caption):
+```
+arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Ajam. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Ajam with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: Epic, Enduring, Triumphant.
+```
 
-### Recommended style (no lyrics change)
+**l2_target_off** — L1 − vocals/instrumentation (redundancy rule):
+```
+arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Ajam. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Mood: Epic, Enduring, Triumphant.
+```
 
+**l3_anti_off** — L1 − genre/production (truth rule):
+```
+arabmaqamrock Maqam Ajam. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Ajam with unhurried phrase-ending sustains. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: Epic, Enduring, Triumphant.
+```
+
+**l4_min** — minimal:
 ```
 arabmaqamrock Maqam Ajam. Mood: Epic, Enduring, Triumphant.
 ```
 
-### What replaces what
+## Next action — render on Colab (GPU, ~32 min on T4)
 
-- The **only** output features that need prompt text are the ones the trigger can't know:
-  **Maqam** (must) and **Mood** (should). Both were the only variable axes in training.
-- Everything else on the MUST/SHOULD list is an output feature the trigger+adapter is
-  trained to produce — re-stating it adds no information.
-- **Ceiling:** if a MUST feature (e.g. full-band arrangement) turns out weak under this
-  minimal style, that's evidence it is *not* held by the adapter — and more words won't
-  add it; a structural lever (Branch B / ABC) would. The ablation tells us which.
+**0. Check state first (no GPU overlap):** `python status.py`
+**1. Stage the α0.3 adapter** (verify the path exists before relying on it):
 
-### Test ladder (style only; lyrics identical)
+```
+gsutil ls "$GCP_BACKUP_BASE/loras/audio_cpp/pron/qfinal_a0.3/"
+gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/qfinal_a0.3" /content/converter/out/
+```
 
-| | style | isolates |
-|---|---|---|
-| L0 | as-is (raw Suno block, today) | control |
-| L1 | trained flat shape, all clauses | format |
-| L2 | L1 − target constants (vocals, instrumentation) | redundancy rule |
-| L3 | L1 − anti-target constants (genre, production) | truth rule #1 |
-| L4 | `arabmaqamrock Maqam <M>. Mood: <mood>.` | minimal |
+**2. Render L0–L4** — terminal: detached; log: `/content/logs/style_ablation_ajam.log`;
+stop: `pkill -f 'generate.py manifests/style_ablation_ajam.json'`;
+resume: re-run the same command (fixed `--out-dir` resumes; succeeded tracks are skipped).
 
-### Later: which script to change
+```
+cd /content/maqamrock-yue2-lora-finetuning
+mkdir -p /content/logs
+setsid nohup python INFERENCE/generate.py manifests/style_ablation_ajam.json \
+  --out-dir /content/audiocpp_inference/out/style_ablation_ajam \
+  > /content/logs/style_ablation_ajam.log 2>&1 & disown
+```
 
-`akbargherbal/suno-workflow` → `scripts/maqam_prompt_generator.py`
-(`GENRE_STANDARD` L66, `PRODUCTION_STANDARD` L85, `INSTRUMENTATION` L98,
-`build_vocals` L205; `EXCLUDE` L107 = never trained). Output → `styles` in
-`workspace_manifest.json` → `ostris_prepare_dataset/prepare_yue2_dataset_v2.py:71`.
-Not touched now.
+Progress: `tail -f /content/logs/style_ablation_ajam.log` (or `cat /content/audiocpp_inference/out/latest`).
+`generate.py` refuses to start if training is detected unless `--allow-concurrent` —
+do not pass it.
 
-## Branch B (only if a MUST feature proves adapter-weak)
+**3. Blind A/B** the 5 renders with `INFERENCE/prepare_ab_eval.py` (see
+`docs/AB_BLIND_EVAL.md`); KEYS records L0–L4 → labels.
 
-Python SheetSage2 front end DONE. 1-track cover render: existing `bin/audiocpp_cli`,
-`cot=melody` + `abc_file`, seed of the v2 track; call the binary directly
-(`run_one.sh:79` hardcodes `cot=off`). Do NOT rebuild audio.cpp.
+**4. The one question it answers:** does the trigger alone hold the MUST features?
+If the arrangement stays sparse at L3/L4, full-band lives in the adapter → Branch B
+(ABC), not more words.
+
+## Still open (not done, flagged)
+
+- Doc index/reconciliation for the new `INFERENCE/build_style_ablation.py` is
+  **pending** (`docs/README.md` + `RECONCILIATION_LOG.md`) — not touched this session.
+- Branch B (only if a MUST feature proves adapter-weak): Python SheetSage2 front end
+  DONE; 1-track cover render via existing `bin/audiocpp_cli`, `cot=melody` + `abc_file`,
+  seed of the v2 track; call the binary directly (`run_one.sh:79` hardcodes `cot=off`).
+  Do NOT rebuild audio.cpp.

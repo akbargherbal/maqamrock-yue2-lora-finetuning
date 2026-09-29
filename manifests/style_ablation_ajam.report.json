@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-09-29T00:56:42Z",
+  "source": "/home/akbar/Jupyter_Notebooks/OpenCode/ostris_prepare_dataset/maqamrock-yue2-lora-finetuning/manifests/batch_36_songs.json",
+  "source_track": "07-الحر-الشديد-وقطع-القفر-والوعول",
+  "source_lora": "v2",
+  "maqam": "Ajam",
+  "seed": 298970020,
+  "quantile": 0.95,
+  "cap": 7500,
+  "arabic_letters": 605,
+  "lyrics_sha256": "2dfdccf1991614d3f47197c11f942ad2eac313e5603c8d03eec48beb1974987e",
+  "levels": {
+    "l0_raw": "[Is_MAX_MODE: MAX](MAX) [QUALITY: MAX](MAX) [REALISM: MAX](MAX)\n[START_ON: TRUE]\n[START_ON: \"وَيَوْمٍ مِنَ الشِّعْرَى\"]\n\ngenre: \"arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM.\"\nvocals: \"deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Ajam with unhurried phrase-ending sustains.\"\nproduction: \"Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases.\"\ninstrumentation: \"Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section.\"\nmood: \"Epic, Enduring, Triumphant\"",
+    "l1_full": "arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Ajam. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Ajam with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: Epic, Enduring, Triumphant.",
+    "l2_target_off": "arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Ajam. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Mood: Epic, Enduring, Triumphant.",
+    "l3_anti_off": "arabmaqamrock Maqam Ajam. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Ajam with unhurried phrase-ending sustains. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: Epic, Enduring, Triumphant.",
+    "l4_min": "arabmaqamrock Maqam Ajam. Mood: Epic, Enduring, Triumphant."
+  }
+}
