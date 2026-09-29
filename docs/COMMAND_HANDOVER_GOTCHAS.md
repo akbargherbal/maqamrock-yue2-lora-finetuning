@@ -113,3 +113,18 @@ human and invisible to the agent — so they get written down here.
   `python train_ctl.py stop --config config/<run>.yml --log-name <log>`.
 - **Possible hardening (not done):** `cmd_stop`/`cmd_status` could fall back to the
   `run_name`/`config` recorded in `<log-name>_state.json` when the flags are omitted.
+
+## 2026-09-29 — a fresh Colab clone lands on `main`, not the working branch
+
+- **Fact:** the repo's default branch is `main`; session work lives on other
+  branches (e.g. `music-cover`, 10 commits ahead on 2026-09-29). `docs/START.md:14`
+  and `docs/INFERENCE.md:11` clone with no `--branch`, so a fresh VM gets `main` and
+  is **missing** this session's files (`INFERENCE/test_batch.sh`,
+  `manifests/test_verbatim_hijaz/`, the updated `docs/music-cover-feasibility.md`).
+- **Failure prevented:** "the new files aren't there" confusion on a fresh VM, or
+  silently running an older manifest.
+- **Correct pattern:** after the clone,
+  `git fetch origin <branch> && git checkout <branch>` — or merge the branch into
+  `main` if it should be the default.
+- **Possible hardening (not done):** add `--branch <name>` to the clone lines in
+  `START.md`/`INFERENCE.md`, or state the branch explicitly.

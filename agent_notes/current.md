@@ -170,6 +170,11 @@ the v2 **arrangement import** — ABC steers melody, not words.
 
 ### Ready artifacts (2026-09-29) — built for the next Colab session
 
+> **Fresh VM:** these live on branch **`music-cover`**. The runbooks' clone lands on
+> `main` (10 commits behind) — run
+> `git fetch origin music-cover && git checkout music-cover` after cloning, or merge
+> the branch to `main`.
+
 - `manifests/test_verbatim_hijaz/batch.json` — `generate.py` manifest, **validated**
   (`--dry-run`: 5 songs → 15 tracks, ~97 min T4). `lora: v2`, seeds
   `4148240095 / 1029169725 / 1938238049`, cap auto (q=0.95). Arms:

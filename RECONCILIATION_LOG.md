@@ -288,3 +288,15 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   `INFERENCE/test_batch.sh` arms) rather than only `agent_notes/current.md`. No other
   live doc contradicts the new artifacts (INFERENCE.md's scope is the standard
   procedure — left as-is; the ABC/cover work stays in the investigation record).
+
+## 2026-09-29 — branch gotcha: a fresh clone lands on `main`
+
+- `docs/COMMAND_HANDOVER_GOTCHAS.md`: recorded that a fresh Colab clone checks out
+  `main` (10 commits behind `music-cover`), so this session's artifacts are absent;
+  fix is `git fetch origin music-cover && git checkout music-cover` (or merge to
+  `main`). `agent_notes/current.md`: same note at the artifact list.
+- `skills/docs-reconciler/references/unverifiable.txt`: scoped the external git flag
+  `--branch` to that doc (cleared 2 `unknown_flag` findings).
+- Reconciler: 1916 claims / 46 docs, 1192 checkable, **6 flagged** (same pre-existing
+  `manifests/workspace_manifest.json` fixture) — **0 new drift**.
+- Authority: user question (fresh-VM readiness); no run config or hyperparameter changed.
