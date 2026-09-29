@@ -28,4 +28,5 @@ History files are authoritative for what happened, never for what is true now.
 | User cheat-sheet (copy-paste commands) | `user_cheatsheet.md` | index only; the runbooks above are authority |
 | Repo knowledge graph (graphify) | `docs/GRAPHIFY.md` | generated map; refresh with `graphify update` |
 | Agent contract | `AGENTS.md` | |
+| v2 training-set facts (repeats, caption shape, lyric tags) | `docs/music-cover-feasibility.md` §9.1–9.2 | measured over the 267-song GCS dataset; sampler note §9.3 |
 | Archived / superseded | `docs/investigation.md`, `docs/yue2-gguf-lora-findings.md`, `verification.md`, `docs/LIVE_STATUS.md` | banners are correct; don't "fix" |

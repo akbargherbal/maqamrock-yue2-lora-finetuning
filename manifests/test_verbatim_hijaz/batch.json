@@ -1,0 +1,41 @@
+{
+  "loras": {
+    "v2": { "dir": "/content/converter/out" }
+  },
+  "defaults": {
+    "lora": "v2",
+    "quantile": 0.95
+  },
+  "songs": [
+    {
+      "name": "ctl_sunoblk_as-is",
+      "style_file": "styles/hijaz_sunoblk.txt",
+      "lyrics_file": "lyrics/01_nesib_as-is.txt",
+      "seeds": [4148240095, 1029169725, 1938238049]
+    },
+    {
+      "name": "win_as-is",
+      "style_file": "styles/hijaz_winning.txt",
+      "lyrics_file": "lyrics/01_nesib_as-is.txt",
+      "seeds": [4148240095, 1029169725, 1938238049]
+    },
+    {
+      "name": "mod_as-is",
+      "style_file": "styles/hijaz_modified.txt",
+      "lyrics_file": "lyrics/01_nesib_as-is.txt",
+      "seeds": [4148240095, 1029169725, 1938238049]
+    },
+    {
+      "name": "win_dedup",
+      "style_file": "styles/hijaz_winning.txt",
+      "lyrics_file": "lyrics/01_nesib_dedup.txt",
+      "seeds": [4148240095, 1029169725, 1938238049]
+    },
+    {
+      "name": "win_bare",
+      "style_file": "styles/hijaz_winning.txt",
+      "lyrics_file": "lyrics/01_nesib_bare.txt",
+      "seeds": [4148240095, 1029169725, 1938238049]
+    }
+  ]
+}

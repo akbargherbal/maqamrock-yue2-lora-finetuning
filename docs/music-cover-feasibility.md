@@ -1,8 +1,9 @@
 # Music cover / guide-conditioned generation — feasibility
 
-_Last revised: 2026-09-28 (route corrected: transcribe with the **official Python
-SheetSage2**, no audio.cpp rebuild; binary capability verified). Investigation &
-discussion record — **not a runbook**.
+_Last revised: 2026-09-29 (**§9 addendum**: v2 training set characterised, outro-repeat
+resolved, ABC/cover batch re-scoped). Earlier, 2026-09-28: route corrected to transcribe
+with the **official Python SheetSage2** (no audio.cpp rebuild; binary capability
+verified). Investigation & discussion record — **not a runbook**.
 The transcription front end (route B2) has been smoke-tested and works; the
 generation experiments remain unrun — hypotheses are marked as such.
 Authority for procedures stays with `docs/INFERENCE.md`, `docs/PRON_LORA_MERGE.md`,
@@ -152,6 +153,12 @@ intentional arrangement steering; do not strip them. If the repetition anomaly n
 investigating, look at decoding/sampling knobs (e.g. `semantic_repetition_penalty`,
 `semantic_penalty_window`, `semantic_temperature`) rather than rewriting the lyrics.
 
+**Resolved 2026-09-29 — see §9.** The "verse line repeating" is the adapter's *learned
+convention*: the v2 training sheets repeat by design (§9.2) and the training audio
+matches them. The sampler is **not** the cause (identical `repetition_penalty=1.2 /
+window=50` in every render; the window is only 2.0 s). `semantic_penalty_window` is the
+knob aimed at section-length repeats.
+
 ## 7. Suggested order of tests
 
 1. **Measure A** (minutes, no new deps): rock-forward style text, same seed/adapter;
@@ -184,3 +191,108 @@ investigating, look at decoding/sampling knobs (e.g. `semantic_repetition_penalt
 - Repo: `docs/LORA_INVENTORY.md`, `docs/PRON_LORA_MERGE.md`,
   `config/akbar_arabic_rock_lora.yml:106`, `INFERENCE/run_one.sh:79`,
   `INFERENCE/generate.py`, `manifests/batch_36_songs.json`.
+
+---
+
+## 9. Addendum — 2026-09-29: the v2 training set, the repeat question, lyric adherence
+
+_Session outcome: the "outro repeats itself" anomaly is resolved (a trained
+convention, not the sampler); the training set is characterised from GCS; the
+ABC/cover batch is re-scoped. Read with §6 (descriptors) and §4–5 (the levers).
+Full knob tables + the proposed batch live in `agent_notes/current.md`._
+
+### 9.1 Where the training data is, and what it is
+
+`gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/dataset/` — **267**
+`.mp3` + `.txt` pairs. Each `.txt` is one training example: the caption (style)
+first, then `[Lyrics]`, then the lyrics with section tags. Measured over all 267
+(read-only; no generation):
+
+| property | value |
+|---|---|
+| Maqam balance | Nahawand 73, Ajam 72, Kurd 62, Hijaz 60 |
+| Caption trigger `arabmaqamrock` | **267/267 (100%)** |
+| Caption `<n> BPM` | **267/267** — always `110` |
+| Caption shape | **267/267 flat** (no `genre:`/`vocals:` keys) — unlike the Suno block (§6) used at inference |
+| Caption tail `Mood:` | 233/267 (87%) |
+| Lyrics tags | **0/267** carry `[Section \| descriptors]`; all **bare** (`[Intro]`, `[Verse 1]`, …) |
+| Sections per song | mean 5.6 |
+
+### 9.2 The repeats are the target — the dataset is self-consistent
+
+Repetition is built into the training lyrics by the `suno-workflow`
+(`github.com/akbargherbal/suno-workflow`; Phase 5 rule 8 "buffer-in/out"; Phase 3
+rules 1, 2, 10):
+
+| pattern | prevalence |
+|---|---|
+| `[Intro]` content == opening of `[Verse 1]` (buffer-in) | 261/267 (98%) |
+| `[Outro]` content already appears earlier (buffer-out) | 263/267 (99%) |
+| duplicate `[Chorus]` block | 127/267 (48%) |
+| ≥1 repeated lyric line anywhere | **267/267 (100%)** |
+| fraction of lines that are repeats | mean **23%** |
+
+**Correction to §6's "anomalous repetition":** the sheet repeats and the audio
+matches — a couplet is sung 2× (once in its verse, once in the `[Outro]`), never 3×.
+So v2 was trained to sing the sheet **verbatim, repeats included**; "verbatim" means
+*reproduce the sheet exactly*. The anomaly to chase is an **insertion beyond the
+sheet** (3× / dropped / reordered), not the sheet's own repeats. Because training
+adhered, an extra repeat at inference is more likely an **inference-side mismatch**
+(descriptor tags / format / prompt) than the data.
+
+### 9.3 The sampler is not the cause
+
+Every render (all 5 ablation variants; all 36-batch takes) logs the same
+`yue2 … repetition_penalty=1.2 penalty_window=50`. Source (`ar_runtime.cpp`,
+`sample_semantic_token`) penalises only the last `penalty_window` emitted frames, so
+the window is **50 / 25 = 2.0 s** — far shorter than a section, hence it cannot
+suppress a section-level repeat. **`semantic_penalty_window` is the knob pointed at
+this symptom** (200–1000 frames = 8–40 s, with a modest penalty).
+
+### 9.4 Knobs for lyric adherence / v2 fidelity (summary; tables in `current.md`)
+
+- **Settings:** `semantic_penalty_window` (the section-repeat lever), `guidance_scale`
+  (CFG on the text; default `1.01` for `cot=off`), `semantic_repetition_penalty`,
+  `semantic_temperature`/`top_p`/`top_k`. Keep `cot=off` + `temp 1.0` + `top_p 0.95` +
+  `top_k 100` = the adapter's trained regime (protects v2 likeness).
+- **Prompt:** `style` (flat caption; **restore `110 BPM`** — 100% of training captions
+  carry it) and `--lyrics` (bare tags = trained; descriptor tags = off-distribution).
+- **ABC:** `abc`/`abc_file` steer the **melody, not the words**; they require
+  `cot=melody|full`, itself off-distribution for a `cot=off` adapter.
+- **Measurement:** `export_semantic=true` + `stop_after=semantic` dumps the token plan
+  so adherence can be scored objectively at no NAR cost.
+
+### 9.5 The ABC/cover batch — re-scoped
+
+Proposed guide = `01-نسيب-وظعن-الحي-ونخيل-يامن-وعرائس-النعمة_4148240095.wav`
+(`batch_36_songs.json`: Hijaz, `lora: v2`; two further seeds on GCS). Review:
+
+- **Maqam clash:** the "winning prompt" is **Ajam** (`current.md` §1); this track is
+  **Hijaz**. ABC (Hijaz) + Ajam text will fight — use a Hijaz copy.
+- **ABC confounds `cot`:** `abc_file` forces `cot=melody|full`; the adapter trained
+  `cot=off`. Any ABC arm needs a `cot=melody`-no-`abc` control.
+- **Missing:** a control arm; a **no-repeat-sheet** arm (the only one that separates
+  "followed the sheet" from "injected the prior"); n=1 seed; an objective metric.
+- Built at `manifests/test_verbatim_hijaz/batch.json` (`generate.py` arms:
+  `ctl_sunoblk_as-is`, `win_as-is`, `mod_as-is`, `win_dedup`, `win_bare`) plus
+  `INFERENCE/test_batch.sh <knobs|abc|all>` (the arms `generate.py` can't express —
+  B: `b1_window`…`b3raw_both`; C: `c0_cotonly`…`c3_abc_raw`; `c3_abc_raw` = the raw
+  Suno block that scored 5/5 MaqamRock). Working details + the revise-placeholder in
+  `agent_notes/current.md`.
+
+### 9.6 Open questions for the next session
+
+1. Does ABC (`cot=melody|full`) help or hurt (a) lyric adherence, (b) v2 arrangement
+   fidelity? **Unrun.**
+2. Does the **descriptor-tag** mismatch (bare tags in training vs descriptor tags at
+   inference) explain the extra repeat? Test: same track, bare-tag vs descriptor sheet.
+3. Which adapter for the batch — `v2` or `qfinal_a0.3`? (§3's tradeoff decides.)
+4. Does a **no-repeat sheet** get echoed (adapter injection) or sung clean?
+
+### 9.7 Provenance additions (2026-09-29)
+
+- Training dataset: `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/dataset/`
+  (267 pairs; the LoRA's actual training text).
+- Workflow that built the repeats: `github.com/akbargherbal/suno-workflow`
+  (`workflow.md`, `Quick_Guide.md`).
+- Session handoff + knob tables + proposed batch: `agent_notes/current.md`.

@@ -143,3 +143,7 @@ docs/EXPERIENCE_CHECKLIST.md :: config/data/course
 # pron-dataset build artifacts + ai-toolkit internals (live in /content, not the repo)
 docs/PRON_LORA_LONG_PLAN.md :: selection_report.json
 docs/PRON_LORA_LONG_PLAN.md :: dataloader_mixins.py
+
+# suno-workflow files (external repo github.com/akbargherbal/suno-workflow)
+docs/music-cover-feasibility.md :: workflow.md
+docs/music-cover-feasibility.md :: Quick_Guide.md

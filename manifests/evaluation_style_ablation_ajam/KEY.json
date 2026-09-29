@@ -1,0 +1,59 @@
+{
+  "generated": "2026-09-29 02:35:21Z",
+  "seed": 20260928,
+  "shuffle_per": "category",
+  "variants": [
+    "l0_raw",
+    "l1_full",
+    "l2_target_off",
+    "l3_anti_off",
+    "l4_min"
+  ],
+  "audio_format": "mp3",
+  "pairs": [
+    {
+      "category": "-",
+      "blind_file": "ajam_A.mp3",
+      "label": "A",
+      "variant": "l1_full",
+      "source_path": "l1_full\\ajam.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "ajam_B.mp3",
+      "label": "B",
+      "variant": "l0_raw",
+      "source_path": "l0_raw\\ajam.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "ajam_C.mp3",
+      "label": "C",
+      "variant": "l3_anti_off",
+      "source_path": "l3_anti_off\\ajam.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "ajam_D.mp3",
+      "label": "D",
+      "variant": "l2_target_off",
+      "source_path": "l2_target_off\\ajam.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "ajam_E.mp3",
+      "label": "E",
+      "variant": "l4_min",
+      "source_path": "l4_min\\ajam.wav"
+    }
+  ],
+  "labels": {
+    "": {
+      "l1_full": "A",
+      "l0_raw": "B",
+      "l3_anti_off": "C",
+      "l2_target_off": "D",
+      "l4_min": "E"
+    }
+  }
+}

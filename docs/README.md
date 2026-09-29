@@ -35,8 +35,10 @@ Future ideas (not runbooks, not scheduled): [FUTURE_PRONUNCIATION_LORA.md](FUTUR
 Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapshot.
 `investigation.md` and `yue2-gguf-lora-findings.md` are **superseded/retracted**
 (see the banners at their tops); do not follow them. [music-cover-feasibility.md](music-cover-feasibility.md)
-is a 2026-09-28 investigation record (covers/ABC conditioning, α tradeoff, style-text
-lever) — hypotheses unverified; procedures stay with the runbooks above.
+is an investigation record (2026-09-28 covers/ABC conditioning, α tradeoff, style-text
+lever; **2026-09-29 §9** characterises the v2 training set, resolves the outro-repeat as
+a trained convention, and re-scopes the batch) — hypotheses unverified; procedures stay
+with the runbooks above.
 
 ## Constants (memorize / copy)
 

@@ -236,3 +236,55 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   `run_one.sh` writes a per-track `<name>_<seed>_gpu.csv` at 1 Hz. Reconciler:
   1837 claims / 45 docs, 1130 checkable, **6 flagged** (same pre-existing
   fixture) — 0 new drift.
+
+## 2026-09-29 — `docs/music-cover-feasibility.md` §9 addendum (v2 dataset / repeat question)
+
+- Added §9.1–9.7: characterised the v2 training set **read-only** from
+  `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/dataset/`
+  (267 `.mp3`+`.txt` pairs) — maqam balance, 100% `arabmaqamrock`, 100% `110 BPM`,
+  100% flat captions, **0%** descriptor lyric tags; repetition 98% buffer-in /
+  99% buffer-out / 100% ≥1 repeat / 23% of lines.
+- Resolved the outro-repeat: the adapter's **trained convention** (the training
+  sheets repeat by design via the external `suno-workflow`); sampler exonerated
+  (`repetition_penalty=1.2 penalty_window=50` = 2.0 s in every render).
+- Corrected §6's "anomalous repetition" note to point at §9; bumped the header
+  `_Last revised_`.
+- Re-scoped the ABC/cover batch (§9.5): control arm, `abc_file`→`cot` confound,
+  no-repeat-sheet control, Maqam clash Ajam-vs-Hijaz.
+- Indexed in `docs/README.md`; added a `SOURCE_OF_TRUTH.md` row for the measured
+  dataset facts.
+- Reconciler: 1903 claims / 46 docs, 1179 checkable, **6 flagged** — all 6 the
+  pre-existing missing `manifests/workspace_manifest.json` fixture; **0 new
+  drift**. Two initial flags (`workflow.md`, `Quick_Guide.md` — external
+  suno-workflow files) cleared by scoping them in
+  `skills/docs-reconciler/references/unverifiable.txt`.
+- Authority: user request (document the session); no run config or hyperparameter
+  changed; no frozen doc rewritten. Knob tables + the proposed batch stay in
+  `agent_notes/current.md` (handoff surface, **not** authority).
+
+## 2026-09-29 — test-batch artifacts (`manifests/test_verbatim_hijaz/`, `INFERENCE/test_batch.sh`)
+
+- Added `manifests/test_verbatim_hijaz/batch.json` (strict `generate.py` schema,
+  **validated** with `--dry-run`: 5 songs → 15 tracks): guide-track arms with
+  `lora=v2`, fixed seeds `4148240095/1029169725/1938238049`, cap auto q=0.95.
+- Added `styles/` (hijaz_winning, hijaz_modified **placeholder to revise**,
+  hijaz_sunoblk) and `lyrics/` (`01_nesib_as-is`, `_dedup`, `_bare`) — the last two
+  generated programmatically from `batch_36_songs.json` (no hand transcription).
+- Added `INFERENCE/test_batch.sh <knobs|abc|all>`: the B (knob, `EXTRA_REQUEST_OPTS`)
+  and C (ABC, direct `audiocpp_cli` with `cot=melody[+abc_file]`) arms that
+  `generate.py`/`run_one.sh` cannot express. Both B and C verified via `--dry-run`.
+- Updated `agent_notes/current.md` with the artifact paths.
+- Reconciler: 1903 claims / 46 docs, 1179 checkable, **6 flagged** — all the
+  pre-existing `manifests/workspace_manifest.json` fixture; **0 new drift**.
+- Authority: user request (write the test JSON + companion script); no run config or
+  hyperparameter changed; no frozen doc rewritten.
+- Follow-up: added the **raw Suno block** (`l0_raw` form — the prompt that scored 5/5
+  MaqamRock), reusing `styles/hijaz_sunoblk.txt`, to **both** the B and C arms: C
+  `c3_abc_raw` + `c0raw_cotonly`; B `b1raw_window` / `b2raw_guidance` / `b3raw_both`
+  (vs the `ctl_sunoblk_as-is` baseline in `batch.json`). Reconciler: 1903 claims / 46
+  docs, 1183 checkable, **6 flagged** (same pre-existing fixture) — **0 new drift**.
+- Reconciliation pass (skill): `music-cover-feasibility.md` §9.5 updated to name the
+  durable artifact paths (`manifests/test_verbatim_hijaz/batch.json`,
+  `INFERENCE/test_batch.sh` arms) rather than only `agent_notes/current.md`. No other
+  live doc contradicts the new artifacts (INFERENCE.md's scope is the standard
+  procedure — left as-is; the ABC/cover work stays in the investigation record).
