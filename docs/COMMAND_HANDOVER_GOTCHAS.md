@@ -186,3 +186,25 @@ human and invisible to the agent — so they get written down here.
 - **Related:** `generate.py` writes `batch_manifest.json` + `input.json` into the run
   dir **before** any generation, so an explicit `--out-dir` makes the batch resumable;
   `--dry-run` validates paths/caps and needs no GPU.
+
+## 2026-09-29 — never edit a shell script while it is running
+
+- **Fact:** bash reads script files **incrementally by byte offset**, not into memory.
+  Editing the file mid-execution shifts those offsets, so the next read starts
+  mid-token. Symptom seen: `run_one.sh: line 85: ession-option: command not found` — a
+  fragment of `--session-option` (i.e. bash resumed partway through that token).
+- **What it cost:** `run_one.sh` was edited at 09:22:40 while track 4 was executing
+  (09:21:39–09:28:23). The fragment ran as its own command *carrying the trailing
+  `> "$log" 2>&1` redirect*, so it **overwrote that track's CLI log** (its TIMING lines
+  are gone), and the script's `rc=$?` captured `127` instead of the binary's `0`. The
+  driver then reported the track FAILED in `_runs_status.log`, `_failed_runs.log` **and**
+  `batch_summary.txt` (`ok: 4  failed: 1`).
+- **The audio was fine.** `/usr/bin/time` had already written `Exit status: 0`, the WAV
+  was byte-exact for its declared duration (48 kHz stereo 16-bit, diff 0) and matched its
+  screen prediction exactly (5701 frames / 228.0 s). So: a **spurious failure**, and the
+  false record nearly caused a needless 7-minute re-render.
+- **Rules:** (1) never edit a script while a batch is calling it — edit between runs,
+  or run a copy; (2) don't trust a log's `exit=` on its own — cross-check the artifact
+  (`_time.txt`'s `Exit status`, the WAV's byte length against its declared duration).
+- **A file-count check is not a success check.** Counting `*.wav` reported "5 of 5" for
+  a batch whose driver called one track FAILED. Gate on exit codes, then on artifacts.

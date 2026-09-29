@@ -298,7 +298,7 @@ cd /content/webshare && python3 -m http.server 8765 --bind 0.0.0.0
   the port; retry. Restarting the server **breaks an already-open tab**.
 - Details + traps: `docs/COMMAND_HANDOVER_GOTCHAS.md` (2026-09-29 entry).
 
-## 6. Blind listening round — sheet written, not yet fillable
+## 6. Blind listening round — READY TO FILL (package uploaded)
 
 **Sheet:** `manifests/evaluation_verbatim_hijaz/MY_EVALUATION.txt` (new). Same shape as
 yesterday's style-ablation round (intro/vocal-start, intro-verse quality, Maqam Rock (v2),
@@ -308,25 +308,43 @@ design — the training songs repeat a couplet once; 3×+ = an added repeat).
 
 **Blinding seed for this round: `20260929`** (next unused; prior rounds were 20260925–28).
 
-`EVAL.txt` / `KEYS.txt` / `KEY.json` are deliberately **not written yet** — the packaging tool
-produces them at build time, and hand-writing them now would invent labels that map to no file.
+`EVAL.txt` / `KEYS.txt` / `KEY.json` are **now produced** — they were deliberately not
+hand-written earlier, because the packaging tool generates the label mapping and hand-writing it
+would invent labels mapping to no file. They sit in `manifests/evaluation_verbatim_hijaz/` and on
+GCS.
 
-**STATUS 2026-09-29 ~09:13Z — RENDERING: 2/5 DONE, track 3 in flight** (GPU 100%).
+**The label map is deliberately NOT reproduced here** — writing which variant each letter is would
+defeat the blind test and this file is tracked and mirrored to GCS. It lives only in
+`KEY_open_after_listening.txt`; open that **after** every section has been scored, not before.
 
-| # | arm | wall | audio rendered | screen predicted |
+**STATUS 2026-09-29 09:36Z — RENDER COMPLETE, PACKAGE UPLOADED.** All 5 WAVs valid; the blind
+A–E package is live at `listening/VERBATIM_HIJAZ_LYRIC_ADHERENCE_INPUT/` (5 mp3 + `EVAL.txt` +
+`KEY_open_after_listening.txt`). Run dir:
+
+| # | arm | wall | rendered | screen predicted |
 |---|---|---|---|---|
-| 1 | `ctl_sunoblk_as-is` | 7:17 | 309.7 s | 7743 f = 309.7 s ✅ |
-| 2 | `win_as-is` | 8:23 | 271.9 s | 6798 f = 271.9 s ✅ |
-| 3 | `mod_as-is` | in flight (started 09:12:33) | — | 7303 f = 292.1 s |
+| 1 | `ctl_sunoblk_as-is` | 7:17 | 309.7 s | 7743 f ✅ |
+| 2 | `win_as-is` | 8:23 | 271.9 s | 6798 f ✅ |
+| 3 | `mod_as-is` | 9:06 | 292.1 s | 7303 f ✅ |
+| 4 | `win_dedup` | 6:44 | 228.0 s | 5701 f ✅ |
+| 5 | `win_bare` | 7:10 | 227.7 s | 5692 f ✅ |
 
-**The screen's frame counts predict the rendered duration exactly (2/2 so far):**
-`7743/25 = 309.72 s` and `6798/25 = 271.92 s`, both matching the WAVs to a tenth of a second.
-That validates the screen's length signal against real audio rather than argument — which is
-what makes §2.1's `vs ref` column usable as a predictor.
+**5/5 exact** — every rendered duration equals its screen-predicted frame count (frames ÷ 25),
+so §2.1's `vs ref` column is a validated duration predictor.
 
-Revised expectation: **≈22.2 min of audio**, not the ~25.3 min derived from the caps — the caps
-are ceilings and most arms stop short of theirs (only `c3_abc_raw` ever reached 7750). The
-screen's measured frames are the better estimate. Run dir:
+**`win_dedup`'s `exit=127` is a FALSE failure; that audio is VALID.** `run_one.sh` was edited at
+09:22:40, *mid-track* (its window was 09:21:39–09:28:23). Bash reads scripts incrementally, so it
+resumed mid-token and ran the fragment `ession-option: command not found` **carrying the trailing
+`> "$log" 2>&1` redirect** — which overwrote that track's CLI log; `rc=$?` then captured 127
+instead of the binary's 0. `win_dedup_4148240095_time.txt` records `Exit status: 0` and the WAV is
+byte-exact (43783468 bytes == expected for 228.039 s @48 kHz stereo 16-bit). A NOTE is appended to
+both `_runs_status.log` and `_failed_runs.log`; **`batch_summary.txt` still says `ok: 4 failed: 1`
+— ignore it.** Full lesson: `docs/COMMAND_HANDOVER_GOTCHAS.md`, 2026-09-29.
+
+**Recipe correction:** gate a batch on **exit codes**, not on counting `*.wav` — the count read
+"5 of 5" for a batch whose driver logged a failure, and only a manual cross-check caught it.
+
+Run dir:
 `/content/audiocpp_inference/out/verbatim_hijaz_seed4148240095` (explicit `--out-dir`, so it is
 resumable and `out/latest` cannot point the copy below at the *wrong* round). Manifest:
 `manifests/test_verbatim_hijaz/batch_seed4148240095.json` — a 5-arm × **1-seed** trim of
@@ -337,12 +355,16 @@ it sits in the `genre:` line, not at the start) — so nothing is prepended eith
 rendered arms therefore match the screened ones. See `docs/COMMAND_HANDOVER_GOTCHAS.md`,
 entry 2026-09-29 (which carries a same-day correction).
 
-**The build + upload is AUTOMATED this round** — the packaging block below is what a background
-job is already running, so you should not need to paste it by hand. It waits for the render,
-verifies 5/5 WAVs, stages flat→per-arm, runs `prepare_ab_eval.py`, copies the sheets into
-`manifests/evaluation_verbatim_hijaz/`, and uploads. Log `/content/logs/ab_verbatim_pipeline.log`;
-stop `pkill -f 'verbatim_pipeline[.]sh'`. Every step is idempotent, so re-running the block is
-safe if it dies.
+**The build + upload ran AUTOMATICALLY** (a background job, 09:35–09:36Z), so the block below is
+shown as the reproducible recipe rather than as something to paste. Outcome: 5 blind mp3s + key +
+`EVAL.txt` uploaded; `EVAL.txt`/`KEYS.txt`/`KEY.json` copied into
+`manifests/evaluation_verbatim_hijaz/`. Log `/content/logs/ab_verbatim_pipeline.log`.
+
+**Its success check was too weak, and that mattered:** it gated on "5 `*.wav` exist", which passed
+even though the driver had logged `win_dedup FAILED exit=127` (a spurious failure — see the status
+block). The audio happened to be valid, so nothing broke, but the check should gate on exit codes.
+`generate.py`'s own `batch_summary.txt` is the authority for per-track outcomes — read it, don't
+count files.
 
 The 5 arms in the round — one track, seed 4148240095, all from `batch.json`, `lora: v2`:
 
