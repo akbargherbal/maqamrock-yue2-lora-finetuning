@@ -310,10 +310,12 @@ produces them at build time, and hand-writing them now would invent labels that 
 `/content/audiocpp_inference/out/verbatim_hijaz_seed4148240095` (explicit `--out-dir`, so it is
 resumable and `out/latest` cannot point the copy below at the *wrong* round). Manifest:
 `manifests/test_verbatim_hijaz/batch_seed4148240095.json` — a 5-arm × **1-seed** trim of
-`batch.json`, because `generate.py` has no `--seed` filter. **`--no-trigger` is required**:
-`generate.py` would otherwise prepend `arabmaqamrock ` to the `ctl_sunoblk` arm only, and
-`run_one.sh` (which rendered every screened arm) never does — see
-`docs/COMMAND_HANDOVER_GOTCHAS.md`, entry 2026-09-29.
+`batch.json`, because `generate.py` has no `--seed` filter. `--no-trigger` is passed, and
+here it is a **no-op**: `generate.py`'s trigger check is a substring search over the whole
+style file, and every Hijaz style already contains `arabmaqamrock` (in `hijaz_sunoblk.txt`
+it sits in the `genre:` line, not at the start) — so nothing is prepended either way. The
+rendered arms therefore match the screened ones. See `docs/COMMAND_HANDOVER_GOTCHAS.md`,
+entry 2026-09-29 (which carries a same-day correction).
 
 The 5 arms in the round — one track, seed 4148240095, all from `batch.json`, `lora: v2`:
 

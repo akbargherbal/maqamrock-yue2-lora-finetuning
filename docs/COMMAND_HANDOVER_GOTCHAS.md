@@ -158,23 +158,31 @@ human and invisible to the agent — so they get written down here.
 - **Possible hardening (not done):** add `--branch <name>` to the clone lines in
   `START.md`/`INFERENCE.md`, or state the branch explicitly.
 
-## 2026-09-29 — `generate.py` prepends the trigger; `run_one.sh` does not
+## 2026-09-29 — `generate.py`'s trigger test is a substring search, not a prefix test
 
-- **Fact:** `INFERENCE/generate.py:316` prepends the `arabmaqamrock ` trigger to any
-  style that does not already contain it (`--no-trigger` disables). `run_one.sh`
-  passes `STYLE_FILE` text straight through and **never** prepends. So the two
-  drivers disagree on a style that lacks the trigger — and only `hijaz_sunoblk.txt`
-  (the `ctl_sunoblk_as-is` control arm, which begins `[Is_MAX_MODE: …`) lacks it.
-- **Why it bites:** all 16 screened arms were rendered by
-  `screen_arms.sh`/`test_batch.sh` → `run_one.sh`, i.e. **without** the trigger. No
-  `generate.py` run had ever executed on this VM, so its default had never been
-  exercised. Rendering the manifest with the default would prepend the trigger to
-  the control arm only, silently decoupling the listening audio from the screen it
-  is supposed to ear-test. The other four arms already contain the trigger and are
-  unaffected either way.
-- **Correct pattern:** to reproduce a screened arm, pass `--no-trigger`. To
-  deliberately move the control in-distribution, leave the default on — but say so,
-  because it is a design change, not a formatting detail.
+- **Fact:** `INFERENCE/generate.py:316` prepends `arabmaqamrock ` iff
+  `TRIGGER.strip() not in text` — a substring test over the **whole** style file, not a
+  check of its leading token (`--no-trigger` disables the prepend entirely).
+  `run_one.sh` never prepends; it passes `STYLE_FILE` through verbatim.
+- **Why the difference is invisible for this manifest:** all three Hijaz styles contain
+  `arabmaqamrock` *somewhere*. For `hijaz_sunoblk.txt` it is inside its `genre:` line
+  (line 5), even though the file's **first** token is `[Is_MAX_MODE: …`. So the test
+  passes and no arm is prepended — making `--no-trigger` a **no-op** here.
+- **The real hazard:** the decision hinges on incidental content elsewhere in the file.
+  Edit the Suno block so `arabmaqamrock` no longer appears anywhere (e.g. drop it from
+  the `genre:` line) and the trigger is suddenly prepended, changing that arm with no
+  visible intent. Symmetrically, a style that legitimately needs the trigger but merely
+  *mentions* it in prose silently goes without.
+- **Correct pattern:** don't reason about prefixes. Check the file itself
+  (`grep -c 'arabmaqamrock' <style>`), and pass `--no-trigger` when you want the file
+  verbatim regardless of its contents.
+- **How it was found:** reading the `audiocpp_cli` command line recorded in the run's
+  `_runs_status.log`, which shows the style actually sent to the model.
+- **Correction (same day).** An earlier version of this entry claimed the default would
+  prepend the trigger *to the control arm only*, decoupling the listening audio from the
+  screen. **That was wrong** — the substring test matched the control arm too. Nothing
+  was harmed: the render passed `--no-trigger`, which was a no-op, so the rendered arms
+  are identical to the screened ones. Corrected in the same session it was written.
 - **Related:** `generate.py` writes `batch_manifest.json` + `input.json` into the run
-  dir **before** any generation, so an explicit `--out-dir` makes the batch
-  resumable; `--dry-run` validates paths/caps and needs no GPU.
+  dir **before** any generation, so an explicit `--out-dir` makes the batch resumable;
+  `--dry-run` validates paths/caps and needs no GPU.
