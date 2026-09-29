@@ -502,7 +502,27 @@ of commit `34d84cc`.
 
 **Gap, not fixed:** `screen_arms.sh` runs the binary directly rather than through `run_one.sh`,
 so the 16 screened arms wrote `_time.txt` + `.log` but **no `_gpu.csv`** — the screen has no GPU
-telemetry. Wiring in the sampler needs a real GPU run to test, and the GPU is busy with the render.
+telemetry. Wiring in the sampler needs a real GPU run to test; the GPU is now free, so it can be
+done next session.
 
 
 
+
+## 7. Next session — first items
+
+Carried over on purpose at session end (2026-09-29):
+
+1. **Consolidate `PROGRESS.md` before merging to `main`.** The branch's milestones are
+   deliberately **unwritten**; the rule + status note are in `PROGRESS.md`'s preamble (added
+   `f1aae4b`). It is its own pass (docs-reconciler *consolidation mode*), needs the user's
+   approval, and must yield **one or two outcome blocks** — not a narrative of every change,
+   test or experiment on this branch.
+2. **Fill in the blind listening round** (§6.1): 5 clips, ~22 min, one sheet. Open
+   `KEY_open_after_listening.txt` **only after** every section is scored.
+3. Still open (from §4): pick the production α/checkpoint (`qfinal_a0.3` vs `qfinal_a0.5`);
+   evaluate the 6 long-aya checkpoints on a T4; per-arch binary auto-selection.
+4. `music-cover` is **27 commits ahead of `main` and NOT merged** — by decision, all work stays
+   on the branch until item 1 is done.
+5. Infra left uncleaned on purpose: `gpu_logger.py` is DOWN (training-side only; harmless with no
+   training running), and the knowledge graph is stale (33 commits) — it **cannot** be refreshed
+   here because `graphify` is not installed on this VM.
