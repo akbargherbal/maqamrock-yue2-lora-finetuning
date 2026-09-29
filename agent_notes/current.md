@@ -1,10 +1,11 @@
 # current
 
-_Updated 2026-09-29 (Colab session 2, ~07:20–07:45 UTC). Purpose: the two paste-ready
+_Updated 2026-09-29 (~09:15 UTC, Colab session 2). Purpose: the two paste-ready
 prompts, the repeat cause, the dataset findings, and the test-batch artifacts — now with the
-assets staged, the semantic-screen driver built and running, backup restored, and a
-plain-English primer on the screen/ABC (below).
-Durable record: `docs/music-cover-feasibility.md` §9._
+assets staged, the semantic screen **COMPLETE (16/16)**, the 5-track listening render **IN
+FLIGHT**, backup running against the **new sectioned GCS layout**, and a plain-English primer
+on the screen/ABC (below).
+Durable record: `docs/music-cover-feasibility.md` §9. GCS layout: `docs/GCP_ORGANIZATION_PLAN.md`._
 
 ## In plain terms — what "the semantic screen" is, and why "ABC" keeps confusing us
 
@@ -54,8 +55,10 @@ _The terse version of the same three-way distinction is in §1 below._
 
 ## 0. VM state (checked, not assumed)
 
-- Branch **`music-cover`** @ `fb071aa`, clean tree apart from this session's two new
-  files (uncommitted, see §3).
+- Branch **`music-cover`** @ `bcaf1a6`, clean tree, pushed (`origin/music-cover` == HEAD).
+  This session's commits: `d46c8c6` (section the GCS inference layout), `b462d5b` (trigger
+  gotcha + the 1-seed manifest), `c2ccd7d` (reconciliation pass + verified GCS inventory),
+  `bcaf1a6` (**correction** — the trigger claim committed in `b462d5b` was wrong; see §6).
 - `/content` present, T4 **idle** (0 MiB / 0%). No training run active.
 - `bash bootstrap/setup.sh --inference` **done**: all 8 jobs `ok`, total 35 s
   (`/content/logs/timing.txt`). Staged: main GGUF 7.26 GB, VAE, sidecars, both v2
@@ -71,6 +74,8 @@ _The terse version of the same three-way distinction is in §1 below._
   `scripts -> tools/scripts`; `logs/`, `agent_notes/` unchanged). Local paths are UNCHANGED. The
   old flat paths still exist and are still the rollback — see
   `docs/GCP_ORGANIZATION_PLAN.md` §9 and §11.
+- **The GPU is NO LONGER idle**: the 5-track verbatim render is running (§6). Track 1 finished
+  09:04, track 2 in flight as of ~09:12. Check `nvidia-smi` before starting anything else.
 
 ## 1. What changed this session — read before re-planning
 
@@ -306,7 +311,10 @@ design — the training songs repeat a couplet once; 3×+ = an added repeat).
 `EVAL.txt` / `KEYS.txt` / `KEY.json` are deliberately **not written yet** — the packaging tool
 produces them at build time, and hand-writing them now would invent labels that map to no file.
 
-**STATUS 2026-09-29 08:57Z — RENDERING, track 1/5** (GPU 98%). Run dir:
+**STATUS 2026-09-29 ~09:12Z — RENDERING: 1/5 DONE, track 2 in flight** (GPU 100%, ~11.3 GB).
+Verified so far: `ctl_sunoblk_as-is_4148240095.wav` = **309.7 s / 56.7 MB** (ffprobe) — the
+control hit its 7750-frame cap exactly, as it should. Expected total ≈ **25.3 min of audio**
+across the 5 clips (7750/7750/7750/7000/7750 frames at 25 fps). Run dir:
 `/content/audiocpp_inference/out/verbatim_hijaz_seed4148240095` (explicit `--out-dir`, so it is
 resumable and `out/latest` cannot point the copy below at the *wrong* round). Manifest:
 `manifests/test_verbatim_hijaz/batch_seed4148240095.json` — a 5-arm × **1-seed** trim of
@@ -316,6 +324,13 @@ style file, and every Hijaz style already contains `arabmaqamrock` (in `hijaz_su
 it sits in the `genre:` line, not at the start) — so nothing is prepended either way. The
 rendered arms therefore match the screened ones. See `docs/COMMAND_HANDOVER_GOTCHAS.md`,
 entry 2026-09-29 (which carries a same-day correction).
+
+**The build + upload is AUTOMATED this round** — the packaging block below is what a background
+job is already running, so you should not need to paste it by hand. It waits for the render,
+verifies 5/5 WAVs, stages flat→per-arm, runs `prepare_ab_eval.py`, copies the sheets into
+`manifests/evaluation_verbatim_hijaz/`, and uploads. Log `/content/logs/ab_verbatim_pipeline.log`;
+stop `pkill -f 'verbatim_pipeline[.]sh'`. Every step is idempotent, so re-running the block is
+safe if it dies.
 
 The 5 arms in the round — one track, seed 4148240095, all from `batch.json`, `lora: v2`:
 
@@ -372,23 +387,63 @@ mkdir -p ~/verbatim_eval && gsutil -m cp -r \
 # then in the same folder: python3 -m http.server 8765   (or just open the files locally)
 ```
 
-Add the upload step to §6's packaging block once the mp3s exist:
+Add the upload step to §6's packaging block once the mp3s exist. **Note the rename**: the
+secret decoder goes up as `KEY_open_after_listening.txt`, matching every existing package
+(`MAQAM_LYRIC_SWAP_INPUT/` etc. all use that name — checked on the bucket, 2026-09-29):
 
 ```bash
 gsutil -m cp /content/ab_verbatim_out/*.mp3 \
   /content/ab_verbatim_out/EVAL.txt \
-  /content/ab_verbatim_out/KEYS.txt \
   gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/listening/VERBATIM_HIJAZ_LYRIC_ADHERENCE_INPUT/
+# secret decoder — renamed on upload, per the convention above
+gsutil cp /content/ab_verbatim_out/KEYS.txt \
+  gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/listening/VERBATIM_HIJAZ_LYRIC_ADHERENCE_INPUT/KEY_open_after_listening.txt
 ```
 
-Two gaps found while checking this (2026-09-29): **today's round has no GCS path yet** because no
-audio has been rendered, and **yesterday's ajam blind mp3 package is not on GCS either** — only the
-raw WAVs under `audiocpp_inference/out/style_ablation_ajam/` are (`l0_raw_298970020.wav` …
-`l4_min_298970020.wav`, ~224 MiB). Its label map survives in git
+**Deliberate deviation:** the four existing packages carry audio + the key and **no `EVAL.txt`**
+at all — the evaluator is handed audio with no instructions. This round adds `EVAL.txt`.
+
+One gap found while checking this (2026-09-29): **yesterday's ajam blind mp3 package is not on
+GCS** — only the raw WAVs under `audiocpp_inference/out/style_ablation_ajam/` are
+(`l0_raw_298970020.wav` … `l4_min_298970020.wav`, ~224 MiB). Its label map survives in git
 (`manifests/evaluation_style_ablation_ajam/KEYS.txt`), but the `ajam_A.mp3` … files themselves do
 not exist anywhere — they were built under `/content/` outside the mirror set. Re-packaging from the
 WAVs is possible but would need the same blinding seed (20260928) *and* variant order to reproduce
 yesterday's A–E labels, otherwise a re-run's labels won't match the scores already recorded.
+
+*(The other gap is now closed: today's round does have a GCS path. The raw renders are already
+under `audiocpp_inference/workspace/out/verbatim_hijaz_seed4148240095/`, and the blind package will
+land at `listening/VERBATIM_HIJAZ_LYRIC_ADHERENCE_INPUT/` when the pipeline finishes.)*
+
+### 6.2 Syncing the raw tracks while they render (progress only — NOT for scoring)
+
+```bash
+# terminal: FOREGROUND loop — long-running. Ctrl+C stops it; nothing is left running after.
+#   log:    n/a (prints to the terminal)
+#   resume: re-run — `rsync` is incremental and has no -d, so nothing local is ever deleted
+mkdir -p ~/verbatim_tracks
+while true; do
+  gsutil -m rsync -r \
+    'gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/workspace/out/verbatim_hijaz_seed4148240095' \
+    ~/verbatim_tracks && date -u +%FT%TZ && ls ~/verbatim_tracks/*.wav 2>/dev/null | wc -l
+  sleep 60
+done
+```
+
+- **One-shot** (no loop): keep only the `gsutil -m rsync -r` line.
+- **Audio only**, skipping the `.log`/`.json`/`_gpu.csv`/`_time.txt` sidecars: add
+  `-x '\.(log|json|csv|txt)$'`.
+- **Timing:** the daemon mirrors `out/` every ~5 min (passes observed 09:00:07 / 09:05:17 /
+  09:10:26), so GCS trails local by up to ~5 min. The first WAV was already up when checked.
+- **Do NOT use `out/latest` to locate this round.** Local `out/latest` does not exist yet:
+  `generate.py:984` writes it only *after* `run_batch` returns, so it appears once the whole batch
+  finishes. The `latest` object already on GCS is a **stale** pointer to a previous round
+  (`…/out/style_ablation_ajam`), left there by an older session. Use the explicit run dir.
+
+> **Blinding warning.** The raw filenames **are** the arm names
+> (`ctl_sunoblk_as-is_4148240095.wav`, `win_dedup_4148240095.wav`). Listening to these tells you
+> which arm you are hearing, which destroys the point of the round. Use this sync to watch progress
+> only; **score from §6.1's blind package**, whose files are `nesib_4148240095_A.mp3 … _E.mp3`.
 
 
 
