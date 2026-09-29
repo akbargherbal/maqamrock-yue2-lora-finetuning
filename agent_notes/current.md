@@ -306,6 +306,15 @@ design — the training songs repeat a couplet once; 3×+ = an added repeat).
 `EVAL.txt` / `KEYS.txt` / `KEY.json` are deliberately **not written yet** — the packaging tool
 produces them at build time, and hand-writing them now would invent labels that map to no file.
 
+**STATUS 2026-09-29 08:57Z — RENDERING, track 1/5** (GPU 98%). Run dir:
+`/content/audiocpp_inference/out/verbatim_hijaz_seed4148240095` (explicit `--out-dir`, so it is
+resumable and `out/latest` cannot point the copy below at the *wrong* round). Manifest:
+`manifests/test_verbatim_hijaz/batch_seed4148240095.json` — a 5-arm × **1-seed** trim of
+`batch.json`, because `generate.py` has no `--seed` filter. **`--no-trigger` is required**:
+`generate.py` would otherwise prepend `arabmaqamrock ` to the `ctl_sunoblk` arm only, and
+`run_one.sh` (which rendered every screened arm) never does — see
+`docs/COMMAND_HANDOVER_GOTCHAS.md`, entry 2026-09-29.
+
 The 5 arms in the round — one track, seed 4148240095, all from `batch.json`, `lora: v2`:
 
 | arm | what differs |
@@ -324,7 +333,7 @@ Build the package once the audio exists (`prepare_ab_eval.py` wants one folder p
 #   log:    /content/logs/ab_build.log
 #   stop:   pkill -f 'prepare_ab_eval[.]py'   (aborts; re-runnable)
 #   resume: re-run the block — the copy loop is idempotent
-R=$(readlink -f /content/audiocpp_inference/out/latest)
+R=/content/audiocpp_inference/out/verbatim_hijaz_seed4148240095   # explicit: do NOT use out/latest (it may still point at an older round)
 mkdir -p /content/ab_verbatim
 for a in ctl_sunoblk_as-is win_as-is mod_as-is win_dedup win_bare; do
   mkdir -p "/content/ab_verbatim/$a"
