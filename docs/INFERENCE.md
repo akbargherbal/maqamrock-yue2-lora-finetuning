@@ -110,7 +110,7 @@ self-contained:
 | `<Maqam>_<seed>.wav` | the generated audio |
 | `<Maqam>_<seed>.log` | CLI `--log` (TRACE/TIMING, errors) |
 | `<Maqam>_<seed>_time.txt` | `/usr/bin/time -v` (wall, max RSS, CPU%) |
-| `<Maqam>_<seed>_gpu.csv` | 1 Hz GPU util/mem/power/temp during the run |
+| `<Maqam>_<seed>_gpu.csv` | 1 Hz `nvidia-smi` during the run — header row, then `gpu_util_pct,mem_used_mib,power_draw_w,temp_c` |
 | `_runs_status.log` | one START/END line per run (always written) |
 
 ## Generate from your own JSON (bring your own lyrics)

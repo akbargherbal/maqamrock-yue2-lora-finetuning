@@ -115,6 +115,8 @@ def _gpu_stats(p):
             parts = [x.strip() for x in line.split(",")]
             if len(parts) != 4:
                 continue
+            if parts[0] == "gpu_util_pct":  # header row (run_one.sh writes one)
+                continue
             try:
                 for i, v in enumerate(parts):
                     cols[i].append(float(v))
