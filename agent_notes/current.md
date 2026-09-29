@@ -311,10 +311,22 @@ design — the training songs repeat a couplet once; 3×+ = an added repeat).
 `EVAL.txt` / `KEYS.txt` / `KEY.json` are deliberately **not written yet** — the packaging tool
 produces them at build time, and hand-writing them now would invent labels that map to no file.
 
-**STATUS 2026-09-29 ~09:12Z — RENDERING: 1/5 DONE, track 2 in flight** (GPU 100%, ~11.3 GB).
-Verified so far: `ctl_sunoblk_as-is_4148240095.wav` = **309.7 s / 56.7 MB** (ffprobe) — the
-control hit its 7750-frame cap exactly, as it should. Expected total ≈ **25.3 min of audio**
-across the 5 clips (7750/7750/7750/7000/7750 frames at 25 fps). Run dir:
+**STATUS 2026-09-29 ~09:13Z — RENDERING: 2/5 DONE, track 3 in flight** (GPU 100%).
+
+| # | arm | wall | audio rendered | screen predicted |
+|---|---|---|---|---|
+| 1 | `ctl_sunoblk_as-is` | 7:17 | 309.7 s | 7743 f = 309.7 s ✅ |
+| 2 | `win_as-is` | 8:23 | 271.9 s | 6798 f = 271.9 s ✅ |
+| 3 | `mod_as-is` | in flight (started 09:12:33) | — | 7303 f = 292.1 s |
+
+**The screen's frame counts predict the rendered duration exactly (2/2 so far):**
+`7743/25 = 309.72 s` and `6798/25 = 271.92 s`, both matching the WAVs to a tenth of a second.
+That validates the screen's length signal against real audio rather than argument — which is
+what makes §2.1's `vs ref` column usable as a predictor.
+
+Revised expectation: **≈22.2 min of audio**, not the ~25.3 min derived from the caps — the caps
+are ceilings and most arms stop short of theirs (only `c3_abc_raw` ever reached 7750). The
+screen's measured frames are the better estimate. Run dir:
 `/content/audiocpp_inference/out/verbatim_hijaz_seed4148240095` (explicit `--out-dir`, so it is
 resumable and `out/latest` cannot point the copy below at the *wrong* round). Manifest:
 `manifests/test_verbatim_hijaz/batch_seed4148240095.json` — a 5-arm × **1-seed** trim of
