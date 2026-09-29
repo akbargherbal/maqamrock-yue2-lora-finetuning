@@ -37,8 +37,9 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 `investigation.md` and `yue2-gguf-lora-findings.md` are **superseded/retracted**
 (see the banners at their tops); do not follow them. [music-cover-feasibility.md](music-cover-feasibility.md)
 is an investigation record (2026-09-28 covers/ABC conditioning, α tradeoff, style-text
-lever; **2026-09-29 §9** characterises the v2 training set, resolves the outro-repeat as
-a trained convention, and re-scopes the batch) — hypotheses unverified; procedures stay
+lever; **2026-09-29 §9** characterises the v2 training set and resolves the outro-repeat as
+a trained convention; **§10** records the verbatim/lyric-adherence blind round — no repeats,
+baseline / baseline+`110 BPM` win, ABC arms unrun) — hypotheses unverified; procedures stay
 with the runbooks above.
 
 ## Constants (memorize / copy)

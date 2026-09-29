@@ -395,3 +395,19 @@ covers both._
   script while it is running" entry, and the run's `_runs_status.log` / `_failed_runs.log`
   carry NOTES.
 - Reconciler: no doc claims changed by this edit; no run config or hyperparameter changed.
+
+## 2026-09-29 — verbatim blind round written into the record
+
+- The user's blind evaluation (`manifests/evaluation_verbatim_hijaz/MY_EVALUATION.txt`) was
+  decoded against `KEYS.txt` and documented as `docs/music-cover-feasibility.md` **§10**
+  (design, scores, verdict, caveats, provenance); the header revision line now names §10.
+- Resolved stale §9 claims with cross-references rather than rewriting the dated snapshot:
+  §9.5's "no-repeat-sheet arm missing" (since rendered/scored), §9.6 Q4 (sung clean) and Q2
+  (not implicated). Q1 (ABC) is left explicitly unrun.
+- `docs/README.md`: the not-a-runbook blurb now names §10.
+- `SOURCE_OF_TRUTH.md`: new row — round outcome, authority
+  `manifests/evaluation_verbatim_hijaz/MY_EVALUATION.txt` (+ `KEYS.txt`).
+- `manifests/evaluation_verbatim_hijaz/KEY.json` deleted — a stale copy of the first build's
+  decoder; the mapping lives in `KEYS.txt` and in git history at `6443287`.
+- Reconciler: narrative-only change; no config, hyperparameter, or script touched, and no
+  other live doc asserts this round's outcome — **0 new drift**.

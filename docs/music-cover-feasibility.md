@@ -1,10 +1,12 @@
 # Music cover / guide-conditioned generation — feasibility
 
-_Last revised: 2026-09-29 (**§9 addendum**: v2 training set characterised, outro-repeat
-resolved, ABC/cover batch re-scoped). Earlier, 2026-09-28: route corrected to transcribe
-with the **official Python SheetSage2** (no audio.cpp rebuild; binary capability
-verified). Investigation & discussion record — **not a runbook**.
-The transcription front end (route B2) has been smoke-tested and works; the
+_Last revised: 2026-09-29 (**§10 addendum**: the verbatim/lyric-adherence blind round is
+scored and decoded — no repeats, baseline / baseline+`110 BPM` win; **§9 addendum**: v2
+training set characterised, outro-repeat resolved, ABC/cover batch re-scoped). Earlier,
+2026-09-28: route corrected to transcribe with the **official Python SheetSage2** (no
+audio.cpp rebuild; binary capability verified). Investigation & discussion record — **not a
+runbook**.
+The transcription front end (route B2) has been smoke-tested and works; the **ABC**
 generation experiments remain unrun — hypotheses are marked as such.
 Authority for procedures stays with `docs/INFERENCE.md`, `docs/PRON_LORA_MERGE.md`,
 `docs/LORA_INVENTORY.md`, and `config/akbar_arabic_rock_lora.yml`._
@@ -273,6 +275,7 @@ Proposed guide = `01-نسيب-وظعن-الحي-ونخيل-يامن-وعرائس
   `cot=off`. Any ABC arm needs a `cot=melody`-no-`abc` control.
 - **Missing:** a control arm; a **no-repeat-sheet** arm (the only one that separates
   "followed the sheet" from "injected the prior"); n=1 seed; an objective metric.
+  *Update §10: the control and no-repeat-sheet arms were subsequently rendered and scored.*
 - Built at `manifests/test_verbatim_hijaz/batch.json` (`generate.py` arms:
   `ctl_sunoblk_as-is`, `win_as-is`, `mod_as-is`, `win_dedup`, `win_bare`) plus
   `INFERENCE/test_batch.sh <knobs|abc|all>` (the arms `generate.py` can't express —
@@ -286,8 +289,10 @@ Proposed guide = `01-نسيب-وظعن-الحي-ونخيل-يامن-وعرائس
    fidelity? **Unrun.**
 2. Does the **descriptor-tag** mismatch (bare tags in training vs descriptor tags at
    inference) explain the extra repeat? Test: same track, bare-tag vs descriptor sheet.
+   **§10: no extra repeat was observed in any arm — not implicated on this track.**
 3. Which adapter for the batch — `v2` or `qfinal_a0.3`? (§3's tradeoff decides.)
 4. Does a **no-repeat sheet** get echoed (adapter injection) or sung clean?
+   **Answered §10: sung clean — no injection.**
 
 ### 9.7 Provenance additions (2026-09-29)
 
@@ -296,3 +301,70 @@ Proposed guide = `01-نسيب-وظعن-الحي-ونخيل-يامن-وعرائس
 - Workflow that built the repeats: `github.com/akbargherbal/suno-workflow`
   (`workflow.md`, `Quick_Guide.md`).
 - Session handoff + knob tables + proposed batch: `agent_notes/current.md`.
+
+---
+
+## 10. Addendum — 2026-09-29: the verbatim / lyric-adherence blind round (scored)
+
+_The §9.6 repeat questions (Q2, Q4) are answered here by listening; Q1 (ABC) stays unrun.
+Scores: `manifests/evaluation_verbatim_hijaz/MY_EVALUATION.txt`; decoder: same dir
+`KEYS.txt` (the earlier build's `KEY.json` was deleted 2026-09-29). The audio package
+lives on GCS (`listening/VERBATIM_HIJAZ_LYRIC_ADHERENCE_INPUT/`). One track, one seed, one
+listener — a signal, not proof._
+
+### 10.1 Design
+
+One track (`01-نسيب…_4148240095`, **Hijaz**), adapter **v2** (step 3000), render seed
+`4148240095`, all `cot=off`. Five arms differ **only** in the style text and/or the lyric
+sheet, so a difference is attributable to that change. Blinded + shuffled with
+`INFERENCE/prepare_ab_eval.py` (blinding seed `20260929`); scored blind, then decoded:
+
+| label | arm | the one variable isolated |
+|---|---|---|
+| A | `ctl_sunoblk_as-is` | baseline — the track's own raw Suno block + its sheet |
+| B | `mod_as-is` | the "winning" prompt + `110 BPM` restored |
+| C | `win_dedup` | the "winning" prompt + a sheet with the built-in repeats **removed** (injection test) |
+| D | `win_as-is` | the "winning" `l2_target_off` prompt alone |
+| E | `win_bare` | the "winning" prompt + bare `[Verse 1]` tags (the trained format) |
+
+### 10.2 Result
+
+| section | A | B | C | D | E |
+|---|---:|---:|---:|---:|---:|
+| intro-verse vocal | 4.5 | **5** | 4 | 4 | 4 |
+| maqam rock (v2) | 4.5 | 4.5 | 4 | 4 | 4 |
+| overall vocal | 4.5 | **5** | 4.5 | 4 | 4 |
+| pronunciation | 4.5 | 4.5 | **5** | 4 | 4 |
+| lyrics adherence | 5 | 5 | 5 | 5 | 5 |
+| pace | **5** | 4.5 | 3.5 | 4 | 3.5 |
+| **mean** | 4.67 | **4.75** | 4.33 | 4.17 | 4.08 |
+| vocal start | 22 s | 21 s | 30 s | 19 s | 6 s |
+
+- **Repeats — none, in any arm.** The no-repeat sheet (C) was **not** re-filled with the
+  removed repeats; every clip scored 5/5 for singing its own sheet. **§9.6 Q4 answered:**
+  the adapter did **not** inject the prior's repeats on this track.
+- **Quality: B ≥ A > C > D > E.** The baseline (A) and baseline+`110 BPM` (B) lead; the
+  "winning" prompt (D) came **4th** ("generic / meh"), bare tags (E) **last**. The
+  listener's own summary: *"best-sounding: A OR B"*.
+- **Objective corroboration:** rendered durations equal the §9 screen's predicted frame
+  counts (5/5) and none truncated — an injected repeat lengthens the plan, and the guide's
+  natural plan (7743) sits 7 frames under the 7750 cap. Ears and length agree.
+- **§9.6 Q2** (descriptor-tag mismatch → extra repeat): no extra repeat anywhere, so it is
+  not implicated here. **Q1 (ABC) remains unrun** — every arm in this round was `cot=off`.
+
+### 10.3 Caveats
+
+n=1 track, 1 seed, 1 listener, subjective 1–5 with no confidence recorded; B over A is
+`0.08` (noise-level). This is evidence the defect did not reproduce on this track, and that
+the "winning" prompt / bare-tag format are unsupported here — not a general verdict on the
+adapter.
+
+### 10.4 Provenance
+
+- Scores + blank sheet: `manifests/evaluation_verbatim_hijaz/MY_EVALUATION.txt`; decoder
+  `manifests/evaluation_verbatim_hijaz/KEYS.txt`.
+- Packaging tool: `INFERENCE/prepare_ab_eval.py` (skill `ab-blind-eval`); blinding seed
+  `20260929`.
+- Render run dir: `out/verbatim_hijaz_seed4148240095` (5/5 durations matched the screen);
+  round uploaded in commit `6443287`.
+- Session notes + knob tables: `agent_notes/current.md`.

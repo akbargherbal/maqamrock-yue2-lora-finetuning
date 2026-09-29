@@ -30,4 +30,5 @@ History files are authoritative for what happened, never for what is true now.
 | Repo knowledge graph (graphify) | `docs/GRAPHIFY.md` | generated map; refresh with `graphify update` |
 | Agent contract | `AGENTS.md` | |
 | v2 training-set facts (repeats, caption shape, lyric tags) | `docs/music-cover-feasibility.md` §9.1–9.2 | measured over the 267-song GCS dataset; sampler note §9.3 |
+| Verbatim / lyric-adherence blind round outcome | `manifests/evaluation_verbatim_hijaz/MY_EVALUATION.txt` (+ `KEYS.txt`) | 5 arms, 1 track, seed 4148240095; narrated in `docs/music-cover-feasibility.md` §10 |
 | Archived / superseded | `docs/investigation.md`, `docs/yue2-gguf-lora-findings.md`, `verification.md`, `docs/LIVE_STATUS.md` | banners are correct; don't "fix" |

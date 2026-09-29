@@ -1,5 +1,5 @@
-VERBATIM_HIJAZ_LYRIC_ADHERENCE
-Generated: 2026-09-29 09:36:21Z
+A/B BLIND AUDIO EVALUATION
+Generated: 2026-09-29 11:40:33Z
 
 You are evaluating audio blind. For each track you have one file per
 label (A, B, C, D, E), differing in configuration but with the labels

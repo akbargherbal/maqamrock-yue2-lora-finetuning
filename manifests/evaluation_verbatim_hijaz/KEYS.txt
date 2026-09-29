@@ -1,7 +1,7 @@
 =====================================================
-            VERBATIM_HIJAZ_LYRIC_ADHERENCE           
+              A/B BLIND AUDIO EVALUATION             
     SECRET DECODER KEY — open only AFTER listening   
-           Generated: 2026-09-29 09:36:21Z           
+           Generated: 2026-09-29 11:40:33Z           
 =====================================================
 seed=20260929  shuffle_per=category  variants=ctl_sunoblk_as-is, mod_as-is, win_as-is, win_bare, win_dedup
 -----------------------------------------------------
