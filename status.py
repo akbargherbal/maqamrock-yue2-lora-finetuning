@@ -182,8 +182,12 @@ def section_inference(lines: list[str]) -> bool:
     )
     failed = run_dir / "_failed_runs.log"
     if failed.is_file():
-        n = len([ln for ln in failed.read_text(errors="replace").splitlines() if ln.strip()])
-        lines.append(f"  failures: {n} (see {failed.name})")
+        text = failed.read_text(errors="replace")
+        # Count FAILED lines only. NOTE/annotation lines appended for the record must
+        # not inflate this (2026-09-29: a spurious exit=127 note made it read 2).
+        n = len([ln for ln in text.splitlines() if ln.strip().startswith("FAILED")])
+        suffix = " (one is flagged SPURIOUS in-file)" if "SPURIOUS" in text else ""
+        lines.append(f"  failures: {n} (see {failed.name}){suffix}")
     summary = run_dir / "batch_summary.txt"
     if summary.is_file():
         for ln in summary.read_text(errors="replace").splitlines():

@@ -383,3 +383,15 @@ covers both._
   `manifests/workspace_manifest.json` fixture) — **0 new drift**.
 - Authority: the writer's own `nvidia-smi` query plus `gpu_logger.py`'s `FIELDS`; no run
   config or hyperparameter changed.
+
+## 2026-09-29 — `status.py` counted annotations as failures
+
+- `status.py:185` counted every non-blank line of `_failed_runs.log`, so the explanatory
+  `NOTE` appended there (for the spurious `win_dedup exit=127`, above) made the report read
+  `failures: 2`. It now counts `FAILED` lines only, and appends "one is flagged SPURIOUS
+  in-file" when the file contains a correction note — so the next session is not invited to
+  re-render valid audio.
+- Related, same incident: `docs/COMMAND_HANDOVER_GOTCHAS.md` gained the "never edit a shell
+  script while it is running" entry, and the run's `_runs_status.log` / `_failed_runs.log`
+  carry NOTES.
+- Reconciler: no doc claims changed by this edit; no run config or hyperparameter changed.
