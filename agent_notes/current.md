@@ -1,123 +1,108 @@
 # current
 
-_Updated 2026-09-29. **Next session = Colab.** We finished on the local machine: the
-guide-conditioned batch is written, `bash -n` + `--dry-run` checked, and the bucket
-inventory is verified read-only. Read this first on the Colab VM, then run §3. Durable
-analysis is `docs/music-cover-feasibility.md` **§11** (inventory, guide options, risks) and
-**§10** (last round's verdict). Branch `music-cover`._
+_Updated 2026-09-29 (Colab VM). The guide-conditioned batch is **mid-run**: bootstrap done,
+adapter staged + sha256-verified, **phase 1 done (`score.abc=yes`)**, `a0_cotoff` rendering.
+Durable analysis: `docs/music-cover-feasibility.md` **§11**. Branch `music-cover` @ `5ca4c71`._
 
-## 0. TL;DR
+## 0. Verified state this session
 
-- **Goal:** test whether v2's plan (exported as `score.abc`) can steer **`qfinal_a0.3`**
-  into v2's maqamrock arrangement **without losing** qfinal's pronunciation.
-- **Driver:** `INFERENCE/v2_abc_to_qfinal.sh` — 4 arms, one track/seed. Verified: `bash -n`
-  clean, `--dry-run` plan correct, `--stage` pulls `qfinal_a0.3`.
-- **Everything needed is in GCS** (verified 2026-09-29) **except** v2's own `cot=full`
-  `score.abc` — phase 1 of the driver generates it. (The pre-existing SheetSage2 ABC can be
-  used instead; see §3 note.)
-- **Not run yet** — needs a Colab GPU. This box is localhost: no `nvidia-smi`, no `/content`.
+- **Env:** Colab. GPU **Tesla T4**, in use by the render. Disk 188 GB free at bootstrap.
+- **Bootstrap** `bash bootstrap/setup.sh --inference`: **8/8 jobs `[ok]`, total 40 s**, no
+  `[FAIL]`. Staged `bin/audiocpp_cli` (350 MB sm_75/T4), `models/Yue2-3B-GGUF/` (7.26 GB
+  bf16 + VAE + sidecars), v2 LoRA pair, `prompts/`(8) + `scripts/`(6), GNU `time`.
+- **Candidate adapter** `--stage`: `/content/converter/out/qfinal_a0.3/` — AR sha256
+  **`0169e5a0ef7d4734…`** (matches the notes' `0169e5a0…`).
+- **Guide route = B1** (v2's own `score.abc`; phase 1 exported it).
+- **Render** (started 13:48 UTC), driver detached, log `/content/logs/v2abc.log`:
+  - phase 1 `v2_plan_…` → `score.abc=yes` (done ~5 min);
+  - `a0_cotoff` **END exit=0** (13:53:37 → 14:02:26); `a1_cotfull_noabc` running; then
+    `a2_cotfull_abc`, `ref_v2_cotoff`. ~6.5–9 min/arm on a T4.
+- **Backup daemon** `python3 backup_to_gcp.py --inference` running (mirrors every **5 min**,
+  `--interval-minutes` default `5.0`).
+- **`gpu_logger.py`** = n/a (training-only; correlates with `loss_log.db`).
+  **`vm-continuity`** loop running, `status` OK. Git `music-cover` == `origin`.
 
-## 1. Where we are (what changed just before this)
+## 1. The render — how it was launched (already running)
 
-- The **verbatim / lyric-adherence blind round is scored and recorded** —
-  `docs/music-cover-feasibility.md` §10. Result: **no repeats in any arm**; quality
-  **B ≥ A > C > D > E** (B = baseline+`110 BPM`; D = the "winning" prompt, 4th; E bare tags,
-  last). Commit `e284052`.
-- Deleted the stale `manifests/evaluation_verbatim_hijaz/KEY.json`; normalized the manifest
-  text files CRLF→LF.
-- Wrote `INFERENCE/v2_abc_to_qfinal.sh` and verified the bucket (see §2).
-
-## 2. Verified assets (`gsutil ls`, bucket read-only, 2026-09-29)
-
-Base = `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`
-
-| asset | path (under base) | note |
-|---|---|---|
-| candidate adapter | `loras/audio_cpp/pron/qfinal_a0.3/akbar_arabic_rock_lora_{ar,nar}.safetensors` | AR rank 40; AR sha256 `0169e5a0…` |
-| v2 style pair | `loras/audio_cpp/style/…` | staged by bootstrap |
-| guide ABC (B2) | `audiocpp_inference/workspace/out/abc_v2/01-نسيب…_4148240095/score.abc` | + `chords.mid`, `melody_vocal.mid`, `tokens.json` |
-| 11 more v2 ABCs | `…/workspace/out/abc_v2/` | 12 dirs total |
-| guide WAV | `…/workspace/out/batch_36_songs/01-نسيب…_4148240095.wav` | B2 source / reference |
-| today's 5 arms | `…/workspace/out/verbatim_hijaz_seed4148240095/*.wav` | re-listenable |
-| pinned tooling | `audiocpp_inference/tools/{build,converter,prompts,scripts}` | |
-| **not stored** | v2's own `cot=full` `score.abc` | phase 1 generates it |
-
-Prompt/lyrics are in-repo: `manifests/test_verbatim_hijaz/styles/hijaz_winning.txt` (or
-`hijaz_sunoblk.txt`) and `lyrics/01_nesib_as-is.txt`.
-
-## 3. Commands (Colab GPU VM)
+`terminal: detached` — survives Ctrl+C / closing the tab.
 
 ```bash
-# 0) fresh VM: stage pinned tooling (model, binary, v2 style, prompts). Skip if done.
 cd /content/maqamrock-yue2-lora-finetuning
-git pull --ff-only                     # pick up this file + the driver (branch music-cover)
-bash bootstrap/setup.sh --inference
-
-# 1) GPU rule — confirm the card is free before any render (AGENTS.md §8)
-nvidia-smi
-
-# 2) stage the candidate adapter (bootstrap stages ONLY the style pair)
-bash INFERENCE/v2_abc_to_qfinal.sh --stage
-
-# 3) dry run — prints the plan, runs nothing
-bash INFERENCE/v2_abc_to_qfinal.sh --dry-run
-
-# 4) real run — DETACHED (survives Ctrl+C / closing the tab)
-mkdir -p /content/logs
+setsid nohup python3 backup_to_gcp.py --inference > /content/logs/backup_inference.log 2>&1 & disown
 setsid nohup bash INFERENCE/v2_abc_to_qfinal.sh > /content/logs/v2abc.log 2>&1 & disown
 #   watch:  tail -f /content/logs/v2abc.log
-#   stop:   pkill -f 'v2_abc_to_qfinal.sh'     (re-runnable; overwrites its arms)
+#   stop:   pkill -f 'v2_abc_to_qfinal.sh'      (re-runnable; overwrites its own arms)
 #   resume: re-run the same line
-
-# 5) mirror the run
-python3 backup_to_gcp.py --inference --once
 ```
 
-**Use the existing SheetSage2 ABC (B2) instead of phase 1** — pull the guide dir and point
-`ABC_SCORE=` at it (skips the v2 `cot=full` render):
+Outputs (VM): `/content/audiocpp_inference/out/v2_abc_to_qfinal_seed4148240095/`.
+
+## 2. On my local machine — pull the run output (after it finishes)
+
+`backup_to_gcp.py --inference` maps **`/content/audiocpp_inference/out` →
+`audiocpp_inference/workspace/out`** (sectioned layout). So the new arms land at:
 
 ```bash
-gsutil -m cp -r "$BASE/audiocpp_inference/workspace/out/abc_v2/01-نسيب…_4148240095" \
-  /content/audiocpp_inference/out/abc_v2/
-ABC_SCORE=/content/audiocpp_inference/out/abc_v2/01-نسيب…_4148240095/score.abc \
-  bash INFERENCE/v2_abc_to_qfinal.sh
+gsutil -m rsync -r 'gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/workspace/out/v2_abc_to_qfinal_seed4148240095' ./v2abc_tracks
 ```
 
-## 4. The arms — and how to read them
+Check it's actually there first (each arm appears within ~5 min of its WAV settling):
 
-One track (Hijaz, seed `4148240095`), style `hijaz_winning`, lyrics `01_nesib_as-is`.
+```bash
+gsutil ls 'gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/workspace/out/v2_abc_to_qfinal_seed4148240095/'
+```
 
-| arm | adapter | cot / abc | question it answers |
-|---|---|---|---|
-| `a0_cotoff` | qfinal_a0.3 | `cot=off` | control (current qfinal) |
-| `a1_cotfull_noabc` | qfinal_a0.3 | `cot=full` | how much is just the `cot` change |
-| `a2_cotfull_abc` | qfinal_a0.3 | `cot=full` + `abc_file` | **the idea** |
-| `ref_v2_cotoff` | v2 | `cot=off` | arrangement/pron reference |
+Add `-d` (`gsutil -m rsync -r -d …`) for a true local mirror; omit it to be safe.
 
-Outputs under `/content/audiocpp_inference/out/v2_abc_to_qfinal_seed4148240095/`.
+**Previous round's blinded package** (the A–E mp3s already scored) lives under `listening/`,
+**not** `workspace/out/`:
 
-**Verdict:** `a0` vs `a2` — does `a2` keep v2's arrangement **without** losing
-pronunciation? If `a2` pronounces like `ref_v2`, the AR-override conflict is real (§3/§11.3)
-and only the blocked `semantic_prefix` route can thread it. If `a2 ≈ a0`, the guide did
-nothing. Blind with `INFERENCE/prepare_ab_eval.py` (next unused blinding seed) for a fair
-call; there is **no objective arrangement metric**.
+```bash
+gsutil -m rsync -r 'gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/listening/VERBATIM_HIJAZ_LYRIC_ADHERENCE_INPUT' ./verbatim_blind
+#   do not open KEY_open_after_listening.txt until after scoring
+```
 
-## 5. Open questions / risks
+**Previous round's raw tracks** (what the earlier command pulled):
 
-1. **AR conflict** — the pron fix lives in the AR stream; any guide overrides it.
-2. **Off-distribution** — adapters trained `cot=off`; `abc_file` forces `cot=melody|full`
-   (hence `a1`).
-3. **Melody ≠ arrangement** — stored ABCs are melody-only; only B1 (`score.abc`) or
-   `semantic_prefix` carry chords/plan.
-4. `semantic_prefix` — the more promising partial-prefix route — is **blocked**: our staged
-   binary is < v0.8.2 (0 `semantic_prefix` hits). Needs a newer build.
-5. Maqam match: guide ABC + prompt must both be Hijaz (don't pair with the Ajam winning
-   prompt).
+```bash
+gsutil -m rsync -r 'gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/workspace/out/verbatim_hijaz_seed4148240095' ./verbatim_tracks
+```
 
-## 6. Pointers
+A **new blinded package for these four arms does not exist yet** — build it after the render
+(`INFERENCE/prepare_ab_eval.py`, skill `ab-blind-eval`; next unused blinding seed, e.g.
+`20260930` — `20260928`/`20260929` are used), then it goes to `listening/<NAME>/` on GCS.
+
+## 3. Then — the verdict
+
+Listen `a0` vs `a2`: does `a2` keep v2's arrangement **without** losing pronunciation? If
+`a2` pronounces like `ref_v2`, the AR-override conflict is real (§11.3) and only the blocked
+`semantic_prefix` route can thread it; if `a2 ≈ a0`, the guide did nothing. Blind the four
+arms for a fair call — there is **no objective arrangement metric**. Cross-check: rendered
+durations/frame counts (an injected repeat lengthens the plan).
+
+## 4. Session side-work on the VM (non-GPU, done 2026-09-29)
+
+- **Docs reconcile** (`docs-reconciler`): first pass flagged 11 (0.9 %), all `missing_path`.
+  Root cause: `manifests/workspace_manifest.json` was **deleted in `528f573`** while
+  `tests/test_suno_to_songs.py` (10 tests) and 3 live docs still referenced it — the tests
+  were **failing**. **Restored** the fixture from `528f573^` (70 KB, 16 tracks): all 17
+  tests pass; the 6 doc claims resolve with **no prose edits**. `SOURCE_OF_TRUTH.md:33`
+  path qualified; 3 doc-scoped entries added to
+  `skills/docs-reconciler/references/unverifiable.txt`. Re-verify: **11 → 1 flagged**
+  (residual `docs/music-cover-feasibility.md:313` `KEYS.txt`, declined).
+  Logged in `RECONCILIATION_LOG.md`.
+- **Graph:** `uv tool install graphifyy` (+ `graphify-out/.graphify_python`); `graphify
+  update .` → 1125 nodes / 2207 edges at HEAD `5ca4c71`; `status.py` says
+  **`graph: fresh at HEAD 5ca4c71`**. Semantic `/graphify --update` not run (no skill here).
+- **Uncommitted:** `manifests/workspace_manifest.json` (restored, untracked),
+  `RECONCILIATION_LOG.md`, `SOURCE_OF_TRUTH.md`, `unverifiable.txt`, this file, plus the
+  graph rebuild (`graphify-out/*`, and the 0.9.70→0.9.71 cache churn). Commit when ready.
+
+## 5. Pointers
 
 - Feasibility: `docs/music-cover-feasibility.md` §11 (this batch) · §3 (α tradeoff) · §5
-  (B1/B2) · §10 (last round).
-- Adapters/identity: `docs/LORA_INVENTORY.md` (`qfinal_a0.3` row), `docs/PRON_LORA_MERGE.md`.
-- Blind packaging: skill `ab-blind-eval`, `INFERENCE/prepare_ab_eval.py`.
-- This file is a handoff surface, not authority — re-derive state from the artifacts/logs.
+  (B1/B2) · §10 (last round) · §11.3 (the three risks).
+- Adapters/identity: `docs/LORA_INVENTORY.md`, `docs/PRON_LORA_MERGE.md`.
+- Runbook: `docs/INFERENCE.md`; blind packaging: skill `ab-blind-eval`.
+- GCS layout: `backup_to_gcp.py` `INFERENCE_TARGETS`; `docs/GCP_ORGANIZATION_PLAN.md`.
+- This file is a handoff surface, not authority — re-derive state from §0's artifacts/logs.
