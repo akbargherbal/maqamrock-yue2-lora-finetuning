@@ -3,6 +3,26 @@
 _Updated 2026-09-29 (localhost). Step 1 of the style-ablation plan is DONE; the
 render below is the next action and is **Colab/GPU only** — this box has no `/content`._
 
+## 0. Resume THIS conversation on the VM (session-restore trick)
+This session (`ses_f1557587dffeXPFxvuqBOVpqil`) was exported locally and uploaded:
+```
+gs://akbar-december-2024-backup/opencode_sessions/by_id/ses_f1557587dffeXPFxvuqBOVpqil.json
+```
+653,059 B; md5 hex `4b225f41bb55cdbc9ccb162bc34b702a` (remote md5 b64 `SyJfQbtVzbycyxYrw0twKg==`), uploaded 2026-09-29.
+
+Restore on the VM (terminal: foreground, quick) — import target is cwd, there is no `--directory` flag:
+```bash
+gsutil cp gs://akbar-december-2024-backup/opencode_sessions/by_id/ses_f1557587dffeXPFxvuqBOVpqil.json /content/
+cd /content/maqamrock-yue2-lora-finetuning
+opencode import /content/ses_f1557587dffeXPFxvuqBOVpqil.json
+opencode -s ses_f1557587dffeXPFxvuqBOVpqil          # or pick it in the session list
+```
+Carries the **conversation** (turns + tool calls), not the environment; history paths are
+this local box's (`/home/akbar/…`). Note: the transcript contains a **leaked `GH_TOKEN`** —
+rotate that PAT and it's moot. Tool-native alternative (if wanted): from this box
+`vm-continuity capture opencode && vm-continuity ship`, then on the VM
+`vm-continuity pull`, `vm-continuity restore opencode -- --mode export|db`.
+
 ## Done this session — style-ablation manifest built
 
 - New tool `INFERENCE/build_style_ablation.py` (self-validates via
