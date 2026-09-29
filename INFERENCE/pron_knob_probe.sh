@@ -58,7 +58,7 @@ touch "$FAILED"
 for f in "$AR" "$NAR"; do
   if [ ! -f "$f" ]; then
     echo "pron_knob_probe: missing anchor adapter: $f" >&2
-    echo "  stage it from gs://<base>/audiocpp_inference/maqam_lyric_swap/converted/$ANCHOR_CFG/" >&2
+    echo "  stage it from gs://<base>/audiocpp_inference/evals/maqam_lyric_swap/converted/$ANCHOR_CFG/" >&2
     exit 2
   fi
 done

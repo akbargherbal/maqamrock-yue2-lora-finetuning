@@ -66,6 +66,11 @@ _The terse version of the same three-way distinction is in §1 below._
   running (log `/content/logs/gcp_backup.log`, 5-min interval). Drift before the catch-up:
   `out/` 5.4 h, `logs/` 4.7 h, `agent_notes/` 5 h. `gpu_logger.py` is still down (training
   concern, not this session's).
+- **GCS remote layout changed the same day** (2026-09-29): `audiocpp_inference/` is now sectioned
+  and the daemon writes the sections (`out -> workspace/out`, `prompts -> tools/prompts`,
+  `scripts -> tools/scripts`; `logs/`, `agent_notes/` unchanged). Local paths are UNCHANGED. The
+  old flat paths still exist and are still the rollback — see
+  `docs/GCP_ORGANIZATION_PLAN.md` §9 and §11.
 
 ## 1. What changed this session — read before re-planning
 
@@ -173,6 +178,45 @@ text **with only `110 BPM` restored** — a clean single variable vs `win_as-is`
 no lyric↔frame alignment, so it cannot say *which line* was sung. It ranks arms by planned
 length + truncation. The verbatim verdict still needs the rendered audio (listening, or
 ASR of the output vs the sheet).
+
+### 2.1 Results — complete, 16/16 (seed 4148240095; `ref` = the guide's 309.7 s)
+
+All 16 arms `exit=0` and wrote `semantic.json`. No audio, by design. Log:
+`/content/logs/tv_screen.log`; artifacts `out/screen_semantic/<arm>_4148240095/`.
+
+| arm | frames | sec | trunc | vs ref |
+|---|---:|---:|---|---:|
+| `ctl_sunoblk_as-is` | 7743 | 309.7 | no | +0.0 |
+| `c3_abc_raw` | 7750 | 310.0 | **yes** | +0.3 |
+| `c2_abc_mod` | 7698 | 307.9 | no | −1.9 |
+| `c1_abc_win` | 7557 | 302.3 | no | −7.4 |
+| `b1_window` | 7499 | 300.0 | no | −9.8 |
+| `c0_cotonly` | 7328 | 293.1 | no | −16.6 |
+| `mod_as-is` | 7303 | 292.1 | no | −17.6 |
+| `c0raw_cotonly` | 7134 | 285.4 | no | −24.4 |
+| `win_as-is` | 6798 | 271.9 | no | −37.8 |
+| `b3raw_both` | 6545 | 261.8 | no | −47.9 |
+| `b1raw_window` | 6497 | 259.9 | no | −49.8 |
+| `b3_both` | 6453 | 258.1 | no | −51.6 |
+| `b2_guidance` | 6368 | 254.7 | no | −55.0 |
+| `b2raw_guidance` | 6179 | 247.2 | no | −62.6 |
+| `win_dedup` | 5701 | 228.0 | no | −81.7 *(own cap 7000)* |
+| `win_bare` | 5692 | 227.7 | no | −82.0 |
+
+**Measured (not interpretation):**
+- **Exactly one truncation**: `c3_abc_raw` reached 7750 = the cap. Every `cot=off` arm plans
+  *shorter* than the guide; the `cot=melody` family is the longest (7750 / 7698 / 7557).
+- Same sheet, prompt only: ctl 7743 → mod 7303 → win 6798. Restoring `110 BPM` alone
+  **lengthens** the plan by ~20 s.
+- Tag format alone (same words, same style): descriptor tags 6798 vs **bare** 5692 — **−44 s**.
+- Sheet repeats removed: as-is 6798 vs dedup 5701 — **−44 s**.
+- The knob arms' effect on length is **not consistent across styles**: `b1_window` lengthens the
+  winning style (6798 → 7499) but shortens the raw style (7743 → 6497). So planned length alone
+  cannot identify a "fix".
+- `ar_s` is contention-polluted (parallel npm/jsdom work) — do not read it as cost.
+
+**Not established:** whether any arm re-sang a line. Length effects of ~44 s are visible; the
+*words* are not. One truncation on one ABC arm says nothing about repeats.
 
 ## 3. Next commands (GPU work — check `nvidia-smi` first)
 
@@ -296,5 +340,44 @@ cp /content/ab_verbatim_out/{EVAL.txt,KEYS.txt,KEY.json} manifests/evaluation_ve
 Two cautions baked into the sheet as well: `win_dedup` carries a **lower cap** (7000 vs 7750 —
 it has fewer letters), so a length difference there is not by itself an added repeat; and if the
 other two seeds are rendered too, they are a **separate block** — labels do not carry across tracks.
+
+### 6.1 Where the evaluator downloads it from
+
+Follow the existing `listening/` convention (`MAQAM_LYRIC_SWAP_INPUT/`, `PRON_*_INPUT/`), so the
+round is fetchable the same way as every earlier one:
+
+```
+gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/listening/VERBATIM_HIJAZ_LYRIC_ADHERENCE_INPUT/
+  nesib_4148240095_A.mp3 … _E.mp3     # blind labels; no mapping in the filenames
+  EVAL.txt                            # instructions only, no mapping
+  KEY_open_after_listening.txt        # SECRET — do not open until every section is scored
+```
+
+```bash
+# terminal: foreground — one download, watch the progress bar
+mkdir -p ~/verbatim_eval && gsutil -m cp -r \
+  'gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/listening/VERBATIM_HIJAZ_LYRIC_ADHERENCE_INPUT/*' \
+  ~/verbatim_eval/
+# then in the same folder: python3 -m http.server 8765   (or just open the files locally)
+```
+
+Add the upload step to §6's packaging block once the mp3s exist:
+
+```bash
+gsutil -m cp /content/ab_verbatim_out/*.mp3 \
+  /content/ab_verbatim_out/EVAL.txt \
+  /content/ab_verbatim_out/KEYS.txt \
+  gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/listening/VERBATIM_HIJAZ_LYRIC_ADHERENCE_INPUT/
+```
+
+Two gaps found while checking this (2026-09-29): **today's round has no GCS path yet** because no
+audio has been rendered, and **yesterday's ajam blind mp3 package is not on GCS either** — only the
+raw WAVs under `audiocpp_inference/out/style_ablation_ajam/` are (`l0_raw_298970020.wav` …
+`l4_min_298970020.wav`, ~224 MiB). Its label map survives in git
+(`manifests/evaluation_style_ablation_ajam/KEYS.txt`), but the `ajam_A.mp3` … files themselves do
+not exist anywhere — they were built under `/content/` outside the mirror set. Re-packaging from the
+WAVs is possible but would need the same blinding seed (20260928) *and* variant order to reproduce
+yesterday's A–E labels, otherwise a re-run's labels won't match the scores already recorded.
+
 
 

@@ -23,11 +23,11 @@ INFERENCE/run_one.sh Hijaz 1                                          # cap defa
 |---|---|---|---|
 | YuE2 GGUF main (`yue2-3b-bf16.gguf`), VAE (`yue2-vae-f16.gguf`), `sidecars/*` | **Hugging Face** `audio-cpp/Yue2-3B-GGUF` (`hf download`) | `/content/audiocpp_inference/models/Yue2-3B-GGUF/` | **No** — deliberately excluded, regenerable (`backup_to_gcp.py` comment: "models/ multi-GB GGUFs; setup.sh re-downloads them from HF") |
 | `audio.cpp` **source** | GitHub `0xShug0/audio.cpp` (clone only, never built by bootstrap) | `/content/audio.cpp` | No |
-| Prebuilt `audiocpp_cli` (sm_75 / T4) | GCS `audiocpp_inference/build/audiocpp_cli` | `/content/audiocpp_inference/bin/audiocpp_cli` | **Yes** |
+| Prebuilt `audiocpp_cli` (sm_75 / T4) | GCS `audiocpp_inference/tools/build/audiocpp_cli` | `/content/audiocpp_inference/bin/audiocpp_cli` | **Yes** |
 | Converted step-3000 LoRA, unfused (`akbar_arabic_rock_lora_{ar,nar}.safetensors`) | GCS `loras/audio_cpp/style/` (canonical library; see `docs/LORA_INVENTORY.md`) | `/content/converter/out/` | **Yes** |
 | Current pron merges (`qfinal_a0.3/0.5`) | GCS `loras/audio_cpp/pron/<cfg>/` | staged per-sweep to `/content/converter/out/<cfg>/` | **Yes** |
-| Prompts (one `*_style.txt` + `*_lyrics.txt` per maqam) | GCS `audiocpp_inference/prompts/` | `/content/audiocpp_inference/prompts/` | **Yes** |
-| Runner + cap script (`run_one.sh`, `duration_cap.py`) | **Repo `INFERENCE/`** (canonical; the GCS `audiocpp_inference/scripts/` copy is a legacy mirror) | `/content/maqamrock-yue2-lora-finetuning/INFERENCE/` | `scripts/` still mirrored, but the repo copy is what runs |
+| Prompts (one `*_style.txt` + `*_lyrics.txt` per maqam) | GCS `audiocpp_inference/tools/prompts/` | `/content/audiocpp_inference/prompts/` | **Yes** |
+| Runner + cap script (`run_one.sh`, `duration_cap.py`) | **Repo `INFERENCE/`** (canonical; the GCS `audiocpp_inference/tools/scripts/` copy is a legacy mirror) | `/content/maqamrock-yue2-lora-finetuning/INFERENCE/` | `scripts/` still mirrored, but the repo copy is what runs |
 
 The superseded `pron_lora_ar_only_r8` merges (`c3050/c4575/cfinal_a0.*`) are **archived**
 under GCS `archive/pron_lora_ar_only_legacy/` — nothing stages them; see
@@ -230,13 +230,13 @@ Flags: `--keep {downloaded-a,a,b,first}` (which take survives; default
 ## Two ways to have the binary
 
 1. **Prebuilt (default, what `setup.sh` stages).** The flat GCS object
-   `audiocpp_inference/build/audiocpp_cli` is the **sm_75 / T4** build.
+   `audiocpp_inference/tools/build/audiocpp_cli` is the **sm_75 / T4** build.
 2. **Build from source** for a different GPU (e.g. L4) — see
    [`audiocpp_gpu_arch_builds.md`](audiocpp_gpu_arch_builds.md). Place the result
    at `/content/audiocpp_inference/bin/audiocpp_cli` (where `run_one.sh` looks:
    `BIN="$ROOT/bin/audiocpp_cli"`).
 
-Per-arch GCS copies exist (e.g. `audiocpp_inference/build/sm89-l4/audiocpp_cli`),
+Per-arch GCS copies exist (e.g. `audiocpp_inference/tools/build/sm89-l4/audiocpp_cli`),
 but `job_audiocpp_binary` still pulls only the flat sm_75 path; picking the arch
 subdir from the live GPU's compute capability is not designed yet.
 

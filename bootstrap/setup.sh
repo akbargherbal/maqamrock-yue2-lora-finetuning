@@ -118,10 +118,21 @@ if [ "$MODE" = "inference" ]; then
   # staged per-sweep, not by the bootstrap. The pron_lora_ar_only_r8 family is
   # superseded/archived (archive/pron_lora_ar_only_legacy/).
   LORA_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/loras/audio_cpp/style"
-  CONVERTER_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/audiocpp_inference/converter"
-  AUDIOCPP_BIN_GCS="$GCP_BACKUP_BASE/audiocpp_inference/build/audiocpp_cli"
-  AUDIOCPP_PROMPTS_GCS="$GCP_BACKUP_BASE/audiocpp_inference/prompts"
-  AUDIOCPP_SCRIPTS_GCS="$GCP_BACKUP_BASE/audiocpp_inference/scripts"
+  # Inference remote layout, sectioned (docs/GCP_ORGANIZATION_PLAN.md, 2026-09-29):
+  # tools/ holds the pinned, re-staged things; workspace/ holds run output. Probe
+  # once and prefer the sectioned root, falling back to the flat pre-2026-09-29
+  # layout so a VM still boots while the migration is in flight.
+  _inf_base="$GCP_BACKUP_BASE/audiocpp_inference"
+  if gsutil -q ls "$_inf_base/tools/scripts/" >/dev/null 2>&1; then
+    _inf_pull="$_inf_base/tools"
+  else
+    echo "[note] $_inf_base/tools/scripts/ not found; using the flat legacy layout"
+    _inf_pull="$_inf_base"
+  fi
+  CONVERTER_GCS="$_inf_pull/converter"
+  AUDIOCPP_BIN_GCS="$_inf_pull/build/audiocpp_cli"
+  AUDIOCPP_PROMPTS_GCS="$_inf_pull/prompts"
+  AUDIOCPP_SCRIPTS_GCS="$_inf_pull/scripts"
 fi
 
 echo "=== $(date) — maqamrock-yue2 bootstrap starting (mode: $MODE) ==="
