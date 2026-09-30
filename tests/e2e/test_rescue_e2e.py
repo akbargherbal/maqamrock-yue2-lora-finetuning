@@ -351,10 +351,48 @@ def test_songs_json_config_only_no_songs_rescues_all(ws):
 
 
 def test_songs_json_cot_and_adapter_override(ws):
-    r = run_cfg(ws, _cfg(ws, cot="full", adapter="custom_adapter", songs=[STEM_B]))
+    r = run_cfg(ws, _cfg(ws, defaults={"cot": "full", "adapter": "custom_adapter"},
+                        songs=[STEM_B]))
     assert r.returncode == 0, r.stderr
     side = json.loads((ws.out / f"{STEM_B}_rescue.json").read_text(encoding="utf-8"))
     assert side["cot"] == "full" and side["adapter"] == "custom_adapter"
+
+
+def test_songs_json_loras_registry_and_per_song_override(ws):
+    cfg = _cfg(ws,
+               loras={"q3": {"dir": "/opt/q3"}, "q5": {"dir": "/opt/q5"}},
+               defaults={"lora": "q3"},
+               songs=[STEMS_A[0], {"stem": STEMS_A[1], "lora": "q5"}])
+    r = run_cfg(ws, cfg, "--plan")
+    assert r.returncode == 0, r.stderr
+    tracks = {t["stem"]: t for t in _index(ws)["tracks"]}
+    assert tracks[STEMS_A[0]]["adapter"] == "q3"
+    assert tracks[STEMS_A[0]]["ar"] == "/opt/q3/akbar_arabic_rock_lora_ar.safetensors"
+    assert tracks[STEMS_A[1]]["adapter"] == "q5"
+    assert tracks[STEMS_A[1]]["nar"] == "/opt/q5/akbar_arabic_rock_lora_nar.safetensors"
+
+
+def test_songs_json_per_song_cot_override(ws):
+    cfg = _cfg(ws, defaults={"cot": "melody"},
+               songs=[STEMS_A[0], {"stem": STEMS_A[1], "cot": "full"}])
+    r = run_cfg(ws, cfg, "--plan")
+    assert r.returncode == 0, r.stderr
+    tracks = {t["stem"]: t for t in _index(ws)["tracks"]}
+    assert tracks[STEMS_A[0]]["cot"] == "melody"
+    assert tracks[STEMS_A[1]]["cot"] == "full"
+
+
+def test_songs_json_unknown_lora_alias_errors(ws):
+    r = run_cfg(ws, _cfg(ws, defaults={"lora": "ghost"}, songs=[STEMS_A[0]]), "--plan")
+    assert r.returncode == 2
+    assert "not in 'loras'" in r.stderr
+
+
+def test_songs_json_legacy_qf_keys_warn(ws):
+    # qf_ar/qf_nar were replaced by 'loras' + per-song/defaults 'lora'
+    r = run_cfg(ws, _cfg(ws, qf_ar="/x", qf_nar="/y", songs=[STEMS_A[0]]), "--plan")
+    assert r.returncode == 0, r.stderr
+    assert "unknown --songs-json key: qf_ar" in r.stderr
 
 
 def test_songs_json_missing_dirs_usage_error(ws):
@@ -372,9 +410,9 @@ def test_songs_json_unknown_key_warns(ws):
 
 
 def test_songs_json_bad_threads_type_errors(ws):
-    r = run_cfg(ws, _cfg(ws, threads="eight", songs=[STEMS_A[0]]), "--plan")
+    r = run_cfg(ws, _cfg(ws, defaults={"threads": "eight"}, songs=[STEMS_A[0]]), "--plan")
     assert r.returncode == 2
-    assert "'threads' must be a non-negative integer" in r.stderr
+    assert "defaults.threads must be a non-negative integer" in r.stderr
 
 
 def test_render_failure_exits_nonzero(ws):

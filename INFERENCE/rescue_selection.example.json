@@ -1,33 +1,46 @@
 {
   "_comment": [
-    "Self-contained run config for INFERENCE/rescue_abc_batch.sh --songs-json.",
-    "It carries the run-level paths/knobs AND the selection, so one file drives a",
-    "whole rescue:   bash INFERENCE/rescue_abc_batch.sh --songs-json this.json --plan",
-    "Any value also given on the CLI (or via env) wins over this file, so you can",
-    "reuse it and override one thing:   ... --songs-json this.json --limit 2",
-    "Keys: pass1_dir <generate.py out-dir> - abc_dir <sheetsage2 out-dir> -",
-    "out_dir <rescue dir, must differ from pass1_dir> - qf_ar/qf_nar <adapter",
-    "paths> - cot - adapter <label written to the sidecar> - threads - limit.",
-    "'songs' entries are a pass-1 NAME (rescues every take) or a full STEM",
-    "<name>_<seed> (one take), or an object {stem|name, note} (note is ignored by",
-    "the driver). Omit the 'songs' key entirely to rescue every track."
+    "Run config for INFERENCE/rescue_abc_batch.sh --songs-json. Same shape as a",
+    "generate.py manifest: an optional 'loras' alias registry, a 'defaults' block,",
+    "and a 'songs' list. Two deliberate differences from a generation manifest:",
+    "  * 'songs' entries SELECT pass-1 takes, they do not re-describe a song. A",
+    "    bare <name> rescues every take of that song; a full <name>_<seed> stem",
+    "    rescues one take. The rescue reuses each pass-1 take's own lyrics/style/",
+    "    seed/cap (gate G6), so the ONLY new input per take is its ABC guide,",
+    "    read from abc_dir/<stem>/score.abc.",
+    "  * a 'songs' entry may override 'lora' and 'cot' per take (a song field wins).",
+    "Precedence: per-song field > env (cot/adapter) > 'defaults' > built-in; the",
+    "adapter pair is per-song/defaults alias > env 'QF_AR'/'QF_NAR'. For the three",
+    "dirs a CLI flag wins over this file. Override one thing to reuse a config:",
+    "  bash INFERENCE/rescue_abc_batch.sh --songs-json this.json --plan",
+    "  bash INFERENCE/rescue_abc_batch.sh --songs-json this.json --limit 2",
+    "Omit 'songs' entirely to rescue every track in the pass-1 manifest."
   ],
-  "pass1_dir": "/content/audiocpp_inference/out/batch_12_rock_v2",
-  "abc_dir": "/content/audiocpp_inference/out/abc_v2_batch12",
+  "pass1_dir": "/content/audiocpp_inference/out/batch_12_rock_v2_winning",
+  "abc_dir": "/content/audiocpp_inference/out/abc_v2_batch12_winning",
   "out_dir": "/content/audiocpp_inference/out/rescue_v2abc_batch12",
-  "qf_ar": "/content/converter/out/qfinal_a0.3/akbar_arabic_rock_lora_ar.safetensors",
-  "qf_nar": "/content/converter/out/qfinal_a0.3/akbar_arabic_rock_lora_nar.safetensors",
-  "cot": "melody",
-  "adapter": "qfinal_a0.3",
-  "threads": 8,
-  "limit": 0,
+  "loras": {
+    "qfinal_a0.3": { "dir": "/content/converter/out/qfinal_a0.3" },
+    "qfinal_a0.5": { "dir": "/content/converter/out/qfinal_a0.5" }
+  },
+  "defaults": {
+    "lora": "qfinal_a0.3",
+    "cot": "melody",
+    "threads": 8,
+    "limit": 0
+  },
   "songs": [
     "07-الحر-الشديد-وقطع-القفر-والوعول_rock_2969540646",
-    "07-الحر-الشديد-وقطع-القفر-والوعول_rock_653160884",
     "06-ليلة-الرعب_rock",
     {
       "stem": "03-مشهد-الذئاب_rock_1791809722",
       "note": "arrangement good, pronunciation bad -> rescue this one"
+    },
+    {
+      "stem": "01-البداية_rock_1234567890",
+      "lora": "qfinal_a0.5",
+      "cot": "full",
+      "note": "per-take override: different adapter + cot for this take only"
     }
   ]
 }

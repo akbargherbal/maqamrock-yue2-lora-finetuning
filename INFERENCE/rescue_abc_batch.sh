@@ -9,7 +9,7 @@
 #     cot:"off") — it cannot carry a guide.
 #   * run_one.sh hardcodes `--request-option cot=off` (run_one.sh:85) and relies
 #     on a later EXTRA_REQUEST_OPTS cot=... to override it — UNVERIFIED. This
-#     driver calls the binary DIRECTLY with `cot=<RESCUE_COT>` + `abc_file=`, so
+#     driver calls the binary DIRECTLY with `cot=<per-take cot>` + `abc_file=`, so
 #     there is no duplicate option to resolve.
 #
 # Alignment guarantees (the point of the file):
@@ -23,16 +23,19 @@
 #
 # Selection: --songs / --songs-file / --songs-json accept song NAMES and/or full
 #   STEMS (<name>_<seed>). A name selects every take of that song; a stem selects
-#   one. --songs-json is a self-contained run config: the "songs" list plus
-#   optional run-level keys (pass1_dir, abc_dir, out_dir, qf_ar, qf_nar, cot,
-#   adapter, threads, limit); an explicit CLI flag or env var always wins.
-#   Example: INFERENCE/rescue_selection.example.json.
+#   one. --songs-json mirrors a generate.py manifest: an optional "loras" alias
+#   registry + a "defaults" block + a "songs" list, plus the three rescue dirs
+#   (pass1_dir/abc_dir/out_dir). A song entry may override "lora"/"cot". Because a
+#   rescue reuses each pass-1 take's own lyrics/style/seed/cap (G6), the ONLY new
+#   input per take is its ABC guide (abc_dir/<stem>/score.abc) -> entries are
+#   SELECTORS, not full song specs. Example:
+#   INFERENCE/rescue_selection.example.json.
 #
 # Env overrides:
 #   ROOT BIN MODEL THREADS   workspace / runner / model dir / cpu threads
-#   QF_AR QF_NAR             qfinal adapters (default: the qfinal_a0.3 pair)
-#   RESCUE_COT               request cot (default: melody)
-#   RESCUE_ADAPTER           label written to the sidecar (default qfinal_a0.3)
+#   QF_AR QF_NAR             env-fallback adapter pair (used when no lora alias)
+#   RESCUE_COT               default request cot (default: melody)
+#   RESCUE_ADAPTER           fallback sidecar label (default qfinal_a0.3)
 #   GCS_BASE                 for the qfinal stage hint
 set -u
 
@@ -50,9 +53,11 @@ usage: rescue_abc_batch.sh [--pass1-dir DIR --abc-dir DIR --out-dir DIR]
                (the three dirs are required: give them here or via --songs-json)
   --songs      comma/space/newline list of song NAMES and/or STEMS to rescue
   --songs-file one selector per line ('#' comments and blank lines ignored)
-  --songs-json a JSON run config: a "songs" selection plus optional pass1_dir/
-               abc_dir/out_dir/qf_ar/qf_nar/cot/adapter/threads/limit; a CLI
-               flag or env var wins over the file. Example:
+  --songs-json a JSON run config: "loras" (alias registry) + "defaults" +
+               "songs" (selectors; each may override lora/cot) + pass1_dir/
+               abc_dir/out_dir. Precedence: per-song > env (cot) > defaults >
+               built-in; the adapter pair: per-song/defaults alias > env pair;
+               the three dirs: CLI flag > file. Example:
                INFERENCE/rescue_selection.example.json
   --plan       validate + write the index, print the plan; no GPU, no render
   --verify     re-check the stored index sha256 against disk, then exit (no render)
@@ -70,18 +75,21 @@ ROOT="${ROOT:-/content/audiocpp_inference}"
 BIN="${BIN:-$ROOT/bin/audiocpp_cli}"
 MODEL="${MODEL:-$ROOT/models/Yue2-3B-GGUF}"
 GCS_BASE="${GCS_BASE:-gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning}"
-# Built-in defaults, kept separate so --songs-json can override the DEFAULT while
-# an explicit CLI flag or env var still wins (see the JSON apply block below).
+# Built-in fallbacks. They are applied only after the JSON "defaults" block, so
+# the precedence is: per-song field > env/CLI (cot/adapter/threads) > "defaults" >
+# these built-ins; the adapter pair is per-song/defaults alias > env pair (matching
+# generate.py, where an alias wins over the --lora-ar/--lora-nar pair).
 DEF_THREADS=8
 DEF_QF_AR=/content/converter/out/qfinal_a0.3/akbar_arabic_rock_lora_ar.safetensors
 DEF_QF_NAR=/content/converter/out/qfinal_a0.3/akbar_arabic_rock_lora_nar.safetensors
 DEF_COT=melody
 DEF_ADAPTER=qfinal_a0.3
-THREADS="${THREADS:-$DEF_THREADS}"
-QF_AR="${QF_AR:-$DEF_QF_AR}"
-QF_NAR="${QF_NAR:-$DEF_QF_NAR}"
-RESCUE_COT="${RESCUE_COT:-$DEF_COT}"
-RESCUE_ADAPTER="${RESCUE_ADAPTER:-$DEF_ADAPTER}"
+# Detect an explicit env value BEFORE defaulting, so a JSON "defaults" only fills
+# a gap that an env var / CLI flag left.
+ENV_THREADS=0; [ -n "${THREADS+x}" ] && ENV_THREADS=1
+ENV_COT=0;     [ -n "${RESCUE_COT+x}" ] && ENV_COT=1
+ENV_ADAPTER=0; [ -n "${RESCUE_ADAPTER+x}" ] && ENV_ADAPTER=1
+CLI_THREADS=0
 
 # /usr/bin/time is preferable (run_one.sh uses it; the bootstrap installs it) but
 # is not required — if absent we still write a `<stem>_time.txt` for resume.
@@ -100,7 +108,7 @@ while [ $# -gt 0 ]; do
     --songs-file) SONGS_FILE="${2:-}"; shift 2;;
     --songs-json) SONGS_JSON="${2:-}"; shift 2;;
     --limit)      LIMIT="${2:-0}"; shift 2;;
-    --threads)    THREADS="${2:-}"; shift 2;;
+    --threads)    THREADS="${2:-}"; CLI_THREADS=1; shift 2;;
     --plan)       MODE=plan; shift;;
     --verify)     MODE=verify; shift;;
     --smoke)      SMOKE=1; shift;;
@@ -116,7 +124,9 @@ _nsel=0
 [ -n "$SONGS_JSON" ] && _nsel=$((_nsel + 1))
 [ "$_nsel" -le 1 ] || { echo "use only one of --songs / --songs-file / --songs-json" >&2; exit 2; }
 case "$LIMIT" in ''|*[!0-9]*) echo "--limit must be an integer" >&2; exit 2;; esac
-case "$THREADS" in ''|*[!0-9]*) echo "--threads must be an integer" >&2; exit 2;; esac
+if [ -n "${THREADS:-}" ]; then
+  case "$THREADS" in ''|*[!0-9]*) echo "--threads must be an integer" >&2; exit 2;; esac
+fi
 
 # Portable realpath (works for not-yet-existing paths too).
 rp() { python3 -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' "$1"; }
@@ -126,13 +136,14 @@ if [ -n "$SONGS_FILE" ]; then
   # strip # comments + CR, one selector per line -> comma list
   SONGS="$(sed -e 's/#.*//' -e 's/\r$//' "$SONGS_FILE" | tr '\n' ',')"
 fi
+# The normalized config (loras registry + defaults + songs) is written here and
+# read again by the index builder; the shell only needs a few run-level values.
+RESOLVED_JSON="$(mktemp)"
+trap '[ -n "${RESOLVED_JSON:-}" ] && rm -f "$RESOLVED_JSON"' EXIT
 if [ -n "$SONGS_JSON" ]; then
   [ -f "$SONGS_JSON" ] || { echo "no such --songs-json: $SONGS_JSON" >&2; exit 2; }
-  # One config file: run-level paths/knobs (optional) + the "songs" selection.
-  # Each emitted line is "key<TAB>value"; applied only where the value is still
-  # the built-in default, so an explicit CLI flag or env var always wins.
-  RESOLVED="$(python3 - "$SONGS_JSON" <<'PY'
-import json, sys
+  python3 - "$SONGS_JSON" > "$RESOLVED_JSON" <<'PY' || exit 2
+import json, os, re, sys
 path = sys.argv[1]
 try:
     doc = json.load(open(path, encoding="utf-8"))
@@ -140,74 +151,132 @@ except (OSError, ValueError) as e:
     sys.exit(f"[error] --songs-json not readable/valid JSON: {path}: {e}")
 if not isinstance(doc, dict):
     sys.exit(f"[error] --songs-json must be a JSON object: {path}")
-
-KNOWN = {"pass1_dir", "abc_dir", "out_dir", "qf_ar", "qf_nar", "cot", "adapter",
-         "threads", "limit", "songs"}
+base = os.path.dirname(os.path.abspath(path))
+ALIAS = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+TOP = {"pass1_dir", "abc_dir", "out_dir", "loras", "defaults", "songs"}
 for k in doc:
-    if k not in KNOWN and not k.startswith("_"):
+    if k not in TOP and not k.startswith("_"):
         print(f"[warn] ignoring unknown --songs-json key: {k}", file=sys.stderr)
 
-def emit(key, value):
-    if any(c in value for c in "\t\n\r"):
-        sys.exit(f"[error] --songs-json '{key}' must not contain tabs/newlines")
-    print(f"{key}\t{value}")
-
-for key in ("pass1_dir", "abc_dir", "out_dir", "qf_ar", "qf_nar", "cot", "adapter"):
-    v = doc.get(key)
-    if v is None:
-        continue
+def need_str(obj, key, where):
+    v = obj.get(key)
     if not isinstance(v, str) or not v.strip():
-        sys.exit(f"[error] --songs-json '{key}' must be a non-empty string")
-    emit(key, v.strip())
+        sys.exit(f"[error] --songs-json {where}.{key} must be a non-empty string")
+    return v.strip()
 
-for key in ("threads", "limit"):
-    v = doc.get(key)
-    if v is None:
-        continue
-    if not isinstance(v, int) or isinstance(v, bool) or v < 0:
-        sys.exit(f"[error] --songs-json '{key}' must be a non-negative integer")
-    emit(key, str(v))
+out = {"loras": {}, "defaults": {}, "songs": []}
+for key in ("pass1_dir", "abc_dir", "out_dir"):
+    if key in doc:
+        out[key] = need_str(doc, key, "top-level")
+
+# 'loras' alias registry -- same shape/semantics as generate.py resolve_loras.
+loras_raw = doc.get("loras", {})
+if not isinstance(loras_raw, dict):
+    sys.exit("[error] --songs-json 'loras' must be an object")
+for alias, spec in loras_raw.items():
+    if not isinstance(alias, str) or not ALIAS.match(alias):
+        sys.exit(f"[error] --songs-json loras alias invalid: {alias!r}")
+    if not isinstance(spec, dict):
+        sys.exit(f"[error] --songs-json loras[{alias!r}] must be an object")
+    has_dir, has_pair = "dir" in spec, ("ar" in spec or "nar" in spec)
+    if has_dir == has_pair:
+        sys.exit(f"[error] --songs-json loras[{alias!r}]: use 'dir' xor both 'ar'+'nar'")
+    if has_dir:
+        d = need_str(spec, "dir", f"loras[{alias!r}]")
+        d = d if os.path.isabs(d) else os.path.join(base, d)
+        ar = os.path.join(d, "akbar_arabic_rock_lora_ar.safetensors")
+        nar = os.path.join(d, "akbar_arabic_rock_lora_nar.safetensors")
+    else:
+        if "ar" not in spec or "nar" not in spec:
+            sys.exit(f"[error] --songs-json loras[{alias!r}]: 'ar' and 'nar' both required")
+        ar = need_str(spec, "ar", f"loras[{alias!r}]")
+        nar = need_str(spec, "nar", f"loras[{alias!r}]")
+        ar = ar if os.path.isabs(ar) else os.path.join(base, ar)
+        nar = nar if os.path.isabs(nar) else os.path.join(base, nar)
+    out["loras"][alias] = {"ar": ar, "nar": nar}
+
+dft = doc.get("defaults", {})
+if not isinstance(dft, dict):
+    sys.exit("[error] --songs-json 'defaults' must be an object")
+for k in dft:
+    if k not in {"lora", "cot", "adapter", "threads", "limit"}:
+        sys.exit(f"[error] --songs-json unknown defaults key: {k}")
+for k in ("lora", "cot", "adapter"):
+    if k in dft:
+        out["defaults"][k] = need_str(dft, k, "defaults")
+for k in ("threads", "limit"):
+    if k in dft:
+        v = dft[k]
+        if not isinstance(v, int) or isinstance(v, bool) or v < 0:
+            sys.exit(f"[error] --songs-json defaults.{k} must be a non-negative integer")
+        out["defaults"][k] = v
 
 songs = doc.get("songs")
-if songs is None:
-    sys.exit(0)                      # config-only file: no selection == rescue every track
-if not isinstance(songs, list):
-    sys.exit(f"[error] --songs-json 'songs' must be a list: {path}")
-out = []
-for e in songs:
-    if isinstance(e, str):
-        s = e
-    elif isinstance(e, dict):
-        s = e.get("stem") or e.get("name")
-        if not s:
-            sys.exit(f"[error] --songs-json entry needs 'stem' or 'name': {e!r}")
-    else:
-        sys.exit(f"[error] --songs-json entry must be a string or object: {e!r}")
-    s = s.strip()
-    if s:
-        out.append(s)
-if not out:
-    sys.exit("no selectors in --songs-json 'songs'; omit the key to rescue every track")
-emit("songs", ",".join(out))
+if songs is not None:
+    if not isinstance(songs, list):
+        sys.exit(f"[error] --songs-json 'songs' must be a list: {path}")
+    for e in songs:
+        if isinstance(e, str):
+            sel, ovr = e, {}
+        elif isinstance(e, dict):
+            sel = e.get("stem") or e.get("name")
+            if not sel:
+                sys.exit(f"[error] --songs-json entry needs 'stem' or 'name': {e!r}")
+            ovr = {k: need_str(e, k, "song") for k in ("lora", "cot") if k in e}
+        else:
+            sys.exit(f"[error] --songs-json entry must be a string or object: {e!r}")
+        sel = sel.strip()
+        if not sel:
+            continue
+        item = {"sel": sel}
+        item.update(ovr)
+        out["songs"].append(item)
+    if not out["songs"]:
+        sys.exit("no selectors in --songs-json 'songs'; omit the key to rescue every track")
+
+for a in [out["defaults"].get("lora")] + [s.get("lora") for s in out["songs"]]:
+    if a and a not in out["loras"]:
+        known = ", ".join(sorted(out["loras"])) or "none"
+        sys.exit(f"[error] --songs-json: lora alias '{a}' not in 'loras' (known: {known})")
+
+json.dump(out, sys.stdout, ensure_ascii=False)
 PY
-)" || exit 2
-  while IFS=$'\t' read -r _k _v; do
-    case "$_k" in
-      "") ;;
-      songs)     [ -n "$SONGS" ] || SONGS="$_v";;
-      pass1_dir) [ -n "$PASS1" ] || PASS1="$_v";;
-      abc_dir)   [ -n "$ABC_DIR" ] || ABC_DIR="$_v";;
-      out_dir)   [ -n "$OUT_DIR" ] || OUT_DIR="$_v";;
-      qf_ar)     [ "$QF_AR" = "$DEF_QF_AR" ] && QF_AR="$_v";;
-      qf_nar)    [ "$QF_NAR" = "$DEF_QF_NAR" ] && QF_NAR="$_v";;
-      cot)       [ "$RESCUE_COT" = "$DEF_COT" ] && RESCUE_COT="$_v";;
-      adapter)   [ "$RESCUE_ADAPTER" = "$DEF_ADAPTER" ] && RESCUE_ADAPTER="$_v";;
-      threads)   [ "$THREADS" = "$DEF_THREADS" ] && THREADS="$_v";;
-      limit)     [ "$LIMIT" -eq 0 ] && LIMIT="$_v";;
-      *) echo "[warn] ignoring unknown --songs-json key: $_k" >&2;;
-    esac
-  done <<< "$RESOLVED"
+  _jget() { python3 -c 'import json,sys
+d=json.load(open(sys.argv[1]))
+c=d
+for p in sys.argv[2].split("."):
+    c=c.get(p) if isinstance(c,dict) else None
+print("" if c is None else c)' "$RESOLVED_JSON" "$1"; }
+  [ -n "$PASS1" ]   || PASS1="$(_jget pass1_dir)"
+  [ -n "$ABC_DIR" ] || ABC_DIR="$(_jget abc_dir)"
+  [ -n "$OUT_DIR" ] || OUT_DIR="$(_jget out_dir)"
+  if [ -z "$SONGS" ]; then
+    SONGS="$(python3 -c 'import json,sys; print(",".join(s["sel"] for s in json.load(open(sys.argv[1]))["songs"]))' "$RESOLVED_JSON")"
+  fi
+else
+  printf '{ "loras": {}, "defaults": {}, "songs": [] }\n' > "$RESOLVED_JSON"
 fi
+
+# --- apply JSON "defaults" where env/CLI left a gap; then built-in fallbacks ---
+_jdef() { python3 -c 'import json,sys
+d=json.load(open(sys.argv[1])).get("defaults",{})
+v=d.get(sys.argv[2]); print("" if v is None else v)' "$RESOLVED_JSON" "$1"; }
+if [ "$ENV_THREADS" -eq 0 ] && [ "$CLI_THREADS" -eq 0 ]; then
+  _v="$(_jdef threads)"; [ -n "$_v" ] && THREADS="$_v"
+fi
+[ -n "${THREADS:-}" ] || THREADS="$DEF_THREADS"
+if [ "$LIMIT" -eq 0 ]; then _v="$(_jdef limit)"; [ -n "$_v" ] && LIMIT="$_v"; fi
+if [ "$ENV_ADAPTER" -eq 0 ]; then
+  _v="$(_jdef adapter)"; [ -n "$_v" ] && RESCUE_ADAPTER="$_v"
+fi
+[ -n "${RESCUE_ADAPTER:-}" ] || RESCUE_ADAPTER="$DEF_ADAPTER"
+if [ "$ENV_COT" -eq 0 ]; then
+  _v="$(_jdef cot)"; [ -n "$_v" ] && RESCUE_COT="$_v"
+fi
+[ -n "${RESCUE_COT:-}" ] || RESCUE_COT="$DEF_COT"
+# env-only fallback pair (a per-song/defaults alias wins over this, per generate.py)
+ENV_QF_AR="${QF_AR:-$DEF_QF_AR}"
+ENV_QF_NAR="${QF_NAR:-$DEF_QF_NAR}"
 
 # pass1/abc/out may come from the CLI or from --songs-json; both absent -> usage.
 [ -n "$PASS1" ] && [ -n "$ABC_DIR" ] && [ -n "$OUT_DIR" ] || {
@@ -275,14 +344,22 @@ PY
 fi
 
 PLAN_TSV="$(mktemp)"
-trap 'rm -f "$PLAN_TSV"' EXIT
+trap 'rm -f "$PLAN_TSV" "${RESOLVED_JSON:-}"' EXIT
 
-python3 - "$PASS1" "$ABC_DIR" "$SONGS" "$INDEX" <<'PY' > "$PLAN_TSV" || { echo "[error] index build failed" >&2; exit 3; }
+python3 - "$PASS1" "$ABC_DIR" "$SONGS" "$INDEX" "$RESOLVED_JSON" \
+         "$ENV_QF_AR" "$ENV_QF_NAR" "$RESCUE_COT" "$RESCUE_ADAPTER" \
+         <<'PY' > "$PLAN_TSV" || { echo "[error] index build failed" >&2; exit 3; }
 import hashlib, json, re, sys
 from pathlib import Path
-pass1, abc_dir, songs_arg, index_path = sys.argv[1:5]
+(pass1, abc_dir, songs_arg, index_path, resolved_json,
+ fb_ar, fb_nar, fb_cot, fb_adapter) = sys.argv[1:10]
 pass1, abc_dir = Path(pass1), Path(abc_dir)
 want = {s for s in re.split(r"[,\s]+", songs_arg) if s}
+cfg = json.loads(Path(resolved_json).read_text(encoding="utf-8"))
+loras, defaults = cfg.get("loras", {}), cfg.get("defaults", {})
+ov_by = {}
+for s in cfg.get("songs", []):
+    ov_by.setdefault(s["sel"], {k: s.get(k) for k in ("lora", "cot")})
 
 def sha(p: Path):
     h = hashlib.sha256()
@@ -321,9 +398,20 @@ for t in tracks:
     if lyrics is None or not lyrics.is_file(): bad.append(f"missing lyrics: {lyrics}")
     if bad:
         problems += [f"{stem}: {b}" for b in bad]; rows.append(None); continue
+    # adapter + cot: per-song field > defaults alias > env pair (adapter) /
+    # env cot > defaults cot (cot) -- env values are already folded into fb_*.
+    ov = ov_by.get(name) or ov_by.get(stem) or {}
+    alias = ov.get("lora") or defaults.get("lora")
+    if alias:
+        ar, nar = loras[alias]["ar"], loras[alias]["nar"]
+        label = alias
+    else:
+        ar, nar = fb_ar, fb_nar
+        label = fb_adapter
     rows.append({
         "idx": t.get("idx"), "name": name, "take": t.get("take", 0), "seed": seed, "cap": cap,
-        "stem": stem,
+        "stem": stem, "cot": ov.get("cot") or fb_cot,
+        "ar": ar, "nar": nar, "adapter": label,
         "pass1_wav": str(wav), "pass1_wav_sha256": sha(wav),
         "abc": str(abc), "abc_sha256": sha(abc),
         "style_file": str(style), "lyrics_file": str(lyrics),
@@ -344,7 +432,8 @@ json.dump({"tool": "rescue_abc_batch", "pass1_dir": str(pass1), "abc_dir": str(a
           ensure_ascii=False, indent=2)
 for r in rows:
     print("\t".join([r["name"], str(r["seed"]), str(r["cap"]), r["style_file"],
-                     r["lyrics_file"], r["abc"], r["stem"]]))
+                     r["lyrics_file"], r["abc"], r["stem"], r["cot"], r["ar"],
+                     r["nar"], r["adapter"]]))
 PY
 mapfile -t PLAN < "$PLAN_TSV"
 
@@ -365,30 +454,42 @@ if [ "$SKIP_PREFLIGHT" -eq 0 ]; then
   if pgrep -af 'run[.]py' | grep -q 'akbar_arabic_rock_lor[a]'; then
     echo "an ai-toolkit training run is active — refusing (AGENTS.md §8)" >&2; exit 1
   fi
-  for f in "$BIN" "$MODEL" "$QF_AR" "$QF_NAR"; do
-    [ -e "$f" ] || { echo "missing: $f" >&2
-      echo "  stage qfinal: gsutil -m cp -r $GCS_BASE/loras/audio_cpp/pron/qfinal_a0.3 /content/converter/out/" >&2
-      exit 1; }
+  for f in "$BIN" "$MODEL"; do
+    [ -e "$f" ] || { echo "missing: $f" >&2; exit 1; }
   done
+  # Every adapter pair the plan actually references must be staged (per-take
+  # aliases included), so a rescue can never start on a half-staged registry.
+  missing_ad=0
+  while IFS=$'\t' read -r _n _s _c _st _ly _ab _stem _co ar nar _ad; do
+    [ -n "$ar" ] || continue
+    for f in "$ar" "$nar"; do
+      [ -e "$f" ] || { echo "missing adapter: $f" >&2; missing_ad=1; }
+    done
+  done < <(printf '%s\n' "${PLAN[@]}")
+  if [ "$missing_ad" -eq 1 ]; then
+    echo "  stage the alias dir(s): gsutil -m cp -r $GCS_BASE/loras/audio_cpp/pron/<alias> /content/converter/out/" >&2
+    exit 1
+  fi
 fi
 
-render() {  # <name> <stem> <seed> <cap> <style> <lyrics> <abc>
+render() {  # <name> <stem> <seed> <cap> <style> <lyrics> <abc> <cot> <ar> <nar> <adapter>
   local name="$1" stem="$2" seed="$3" cap="$4" style="$5" lyrics="$6" abc="$7"
+  local cot="$8" ar="$9" nar="${10}" adapter="${11}"
   local wav="$OUT_DIR/${stem}.wav" log="$OUT_DIR/${stem}.log" tf="$OUT_DIR/${stem}_time.txt"
   if [ "$FORCE" -eq 0 ] && [ -s "$wav" ] && grep -q "Exit status: 0" "$tf" 2>/dev/null; then
     echo "== skip $stem (rescue already succeeded; --force to redo)"; return 0
   fi
-  echo "== $stem seed=$seed cap=$cap abc=$abc -> $wav"
+  echo "== $stem seed=$seed cot=$cot adapter=$adapter cap=$cap abc=$abc -> $wav"
   echo "=== START rescue $stem seed=$seed $(date -u +%FT%TZ) ===" >> "$OUT_DIR/_rescue_status.log"
   local -a cmd=("$BIN" --task gen --family yue2 --model "$MODEL" --backend cuda --threads "$THREADS" \
     --session-option yue2.model_gguf=yue2-3b-bf16.gguf \
     --session-option yue2.vae_gguf=yue2-vae-f16.gguf \
-    --session-option yue2.ar_lora="$QF_AR" --session-option yue2.ar_lora_scale=1.0 \
-    --session-option yue2.nar_lora="$QF_NAR" --session-option yue2.nar_lora_scale=1.0 \
+    --session-option yue2.ar_lora="$ar" --session-option yue2.ar_lora_scale=1.0 \
+    --session-option yue2.nar_lora="$nar" --session-option yue2.nar_lora_scale=1.0 \
     --session-option yue2.attention=flash \
     --lyrics "$(cat "$lyrics")" \
     --request-option style="$(cat "$style")" \
-    --request-option cot="$RESCUE_COT" \
+    --request-option cot="$cot" \
     --request-option abc_file="$abc" \
     --request-option semantic_max_tokens="$cap" \
     --seed "$seed" \
@@ -403,7 +504,7 @@ render() {  # <name> <stem> <seed> <cap> <style> <lyrics> <abc>
   echo "=== END rescue $stem exit=$rc $(date -u +%FT%TZ) ===" >> "$OUT_DIR/_rescue_status.log"
   [ -s "$wav" ] || rc=1   # a "success" that produced no audio is a failure
   # sidecar: bind the rescue WAV to the guide it used + the pass-1 take it derives from
-  python3 - "$name" "$stem" "$seed" "$cap" "$abc" "$style" "$lyrics" "$wav" "$rc" "$RESCUE_COT" "$RESCUE_ADAPTER" <<'PY'
+  python3 - "$name" "$stem" "$seed" "$cap" "$abc" "$style" "$lyrics" "$wav" "$rc" "$cot" "$adapter" <<'PY'
 import hashlib, json, sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -432,8 +533,8 @@ PY
 n=0 ok=0 fail=0
 for line in "${PLAN[@]}"; do
   if [ "$LIMIT" -gt 0 ] && [ "$n" -ge "$LIMIT" ]; then break; fi
-  IFS=$'\t' read -r name seed cap style lyrics abc stem <<<"$line"
-  if render "$name" "$stem" "$seed" "$cap" "$style" "$lyrics" "$abc"; then ok=$((ok + 1)); else fail=$((fail + 1)); fi
+  IFS=$'\t' read -r name seed cap style lyrics abc stem cot ar nar adapter <<<"$line"
+  if render "$name" "$stem" "$seed" "$cap" "$style" "$lyrics" "$abc" "$cot" "$ar" "$nar" "$adapter"; then ok=$((ok + 1)); else fail=$((fail + 1)); fi
   n=$((n + 1))
   if [ "$SMOKE" -eq 1 ]; then
     echo "[smoke] rendered 1 track ($stem). Listen to it, then re-run without --smoke."; break

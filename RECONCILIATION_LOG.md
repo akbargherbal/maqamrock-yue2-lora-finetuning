@@ -884,3 +884,26 @@ covers both._
 - Mechanical reconciler (`extract_claims.py` / `verify_claims.py`): 2428 claims, 1529 checkable,
   **0 flagged**.
 - Authority: `INFERENCE/rescue_abc_batch.sh --help` (source + example). CPU-only plan checks; no GPU.
+
+## 2026-09-30 — `--songs-json` reshaped to manifest parity (`loras` + `defaults` + per-take overrides)
+
+- `INFERENCE/rescue_abc_batch.sh`: the flat run-level keys (`qf_ar`, `qf_nar`, `cot`, `adapter`,
+  `threads`, `limit`) are replaced by a generate.py-shaped header — an optional `loras` alias
+  registry (`{alias: {dir}}` or `{alias: {ar, nar}}`, resolved exactly like `generate.py:resolve_loras`)
+  plus a `defaults` block (`lora`, `cot`, `adapter`, `threads`, `limit`). A `songs` entry may now
+  override `lora`/`cot` per take. Precedence: per-song field > env (`cot`/`adapter`) > `defaults` >
+  built-in; adapter pair: per-song/defaults alias > env `QF_AR`/`QF_NAR`; the three dirs: CLI > file.
+  The index/plan rows and the per-track sidecar now carry the resolved `cot`/`ar`/`nar`/`adapter`, and
+  preflight existence-checks **every** adapter pair the plan references (per-take aliases included),
+  not just one global pair.
+- `INFERENCE/rescue_selection.example.json`: rewritten to the manifest shape; a fourth `songs` entry
+  demonstrates a per-take `lora`/`cot` override.
+- `tests/e2e/test_rescue_e2e.py`: migrated the two schema-dependent cases (`cot`/`adapter` and
+  `threads` now under `defaults`) and added 4 cases (loras registry + per-take `lora`; per-take `cot`;
+  unknown alias errors; legacy `qf_ar` warns) → **38 passed**.
+- Docs: `docs/PRON_LORA_RESCUE.md` Phase 4 (manifest-shaped format + precedence);
+  `SOURCE_OF_TRUTH.md` cover/rescue row.
+- Mechanical reconciler (`extract_claims.py` / `verify_claims.py`): 2431 claims, 1532 checkable,
+  **0 flagged**.
+- Authority: `INFERENCE/rescue_abc_batch.sh --help` (source + example) and `INFERENCE/generate.py`
+  (`loras`/`defaults` semantics). CPU-only plan checks; no config or run touched; no GPU.

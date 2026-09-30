@@ -103,14 +103,18 @@ song `name` rescues every take of that song (see Phase 4).
 
 Selectors accept a song **name or a full stem** (`<name>_<seed>`): a name rescues every take of
 that song, a stem exactly one. Give them as `--songs` (inline), `--songs-file` (one per line), or
-`--songs-json` — a **self-contained run config**: the `songs` list *plus* optional run-level keys
-(`pass1_dir`, `abc_dir`, `out_dir`, `qf_ar`, `qf_nar`, `cot`, `adapter`, `threads`, `limit`), so one
-file can drive a whole rescue and a CLI flag / env var overrides just one value. Edit a copy of
-`INFERENCE/rescue_selection.example.json`; an entry is a bare `<name-or-stem>` or an object
-`{"stem"|"name", "note"}` (extra keys ignored). Omit `songs` to rescue every track.
+`--songs-json` — a **self-contained run config** shaped like a generate.py manifest: an optional
+`loras` alias registry (`{alias: {dir}}` or `{alias: {ar, nar}}`, resolved exactly like
+`generate.py:resolve_loras`) + a `defaults` block (`lora`, `cot`, `adapter`, `threads`, `limit`) +
+a `songs` list + the three dirs (`pass1_dir`, `abc_dir`, `out_dir`). Because a rescue reuses each
+pass-1 take's own lyrics/style/seed/cap (G6), entries are **selectors**, not song specs: a bare
+`<name-or-stem>`, or an object `{"stem"|"name", ...}` that may override `lora`/`cot` for that take
+(`note` is ignored). Precedence: per-song field > env (`cot`/`adapter`) > `defaults` > built-in; the
+adapter pair is per-song/defaults alias > env `QF_AR`/`QF_NAR`; for the three dirs a CLI flag wins.
+Edit a copy of `INFERENCE/rescue_selection.example.json`. Omit `songs` to rescue every track.
 Other flags: `--limit N` (cap the run), `--threads N`,
 `--skip-preflight` (test / off-box use). Env overrides: `ROOT`, `BIN`, `MODEL`, `THREADS`,
-`QF_AR`/`QF_NAR` (default qfinal_a0.3), `RESCUE_COT` (default `melody`), `RESCUE_ADAPTER`.
+`QF_AR`/`QF_NAR` (env-fallback adapter pair), `RESCUE_COT` (default `melody`), `RESCUE_ADAPTER`.
 
 1. **Build + check the index (no GPU):** the three dirs may be given on the CLI or in the JSON.
    ```bash
