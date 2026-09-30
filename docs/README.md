@@ -19,6 +19,7 @@ operating contract is `../AGENTS.md`.
 | Run inference (YuE2 GGUF + LoRA) on a fresh VM | [INFERENCE.md](INFERENCE.md) |
 | Train the AR-only pronunciation LoRA | [PRON_LORA.md](PRON_LORA.md) |
 | **Run / resume the long-aya Quran LoRA (`quran_long_aya_r8_s10`) — canonical hub** | [PRON_LORA_LONG.md](PRON_LORA_LONG.md) |
+| Build & multi-day plan for the long-aya run (full set; s10 pivot) | [PRON_LORA_LONG_PLAN.md](PRON_LORA_LONG_PLAN.md) |
 | Verify / offline-eval the pronunciation LoRA (source + AR-loss replay) | [PRON_LORA_VERIFICATION.md](PRON_LORA_VERIFICATION.md) |
 | Merge v2 + pron at a chosen alpha | [PRON_LORA_MERGE.md](PRON_LORA_MERGE.md) |
 | Alpha sweep + blinded listening review | [PRON_LORA_SWEEP.md](PRON_LORA_SWEEP.md) |
@@ -35,6 +36,8 @@ Future ideas (not runbooks, not scheduled): [FUTURE_PRONUNCIATION_LORA.md](FUTUR
 — fixing Arabic pronunciation with a second, AR-only LoRA.
 
 Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapshot.
+[L4_HANDOFF_TASK14C.md](L4_HANDOFF_TASK14C.md) is a dated (2026-09-27) pre-work handoff
+for the superseded `pron_lora_ar_only_r8` run.
 `investigation.md` and `yue2-gguf-lora-findings.md` are **superseded/retracted**
 (see the banners at their tops); do not follow them. [music-cover-feasibility.md](music-cover-feasibility.md)
 is an investigation record: covers/ABC conditioning, the α tradeoff (§3), the style/ABC

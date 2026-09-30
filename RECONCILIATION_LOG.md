@@ -642,3 +642,60 @@ covers both._
 - Open item (not fixed): `AGENTS.md` §2 lists `docs/models/yue2.md` as the authority
   for the "build the inference binary" row, but no such file exists in this repo (it
   is upstream `audio.cpp`'s doc, per `setup.sh` / `INFERENCE.md`).
+
+## 2026-09-30 — docs reconciliation (housekeeping pass after E2E + music-cover)
+
+- Trigger: user housekeeping after `docs/E2E_TESTING_PLAN.md` completed and
+  `docs/music-cover-feasibility.md` was condensed. Mechanical layer was **already
+  clean**: 2160 claims / 49 files, 1318 checkable, **0 flagged (0.0 %)** — so this
+  pass is semantic-only (the half the scripts cannot see).
+- **`AGENTS.md:37`** (the Session-4 open item): the "build the inference binary (new
+  arch)" authority cell named `` `docs/models/yue2.md` ``, which is upstream
+  `audio.cpp`'s doc, not a repo file. Now the in-repo authority
+  `docs/audiocpp_gpu_arch_builds.md` + `bootstrap/setup.sh` (arch pin). Added the
+  matching `SOURCE_OF_TRUTH.md` row (topic: build/stage `audiocpp_cli`) so the §2
+  cell has a row to point at; bumped the `AGENTS.md` `_Last revised_` line
+  (its own §12 rule). Authority: `bootstrap/setup.sh::job_audio_cpp` + the plan's
+  gate; the upstream flag doc stays curated in `unverifiable.txt`.
+- **`docs/PRON_LORA_LONG_PLAN.md`** claimed of itself "*this file is the single
+  source of truth*", contradicting `SOURCE_OF_TRUTH.md` + `docs/PRON_LORA_LONG.md`
+  (the canonical run hub). Softened to name the hub and scope this file to build
+  decisions. Authority: `SOURCE_OF_TRUTH.md:15`.
+- **`docs/README.md` index gap** (its own rule: "must list every live runbook"):
+  added a row for `PRON_LORA_LONG_PLAN.md`; added `L4_HANDOFF_TASK14C.md` to the
+  not-a-runbook/history note (it is banner-marked *Historical 2026-09-27*).
+- **`docs/E2E_TESTING_PLAN.md` §8**: the doc is now `complete`, but §8 was titled
+  "proposals" and its tree listed a `tests/fixtures/gpu/` Tier B dir. Retitled
+  "as landed" and dropped `gpu/` — Session 4 folded the 1 Hz `_gpu.csv` into Tier A
+  (small text, `tests/fixtures/inference/…_gpu.csv`); no such dir exists.
+  Authority: the on-disk `tests/fixtures/` tree + `tests/fixtures/README.md`.
+- **`unverifiable.txt`**: pruned the four E2E suppressions that now match no claim
+  and resolve on disk (`tests/fixtures/{loss_log.spec.json,inference,training,gpu}`);
+  rewrote the now-false "later sessions will create …" comment. Curations that are
+  still live (bare filenames the extractor cannot map into `tests/`) kept.
+- **Graph refreshed** (free AST tier): `graphify update .` rebuilt **1275 nodes /
+  2457 edges / 91 communities** at HEAD `9bc008f` (was `5ca4c71`, 17 commits behind
+  — `status.py` flagged it); backup written to `graphify-out/2026-09-30/`. Code/AST
+  only; doc/semantic edges still need `/graphify --update` (pre-merge tier).
+- Re-verify after the edits: 2168 claims / 49 files, 1324 checkable, **0 flagged
+  (0.0 %)**.
+- Authority: user-approved reconciliation per `skills/docs-reconciler/SKILL.md`
+  (live docs only); no run config, hyperparameter, or script behaviour changed; no
+  frozen doc rewritten (`DECISIONS.md`/`PROGRESS.md`/`IMPROVEMENTS.md` untouched).
+
+## 2026-09-30 — graphify: untrack the extraction cache (multi-VM policy)
+
+- **Decision (user-approved).** `graphify-out/cache/` is now git-ignored and
+  untracked (`git rm -r --cached`); the graph outputs (`graph.json`,
+  `GRAPH_REPORT.md`, `graph.html`, `manifest.json`, `.graphify_labels.json`) stay
+  committed. Rationale: the cache is keyed by graphify version, and VMs run
+  different versions (this one 0.9.70 vs the committed `v0.9.71-s4`), so every
+  refresh replaced the whole directory — 189 tracked files churned + cross-branch
+  conflict risk for zero map benefit. The cache is AST-only (no LLM), so a fresh
+  VM rebuilds it free on first `graphify update`.
+- Docs: `.gitignore` comment + `graphify-out/cache/`; `docs/GRAPHIFY.md` (table
+  row, refresh note, caveat 2) and `DECISIONS.md` (new "Knowledge graph" section)
+  document the split. Also corrected the stale `GRAPHIFY.md` "built at `9c03b20`,
+  branch `pron-lora-ar-only`" line to `9bc008f` / `music-cover`.
+- Authority: user decision (multi-VM workflow; graphify is agent-facing); no run
+  config or hyperparameter changed.

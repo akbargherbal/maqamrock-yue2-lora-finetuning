@@ -11,6 +11,7 @@ History files are authoritative for what happened, never for what is true now.
 | Backup layout / restore | `docs/BACKUP_RESTORE.md` + `backup_to_gcp.py --help` | script flags beat prose |
 | GCS prefix organisation (sections, frozen dataset, migration state) | `docs/GCP_ORGANIZATION_PLAN.md` + the on-bucket `<base>/LAYOUT.json` | the plan is authority for *intent*; the bucket is the fact. `quran_long_aya_dataset/` frozen 2026-09-29 |
 | Inference procedure / provenance | `docs/INFERENCE.md` | repo `INFERENCE/` scripts are canonical |
+| Build / stage `audiocpp_cli` for a target GPU | `docs/audiocpp_gpu_arch_builds.md` + `bootstrap/setup.sh` (arch pin) | yue2 CLI flags live upstream in audio.cpp `docs/models/yue2.md` |
 | Pron LoRA training | `docs/PRON_LORA.md` | runbook; opt-in via `GCP_PRON_DATASET_PATH` |
 | Long-aya Quran LoRA (run / resume) | `docs/PRON_LORA_LONG.md` | canonical hub; active run `quran_long_aya_r8_s10`, full set reserved |
 | Long-aya run configs | `config/quran_long_aya_r8_s10.yml` (active) · `config/quran_long_aya_r8.yml` (full set, reserved) | never edit; dataset `_s10` = 8,100 pairs |

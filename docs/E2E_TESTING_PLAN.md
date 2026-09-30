@@ -224,7 +224,7 @@ Note the deliberate asymmetry: `--training` installs torch/cu130 and can pull th
 multi-GB dataset; the CPU e2e does **not** need it. Use `--inference` on the CPU
 VM and fetch only the tiny text fixtures from git.
 
-## 8. Test-suite wiring (proposals, each small)
+## 8. Test-suite wiring (as landed)
 
 ```
 pytest.ini   markers = gpu: needs a real CUDA device
@@ -245,8 +245,11 @@ tests/e2e/
   test_backup_restore_e2e.py    # J12
 tests/fixtures/
   README.md  manifest.json  fetch.sh  recorded_batch.json  loss_log.spec.json
-  inference/  training/  gpu/   (Tier B, GCS-backed)
+  inference/  training/       (Tier B, GCS-backed)
 ```
+
+No separate `gpu/` Tier B dir was needed: the 1 Hz `_gpu.csv` is small text and
+landed in Tier A (`tests/fixtures/inference/…_gpu.csv`).
 
 The default `pytest` must stay green and GPU-free on the CPU runtime; `pytest -m
 gpu` lists the T5 checks that are deferred to the gate; `pytest -m live` is never

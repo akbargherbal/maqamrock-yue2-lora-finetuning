@@ -21,7 +21,8 @@ hub, which includes the kickstart/resume/status prompts).
 > `selection_report.json` / `excluded_ayat.jsonl` in GCS, the separately-verified
 > ` ۝` caption edit, and the locked decisions recovered from the original
 > GPU-phase opening prompt.
-> `docs/PRON_LORA_LONG_PLAN.md` (this file) is the single source of truth.
+> The run/resume hub is `docs/PRON_LORA_LONG.md`; this file is the build &
+> multi-day plan behind it (authority for build decisions only).
 
 ## 1. Objective
 

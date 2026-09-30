@@ -182,15 +182,14 @@ docs/COMMAND_HANDOVER_GOTCHAS.md :: _failed_runs.log
 # dropped 2026-09-29 when the doc was condensed and stopped citing that deleted decoder.)
 docs/music-cover-feasibility.md :: tokens.json
 
-# 2026-09-30 — docs/E2E_TESTING_PLAN.md. Session 1 (T2 scaffold + J1) landed
-# 2026-09-30: tests/e2e/{conftest,replay,test_inference_e2e}.py and
-# tests/fixtures/{README.md,manifest.json,fetch.sh,recorded_batch.json} now exist,
-# so the broad dir globs are gone. What remains is what the later sessions will
-# create (plan §8/§9: fake_run.py, the T3 *_e2e.py, loss_log.spec.json, the
-# inference/training/gpu Tier B dirs) plus bare filenames the extractor resolves
-# only against repo-root/docs and cannot map into tests/e2e or tests/fixtures.
+# 2026-09-30 — docs/E2E_TESTING_PLAN.md. Sessions 1–4 all landed (the plan is
+# complete), so the `tests/e2e/*` and `tests/fixtures/*` files exist. What
+# remains are bare filenames the extractor resolves only against repo-root/docs
+# and cannot map into tests/e2e or tests/fixtures, plus runtime out-dir logs.
 # Doc-scoped, so the suppression cannot hide drift elsewhere — same class as the
 # `docs/GCP_ORGANIZATION_PLAN.md` "plan PROPOSES … not written yet" entry.
+# Pruned 2026-09-30: the four `tests/fixtures/…` full-path entries now resolve on
+# disk and matched no claim.
 docs/E2E_TESTING_PLAN.md :: conftest.py
 docs/E2E_TESTING_PLAN.md :: replay.py
 docs/E2E_TESTING_PLAN.md :: tests/test_*
@@ -200,10 +199,6 @@ docs/E2E_TESTING_PLAN.md :: recorded_batch.json
 docs/E2E_TESTING_PLAN.md :: loss_log.spec.json
 docs/E2E_TESTING_PLAN.md :: manifest.json
 docs/E2E_TESTING_PLAN.md :: fetch.sh
-docs/E2E_TESTING_PLAN.md :: tests/fixtures/loss_log.spec.json
-docs/E2E_TESTING_PLAN.md :: tests/fixtures/inference
-docs/E2E_TESTING_PLAN.md :: tests/fixtures/training
-docs/E2E_TESTING_PLAN.md :: tests/fixtures/gpu
 docs/E2E_TESTING_PLAN.md :: _driver.log
 docs/E2E_TESTING_PLAN.md :: _failed_runs.log
 

@@ -17,11 +17,12 @@ but still open the real files before editing.
 | `graphify-out/graph.json` | Raw graph (nodes / links / hyperedges + `built_at_commit`) |
 | `graphify-out/graph.html` | Self-contained interactive view — open in any browser |
 | `graphify-out/manifest.json` | What was scanned; drives incremental `graphify update` |
-| `graphify-out/cache/` | Per-file extraction cache — what makes rebuilds cheap |
+| `graphify-out/cache/` | Per-file extraction cache — **git-ignored**, rebuilt locally |
 
-Built at commit `9c03b20` on branch `pron-lora-ar-only` (committed there and
-rides into `main` on merge). The graph reflects the commit it was built at —
-refresh it after meaningful changes (see below).
+Built at commit `9bc008f` (branch `music-cover`). The graph reflects the commit
+it was built at — refresh it after meaningful changes (see below). The graph
+outputs above are committed so the map survives on every clone; only the cache
+(and the VM-specific interpreter path) is not.
 
 ## Use it
 
@@ -77,7 +78,12 @@ where `python` is the interpreter that has `graphify` installed (see caveat 1).
      > graphify-out/.graphify_python
    ```
 2. The extraction cache is keyed by graphify version *and* extraction prompt — a
-   version bump can miss cache and re-extract.
+   version bump can miss cache and re-extract the whole tree. **That is why the
+   cache is git-ignored** (`.gitignore`: `graphify-out/cache/`): on a multi-VM
+   setup the installed versions differ, so tracking it would churn the entire
+   directory on every refresh (and conflict across branches). Each VM rebuilds
+   it locally on its first `graphify update` at no token cost — the `update`
+   path is AST-only, no LLM — and the committed graph outputs are unaffected.
 3. The graph is **branch-specific**. The 2026-09-25 build has a known gap: 135
    dangling-endpoint edges + 1 self-loop; a targeted re-extract would clean them.
 4. Building / semantic extraction costs LLM tokens (~26k in / 9k out on the first
