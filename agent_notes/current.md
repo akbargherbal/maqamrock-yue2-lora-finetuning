@@ -3,8 +3,8 @@
 _Updated 2026-09-30 (L4 GPU VM). **E2E Session 4 — the T5 GPU gate — is COMPLETE.**
 Ran on an NVIDIA L4 (sm_89), not a T4 (L4 is deliberate; the plan's T4 rows were
 stale and are now corrected). S1–S3 passed; the recording is folded into
-`tests/fixtures`; `python -m pytest` -> **191 passed, 1 skipped**. Changes are
-**uncommitted** on `music-cover`._
+`tests/fixtures`; `python -m pytest` -> **191 passed, 1 skipped**. Committed and
+pushed as **`e953044`** on `origin/music-cover`._
 
 ## 0. What happened this session
 
@@ -38,10 +38,9 @@ stale and are now corrected). S1–S3 passed; the recording is folded into
 
 ## 2. Next action
 
-1. **Review + commit** the change set (see `git status --short`); push needs GitHub
-   auth (`bash bootstrap/github_auth.sh`, PAT at the hidden prompt — AGENTS.md §11).
-2. Optional: on a **CPU runtime**, re-run `python -m pytest` to confirm the suite
+1. Optional: on a **CPU runtime**, re-run `python -m pytest` to confirm the suite
    stays green with the pin in place (setup re-clones audio.cpp at the pinned commit).
+2. Nothing else outstanding — Session 4 (and the E2E plan) is done.
 
 ## 3. Open item (unfixed)
 
