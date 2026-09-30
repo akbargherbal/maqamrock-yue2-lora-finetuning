@@ -718,3 +718,20 @@ covers both._
 - Reconciler: 2193 claims / 50 files, 1334 checkable, **0 flagged (0.0%)**.
 - Authority: the probe logs (`results/ss2_cpu_probe/*.log`); no run config, hyperparameter,
   or script behaviour changed; no frozen doc rewritten.
+
+## 2026-09-30 — cover/rescue workflow & economics recorded (§10)
+
+- `docs/music-cover-feasibility.md`: new **§10 "Rescue workflow & economics (B2 on CPU)"** —
+  turns the §2.1 CPU-viability fact into the revised GPU/CPU split (pass-1 v2 `cot=off` on
+  GPU → B2 transcription on a **free CPU** runtime → selective `qfinal cot=melody` rescue on
+  GPU), with a GPU-minute cost table (N=12 / M=5: 110 vs 143 on B1 vs 156 guide-all) and the
+  B2-still-unrun caveat + mandatory 1-track smoke. §4.2 B2 bullet now cites §2.1/§10; §8
+  B1-vs-B2 item notes it gates the flow; header revision line updated; former §10 Sources
+  renumbered to §11.
+- `SOURCE_OF_TRUTH.md`: new row for the cover/rescue workflow-split topic, **marked a plan,
+  not measured** (B2 unrun).
+- `docs/README.md`: investigation-record blurb now names §10.
+- Reconciler: 2198 claims / 50 files, 1339 checkable, **0 flagged (0.0%)**.
+- Authority: the §2.1 probe (`results/ss2_cpu_probe/`) + `docs/GPU_L4_VS_A100.md` unit rates
+  + `docs/INFERENCE.md` T4 timing; the cost model is a plan — no run config, hyperparameter,
+  or script changed; no frozen doc rewritten.

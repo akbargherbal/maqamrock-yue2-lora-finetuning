@@ -8,7 +8,7 @@ _Investigation record, **not a runbook**. Procedures stay with `docs/INFERENCE.m
 `docs/PRON_LORA_MERGE.md`, `docs/LORA_INVENTORY.md`, and
 `config/akbar_arabic_rock_lora.yml`. Round scores live in
 `manifests/evaluation_*/MY_EVALUATION.txt`. Last updated 2026-09-30 (SheetSage2 CPU
-feasibility, §2.1)._
+feasibility §2.1; rescue flow & economics §10)._
 
 ## 1. Question
 
@@ -118,7 +118,9 @@ text says "hymn-like" makes the drift worse).
   transcription loss; the guide is v2's full-mode plan (melody **+ chords**). **This is the
   route that worked.** Caveat: it is a different v2 render from the liked `cot=off` track.
 - **B2 (faithful, lossy; unrun):** liked `cot=off` v2 wav → **Python SheetSage2** →
-  `melody.abc` → `qfinal_a0.3` `cot=melody` + `abc_file`. Melody-only.
+  `melody.abc` → `qfinal_a0.3` `cot=melody` + `abc_file`. Melody-only. Its transcription
+  step is **CPU-viable (§2.1)** — ~4 min/track at ~4.3 GB RAM, no GPU — so B2 buys the guide
+  for **0 compute units**, unlike B1's extra v2 render (§10).
 
 ### 4.3 Knobs for adherence / v2 fidelity
 
@@ -205,7 +207,8 @@ the per-arm render logs byte-for-byte (`ref` 52,208,428 / `a0` 49,313,068 / `a1`
 - [ ] **Replicate round 2** on the other two seeds (`1029169725`, `1938238049`) — the sheet
   asks for it. *(next)*
 - [ ] **B1 vs B2 guide.** Does the melody-only SheetSage2 ABC (B2) steer arrangement as well
-  as v2's full plan (B1)? B2 unrun.
+  as v2's full plan (B1)? B2 unrun — and it gates the GPU-cheap rescue flow (§10). Smoke 1
+  track before any batch.
 - [ ] **Style-text lever (§4.1).** Does a rock-forward caption close the gap without a
   guide, and does `guidance_scale` 1.3–1.5 help once the text is fixed? Unrun.
 - [ ] **Partial prefix.** Can `semantic_prefix` steer arrangement *without* reverting
@@ -221,7 +224,55 @@ the per-arm render logs byte-for-byte (`ref` 52,208,428 / `a0` 49,313,068 / `a1`
 - A guide and its prompt must share the **maqam** (Hijaz ABC + Hijaz prompt).
 - Scores are subjective 1–5 with no confidence captured.
 
-## 10. Sources & artifacts
+## 10. Rescue workflow & economics (B2 on CPU)
+
+The measured CPU transcription (§2.1) changes the **cost** of the cover/rescue flow, not the
+quality story (§7). Currency is Colab compute units: a **GPU** runtime is billed (L4
+`1.54 u/h`, A100 `6.7 u/h` — `GPU_L4_VS_A100.md`), a **CPU** runtime is not. Per-track GPU
+render ≈ **6.5 min on a T4** (`INFERENCE.md`); per-track CPU transcription ≈ 4 min (8
+threads) / 5.8 min (2 threads), ~4.3 GB RAM.
+
+**Revised flow — GPU only for renders, CPU for the guide:**
+
+| phase | box | cost | step |
+|---|---|---|---|
+| A. pass-1 | GPU | N × ~6.5 min | v2 `cot=off` → wavs; back up; stop GPU |
+| B. audio→ABC (B2) | **free CPU** | **0 units** (~4–6 min/track) | SheetSage2 `melody_only=True` on the pass-1 wavs → ABC (to GCS) |
+| C. listen / classify | human | — | arrangement vs pronunciation |
+| D. rescue | GPU | **M** × ~6.5 min | qfinal `cot=melody` + `abc_file=<B2 abc>`, only the M pron-fails |
+| E. re-listen | human | — | finals |
+
+Two consequences of §2.1:
+
+- **B2 is now the GPU-cheap guide route.** B1 must burn a GPU render to export v2's plan
+  (`cot=full --out-dir`); B2 transcribes the **already-rendered** pass-1 wav on CPU. So
+  pass-1 can stay `cot=off` (the trained regime, §3) and the guide is still free — B2 no
+  longer costs the extra render; only the B1-vs-B2 quality caveat (§4.2, §8) remains.
+- **Transcription must not run on a paid GPU VM.** On L4/A100, stop the GPU after pass-1 and
+  transcribe on a free CPU VM (WAVs/ABCs over GCS — ABC is ~3 KB). On a free T4 runtime the
+  whole box is free, so transcribing there is fine too.
+
+**GPU-minute cost of a rescue batch** (N = 12 pass-1 tracks, M = 5 pron-fails,
+6.5 min/render):
+
+| plan | GPU renders | GPU-min |
+|---|--:|--:|
+| pass-1 only (accept drift) | 12 | 78 |
+| **selective rescue on B2 (this flow)** | 12 + 5 | **110** |
+| selective rescue on B1 (+ plan export) | 12 + 5 + 5 | 143 |
+| guide every track (v2→ABC→qfinal all) | 24 | 156 |
+
+The two levers are independent: **B2 saves M renders** (~33 min here) vs B1, and **selective
+rescue saves N − M** (~46 min) vs guiding every track. The selective saving **shrinks as M
+grows** — if most tracks fail pronunciation, "guide every track" costs the same with less
+bookkeeping.
+
+**Caveat before committing.** The economics assume the B2 guide *works*, which is **unrun
+(§8)** — only B1 was validated (§7, n=1). A wasted rescue batch is ~M renders, dwarfing the
+CPU saving. So a **1-track B2 smoke** (1 render + free CPU minutes) must precede any batch;
+if melody-only steering disappoints, fall back to B1.
+
+## 11. Sources & artifacts
 
 - **Upstream:** YuE2 cover + SHS100K — <https://huggingface.co/m-a-p/YuE2-3B>; SheetSage2 —
   <https://huggingface.co/m-a-p/SheetSage2>; audio.cpp YuE2 options —
