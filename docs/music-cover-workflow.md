@@ -60,9 +60,9 @@ Keyed throughout by one string: **`<name>_<seed>`** (the pass-1 WAV stem).
 | phase | box | in → out | notes |
 |---|---|---|---|
 | **0. Setup** | GPU VM | — → staged env | binary + models + **both** LoRAs; branch `music-cover`; backup sidecar up |
-| **1. Pass-1** | GPU | manifest → 12 v2 takes | `cot=off` (trained regime); ~6.5 min/track |
+| **1. Pass-1** | GPU | manifest → 2 v2 takes/song | `cot=off` (trained regime); ~6.5 min/track |
 | **2. Transcribe** | **free CPU** | takes → `score.abc` per take | SheetSage2 `melody_only=True`; ~4–6 min/track; 0 GPU units |
-| **3. Listen** | human | takes → `M` (fail list) | two axes: maqamrock-OK? pronunciation-OK? |
+| **3. Listen** | human | takes → chosen take/song + `M` (fail list) | two axes: maqamrock-OK? pronunciation-OK? |
 | **4. Rescue** | GPU | `M` takes + their ABC → rescue WAVs | `qfinal_a0.3` `cot=melody` + `abc_file`; same seed/cap/style/lyrics |
 | **5. Re-listen** | human | pass-1 vs rescue, same seed | only the guide changed |
 
@@ -112,7 +112,8 @@ Two consequences of B2 being CPU-viable:
 - **Transcription must not run on a paid GPU VM.** Stop the GPU after pass-1; transcribe on a
   free CPU runtime (WAVs/ABCs over GCS). On the GPU box, force CPU with `CUDA_VISIBLE_DEVICES=""`.
 
-For a 12-track batch with M pronunciation-failures, GPU minutes:
+Per chosen take/song (12-song batch) with M pronunciation-failures, GPU minutes — pass-1 itself
+renders `repeat: 2` takes/song, so double the first row (24 takes ≈ 156 min):
 
 | plan | renders | GPU-min |
 |---|--:|--:|

@@ -1,0 +1,259 @@
+"""e2e: `rescue_abc_batch.sh` against a stub binary and a staged pass-1/ABC tree.
+
+The device boundary is two seams: the preflight GPU probe (bypassed with
+`--skip-preflight`) and the binary (`$BIN`). Everything else — arg parsing,
+selector resolution, the sha256 index, render loop, resume, and the sidecar — is
+the production shell code path. No GPU, no `/content`.
+
+Covers: plan (all / by stem / by name / unknown), missing ABC, out-dir refusals,
+`--verify` clean + tamper, render + sidecar + status log, resume + `--force`,
+`--smoke`, `--limit`, `--songs-file` (CRLF/comments), a simulated render failure,
+and Arabic stems.
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+REPO = Path(__file__).resolve().parents[2]
+DRIVER = REPO / "INFERENCE" / "rescue_abc_batch.sh"
+STUB = Path(__file__).resolve().parent / "fake_audiocpp.py"
+
+ARABIC = "الحر"
+SONG_A = f"07-{ARABIC}-rock"     # 2 takes
+SONG_B = "06-night_rock"          # 1 take
+SEEDS_A = [11, 22]
+SEED_B = 33
+STEMS_A = [f"{SONG_A}_{s}" for s in SEEDS_A]
+STEM_B = f"{SONG_B}_{SEED_B}"
+
+
+def _sha(p: Path) -> str:
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+@pytest.fixture
+def ws(tmp_path) -> SimpleNamespace:
+    pass1 = tmp_path / "pass1"
+    (pass1 / "prompts").mkdir(parents=True)
+    tracks = []
+    for name, seeds in ((SONG_A, SEEDS_A), (SONG_B, [SEED_B])):
+        (pass1 / "prompts" / f"{name}_style.txt").write_text("arabmaqamrock style", encoding="utf-8")
+        (pass1 / "prompts" / f"{name}_lyrics.txt").write_text("[Verse 1]\nكلمات", encoding="utf-8")
+        for take, seed in enumerate(seeds):
+            stem = f"{name}_{seed}"
+            (pass1 / f"{stem}.wav").write_bytes(b"RIFFpass1")
+            (pass1 / f"{stem}_time.txt").write_text("...\nExit status: 0\n", encoding="utf-8")
+            tracks.append({"idx": len(tracks), "name": name, "take": take, "seed": seed, "cap": 7000,
+                           "style_file": f"prompts/{name}_style.txt",
+                           "lyrics_file": f"prompts/{name}_lyrics.txt"})
+    (pass1 / "batch_manifest.json").write_text(
+        json.dumps({"songs": 2, "tracks": tracks}, ensure_ascii=False), encoding="utf-8")
+
+    abc = tmp_path / "abc"
+    for t in tracks:
+        d = abc / f"{t['name']}_{t['seed']}"
+        d.mkdir(parents=True)
+        (d / "score.abc").write_text("X:1\nK:C\nCDEF|", encoding="utf-8")
+
+    out = tmp_path / "rescue"
+    out.mkdir()
+    bindir = tmp_path / "bin"
+    bindir.mkdir()
+    exe = bindir / "audiocpp_cli"
+    shutil.copy2(STUB, exe)
+    exe.chmod(0o755)
+    return SimpleNamespace(root=tmp_path, pass1=pass1, abc=abc, out=out, bin=exe, tracks=tracks)
+
+
+def run(ws: SimpleNamespace, *args: str, fail: str | None = None,
+        out_dir: Path | None = None) -> subprocess.CompletedProcess:
+    env = dict(os.environ)
+    env.update({"BIN": str(ws.bin), "MODEL": str(ws.root / "model"), "THREADS": "1",
+                "QF_AR": str(ws.root / "ar"), "QF_NAR": str(ws.root / "nar")})
+    if fail:
+        env["FAKE_AUDIOCPP_FAIL"] = fail
+    cmd = ["bash", str(DRIVER),
+           "--pass1-dir", str(ws.pass1), "--abc-dir", str(ws.abc),
+           "--out-dir", str(out_dir or ws.out), "--skip-preflight", *args]
+    return subprocess.run(cmd, capture_output=True, text=True, env=env)
+
+
+def _index(ws) -> dict:
+    return json.loads((ws.out / "_rescue_index.json").read_text(encoding="utf-8"))
+
+
+def _wavs(ws) -> list[str]:
+    return sorted(p.name for p in ws.out.glob("*.wav"))
+
+
+# --- plan / selection --------------------------------------------------------
+
+def test_plan_all(ws):
+    r = run(ws, "--plan")
+    assert r.returncode == 0, r.stderr
+    assert _index(ws)["n"] == 3
+    assert "n     : 3" in r.stdout
+
+
+def test_plan_by_stem_selects_one(ws):
+    r = run(ws, "--plan", "--songs", STEMS_A[1])
+    assert r.returncode == 0, r.stderr
+    assert _index(ws)["n"] == 1
+    assert _index(ws)["tracks"][0]["stem"] == STEMS_A[1]
+
+
+def test_plan_by_name_selects_every_take(ws):
+    r = run(ws, "--plan", "--songs", SONG_A)
+    assert r.returncode == 0, r.stderr
+    assert _index(ws)["n"] == 2
+
+
+def test_plan_unknown_selector_aborts(ws):
+    r = run(ws, "--plan", "--songs", "does-not-exist")
+    assert r.returncode == 3
+    assert "requested selector not in manifest" in r.stderr
+
+
+def test_plan_missing_abc_aborts(ws):
+    (ws.abc / STEM_B / "score.abc").unlink()
+    r = run(ws, "--plan")
+    assert r.returncode == 3
+    assert "missing/empty abc" in r.stderr
+
+
+def test_plan_missing_style_aborts(ws):
+    (ws.pass1 / "prompts" / f"{SONG_B}_style.txt").unlink()
+    r = run(ws, "--plan", "--songs", STEM_B)
+    assert r.returncode == 3
+    assert "missing style" in r.stderr
+
+
+def test_plan_missing_cap_aborts(ws):
+    man = json.loads((ws.pass1 / "batch_manifest.json").read_text(encoding="utf-8"))
+    for t in man["tracks"]:
+        if t["name"] == SONG_B:
+            del t["cap"]
+    (ws.pass1 / "batch_manifest.json").write_text(json.dumps(man, ensure_ascii=False), encoding="utf-8")
+    r = run(ws, "--plan", "--songs", STEM_B)
+    assert r.returncode == 3
+    assert "manifest has no cap" in r.stderr
+
+
+# --- out-dir refusals --------------------------------------------------------
+
+def test_refuse_out_equals_pass1(ws):
+    r = run(ws, "--plan", out_dir=ws.pass1)
+    assert r.returncode == 2
+    assert "== --pass1-dir" in r.stderr
+
+
+def test_refuse_out_under_pass1(ws):
+    r = run(ws, "--plan", out_dir=ws.pass1 / "sub")
+    assert r.returncode == 2
+    assert "is under --pass1-dir" in r.stderr
+
+
+def test_refuse_out_is_generate_dir(ws):
+    (ws.out / "batch_manifest.json").write_text("{}", encoding="utf-8")
+    r = run(ws, "--plan")
+    assert r.returncode == 2
+    assert "looks like a generate.py run dir" in r.stderr
+
+
+def test_refuse_out_equals_abc(ws):
+    r = run(ws, "--plan", out_dir=ws.abc)
+    assert r.returncode == 2
+    assert "== --abc-dir" in r.stderr
+
+
+# --- verify ------------------------------------------------------------------
+
+def test_verify_clean_then_tamper(ws):
+    assert run(ws, "--plan").returncode == 0
+    ok = run(ws, "--verify")
+    assert ok.returncode == 0, ok.stdout
+    assert "verify: OK" in ok.stdout
+    (ws.abc / STEM_B / "score.abc").write_text("X:1\nK:C\nGABc|", encoding="utf-8")
+    bad = run(ws, "--verify")
+    assert bad.returncode == 1
+    assert "MISMATCH" in bad.stdout
+
+
+# --- render / sidecar / resume ----------------------------------------------
+
+def test_render_sidecar_status_and_resume(ws):
+    r = run(ws)
+    assert r.returncode == 0, r.stderr
+    assert _wavs(ws) == sorted(f"{s}.wav" for s in STEMS_A + [STEM_B])
+    assert "ok=3 fail=0" in r.stdout
+
+    side = json.loads((ws.out / f"{STEM_B}_rescue.json").read_text(encoding="utf-8"))
+    assert side["cot"] == "melody" and side["adapter"] == "qfinal_a0.3"
+    assert side["name"] == SONG_B and side["seed"] == SEED_B
+    assert side["abc_sha256"] == _sha(ws.abc / STEM_B / "score.abc")
+
+    args = json.loads((ws.out / f"{STEM_B}.wav.args.json").read_text(encoding="utf-8"))
+    assert args["opts"]["cot"] == "melody"
+    assert args["opts"]["abc_file"] == str(ws.abc / STEM_B / "score.abc")
+
+    status = (ws.out / "_rescue_status.log").read_text(encoding="utf-8")
+    assert f"START rescue {STEM_B}" in status and f"END rescue {STEM_B}" in status
+
+    again = run(ws)
+    assert again.returncode == 0 and "skip" in again.stdout
+
+    forced = run(ws, "--force")
+    assert forced.returncode == 0 and "skip" not in forced.stdout
+
+
+def test_smoke_renders_one(ws):
+    r = run(ws, "--smoke")
+    assert r.returncode == 0 and "[smoke]" in r.stdout
+    assert len(_wavs(ws)) == 1
+
+
+def test_limit(ws):
+    r = run(ws, "--limit", "2")
+    assert r.returncode == 0
+    assert len(_wavs(ws)) == 2
+
+
+def test_songs_file_crlf_comments_and_blank(ws):
+    f = ws.root / "fails.txt"
+    f.write_bytes(f"# a comment\r\n\r\n{STEMS_A[0]}\r\n".encode())
+    r = run(ws, "--plan", "--songs-file", str(f))
+    assert r.returncode == 0, r.stderr
+    assert _index(ws)["n"] == 1
+
+
+def test_empty_songs_file_errors_not_select_all(ws):
+    f = ws.root / "empty.txt"
+    f.write_bytes(b"# only a comment\r\n\r\n")
+    r = run(ws, "--plan", "--songs-file", str(f))
+    assert r.returncode == 2
+    assert "no selectors" in r.stderr
+
+
+def test_render_failure_exits_nonzero(ws):
+    r = run(ws, fail=STEM_B)
+    assert r.returncode == 1
+    assert "fail=1" in r.stdout
+    assert f"{STEM_B}.wav" not in _wavs(ws)
+    assert len(_wavs(ws)) == 2
+
+
+def test_arabic_stem_roundtrip(ws):
+    r = run(ws, "--songs", STEMS_A[0])
+    assert r.returncode == 0, r.stderr
+    assert (ws.out / f"{STEMS_A[0]}.wav").exists()
+    assert (ws.out / f"{STEMS_A[0]}_rescue.json").exists()
+    # only the selected stem rendered
+    assert _wavs(ws) == [f"{STEMS_A[0]}.wav"]

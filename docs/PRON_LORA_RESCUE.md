@@ -42,7 +42,8 @@ structural, never hand-carried:
 - Clone the right branch: `git clone --branch music-cover <url>` (a default clone lands on
   `main` and is missing these files).
 - Pass-1 manifest: **`manifests/batch_12_rock_v2.json`** (generated from `batch_12_rock.json`
-  with every `lora` set to `v2`; the original is kept). Validate with
+  with every `lora` set to `v2`; the original is kept). It sets `defaults.repeat: 2` — **2 takes
+  per song, fresh random seeds → 24 tracks**. Validate with
   `python INFERENCE/generate.py manifests/batch_12_rock_v2.json --dry-run`.
 
 ## Phase 1 — pass-1 v2 batch (GPU)
@@ -55,8 +56,9 @@ python INFERENCE/generate.py manifests/batch_12_rock_v2.json \
 ```
 
 Wrap it: `setsid nohup <cmd> > /content/logs/batch_12_rock_v2.log 2>&1 & disown`.
-~12 × ~6.5 min ≈ **~78 min** on a T4. The `--out-dir` is deliberate (G1); the manifest's
-explicit per-song seeds mean a re-run reproduces the same tracks.
+2 takes/song → 24 tracks × ~6.5 min ≈ **~156 min** on a T4. The `--out-dir` is deliberate (G1);
+seeds are random per take and written to the run's `batch_manifest.json` before generation, so a
+resume reproduces the same tracks.
 
 ## Phase 2 — transcribe all (free CPU)
 
@@ -65,22 +67,30 @@ explicit per-song seeds mean a re-run reproduces the same tracks.
 ```bash
 CUDA_VISIBLE_DEVICES="" /content/.venv-sheetsage2/bin/python INFERENCE/sheetsage2_transcribe.py \
   --input-dir /content/audiocpp_inference/out/batch_12_rock_v2 \
-  --out-dir   /content/audiocpp_inference/out/abc_v2_batch12
+  --out-dir   /content/audiocpp_inference/out/abc_v2_batch12 --all
 ```
 
 `CUDA_VISIBLE_DEVICES=""` forces CPU even on the GPU box (the script auto-selects CUDA when
-present). Best run on a **free CPU runtime** with the WAVs via GCS. ~12 × ~4.5 min ≈ **~54 min**.
-Never point `--input-dir` at a dir that also holds rescue WAVs (G2).
+present). Best run on a **free CPU runtime** with the WAVs via GCS. ~24 × ~4.5 min ≈ **~108 min**.
+Never point `--input-dir` at a dir that also holds rescue WAVs (G2). Pass `--all`: the script's
+default silently **skips any stem matching `_[23]_`** (`sheetsage2_transcribe.py:34`), which would
+quietly drop a take whose name/slug contains `_2_`/`_3_`.
 
 ## Phase 3 — listen / classify
 
-Play the 12 pass-1 takes. Two axes each: **maqamrock-OK?** and **pronunciation-OK?**. The
-rescue set `M` = the tracks that are maqamrock-OK but pronunciation-bad. List their whole
-`name` strings (no hand-typing needed — see Phase 4's `--songs-file`).
+Play the pass-1 takes (2 per song). Two axes each: **maqamrock-OK?** and **pronunciation-OK?**.
+Pick the **better take per song**; the rescue set `M` = the chosen take that is maqamrock-OK but
+pronunciation-bad. List each as a **stem** (`<name>_<seed>`) to rescue exactly that take — a bare
+song `name` rescues every take of that song (see Phase 4).
 
 ## Phase 4 — rescue `M` (GPU)
 
 `terminal: foreground for --plan/--smoke (seconds); detached for the batch; stop: pkill -f rescue_abc_batch.sh; resume: same command (skips succeeded).`
+
+Selectors accept a song **name or a full stem** (`<name>_<seed>`): a name rescues every take of
+that song, a stem exactly one. Other flags: `--limit N` (cap the run), `--threads N`,
+`--skip-preflight` (test / off-box use). Env overrides: `ROOT`, `BIN`, `MODEL`, `THREADS`,
+`QF_AR`/`QF_NAR` (default qfinal_a0.3), `RESCUE_COT` (default `melody`), `RESCUE_ADAPTER`.
 
 1. **Build + check the index (no GPU):**
    ```bash
@@ -99,16 +109,20 @@ rescue set `M` = the tracks that are maqamrock-OK but pronunciation-bad. List th
    Listen: does the melody-only ABC steer the arrangement while qfinal keeps the pronunciation?
    If not, stop — B2 is unproven and the fallback is B1 (`INFERENCE/v2_abc_to_qfinal.sh`).
 
-3. **Full rescue** (pass `--songs-file` of the M names):
+3. **Full rescue** (pass `--songs-file` of the M stems, one per line):
    ```bash
    bash INFERENCE/rescue_abc_batch.sh --pass1-dir ... --abc-dir ... --out-dir ... \
      --songs-file /content/fails.txt
    ```
 
-The driver calls the binary **directly** with `cot=melody abc_file=<abc>` (it does **not** use
+   `--songs`/`--songs-file` take song **names and/or stems** — a name rescues every take of that
+   song, a stem (`<name>_<seed>`) rescues exactly one. Blank lines and `#` comments in the file
+   are ignored.
+
+   The driver calls the binary **directly** with `cot=melody abc_file=<abc>` (it does **not** use
 `run_one.sh`, whose hardcoded `cot=off` + later override is unverified) and writes, per track,
 `<stem>.wav`, `<stem>.log`, `<stem>_time.txt`, `<stem>_rescue.json` (binds the WAV to the exact
-> abc sha256 + seed + cap), and `_rescue_status.log`.
+abc sha256 + seed + cap), and `_rescue_status.log`.
 
 ## Phase 5 — re-listen
 

@@ -243,3 +243,13 @@ human and invisible to the agent — so they get written down here.
   v2 take**, same name, no warning.
 - **Correct pattern:** render rescues into a dedicated dir; `rescue_abc_batch.sh` refuses when
   `--out-dir == --pass1-dir` or when the target holds a `batch_manifest.json`.
+
+## 2026-09-30 — `sheetsage2_transcribe.py` silently skips stems matching `_[23]_`
+
+- **Fact:** the default exclusion is `VARIANT_MARKER = re.compile(r"_[23]_")`
+  (`sheetsage2_transcribe.py:34`), meant to drop the old `_2_`/`_3_` duplicate takes. A legit
+  stem whose name/slug happens to contain `_2_`/`_3_` is dropped with **no error** — that take
+  gets no ABC, so the rescue silently omits it.
+- **Correct pattern:** pass `--all` (or an explicit `--exclude`) for a batch whose stems are not
+  the legacy `_2_`/`_3_` variants; the rescue flow now uses `--all`
+  (`docs/PRON_LORA_RESCUE.md`, phase 2).

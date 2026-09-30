@@ -770,3 +770,49 @@ covers both._
   explicit (design here, procedure in the runbook, evidence in the feasibility record).
 - Authority: synthesised from `docs/music-cover-feasibility.md` + `docs/PRON_LORA_RESCUE.md`;
   no new measurement, no run config or hyperparameter changed.
+
+## 2026-09-30 — pass-1 manifest → 2 takes/song (random seeds)
+
+- `manifests/batch_12_rock_v2.json`: added `defaults.repeat: 2`, removed the 12 per-song `seed`
+  values — pass-1 now renders **2 takes per song with fresh random seeds** (24 tracks, ~156 min
+  T4). `generate.py` rejects `seed` + `repeat>1` as ambiguous (`_seed_spec`), so the fixed seeds
+  had to go; resolved seeds are written to the run's `batch_manifest.json` before generation, so
+  a resume still reproduces the set. Validated `--dry-run`: 12 songs / 24 tracks / ~156 min.
+- `docs/PRON_LORA_RESCUE.md` (Phases 0/1/2/3/4) and `docs/music-cover-workflow.md` (§4 phase
+  table, §6 cost caption) updated so the documented pass-1 counts match 24 takes; the runbook now
+  records that `--songs`/`--songs-file` are **name-keyed** (`rescue_abc_batch.sh:149`), so a
+  listed song rescues both its takes (per-take selection not implemented).
+- Authority: user directive (2 tracks/song, random seeds) + `INFERENCE/generate.py`
+  (`repeat`, `_seed_spec`, `DEFAULT_KEYS`) + `INFERENCE/rescue_abc_batch.sh:149`. No rescue script
+  or config knob above `repeat` changed; no run started.
+
+## 2026-09-30 — `rescue_abc_batch.sh` hardened + e2e tested (selection, ports, failures)
+
+- **`INFERENCE/rescue_abc_batch.sh`** rewritten for robustness/flexibility:
+  - **selection**: `--songs`/`--songs-file` now match a song **name OR a full stem**
+    (`<name>_<seed>`) — with 2 takes/song a name rescues both takes, a stem exactly one (the
+    earlier name-only behaviour is superseded); file parsing strips `#` comments, CR, blanks.
+  - **ports**: `ROOT`/`BIN`/`MODEL`/`THREADS` now env-overridable (were hardcoded to
+    `/content/...`), so the driver runs and is tested off the canonical path; added
+    `--threads`, `--limit`, `--skip-preflight`; graceful fallback when `/usr/bin/time` is absent.
+  - **guards/robustness**: refuses an `--out-dir` **under** the pass-1 dir (rescue WAVs would be
+    re-transcribed, G2) and an `--out-dir == --abc-dir`; an explicit-but-empty selector list
+    (`--songs`/`--songs-file` with no tokens) **errors** instead of silently meaning "rescue
+    everything"; tolerates a manifest track missing `cap`/`style_file`/`lyrics_file` (clear gate
+    message, not a Python traceback); a render that produced no WAV counts as a failure; the batch
+    **exits non-zero** if any render failed; the sidecar `name` is passed explicitly (not
+    re-derived by `rsplit`).
+- **New e2e tests** (GPU-free, stub binary): `tests/e2e/fake_audiocpp.py` (records the request
+  options, can fail a stem) + `tests/e2e/test_rescue_e2e.py` — 19 cases: plan (all/stem/name/
+  unknown), missing ABC/style/cap, the out-dir refusals (== pass1, under pass1, == abc, generate
+  dir), `--verify` clean + tamper, render + sidecar + status log, resume + `--force`, `--smoke`,
+  `--limit`, `--songs-file` CRLF/comments, an empty selector file (rc 2), a simulated render
+  failure (rc 1), and Arabic stems. `198 passed` (+19), the lone unrelated
+  failure being `test_inference_e2e.py::test_provenance_guard` (needs the `/content/audio.cpp`
+  clone; environment-only).
+- `docs/PRON_LORA_RESCUE.md` (Phases 2/3/4 + gates) updated: `--all` on the transcribe command
+  (its default silently drops `_[23]_` stems), stem-or-name selectors, and the new flags/env.
+  `SOURCE_OF_TRUTH.md` rescue row + `agent_notes/current.md` updated;
+  `docs/COMMAND_HANDOVER_GOTCHAS.md` gained the `_[23]_` skip entry.
+- Authority: the driver is its own spec; behaviour pinned by `tests/e2e/test_rescue_e2e.py`.
+  No run started; no GPU touched.
