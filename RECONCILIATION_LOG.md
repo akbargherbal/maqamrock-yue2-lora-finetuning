@@ -816,3 +816,21 @@ covers both._
   `docs/COMMAND_HANDOVER_GOTCHAS.md` gained the `_[23]_` skip entry.
 - Authority: the driver is its own spec; behaviour pinned by `tests/e2e/test_rescue_e2e.py`.
   No run started; no GPU touched.
+
+## 2026-09-30 — cover-workflow gaps found during the live batch-12 run
+
+- `docs/PRON_LORA_RESCUE.md` Phase 0: the staging step now requires **every** adapter alias the
+  manifest's `loras` block declares, not just v2 + qfinal_a0.3. Authority: `generate.py:581`
+  (`preflight` existence-checks all of `resolve_loras`, whether or not a song uses them) — the
+  handed-over pass-1 command failed live with `missing AR LoRA adapter [qfinal_a0.5]`. G0 row widened.
+- `docs/PRON_LORA_RESCUE.md` Phase 2: added the one-time env build (`bash INFERENCE/ss2_venv.sh`).
+  The runbook and `sheetsage2_transcribe.py` both run under `/content/.venv-sheetsage2`, but no repo
+  artifact built it — only the scratch `ss2_probe.sh`, which builds `/content/.ss2` and then probes.
+  New file `INFERENCE/ss2_venv.sh` (build-only, idempotent, pins mirroring `ss2_probe.sh:30-36`).
+- `docs/COMMAND_HANDOVER_GOTCHAS.md`: two entries — the a0.5 preflight requirement, and the
+  host-wide `_pgrep("generate.py")` (`status.py:158`) making `test_monitor_status_e2e` fail while a
+  real render runs.
+- Mechanical reconciler (`extract_claims.py` / `verify_claims.py`): 2397 claims, 1500 checkable,
+  1 flagged (0.1%); the flagged `_v2.json` token was reworded in the same pass.
+- Authority: `generate.py` source/`--help`, `INFERENCE/ss2_probe.sh`, `status.py:158`. Live context
+  was the running pass-1 batch `batch_12_rock_v2`. No config edited, no GPU work touched.

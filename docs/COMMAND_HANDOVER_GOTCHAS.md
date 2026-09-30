@@ -253,3 +253,35 @@ human and invisible to the agent — so they get written down here.
 - **Correct pattern:** pass `--all` (or an explicit `--exclude`) for a batch whose stems are not
   the legacy `_2_`/`_3_` variants; the rescue flow now uses `--all`
   (`docs/PRON_LORA_RESCUE.md`, phase 2).
+
+## 2026-09-30 — pass-1 preflight wants the manifest's *whole* `loras` registry, not just the used adapter
+
+- **Fact:** `generate.py` preflight existence-checks **every** alias in `input.loras`
+  (`generate.py:581` iterating `resolve_loras`, `:253`), regardless of which `lora` the songs
+  reference. `manifests/batch_12_rock_v2.json` carries the shared 4-alias registry (v2,
+  qfinal_a0.3, qfinal_a0.5, qfinal_a0.5_explicit), so a **pass-1 v2** batch refuses to start
+  unless **all four** adapter pairs are on disk.
+- **Failure prevented:** the handed-over pass-1 command dies in preflight with
+  `missing AR LoRA adapter [qfinal_a0.5]: /content/converter/out/qfinal_a0.5/…` even though
+  pass-1 only ever uses `v2`. `docs/PRON_LORA_RESCUE.md` Phase 0 stages only v2 + qfinal_a0.3,
+  so following the runbook literally reproduces the failure. No `--skip-preflight` exists on
+  `generate.py` (unlike `rescue_abc_batch.sh`).
+- **Correct pattern:** stage every alias the manifest declares before the batch —
+  `gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/qfinal_a0.5" /content/converter/out/`
+  (`qfinal_a0.5_explicit` aliases into that same dir, so this satisfies both). Alternative:
+  trim the derived `batch_12_rock_v2.json`'s `loras` block to the adapters its songs actually reference.
+
+## 2026-09-30 — the inference test suite fails while a real render is running (host-wide liveness)
+
+- **Fact:** `status.py:158` `section_inference` decides RUNNING via `_pgrep("generate.py")` — a
+  **host-wide** process check, not scoped to the `INFER_OUT` directory it prints. So while any
+  real `generate.py` runs, `tests/e2e/test_monitor_status_e2e.py::test_j11_status_inference_section_from_real_run`
+  (which monkeypatches `INFER_OUT` to a tmp run and asserts `inference: idle`) fails with
+  `inference: RUNNING · j11 · 1/1 wavs` — the assertion, not the code, is wrong.
+- **Failure prevented:** reading that as a regression (it is not; the test is not isolated from a
+  concurrent run), and re-running the suite mid-batch — its e2e path spawns a real `generate.py`
+  that hashes the 3.9 GB GGUF, competing with the live render for CPU/disk.
+- **Correct pattern:** run the suite with no inference run active, or deselect that case:
+  `python -m pytest tests/ -q -k 'not test_j11_status_inference_section_from_real_run'`.
+  (Hardening not done: scope the liveness probe to `INFER_OUT`, or xfail the case when a live run
+  exists.)

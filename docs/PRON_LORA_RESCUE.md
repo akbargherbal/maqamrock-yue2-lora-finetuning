@@ -25,7 +25,7 @@ structural, never hand-carried:
 
 | # | Gate | Phase | Prevents |
 |---|---|---|---|
-| G0 | `generate.py --dry-run`; qfinal adapters staged; backup sidecar up | 0 | stalls, missing adapters, ephemeral-VM loss |
+| G0 | `generate.py --dry-run`; **every** `loras` alias staged; backup sidecar up | 0 | stalls, missing adapters, ephemeral-VM loss |
 | G1 | always the same absolute `--out-dir` (resume, never the timestamped default) | 1 | scatted/duplicated take sets |
 | G2 | fresh `--abc-dir` (or re-transcribe with `--force`); transcribe only the pass-1 dir | 2 | stale `score.abc` stapled to a fresh take |
 | G3 | `rescue_abc_batch.sh --plan` builds `_rescue_index.json` (sha256 of wav + abc) and **aborts** on any missing piece | 2→4 | running a rescue with the wrong/absent guide |
@@ -35,9 +35,16 @@ structural, never hand-carried:
 
 ## Phase 0 — setup (GPU VM)
 
-- Stage the binary + models + **both** LoRAs. `bootstrap/setup.sh --inference` stages the v2
-  pair only; pull qfinal explicitly:
-  `gsutil -m cp -r gs://<base>/OSTRIS_Arabic_Suno_Finetuning/loras/audio_cpp/pron/qfinal_a0.3 /content/converter/out/`
+- Stage the binary + models + **every** adapter alias the manifest's `loras` block declares.
+  `bootstrap/setup.sh --inference` stages the v2 pair only; pull the qfinal ones explicitly —
+  preflight existence-checks **all** aliases even though pass-1 songs use only `v2`
+  (`generate.py:581`; `COMMAND_HANDOVER_GOTCHAS.md` 2026-09-30):
+  ```bash
+  for a in qfinal_a0.3 qfinal_a0.5; do
+    gsutil -m cp -r "gs://<base>/OSTRIS_Arabic_Suno_Finetuning/loras/audio_cpp/pron/$a" /content/converter/out/
+  done
+  ```
+  (`qfinal_a0.5_explicit` aliases into the `qfinal_a0.5/` dir, so this covers both.)
 - Start the backup sidecar and confirm continuity **before** the batch (`AGENTS.md` §10).
 - Clone the right branch: `git clone --branch music-cover <url>` (a default clone lands on
   `main` and is missing these files).
@@ -61,6 +68,13 @@ seeds are random per take and written to the run's `batch_manifest.json` before 
 resume reproduces the same tracks.
 
 ## Phase 2 — transcribe all (free CPU)
+
+Build the isolated env once — bootstrap does **not** stage it, and this script is build-only and
+idempotent (the scratch `ss2_probe.sh` builds a different venv and then probes):
+
+```bash
+bash INFERENCE/ss2_venv.sh      # creates /content/.venv-sheetsage2 (uv, py3.11, torch 2.8.0)
+```
 
 `terminal: detached; log: out/abc_v2_batch12/_driver.log; stop: pkill -f sheetsage2_transcribe.py; resume: same command (skips existing score.abc).`
 
@@ -140,12 +154,13 @@ Compare `rescue_v2abc_batch12/<stem>.wav` against `batch_12_rock_v2/<stem>.wav` 
 - **Conditioning drift in hand-typed rescue** → G6 (values from the manifest).
 - **Arabic stems mis-copied by hand** → the spine + `--songs-file`.
 - **Transcription steals the GPU** → `CUDA_VISIBLE_DEVICES=""`.
-- **Fresh-VM missing qfinal / wrong branch** → Phase 0.
+- **Fresh-VM missing an adapter alias / wrong branch** → Phase 0.
 
 ## Sources
 
 - Drivers: `INFERENCE/generate.py`, `INFERENCE/sheetsage2_transcribe.py`,
-  `INFERENCE/rescue_abc_batch.sh` (this file's subject; `--help`).
+  `INFERENCE/ss2_venv.sh` (phase-2 env), `INFERENCE/rescue_abc_batch.sh`
+  (this file's subject; `--help`).
 - Manifests: `manifests/batch_12_rock_v2.json` (pass-1), `manifests/batch_12_rock.json` (source).
 - Analysis: `docs/music-cover-feasibility.md` §2.1, §4.2, §10; `docs/GPU_L4_VS_A100.md` (unit
   rates); `docs/INFERENCE.md` (batch generation, T4 timing).
