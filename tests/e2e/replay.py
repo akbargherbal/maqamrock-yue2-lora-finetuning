@@ -6,6 +6,10 @@ without touching `run_one.sh` or the device. It writes the per-track files that
 `run_one.sh` writes, synthesized from a recorded `recorded_batch.json` (Tier A).
 The WAV is rebuilt with stdlib `wave` at the recorded duration -- recorded audio
 bytes are provenance, never asserted (plan §4.2).
+
+`write_track_outputs` is the single writer of that contract; the replay runner and
+the test-local variants (J3's recover-on-retry, J6's permissive round trip) all
+funnel through it, so the file set stays in one place.
 """
 from __future__ import annotations
 
@@ -41,6 +45,26 @@ def _synth_wav(path: Path, duration_s: float, rate: int = WAV_RATE) -> None:
         w.writeframes(b"\x00\x00" * frames)
 
 
+def write_track_outputs(out_dir: Path, name: str, seed, *, duration_s: float | None,
+                        exit_code: int, log_text: str = "", rate: int = WAV_RATE) -> None:
+    """Write exactly the per-track files `run_one.sh` writes.
+
+    `duration_s=None` models a run that failed before producing audio (no WAV).
+    The sidecar is the code under test's job and is deliberately not touched.
+    """
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    if duration_s is not None:
+        _synth_wav(out_dir / f"{name}_{seed}.wav", duration_s, rate)
+    (out_dir / f"{name}_{seed}_time.txt").write_text(
+        f"\tExit status: {exit_code}\n", encoding="utf-8")
+    (out_dir / f"{name}_{seed}.log").write_text(log_text, encoding="utf-8")
+    (out_dir / f"{name}_{seed}_gpu.csv").write_text(GPU_CSV_HEADER, encoding="utf-8")
+    with (out_dir / "_runs_status.log").open("a", encoding="utf-8") as f:
+        f.write(f"=== START {name} seed={seed} (replay) ===\n")
+        f.write(f"=== END {name} seed={seed} exit={exit_code} (replay) ===\n")
+
+
 def make_replay_runner(recorded_batch, *, rate: int = WAV_RATE) -> Callable:
     spec = (recorded_batch if isinstance(recorded_batch, dict)
             else load_recorded_batch(recorded_batch))
@@ -54,18 +78,27 @@ def make_replay_runner(recorded_batch, *, rate: int = WAV_RATE) -> Callable:
             raise KeyError(
                 f"no recorded fixture for (name={name!r}, seed={seed!r}); add it to "
                 f"tests/fixtures/recorded_batch.json") from None
-        out = Path(env["OUT_DIR"])
-        out.mkdir(parents=True, exist_ok=True)
-        if t.get("duration_s") is not None:  # a failed run may have produced no WAV
-            _synth_wav(out / f"{name}_{seed}.wav", t["duration_s"], rate)
-        (out / f"{name}_{seed}_time.txt").write_text(
-            f"\tExit status: {t['exit']}\n", encoding="utf-8")
-        (out / f"{name}_{seed}.log").write_text(t.get("log_text", ""), encoding="utf-8")
-        (out / f"{name}_{seed}_gpu.csv").write_text(GPU_CSV_HEADER, encoding="utf-8")
-        with (out / "_runs_status.log").open("a", encoding="utf-8") as f:
-            f.write(f"=== START {name} seed={seed} cap={t.get('cap')} (replay) ===\n")
-            f.write(f"=== END {name} seed={seed} exit={t['exit']} (replay) ===\n")
+        write_track_outputs(Path(env["OUT_DIR"]), name, seed, duration_s=t.get("duration_s"),
+                            exit_code=int(t["exit"]), log_text=t.get("log_text", ""),
+                            rate=rate)
         log_fh.write(f"[replay] {name} seed={seed} exit={t['exit']}\n")
         return int(t["exit"])
+
+    return runner
+
+
+def make_passthrough_runner(*, duration_s: float = 180.0, exit_code: int = 0,
+                            log_text: str = "[TRACE] truncated=0\n") -> Callable:
+    """Succeed for any (name, seed) -- for journeys whose names/seeds are drawn.
+
+    J2 resumes a random-seed run and J6 feeds `suno_to_songs.py` output (arbitrary
+    titles, random seeds); neither can be keyed against a hand-recorded fixture.
+    """
+    def runner(cmd: list[str], env: dict, log_fh: TextIO) -> int:
+        name, seed = cmd[2], cmd[3]
+        write_track_outputs(Path(env["OUT_DIR"]), name, seed, duration_s=duration_s,
+                            exit_code=exit_code, log_text=log_text)
+        log_fh.write(f"[replay] {name} seed={seed} exit={exit_code}\n")
+        return exit_code
 
     return runner

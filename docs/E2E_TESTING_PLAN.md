@@ -1,7 +1,8 @@
 # End-to-end testing plan — Colab, GPU-light
 
-_Status: **in progress.** Session 1 (T2 scaffold + J1) landed 2026-09-30;
-decisions in §12 resolved. Remaining tiers per §9. Last revised 2026-09-30._
+_Status: **in progress.** Sessions 1–2 landed 2026-09-30 (T2 scaffold + J1, then
+J2–J4/J6 + the provenance guard); decisions in §12 resolved. Remaining tiers per
+§9. Last revised 2026-09-30._
 
 Goal: exercise the real user journeys end to end — as faithfully as possible —
 **without renting a GPU** for the bulk of it. A GPU is allowed exactly once or
@@ -54,7 +55,7 @@ and `duration_cap.py` are pure CPU; hashing and cap math are exercised for free.
 |---|---|---|---|---|
 | **T0** unit/logic | no | parsing, planning, validation, cap parity | localhost + Colab CPU | **done** — `tests/test_*.py` |
 | **T1** contract/fake | no | orchestration ↔ subprocess wiring | localhost + Colab CPU | **done** — `runner=`, monkeypatched probes |
-| **T2** record→replay e2e | no | the *whole pipeline* on real recorded artifacts | Colab CPU | **partial** — scaffold + J1 (Session 1) |
+| **T2** record→replay e2e | no | the *whole pipeline* on real recorded artifacts | Colab CPU | **done** — J1–J4, J6 (Sessions 1–2) |
 | **T3** process/lifecycle e2e | no | real detach, PID, SIGINT stop, backup mirror | Colab CPU | **partial** |
 | **T4** hosted-env e2e | no | the real Colab paths/env, minus the device | Colab CPU | **to run** |
 | **T5** kernel smoke | **yes** | the binary/kernels actually run | Colab GPU *or* Kaggle T4 | **budgeted** |
@@ -131,9 +132,16 @@ def make_replay_runner(recorded_batch: Path):
 Every fixture set carries a `tests/fixtures/manifest.json` recording: source GCS
 path, per-fixture `sha256`, the recorded run's `batch_manifest.json` `assets`
 block (LoRA/GGUF shas, `audio_cpp_commit`, `checkpoint_step`), the GPU name, and
-the date. A guard test fails loudly if a fixture's `audio_cpp_commit` /
-`checkpoint_step` no longer matches the values the code computes today —
-catching "fixture rot" instead of silently testing a stale contract.
+the date. A guard test (`tests/e2e/test_inference_e2e.py::test_provenance_guard`)
+fails loudly when a fixture's `checkpoint_step` no longer matches the code
+constant, catching "fixture rot" instead of silently testing a stale contract.
+
+The `audio_cpp_commit` half only becomes checkable once the **Tier B binary** is
+recorded (the T5 gate): on the CPU tier `/content/audio.cpp` is an arbitrary
+current clone, so a strict equality there would be a false failure. Until
+`manifest.json` has a non-empty `tier_b`, that half skips with a named reason;
+the `checkpoint_step` check and the manifest/`recorded_batch.json` agreement
+always run.
 
 ## 5. Test matrix (journeys × tier)
 
@@ -164,8 +172,10 @@ real-artifact** layer, which is exactly where integration bugs live.
 One test drives `generate.main()` through **real** `preflight`, `asset_fingerprint`,
 `materialize`, `run_batch`, `render_summary`, and `out/latest` — with only two
 substitutions: `gpu_info` (device probe) and the `runner` (device compute). It
-reuses the `_stub_assets` staging already in `tests/test_generate.py:521`. That
-is the whole inference product, GPU-free, with a real subprocess contract.
+reuses the workspace staging shared by the unit tests via `tests/staging.py`
+(`stage_inference_tree`, used by both `tests/test_generate.py::_stub_assets` and
+the e2e `staged_inference` fixture). That is the whole inference product,
+GPU-free, with a real subprocess contract.
 
 ## 6. The GPU smoke gate (T5) — allowed, budgeted
 
@@ -239,7 +249,7 @@ run automatically.
 | Session | Deliverable | Exit criterion |
 |---|---|---|
 | **1** | `tests/e2e/` scaffold, `replay.py`, `recorded_batch.json` schema, markers, `fake_gpu`. Fixtures harvested from **existing** GCS artifacts first (sidecars/`results/` already exist) — no GPU yet. | J1 passes on Colab CPU with a hand-authored fixture — **done 2026-09-30** (181 passed, 1 skipped) |
-| **2** | T2 inference journeys J1–J4, J6; provenance guard test; `test_generate.py`'s `_stub_assets` reused. | `pytest -m "not gpu"` green; J3 failure/retry covered |
+| **2** | T2 inference journeys J1–J4, J6; provenance guard test; `test_generate.py`'s `_stub_assets` reused. | `pytest -m "not gpu"` green; J3 failure/retry covered — **done 2026-09-30** (185 passed, 2 skipped; scaffolding shared via `tests/staging.py`) |
 | **3** | T3 lifecycle/monitor/backup J10–J12 with `fake_run.py` and a fake `gsutil`; J11 from a spec-built db. | start→stop SIGINT proven with a real process; restore diff clean |
 | **4** | T5 gate: one budgeted GPU session (S1–S3) → record fixtures → fold them into Tier A/B. | S1–S3 evidence (exit 0, WAV duration, finite loss); fixtures committed with provenance |
 

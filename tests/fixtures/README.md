@@ -38,3 +38,8 @@ Recorded `wav_sha256` is provenance metadata only.
 that produced these fixtures. A guard test (plan §4.4) fails loudly when they no
 longer match what the code computes today, so a stale fixture cannot silently keep
 testing an old contract. Regenerate via `fetch.sh`, or re-record at the T5 gate.
+
+`checkpoint_step` and the manifest/`recorded_batch.json` agreement are checked
+unconditionally. The `audio_cpp_commit` equality needs the Tier B binary (same
+checkout as the recording); until `tier_b` is non-empty that half skips, since a
+CPU-tier `/content/audio.cpp` is just a current clone and would fail spuriously.

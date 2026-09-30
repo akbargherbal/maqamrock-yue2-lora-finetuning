@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+import staging
+
 FP = {
     "lora_ar_sha256": "aa", "lora_nar_sha256": "bb",
     "model_gguf": "yue2-3b-bf16.gguf", "vae_gguf": "yue2-vae-f16.gguf",
@@ -519,24 +521,8 @@ def test_asset_fingerprint_includes_lora_registry(gen, tmp_path, monkeypatch):
 
 
 def _stub_assets(gen, tmp_path, monkeypatch, bin_exec=True):
-    run_one = tmp_path / "run_one.sh"
-    run_one.write_text("#!/bin/sh\n", encoding="utf-8")
-    binp = tmp_path / "bin" / "audiocpp_cli"
-    binp.parent.mkdir()
-    binp.write_text("x", encoding="utf-8")
-    binp.chmod(0o755 if bin_exec else 0o644)
-    model = tmp_path / "model"
-    (model / "sidecars").mkdir(parents=True)
-    (model / gen.MODEL_GGUF).write_bytes(b"m")
-    (model / gen.VAE_GGUF).write_bytes(b"v")
-    ar, nar = tmp_path / "ar", tmp_path / "nar"
-    ar.write_bytes(b"a")
-    nar.write_bytes(b"n")
-    monkeypatch.setattr(gen, "RUN_ONE", run_one)
-    monkeypatch.setattr(gen, "BIN", binp)
-    monkeypatch.setattr(gen, "MODEL_DIR", model)
-    monkeypatch.setattr(gen, "ROOT", tmp_path)
-    return binp, ar, nar
+    ns = staging.stage_inference_tree(gen, tmp_path, monkeypatch, bin_exec=bin_exec)
+    return ns.bin, ns.ar, ns.nar
 
 
 def test_preflight_success(gen, tmp_path, monkeypatch):

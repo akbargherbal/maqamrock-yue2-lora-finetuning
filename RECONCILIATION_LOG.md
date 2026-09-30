@@ -547,3 +547,36 @@ covers both._
   `torch`-dependent skip), including the new J1.
 - Authority: plan §5.1/§9 + the on-disk test tree; no config, hyperparameter, or
   frozen doc changed.
+
+## 2026-09-30 — E2E plan Session 2 landed (T2 J2–J4, J6 + provenance guard)
+
+- Implemented `docs/E2E_TESTING_PLAN.md` §9 Session 2 on the Colab CPU runtime:
+  - J2 re-run/`--force` (`test_j2_rerun_skips_seeds_and_force`): skip on success,
+    manifest seed reuse, force redoes.
+  - J3 failure/retry (`test_j3_partial_failure_then_retry_recovers`): one `exit=1`
+    track -> `_failed_runs.log` -> only that track re-invoked and recovered.
+  - J4 registry routing (`test_j4_lora_registry_routing_and_provenance`):
+    per-song `loras:` alias -> `env["LORA_AR"]` + sidecar `lora_alias`/shas.
+  - J6 round trip (`test_j6_suno_to_generate_round_trip`): real
+    `manifests/workspace_manifest.json` -> `suno_to_songs.py` -> real
+    `generate.main` (8 songs), byte-for-byte trigger prepend.
+  - Provenance guard (`test_provenance_guard`): `manifest.json` sha + the two
+    fixture files agree + `checkpoint_step == gen.CHECKPOINT_STEP`; the
+    `audio_cpp_commit` half skips until Tier B exists.
+- New shared `tests/staging.py::stage_inference_tree`, now used by
+  `tests/test_generate.py::_stub_assets` and the e2e `staged_inference` fixture
+  (plan §5.1's "reuse `_stub_assets`"); `tests/e2e/replay.py` gained
+  `write_track_outputs` + `make_passthrough_runner`; `run_generate` is now
+  re-invocable within one test.
+- Fixtures: added a synthetic `Saba` `exit=1`/no-audio track to
+  `recorded_batch.json` for J3; refreshed its `sha256` in `manifest.json`.
+- **Plan wording corrected to match code:** §4.4 now states the `audio_cpp_commit`
+  equality is gated on a non-empty `tier_b` (a CPU-tier `/content/audio.cpp` is an
+  arbitrary current clone, and `ac16661d` != present `30ec4596` would be a false
+  failure). `checkpoint_step` is checked unconditionally. Banner, T2 row, §5.1 and
+  the Session 2 row updated; `SOURCE_OF_TRUTH.md` row note updated.
+- Mechanical pass: 2139 claims / 49 files, 1304 checkable, **0 flagged (0.0 %)**.
+- Verified: `python -m pytest` -> **185 passed, 2 skipped** (the pre-existing
+  torch skip + the provenance-guard Tier B skip).
+- Authority: plan §4.4/§5/§9 + the on-disk test tree; no config, hyperparameter,
+  or frozen doc changed.

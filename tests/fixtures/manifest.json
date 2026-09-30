@@ -12,9 +12,9 @@
   },
   "tier_a": {
     "recorded_batch.json": {
-      "sha256": "7e581c514b9fa61c2344135795dd2b0aba31de9d0916da9e0e69d1c524405062",
+      "sha256": "d6b0ab0c99f1870cec44ffe80078be8e993bbc4ea62e5ac670ebe637358e0f13",
       "kind": "recorded_batch",
-      "source": "hand-authored from results/maqam_lyric_swap/sidecars/*.json"
+      "source": "hand-authored from results/maqam_lyric_swap/sidecars/*.json; one synthetic failure track"
     }
   },
   "tier_b": {}

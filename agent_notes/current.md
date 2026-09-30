@@ -1,73 +1,79 @@
 # current
 
-_Updated 2026-09-30 (local). **Session 1 of `docs/E2E_TESTING_PLAN.md` is
-complete** (Colab CPU, GPU-free): 181 passed, 1 skipped. Next session: **Session 2 —
-T2 inference journeys J1–J4, J6 + the provenance guard test.** No GPU work until
-the Session 4 gate (now decided: **Colab free T4**). Branch `music-cover`
-(uncommitted Session 1 changes in the working tree — see `git status`)._
+_Updated 2026-09-30 (local). **E2E Sessions 1–2 are complete** (Colab CPU,
+GPU-free): `python -m pytest` -> **185 passed, 2 skipped**. Next: **Session 3 —
+T3 process/lifecycle e2e J10–J12** (`fake_run.py`, fake `gsutil`, monitor/status
+from a spec-built db). No GPU work until Session 4 (the T5 gate; host decided:
+**Colab free T4**). Branch `music-cover`; Session 2 changes uncommitted (see
+`git status`)._
 
 ## 0. Orientation — read these first, in order
 
-1. `AGENTS.md` §2 (identify mode/environment) and §8 (the never list). This is **not** a
+1. `AGENTS.md` §2 (mode/environment) and §8 (the never list). This is **not** a
    §2 runbook mode; the authority is the plan doc below.
-2. `docs/E2E_TESTING_PLAN.md` — §4 (record→replay), §5 (journey matrix), §8 (test wiring),
-   §9 (sequencing = what Session 2 is), §12 (decisions, now resolved).
+2. `docs/E2E_TESTING_PLAN.md` — §2 (device boundary), §4 (record→replay + §4.4
+   provenance), §5 (journey matrix), §8 (wiring), §9 (sequencing = Session 3),
+   §11 (risks), §12 (resolved decisions).
 3. `SOURCE_OF_TRUTH.md`, row "End-to-end test plan / tiers".
 
-## 1. What landed in Session 1
+## 1. What landed in Sessions 1–2
 
-- `tests/e2e/replay.py` — `make_replay_runner` (writes the `run_one.sh` file set from
-  `recorded_batch.json`; synthesizes the WAV via stdlib `wave`), `load_recorded_batch`,
-  `_synth_wav`.
-- `tests/e2e/conftest.py` — `fake_gpu`, `staged_inference` (all preflight files in tmp),
-  `run_generate` (drives the **real** `generate.main` with only `gpu_info` +
-  `training_active` + `run_batch`'s `runner` substituted — plan §5.1).
-- `tests/e2e/test_inference_e2e.py` — **J1** happy path (2 songs, 3 tracks, explicit seeds):
-  prompts, `batch_manifest.json`, per-track sidecar provenance, WAV duration, summary,
-  `out/latest`, `_runs_status.log`.
-- `tests/fixtures/{recorded_batch.json,manifest.json,README.md,fetch.sh}` — Tier A
-  hand-authored from `results/maqam_lyric_swap/sidecars/`; Tier B (GCS) declared empty.
-- `pytest.ini` — markers `gpu` / `fixtures_heavy` / `live`; default
-  `-m "not gpu and not fixtures_heavy and not live"`.
-- Docs reconciled: plan banner/§3/§9/§12 updated; `SOURCE_OF_TRUTH.md` row note;
-  suppression list narrowed; `RECONCILIATION_LOG.md` appended. Mechanical pass **0 flagged**.
+- `tests/e2e/replay.py` — `write_track_outputs` (the single `run_one.sh` file-set
+  writer), `make_replay_runner`, `make_passthrough_runner`.
+- `tests/e2e/conftest.py` — `fake_gpu`, `staged_inference`, `run_generate`
+  (re-invocable; drives the real `generate.main` with only `gpu_info` +
+  `training_active` + the `runner` substituted).
+- `tests/e2e/test_inference_e2e.py` — **J1** happy path, **J2** re-run/`--force`,
+  **J3** failure→retry, **J4** LoRA registry routing, **J6** suno→generate round
+  trip, **provenance guard** (`checkpoint_step` + manifest integrity; the
+  `audio_cpp_commit` half is gated on Tier B).
+- `tests/staging.py` — `stage_inference_tree`, shared by the unit tests
+  (`tests/test_generate.py::_stub_assets`) and the e2e `staged_inference` fixture.
+- `tests/fixtures/` — Tier A `recorded_batch.json` (incl. a synthetic `Saba`
+  `exit=1` track for J3), `manifest.json` (refreshed sha), `README.md`, `fetch.sh`.
+- `pytest.ini` — `gpu` / `fixtures_heavy` / `live` markers + default filter.
 
 ## 2. Decisions (resolved 2026-09-30, plan §12)
 
-1. **Gate host: Colab free T4.** Kaggle / GH Actions remain fallbacks.
+1. **Gate host: Colab free T4.** Kaggle / GH Actions GPU are fallbacks.
 2. **Fixtures: Tier A in git, Tier B in GCS** (`tests/fixtures/fetch.sh`, gitignored).
 3. **T3 scope: fake `run.py` only**; the real 10-step smoke stays at the T5 gate.
 
-## 3. Next — Session 2 (plan §9)
+## 3. Next — Session 3 (plan §9)
 
-- T2 journeys **J1–J4, J6** in `tests/e2e/test_inference_e2e.py`:
-  - J2 idempotent re-run skip + `--force`; J3 partial failure → `_failed_runs.log` → retry;
-    J4 per-song `loras:` registry routing + provenance; J6 `suno_to_songs.py` → `generate.py`.
-- **Provenance guard test** (plan §4.4): fixture `checkpoint_step` / `audio_cpp_commit`
-  vs today's code; skip cleanly when `AUDIO_CPP` is absent (CPU VM).
-- Keep the default suite GPU-free and green.
+- **J10** training lifecycle with `tests/e2e/fake_run.py`: a real process that
+  writes a `loss_log.db` and answers SIGINT; prove `train_ctl.py` start →
+  `status` (detached, PID file) → `stop` (SIGINT reaches the child, "Job stopped").
+- **J11** monitor + status from a spec-built db: `monitor_loss.py` step/rate and
+  `status.py` drift/staleness, built from `tests/fixtures/loss_log.spec.json`.
+- **J12** backup mirror + restore diff with a fake `gsutil`/`gcloud` shim on
+  `PATH`: targets, manifest, byte-identical restore.
+- Keep the default suite GPU-free and green; `pytest -m live` is never automatic.
 
 ## 4. Reproduce / verify (CPU runtime)
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
-python -m pytest -q                     # 181 passed, 1 skipped
-python -m pytest tests/e2e -q           # J1
+python -m pytest -q                     # 185 passed, 2 skipped
+python -m pytest tests/e2e -q           # J1–J4, J6
 python -m pytest -m gpu --collect-only  # T5 checks, deferred to the gate
 ```
 
 ## 5. Guardrails
 
-- **CPU only.** No `audiocpp_cli`, no `nvidia-smi` dependency; `preflight`'s GPU refusal
-  is itself a test (plan §7).
+- **CPU only.** No `audiocpp_cli`, no real `run.py`; `preflight`'s GPU refusal is
+  itself a test (plan §7). T3 uses a real *process* for `fake_run.py`, still no GPU.
 - Tier B binaries stay out of git (`tests/fixtures/**/*.wav|.safetensors|.db`,
   `audiocpp_cli`, `out/`).
-- Do not modify run configs or `/content` datasets (§8).
-- `agent_notes/current.md` is a handoff surface, **not authority** — re-derive state with
-  `python status.py`.
+- Do not modify run configs or `/content` datasets (AGENTS.md §8).
+- `agent_notes/current.md` is a handoff surface, **not authority** — re-derive
+  state with `python status.py`.
 
 ## 6. Pointers
 
-- Plan: `docs/E2E_TESTING_PLAN.md`. This pass: `RECONCILIATION_LOG.md` (2026-09-30 entries).
+- Plan: `docs/E2E_TESTING_PLAN.md`. Passes: `RECONCILIATION_LOG.md` (2026-09-30).
 - Reconciler: `skills/docs-reconciler/SKILL.md`; suppressions
   `skills/docs-reconciler/references/unverifiable.txt`.
+- Note (audit, 2026-09-30): `status.py` reports `backup_to_gcp.py` and
+  `gpu_logger.py` sidecars DOWN (no run active; vm-continuity healthy). Not this
+  session's work — re-check before the Session 4 gate.

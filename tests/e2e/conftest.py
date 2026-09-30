@@ -11,9 +11,10 @@ from __future__ import annotations
 import importlib.util
 import sys
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
+
+import staging
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = REPO_ROOT / "tests" / "fixtures"
@@ -66,43 +67,36 @@ def fake_gpu() -> dict:
 
 
 @pytest.fixture
-def staged_inference(gen, tmp_path, monkeypatch) -> SimpleNamespace:
-    """Stage every file preflight demands in tmp and point `generate` at them."""
-    run_one = tmp_path / "run_one.sh"
-    run_one.write_text("#!/bin/sh\n", encoding="utf-8")
-    binp = tmp_path / "bin" / "audiocpp_cli"
-    binp.parent.mkdir()
-    binp.write_text("x", encoding="utf-8")
-    binp.chmod(0o755)
-    model = tmp_path / "model"
-    (model / "sidecars").mkdir(parents=True)
-    (model / gen.MODEL_GGUF).write_bytes(b"m")
-    (model / gen.VAE_GGUF).write_bytes(b"v")
-    ar = tmp_path / "ar.safetensors"
-    nar = tmp_path / "nar.safetensors"
-    ar.write_bytes(b"a")
-    nar.write_bytes(b"n")
-    monkeypatch.setattr(gen, "RUN_ONE", run_one)
-    monkeypatch.setattr(gen, "BIN", binp)
-    monkeypatch.setattr(gen, "MODEL_DIR", model)
-    monkeypatch.setattr(gen, "ROOT", tmp_path)
-    return SimpleNamespace(root=tmp_path, run_one=run_one, bin=binp, model=model,
-                           ar=ar, nar=nar)
+def staged_inference(gen, tmp_path, monkeypatch):
+    """Stage every file preflight demands in tmp and point `generate` at them.
+
+    Reuses the same helper the T0 unit tests use (`tests/test_generate.py`
+    `_stub_assets` -> `tests/staging.py`), so the e2e layer exercises the exact
+    preflight contract those tests pin (plan §5.1).
+    """
+    return staging.stage_inference_tree(gen, tmp_path, monkeypatch)
 
 
 @pytest.fixture
 def run_generate(gen, fake_gpu, monkeypatch):
-    """Invoke `generate.main` with only the probe and the compute runner replaced."""
+    """Invoke `generate.main` with only the probe and the compute runner replaced.
+
+    `runner` is read from a holder, so one fixture supports several invocations in
+    a single test (J2 re-runs the same out-dir) without stacking wrappers.
+    """
+    holder: dict = {}
+    real_run_batch = gen.run_batch
+    monkeypatch.setattr(gen, "gpu_info", lambda: fake_gpu)
+    monkeypatch.setattr(gen, "training_active", lambda: None)
+
+    def with_runner(*a, **k):
+        k["runner"] = holder["runner"]
+        return real_run_batch(*a, **k)
+
+    monkeypatch.setattr(gen, "run_batch", with_runner)
+
     def invoke(argv, *, runner):
-        monkeypatch.setattr(gen, "gpu_info", lambda: fake_gpu)
-        monkeypatch.setattr(gen, "training_active", lambda: None)
-        real_run_batch = gen.run_batch
-
-        def with_runner(*a, **k):
-            k["runner"] = runner
-            return real_run_batch(*a, **k)
-
-        monkeypatch.setattr(gen, "run_batch", with_runner)
+        holder["runner"] = runner
         return gen.main(argv)
 
     return invoke

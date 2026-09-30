@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Tier A record->replay contract for the GPU-free e2e tiers (docs/E2E_TESTING_PLAN.md §4). Hand-authored from real recorded sidecars under results/maqam_lyric_swap/sidecars/ (NVIDIA L4 run, 2026-09-25); the WAV is resynthesized at the recorded duration_s and audio bytes are provenance, never asserted.",
+  "note": "Tier A record->replay contract for the GPU-free e2e tiers (docs/E2E_TESTING_PLAN.md §4). Hand-authored from real recorded sidecars under results/maqam_lyric_swap/sidecars/ (NVIDIA L4 run, 2026-09-25); the WAV is resynthesized at the recorded duration_s and audio bytes are provenance, never asserted. The 'Saba' track is a synthetic exit=1, no-audio entry (duration_s null) that exercises J3's failure -> _failed_runs.log -> retry path.",
   "recorded_at": "2026-09-30T00:00:00Z",
   "provenance": {
     "source": "results/maqam_lyric_swap/sidecars/HijazStyle_KurdLyrics__c3050_a0.5.json",
@@ -42,6 +42,16 @@
       "duration_s": 205.5,
       "exit": 0,
       "log_text": "[TRACE] yue2 generation start\n[TRACE] seed=20260924 semantic_max_tokens=7250\n[TIMING] ar 44.1s nar 160.0s total 207.6s\n[TRACE] truncated=0\n"
+    },
+    {
+      "idx": 4,
+      "name": "Saba",
+      "take": 0,
+      "seed": 20260924,
+      "cap": 6500,
+      "duration_s": null,
+      "exit": 1,
+      "log_text": "[TRACE] yue2 generation start\n[TRACE] seed=20260924 semantic_max_tokens=6500\n[ERROR] audiocpp_cli: failed to load model (exit 1)\n"
     }
   ]
 }
