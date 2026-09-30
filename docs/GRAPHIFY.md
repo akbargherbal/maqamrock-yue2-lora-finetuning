@@ -19,7 +19,7 @@ but still open the real files before editing.
 | `graphify-out/manifest.json` | What was scanned; drives incremental `graphify update` |
 | `graphify-out/cache/` | Per-file extraction cache — **git-ignored**, rebuilt locally |
 
-Built at commit `9bc008f` (branch `music-cover`). The graph reflects the commit
+Built at commit `cfbc3dd` (branch `music-cover`). The graph reflects the commit
 it was built at — refresh it after meaningful changes (see below). The graph
 outputs above are committed so the map survives on every clone; only the cache
 (and the VM-specific interpreter path) is not.
