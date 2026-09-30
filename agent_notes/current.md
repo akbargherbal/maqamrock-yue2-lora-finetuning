@@ -3,7 +3,7 @@
 _Copy surface, not authority. 2026-09-30 · Colab **T4**, branch `music-cover`._
 
 ## GIT — pushed ✓
-`music-cover` is up to date with `origin` (tip `017a1d4`). Push flow if needed again: auth via
+`music-cover` tracks `origin` and is in sync. Push flow if needed again: auth via
 `bash bootstrap/github_auth.sh` (or an existing `gh` login), then `git push origin music-cover`.
 
 ## RUNNING — pass-1 v2 (`batch_12_rock_v2`)
