@@ -208,3 +208,38 @@ human and invisible to the agent — so they get written down here.
   (`_time.txt`'s `Exit status`, the WAV's byte length against its declared duration).
 - **A file-count check is not a success check.** Counting `*.wav` reported "5 of 5" for
   a batch whose driver called one track FAILED. Gate on exit codes, then on artifacts.
+
+## 2026-09-30 — `generate.py`'s default run dir is timestamped; a re-run scatters the set
+
+- **Fact:** without `--out-dir`, `generate.py:477` makes `out/<YYYYMMDD-HHMMSS>_<label>/`. A
+  resumed/retried batch that omits `--out-dir` writes a **second** directory, so `*.wav` now
+  spans two runs and a transcription `--input-dir` silently sees only one (or the wrong one).
+- **Correct pattern:** always pass the same absolute `--out-dir`; resume then skips succeeded
+  tracks (`generate.py:794`). The pass-1 flow uses
+  `out/batch_12_rock_v2` (`docs/PRON_LORA_RESCUE.md`, G1).
+
+## 2026-09-30 — `sheetsage2_transcribe.py` silently skips an existing `score.abc`
+
+- **Fact:** the driver returns early when `<out-dir>/<stem>/score.abc` already exists
+  (`sheetsage2_transcribe.py:107`) — no warning. Re-render a take with the same `name`+`seed`
+  (a legitimate `--force` redo) and re-transcribe in place, and the **old** ABC is stapled to
+  the **new** audio; the rescue then guides on the wrong score.
+- **Correct pattern:** transcribe into a **fresh** `--abc-dir` (or re-run with `--force`)
+  whenever a source WAV changed. `rescue_abc_batch.sh --plan/--verify` records and re-checks
+  the ABC sha256 so a mismatch halts before any render.
+
+## 2026-09-30 — transcription auto-selects CUDA on the GPU box (not "free CPU")
+
+- **Fact:** `sheetsage2_transcribe.py:100` moves to `cuda` whenever `torch.cuda.is_available()`.
+  On the GPU VM the "free CPU" step therefore holds the rented GPU, and can OOM a queued
+  render (`run_one.sh`/rescue) because two jobs share one GPU.
+- **Correct pattern:** run it on a **free CPU runtime**, or force CPU on the GPU box with
+  `CUDA_VISIBLE_DEVICES="" /content/.venv-sheetsage2/bin/python INFERENCE/sheetsage2_transcribe.py …`.
+
+## 2026-09-30 — a rescue render has the *same WAV filename* as the pass-1 take it guides
+
+- **Fact:** `run_one.sh:42` names output `$OUT/<name>_<seed>.wav` — identical to the pass-1
+  filename. Point a rescue at the pass-1 dir (one `OUT_DIR` slip) and it **overwrites the liked
+  v2 take**, same name, no warning.
+- **Correct pattern:** render rescues into a dedicated dir; `rescue_abc_batch.sh` refuses when
+  `--out-dir == --pass1-dir` or when the target holds a `batch_manifest.json`.

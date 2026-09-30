@@ -25,6 +25,7 @@ operating contract is `../AGENTS.md`.
 | Alpha sweep + blinded listening review | [PRON_LORA_SWEEP.md](PRON_LORA_SWEEP.md) |
 | LoRA inventory: what exists, how many, where | [LORA_INVENTORY.md](LORA_INVENTORY.md) |
 | Prepare a blinded A/B(/N) audio listening package | [AB_BLIND_EVAL.md](AB_BLIND_EVAL.md) |
+| Generate with v2, transcribe to ABC, rescue pronunciation failures (B2) | [PRON_LORA_RESCUE.md](PRON_LORA_RESCUE.md) |
 | End-to-end testing plan (Colab, GPU-light: record→replay + budgeted smoke gate) | [E2E_TESTING_PLAN.md](E2E_TESTING_PLAN.md) |
 | Hand the user a command to run (terminal reality check) | [COMMAND_HANDOVER_GOTCHAS.md](COMMAND_HANDOVER_GOTCHAS.md) |
 | Review how it felt to work with the agent (experience, trust, friction) | [EXPERIENCE_CHECKLIST.md](EXPERIENCE_CHECKLIST.md) |

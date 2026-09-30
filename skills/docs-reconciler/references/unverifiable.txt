@@ -207,3 +207,15 @@ docs/E2E_TESTING_PLAN.md :: _failed_runs.log
 # stands for (evaluation_style_ablation_ajam, evaluation_v2_abc_to_qfinal,
 # evaluation_verbatim_hijaz) does exist, so this is a false positive, not drift.
 docs/music-cover-feasibility.md :: manifests/evaluation_*
+
+# 2026-09-30 — docs/PRON_LORA_RESCUE.md runtime artifacts + the external git flag it quotes.
+# `_rescue_index.json`/`_rescue.json`/`_rescue_status.log` are written into the rescue
+# out-dir by INFERENCE/rescue_abc_batch.sh; `out/abc_v2_batch12/_driver.log` is written by
+# sheetsage2_transcribe.py. `--branch` is `git clone`'s flag, not repo code. Doc-scoped, so
+# the suppression cannot hide real drift elsewhere — same class as the E2E entries above.
+docs/PRON_LORA_RESCUE.md :: _rescue_index.json
+docs/PRON_LORA_RESCUE.md :: _rescue.json
+docs/PRON_LORA_RESCUE.md :: _rescue_status.log
+docs/PRON_LORA_RESCUE.md :: out/abc_v2_batch12/_driver.log
+docs/PRON_LORA_RESCUE.md :: _driver.log
+docs/PRON_LORA_RESCUE.md :: --branch

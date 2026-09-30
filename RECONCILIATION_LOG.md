@@ -735,3 +735,26 @@ covers both._
 - Authority: the §2.1 probe (`results/ss2_cpu_probe/`) + `docs/GPU_L4_VS_A100.md` unit rates
   + `docs/INFERENCE.md` T4 timing; the cost model is a plan — no run config, hyperparameter,
   or script changed; no frozen doc rewritten.
+
+## 2026-09-30 — rescue workflow implemented (runbook + guarded driver + pass-1 manifest)
+
+- New runbook **`docs/PRON_LORA_RESCUE.md`**: the B2 test flow (pass-1 v2 → SheetSage2 ABC on
+  free CPU → listen → qfinal `cot=melody` rescue), the `<name>_<seed>` alignment spine, and the
+  gate table (G0–G6). Indexed in `docs/README.md`.
+- New driver **`INFERENCE/rescue_abc_batch.sh`**: calls the binary **directly** with
+  `cot=melody` + `abc_file` (bypasses `run_one.sh:85`'s hardcoded `cot=off`, whose later
+  override is unverified); refuses `--out-dir == pass-1 dir` (would clobber the liked take);
+  builds `_rescue_index.json` (sha256 of each pass-1 WAV + its ABC) and aborts if any is
+  missing; `--plan`/`--verify`/`--smoke`/`--songs-file`. Verified locally against a synthetic
+  fixture: plan, refuse, missing-abc abort, and tamper-detecting `--verify` all behave.
+- New **`manifests/batch_12_rock_v2.json`** (generated from `batch_12_rock.json`, every `lora`
+  → `v2`; original kept as authored). Validated with `generate.py --dry-run` (12 songs, 12
+  tracks, ~78 min T4).
+- `SOURCE_OF_TRUTH.md`: row for the rescue procedure; `agent_notes/current.md`: pointer updated.
+- Reconciler: 2321 claims / 51 files → 5 missing-path + 1 unknown-flag, all from the new
+  runbook's **runtime artifacts** (`_rescue_index.json`, `_rescue.json`, `_rescue_status.log`,
+  `_driver.log`) and a quoted `git clone --branch`. Curated (doc-scoped) in
+  `skills/docs-reconciler/references/unverifiable.txt` → 1438 checkable, **0 flagged**.
+- Authority: `docs/music-cover-feasibility.md` §2.1/§10 + `INFERENCE/generate.py`,
+  `sheetsage2_transcribe.py`, `run_one.sh` (read for the guards). No run config or
+  hyperparameter changed.
