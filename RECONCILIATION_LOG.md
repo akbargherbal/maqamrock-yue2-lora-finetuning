@@ -845,3 +845,23 @@ covers both._
 - `agent_notes/current.md` refreshed to the running `batch_12_rock_v2_winning` batch.
 - Authority: the repo tree (`INFERENCE/`, `manifests/`). No config or run touched; the GPU batch
   continued throughout.
+
+## 2026-09-30 — `rescue_abc_batch.sh` gains `--songs-json` (+ example), 0 mechanical findings
+
+- `INFERENCE/rescue_abc_batch.sh`: added a third selector input, `--songs-json FILE` (alongside
+  `--songs` inline and `--songs-file`), parsed as `{"songs": [<name>|<stem> | {"stem"|"name",
+  "note"}]}`; the three inputs are now mutually exclusive. An empty JSON list errors ("no selectors")
+  rather than silently selecting everything. Header + `--help` updated.
+- New `INFERENCE/rescue_selection.example.json` — the editable "typical file" (real `batch_12`
+  stems/names; demonstrates string, name, and object-with-`note` entries).
+- `tests/e2e/test_rescue_e2e.py`: 8 new cases (strings+objects, name→all takes, render-one, empty
+  list, invalid JSON, non-list, entry without stem/name, mutual exclusion). `tests/e2e/test_rescue_e2e.py`
+  → 27 passed.
+- Docs: `docs/PRON_LORA_RESCUE.md` Phase 4 (selectors + example + partial-batch note in Risk→guard);
+  `SOURCE_OF_TRUTH.md` cover/rescue row mentions `--songs-json`.
+- Mechanical reconciler (`extract_claims.py` / `verify_claims.py`): 2428 claims, 1530 checkable,
+  **0 flagged**.
+- Authority: `INFERENCE/rescue_abc_batch.sh --help` (source + example). No config or run touched;
+  CPU-only rehearsal, no GPU.
+- Pre-existing, unrelated: `tests/e2e/test_inference_e2e.py::test_provenance_guard` fails on this
+  box (local `audio.cpp` at `9427addd`, fixture expects `30ec4596`) — environment drift, not this change.

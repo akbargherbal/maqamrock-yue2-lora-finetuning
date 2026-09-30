@@ -1,22 +1,41 @@
 # current
 
-_Copy surface, not authority. 2026-09-30 · Colab **T4**, branch `music-cover` @ `30682a2`._
+_Copy surface, not authority. 2026-09-30 · Colab **CPU-only** (no `nvidia-smi`, 2 vCPU/12 GiB), branch `music-cover` @ `ad5c338`._
 
-## RUNNING — new batch `batch_12_rock_v2_winning` (launched 12:18:07Z)
-`generate.py` pid 184762 · **track 1/24** · run dir `/content/audiocpp_inference/out/batch_12_rock_v2_winning/`.
-Manifest `manifests/batch_12_rock_v2_winning.json` (12 songs × 2 = 24, `v2`, winning flat-prompt style).
-ETA ≈ **15:30** (~24 × ~8 min). Watch: `tail -f /content/logs/batch_12_rock_v2_winning.log` · `python status.py`.
-Stop: `pkill -f 'generate.py manifests/batch_12_rock_v2_winning.json'` · resume: same launch (skips done).
+## Rehearsed the rescue workflow (CPU `--plan`/`--verify`, no GPU) — verdict: mechanics READY
+Driver `INFERENCE/rescue_abc_batch.sh` (`docs/PRON_LORA_RESCUE.md` phase 4). It renders **qfinal_a0.3 + `cot=melody` + `abc_file`**, seeded from the pass-1 `batch_manifest.json` + `prompts/`. Verified here:
+- **Bulk** — a 14-stem selection → `n=14`, index + sha256 pairing OK, `--verify` OK.
+- **Bulk w/ no selectors** over this partial batch → **aborts** (gate G3 validates every one of the 24 manifest tracks; 10 have no WAV/ABC) — expected; enumerate instead.
+- **Pick** — `--songs <stem>` → 1 track; `--songs <name>` → both takes → `n=2`. Both OK.
+- **New selector input `--songs-json FILE`** (edit a copy of `INFERENCE/rescue_selection.example.json`):
+  `{"songs": [<name-or-stem> | {"stem"|"name", "note"}]}`. Verified `n=5` on the example.
+- Preconditions proven: pass-1 dir needs `batch_manifest.json` + `prompts/` (staged 24 files) and `--abc-dir/<stem>/score.abc` (14/14 done).
+- Bulk stem list at `/content/rescue_stems.txt` (14 stems).
 
-## Old batch `batch_12_rock_v2` — stopped early, 14/24 kept
-Deliberate stop 12:11 (not a crash); 14 finished takes kept local + GCS; unfinished track-15 orphans
-removed; `README.txt` in the GCS run path records it:
-`gs://…/audiocpp_inference/workspace/out/batch_12_rock_v2/`
+## NOT proven / gaps
+- **B2 guide quality is unrun** (§8) — `--smoke` one track first on the T4.
+- Render needs a GPU; `--plan`/`--verify` are CPU-only.
+- `generate.py` (arbitrary-manifest bulk) still has **no cot/abc field** — qfinal+ABC bulk only via the rescue driver, only for tracks already in a pass-1 manifest.
+- Selection is a filter over the pass-1 manifest; it cannot pull in songs that were never pass-1 rendered.
 
-## Deferred until the render finishes (don't run mid-batch)
-- `bash INFERENCE/ss2_venv.sh` — build the phase-2 env (`/content/.venv-sheetsage2`).
-- Clean pytest: `python -m pytest tests/ -q -k 'not test_j11_status_inference_section_from_real_run'`.
-- graphify install + `graphify update .` (graph 12 commits stale).
+## T4 recipe (fresh VM, GPU free)
+```bash
+# 0. stage: binary+models+v2 (setup.sh --inference); then qfinal (setup stages v2 only)
+bash bootstrap/setup.sh --inference
+for a in qfinal_a0.3 qfinal_a0.5; do gsutil -m cp -r \
+  gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/loras/audio_cpp/pron/$a /content/converter/out/; done
+# 1. bring the pass-1 set + ABCs local (GCS mirrors of this VM's out/)
+gsutil -m cp -r gs://…/audiocpp_inference/workspace/out/batch_12_rock_v2 /content/audiocpp_inference/out/
+gsutil -m cp -r gs://…/audiocpp_inference/workspace/out/abc_v2_batch12 /content/audiocpp_inference/out/
+# 2. plan (no GPU) -> smoke -> full (all stems, or a hand-picked selection file)
+cp maqamrock-yue2-lora-finetuning/INFERENCE/rescue_selection.example.json /content/m_selection.json  # edit
+B=/content/audiocpp_inference/out
+bash INFERENCE/rescue_abc_batch.sh --pass1-dir $B/batch_12_rock_v2 --abc-dir $B/abc_v2_batch12 \
+  --out-dir $B/rescue_v2abc_batch12 --songs-json /content/m_selection.json --plan
+bash INFERENCE/rescue_abc_batch.sh … --smoke     # listen before committing the batch
+bash INFERENCE/rescue_abc_batch.sh … --songs-json /content/m_selection.json
+```
+Stop: `pkill -f rescue_abc_batch.sh` · resume: same command (skips succeeded). Then P5 `prepare_ab_eval.py`.
 
-## Then — P2 transcribe (FREE CPU) → P3 listen → P4 rescue
-`docs/PRON_LORA_RESCUE.md`; key `<name>_<seed>`; `--all`; `CUDA_VISIBLE_DEVICES=""`.
+## Backup — up
+`backup_to_gcp.py --inference` (every 5 min); ABCs at `…/workspace/out/abc_v2_batch12/` (14/14).

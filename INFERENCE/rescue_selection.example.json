@@ -1,0 +1,21 @@
+{
+  "_comment": [
+    "Selection for INFERENCE/rescue_abc_batch.sh --songs-json (B2 rescue:",
+    "qfinal_a0.3 conditioned on each take's own SheetSage2 melody ABC).",
+    "Each entry is either a pass-1 song NAME (rescues EVERY take of it) or a",
+    "full STEM <name>_<seed> (rescues exactly that one take). An entry may also",
+    "be an object with 'stem' or 'name'; any extra keys ('note' here) are ignored",
+    "by the driver and are just for you. Delete the entries you don't want.",
+    "Find stems with: ls <pass1-dir>/*.wav | sed 's#.*/##;s#.wav##'; the pass-1",
+    "batch_manifest.json 'tracks' list has the same name/seed pairs."
+  ],
+  "songs": [
+    "07-الحر-الشديد-وقطع-القفر-والوعول_rock_2969540646",
+    "07-الحر-الشديد-وقطع-القفر-والوعول_rock_653160884",
+    "06-ليلة-الرعب_rock",
+    {
+      "stem": "03-مشهد-الذئاب_rock_1791809722",
+      "note": "arrangement good, pronunciation bad -> rescue this one"
+    }
+  ]
+}

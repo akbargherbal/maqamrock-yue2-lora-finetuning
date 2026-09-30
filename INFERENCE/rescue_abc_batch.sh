@@ -21,8 +21,11 @@
 #   * _rescue_index.json records sha256 of every pass-1 WAV and its ABC, so the
 #     pairing is proven, not assumed (use --verify to re-check before a batch)
 #
-# Selection: --songs / --songs-file accept song NAMES and/or full STEMS
-#   (<name>_<seed>). A name selects every take of that song; a stem selects one.
+# Selection: --songs / --songs-file / --songs-json accept song NAMES and/or full
+#   STEMS (<name>_<seed>). A name selects every take of that song; a stem selects
+#   one. --songs-json is a JSON file: {"songs": [<name-or-stem> |
+#   {"stem"|"name": "...", "note": "..."}]}; example:
+#   INFERENCE/rescue_selection.example.json.
 #
 # Env overrides:
 #   ROOT BIN MODEL THREADS   workspace / runner / model dir / cpu threads
@@ -35,7 +38,8 @@ set -u
 usage() {
   cat <<'EOF'
 usage: rescue_abc_batch.sh --pass1-dir DIR --abc-dir DIR --out-dir DIR
-                           [--songs NAME|STEM,... | --songs-file FILE]
+                           [--songs NAME|STEM,... | --songs-file FILE
+                            | --songs-json FILE]
                            [--smoke] [--limit N] [--threads N]
                            [--plan] [--verify] [--force] [--skip-preflight]
 
@@ -44,6 +48,8 @@ usage: rescue_abc_batch.sh --pass1-dir DIR --abc-dir DIR --out-dir DIR
   --out-dir    rescue output dir; MUST differ from --pass1-dir and not sit under it
   --songs      comma/space/newline list of song NAMES and/or STEMS to rescue
   --songs-file one selector per line ('#' comments and blank lines ignored)
+  --songs-json a JSON file: {"songs": ["<name>|<stem>",
+               {"stem": "...", "note": "..."}]}; example in INFERENCE/
   --plan       validate + write the index, print the plan; no GPU, no render
   --verify     re-check the stored index sha256 against disk, then exit (no render)
   --smoke      render ONLY the first planned track, then stop (the B2 quality gate)
@@ -70,7 +76,7 @@ GCS_BASE="${GCS_BASE:-gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetun
 # is not required — if absent we still write a `<stem>_time.txt` for resume.
 TIME_BIN=""; [ -x /usr/bin/time ] && TIME_BIN=/usr/bin/time
 
-PASS1="" ABC_DIR="" OUT_DIR="" SONGS="" SONGS_FILE=""
+PASS1="" ABC_DIR="" OUT_DIR="" SONGS="" SONGS_FILE="" SONGS_JSON=""
 MODE=run   # run | plan | verify
 FORCE=0 SMOKE=0 LIMIT=0 SKIP_PREFLIGHT=0
 
@@ -81,6 +87,7 @@ while [ $# -gt 0 ]; do
     --out-dir)    OUT_DIR="${2:-}"; shift 2;;
     --songs)      SONGS="${2:-}"; shift 2;;
     --songs-file) SONGS_FILE="${2:-}"; shift 2;;
+    --songs-json) SONGS_JSON="${2:-}"; shift 2;;
     --limit)      LIMIT="${2:-0}"; shift 2;;
     --threads)    THREADS="${2:-}"; shift 2;;
     --plan)       MODE=plan; shift;;
@@ -93,7 +100,11 @@ while [ $# -gt 0 ]; do
   esac
 done
 [ -n "$PASS1" ] && [ -n "$ABC_DIR" ] && [ -n "$OUT_DIR" ] || usage
-[ -n "$SONGS_FILE" ] && [ -n "$SONGS" ] && { echo "use --songs xor --songs-file" >&2; exit 2; }
+_nsel=0
+[ -n "$SONGS" ] && _nsel=$((_nsel + 1))
+[ -n "$SONGS_FILE" ] && _nsel=$((_nsel + 1))
+[ -n "$SONGS_JSON" ] && _nsel=$((_nsel + 1))
+[ "$_nsel" -le 1 ] || { echo "use only one of --songs / --songs-file / --songs-json" >&2; exit 2; }
 case "$LIMIT" in ''|*[!0-9]*) echo "--limit must be an integer" >&2; exit 2;; esac
 
 # Portable realpath (works for not-yet-existing paths too).
@@ -104,9 +115,45 @@ if [ -n "$SONGS_FILE" ]; then
   # strip # comments + CR, one selector per line -> comma list
   SONGS="$(sed -e 's/#.*//' -e 's/\r$//' "$SONGS_FILE" | tr '\n' ',')"
 fi
+if [ -n "$SONGS_JSON" ]; then
+  [ -f "$SONGS_JSON" ] || { echo "no such --songs-json: $SONGS_JSON" >&2; exit 2; }
+  # {"songs": [<name-or-stem> | {"stem"|"name": "...", "note": "..."}]} -> comma list
+  SONGS="$(python3 - "$SONGS_JSON" <<'PY'
+import json, sys
+path = sys.argv[1]
+try:
+    doc = json.load(open(path, encoding="utf-8"))
+except (OSError, ValueError) as e:
+    sys.exit(f"[error] --songs-json not readable/valid JSON: {path}: {e}")
+if not isinstance(doc, dict):
+    sys.exit(f"[error] --songs-json must be an object with a 'songs' list: {path}")
+songs = doc.get("songs")
+if songs is None:
+    sys.exit(f"[error] --songs-json has no 'songs' key: {path}")
+if not isinstance(songs, list):
+    sys.exit(f"[error] --songs-json 'songs' must be a list: {path}")
+out = []
+for e in songs:
+    if isinstance(e, str):
+        s = e
+    elif isinstance(e, dict):
+        s = e.get("stem") or e.get("name")
+        if not s:
+            sys.exit(f"[error] --songs-json entry needs 'stem' or 'name': {e!r}")
+    else:
+        sys.exit(f"[error] --songs-json entry must be a string or object: {e!r}")
+    s = s.strip()
+    if s:
+        out.append(s)
+if not out:
+    sys.exit("no selectors in --songs-json; omit it to rescue every track")
+print(",".join(out))
+PY
+)" || exit 2
+fi
 # An explicit-but-empty selector list must NOT silently mean "rescue everything".
 if [ -n "$SONGS" ] && [ -z "$(printf '%s' "$SONGS" | tr -d ',[:space:]')" ]; then
-  echo "no selectors in --songs/--songs-file; omit them to rescue every track" >&2; exit 2
+  echo "no selectors in --songs/--songs-file/--songs-json; omit them to rescue every track" >&2; exit 2
 fi
 
 # --- gate 1: never write into (or under) the pass-1 dir ------------------------

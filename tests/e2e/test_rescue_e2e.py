@@ -242,6 +242,77 @@ def test_empty_songs_file_errors_not_select_all(ws):
     assert "no selectors" in r.stderr
 
 
+# --- --songs-json ------------------------------------------------------------
+
+def test_songs_json_strings_and_objects(ws):
+    f = ws.root / "pick.json"
+    f.write_text(json.dumps({
+        "_comment": "ignored",
+        "songs": [STEMS_A[1], {"stem": STEMS_A[0], "note": "why not"}],
+    }, ensure_ascii=False), encoding="utf-8")
+    r = run(ws, "--plan", "--songs-json", str(f))
+    assert r.returncode == 0, r.stderr
+    assert _index(ws)["n"] == 2
+
+
+def test_songs_json_name_selects_every_take(ws):
+    f = ws.root / "pick.json"
+    f.write_text(json.dumps({"songs": [SONG_A]}), encoding="utf-8")
+    r = run(ws, "--plan", "--songs-json", str(f))
+    assert r.returncode == 0, r.stderr
+    assert _index(ws)["n"] == 2
+
+
+def test_songs_json_render_one(ws):
+    f = ws.root / "pick.json"
+    f.write_text(json.dumps({"songs": [STEMS_A[1]]}), encoding="utf-8")
+    r = run(ws, "--songs-json", str(f))
+    assert r.returncode == 0, r.stderr
+    assert _wavs(ws) == [f"{STEMS_A[1]}.wav"]
+
+
+def test_songs_json_empty_list_errors_not_select_all(ws):
+    f = ws.root / "pick.json"
+    f.write_text(json.dumps({"songs": []}), encoding="utf-8")
+    r = run(ws, "--plan", "--songs-json", str(f))
+    assert r.returncode == 2
+    assert "no selectors" in r.stderr
+
+
+def test_songs_json_invalid_json_errors(ws):
+    f = ws.root / "pick.json"
+    f.write_text("{not json", encoding="utf-8")
+    r = run(ws, "--plan", "--songs-json", str(f))
+    assert r.returncode == 2
+    assert "not readable/valid JSON" in r.stderr
+
+
+def test_songs_json_songs_must_be_list(ws):
+    f = ws.root / "pick.json"
+    f.write_text(json.dumps({"songs": "not-a-list"}), encoding="utf-8")
+    r = run(ws, "--plan", "--songs-json", str(f))
+    assert r.returncode == 2
+    assert "must be a list" in r.stderr
+
+
+def test_songs_json_entry_needs_stem_or_name(ws):
+    f = ws.root / "pick.json"
+    f.write_text(json.dumps({"songs": [{"note": "no selector"}]}), encoding="utf-8")
+    r = run(ws, "--plan", "--songs-json", str(f))
+    assert r.returncode == 2
+    assert "needs 'stem' or 'name'" in r.stderr
+
+
+def test_songs_json_mutually_exclusive_with_songs_file(ws):
+    js = ws.root / "pick.json"
+    js.write_text(json.dumps({"songs": [STEMS_A[0]]}), encoding="utf-8")
+    txt = ws.root / "pick.txt"
+    txt.write_text(STEMS_A[1], encoding="utf-8")
+    r = run(ws, "--plan", "--songs-json", str(js), "--songs-file", str(txt))
+    assert r.returncode == 2
+    assert "only one of" in r.stderr
+
+
 def test_render_failure_exits_nonzero(ws):
     r = run(ws, fail=STEM_B)
     assert r.returncode == 1

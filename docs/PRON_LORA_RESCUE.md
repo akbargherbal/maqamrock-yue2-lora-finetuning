@@ -102,7 +102,10 @@ song `name` rescues every take of that song (see Phase 4).
 `terminal: foreground for --plan/--smoke (seconds); detached for the batch; stop: pkill -f rescue_abc_batch.sh; resume: same command (skips succeeded).`
 
 Selectors accept a song **name or a full stem** (`<name>_<seed>`): a name rescues every take of
-that song, a stem exactly one. Other flags: `--limit N` (cap the run), `--threads N`,
+that song, a stem exactly one. Give them as `--songs` (inline), `--songs-file` (one per line), or
+`--songs-json` (a JSON selection file — easiest to edit; example
+`INFERENCE/rescue_selection.example.json`: `{"songs": [<name-or-stem> | {"stem"|"name", "note"}]}`).
+Other flags: `--limit N` (cap the run), `--threads N`,
 `--skip-preflight` (test / off-box use). Env overrides: `ROOT`, `BIN`, `MODEL`, `THREADS`,
 `QF_AR`/`QF_NAR` (default qfinal_a0.3), `RESCUE_COT` (default `melody`), `RESCUE_ADAPTER`.
 
@@ -123,15 +126,18 @@ that song, a stem exactly one. Other flags: `--limit N` (cap the run), `--thread
    Listen: does the melody-only ABC steer the arrangement while qfinal keeps the pronunciation?
    If not, stop — B2 is unproven and the fallback is B1 (`INFERENCE/v2_abc_to_qfinal.sh`).
 
-3. **Full rescue** (pass `--songs-file` of the M stems, one per line):
+3. **Full rescue** — pass the M takes as a `--songs-json` selection (edit a copy of
+   `INFERENCE/rescue_selection.example.json`; list names and/or stems), or as `--songs-file`
+   (one selector per line):
    ```bash
    bash INFERENCE/rescue_abc_batch.sh --pass1-dir ... --abc-dir ... --out-dir ... \
-     --songs-file /content/fails.txt
+     --songs-json /content/m_selection.json
    ```
 
-   `--songs`/`--songs-file` take song **names and/or stems** — a name rescues every take of that
-   song, a stem (`<name>_<seed>`) rescues exactly one. Blank lines and `#` comments in the file
-   are ignored.
+   `--songs`/`--songs-file`/`--songs-json` take song **names and/or stems** — a name rescues every
+   take of that song, a stem (`<name>_<seed>`) rescues exactly one. Blank lines and `#` comments in
+   a `--songs-file` are ignored; a `--songs-json` entry may be a bare string or an object with
+   `stem`/`name` plus any extra keys (e.g. `note`, ignored by the driver).
 
    The driver calls the binary **directly** with `cot=melody abc_file=<abc>` (it does **not** use
 `run_one.sh`, whose hardcoded `cot=off` + later override is unverified) and writes, per track,
@@ -152,7 +158,9 @@ Compare `rescue_v2abc_batch12/<stem>.wav` against `batch_12_rock_v2/<stem>.wav` 
 - **Rescue overwrites the liked take** (same `<name>_<seed>.wav`) → G4.
 - **`cot` override silently a no-op** (`run_one.sh:85`) → driver bypasses `run_one.sh`.
 - **Conditioning drift in hand-typed rescue** → G6 (values from the manifest).
-- **Arabic stems mis-copied by hand** → the spine + `--songs-file`.
+- **Arabic stems mis-copied by hand** → the spine + `--songs-file`/`--songs-json`.
+- **Partial pass-1 batch** → bulk with *no* selector aborts (the gate validates every manifest
+  track); enumerate the realized stems/names (e.g. a `--songs-json` list).
 - **Transcription steals the GPU** → `CUDA_VISIBLE_DEVICES=""`.
 - **Fresh-VM missing an adapter alias / wrong branch** → Phase 0.
 
@@ -160,7 +168,8 @@ Compare `rescue_v2abc_batch12/<stem>.wav` against `batch_12_rock_v2/<stem>.wav` 
 
 - Drivers: `INFERENCE/generate.py`, `INFERENCE/sheetsage2_transcribe.py`,
   `INFERENCE/ss2_venv.sh` (phase-2 env), `INFERENCE/rescue_abc_batch.sh`
-  (this file's subject; `--help`).
+  (this file's subject; `--help`), `INFERENCE/rescue_selection.example.json` (selection format).
+- Tests: `tests/e2e/test_rescue_e2e.py`.
 - Manifests: `manifests/batch_12_rock_v2.json` (pass-1), `manifests/batch_12_rock.json` (source).
 - Analysis: `docs/music-cover-feasibility.md` §2.1, §4.2, §10; `docs/GPU_L4_VS_A100.md` (unit
   rates); `docs/INFERENCE.md` (batch generation, T4 timing).
