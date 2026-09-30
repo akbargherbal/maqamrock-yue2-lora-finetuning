@@ -139,10 +139,12 @@ its prompt must share the **maqam**; every round so far is n=1.
 
 ## 8. Where things live
 
-- **Inputs:** `manifests/batch_12_rock_v2.json` (pass-1 v2) derived from
+- **Inputs:** pass-1 manifests `manifests/batch_12_rock_v2.json` (v2) and
+  `manifests/batch_12_rock_v2_winning.json` (v2, "winning flat-prompt" style), each derived from
   `manifests/batch_12_rock.json` (source). Adapters under `/content/converter/out/`.
 - **Drivers:** `INFERENCE/generate.py`, `INFERENCE/sheetsage2_transcribe.py`,
-  `INFERENCE/rescue_abc_batch.sh`, `INFERENCE/v2_abc_to_qfinal.sh` (B1).
+  `INFERENCE/ss2_venv.sh` (phase-2 env), `INFERENCE/rescue_abc_batch.sh`,
+  `INFERENCE/v2_abc_to_qfinal.sh` (B1).
 - **Outputs:** `out/<run>/` (pass-1 takes + sidecars), `out/<abc>/` (ABCs),
   `out/<rescue>/` (rescue takes + `_rescue_index.json`). Audio packages on GCS `listening/`.
 - **Analysis:** `docs/music-cover-feasibility.md`; merge convention `docs/PRON_LORA_MERGE.md`.

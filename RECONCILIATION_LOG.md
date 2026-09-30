@@ -834,3 +834,14 @@ covers both._
   1 flagged (0.1%); the flagged `_v2.json` token was reworded in the same pass.
 - Authority: `generate.py` source/`--help`, `INFERENCE/ss2_probe.sh`, `status.py:158`. Live context
   was the running pass-1 batch `batch_12_rock_v2`. No config edited, no GPU work touched.
+
+## 2026-09-30 — reconcile pass 2 (live docs), 0 mechanical findings
+
+- `docs/music-cover-workflow.md` §8: added `INFERENCE/ss2_venv.sh` to the Drivers list and
+  `manifests/batch_12_rock_v2_winning.json` to Inputs — both drift created earlier this session
+  (the new phase-2 env script; the operator's new winning-style pass-1 manifest).
+- Mechanical reconciler (`extract_claims.py` / `verify_claims.py`): 2409 claims, 1513 checkable,
+  **0 flagged**.
+- `agent_notes/current.md` refreshed to the running `batch_12_rock_v2_winning` batch.
+- Authority: the repo tree (`INFERENCE/`, `manifests/`). No config or run touched; the GPU batch
+  continued throughout.
