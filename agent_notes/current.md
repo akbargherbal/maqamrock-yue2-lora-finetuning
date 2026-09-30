@@ -1,41 +1,52 @@
 # current
 
-_Updated 2026-09-30 (localhost). **Docs reconciliation + graphify cache-untrack — COMPLETE.**
-`status.py` @ `9bc008f`. Mechanical 0 flagged; changes uncommitted._
+_Updated 2026-09-30 (localhost). Handoff — read this first. Scratch probe, not authority._
 
-## What changed (all uncommitted)
+## Why we're here (context for a fresh session)
+The plan under test is the **v2 → audio2sheet → qfinal rescue** flow in
+`docs/music-cover-feasibility.md` (§4.2 route **B2**, §7): generate with the rock model (v2),
+keep the good takes, and for takes whose **pronunciation** fails, hand their score to the
+clear-singing model (`qfinal_a0.X`) so it keeps the maqamrock arrangement but sings cleanly.
+Route **B1** (v2's own `score.abc`, no transcription) already won at n=1 (§7). The scaling
+question for **B2**: **can the audio→ABC transcription (SheetSage2) run on CPU, or does it
+need a GPU?** T4 works (established); CPU time is the unknown. That is all this probe measures.
 
-Docs reconciliation (6 semantic findings):
-- `AGENTS.md`: §2 "build the inference binary" authority → in-repo
-  (`docs/audiocpp_gpu_arch_builds.md` + `bootstrap/setup.sh`); `_Last revised_` 2026-09-30.
-- `SOURCE_OF_TRUTH.md`: new build/stage row.
-- `docs/PRON_LORA_LONG_PLAN.md`: dropped the "single source of truth" self-claim.
-- `docs/README.md`: indexed `PRON_LORA_LONG_PLAN.md`; marked `L4_HANDOFF_TASK14C.md` historical.
-- `docs/E2E_TESTING_PLAN.md` §8: "proposals" → "as landed"; phantom `tests/fixtures/gpu/` removed.
-- `unverifiable.txt`: 4 dead E2E suppressions pruned.
+## Run the probe (Colab; scratch)
+```bash
+bash INFERENCE/ss2_probe.sh /content/sample_song.mp3      # no args -> this path
+# clip-first for a cheap estimate:
+ffmpeg -y -i /content/sample_song.mp3 -t 60 /content/song60.wav
+bash INFERENCE/ss2_probe.sh /content/song60.wav /content/sample_song.mp3
+```
+`ss2_probe.sh` builds `/content/.ss2` (py3.11 venv, pinned torch/transformers), warms ffmpeg,
+sources `HF_TOKEN`, then runs `ss2_probe.py`. GPU vs CPU is auto-detected.
 
-Graphify tracking (user decision, multi-VM):
-- **`graphify-out/cache/` untracked + gitignored** (`git rm -r --cached`; `.gitignore:20`).
-  Outputs stay committed (8 files: `graph.json`, `GRAPH_REPORT.md`, `graph.html`,
-  `manifest.json`, labels, `cost.json`, `.graphify_root`).
-- Rationale: cache is keyed by graphify version; VMs differ (0.9.70 vs committed 0.9.71),
-  so tracking it churned 189 files per refresh. AST rebuild is free (no LLM).
-- Documented in `.gitignore`, `docs/GRAPHIFY.md`, `DECISIONS.md` ("Knowledge graph"
-  section), `RECONCILIATION_LOG.md`.
-- `graphify update .` ran: 1275 nodes / 2457 edges / 91 communities at `9bc008f`.
+## Hand back (what I need to debug)
+The `RESULT <tag>: transcribe_s=… abc_bytes=… peak_ram_GB=…` lines, plus any traceback.
+`clip60` × (audio_len_s / 60) ≈ full-file estimate.
 
-## State
+## Files
+- `INFERENCE/ss2_probe.py` — probe: loads SheetSage2 by repo id, clears the module cache,
+  times load+transcribe, prints peak RAM/VRAM.
+- `INFERENCE/ss2_probe.sh` — venv + ffmpeg wrapper.
+- `agent_notes/CPU_benchmark.ipynb` — notebook version (session state, gitignored; superseded).
 
-- Re-verify: 2168 claims / 49 files, **0 flagged**.
-- `graphify-out/` now tracks **8** files (was 189). Fresh VM rebuilds the cache
-  locally on first `graphify update`; semantic edges ride in the committed outputs.
-- `.opencode/`: opencode's own `.opencode/.gitignore` already excludes
-  `node_modules`, `package.json`, `package-lock.json`; only the hand-authored
-  `opencode.json` + `plugins/graphify.js` were untracked — now staged for tracking.
-- No commit made (per policy) — the cache deletions and `.opencode` adds are staged;
-  everything else unstaged.
+## Traps already solved (baked into the probe)
+1. **Load by repo id, not a local dir** — local `trust_remote_code` cached only the entry
+   module and died on `chord_spelling_sheetsage2.py`.
+2. Clear `~/.cache/huggingface/modules/transformers_modules` before loading.
+3. Run under the venv; multi-line code lives in a file, never a `!`-cell heredoc.
+4. `huggingface-cli` is deprecated → `hf`.
+5. `HF_TOKEN` required for the gated `SheetSage2` + `MERT-v2-FullSong` repos.
 
-## Ground truth reminders
+## Facts
+- SheetSage2 head 57.2M / 229 MB + backbone MERT-v2-FullSong 632M (~2.5 GB); 24 kHz mono,
+  processor `window_seconds=300`. License CC BY-NC 4.0.
+- T4 works (established). This measures **CPU** — F32; BF16 speedup is GPU-only.
+- Box seen: High-RAM, x86_64, 8 cores, 50 GiB RAM.
 
-- One GPU, shared, rented — `nvidia-smi` before any GPU work (idle; localhost).
-- This file is a handoff surface, not authority — re-derive with `python status.py`.
+## Next
+- Run the probe, read `RESULT`; if CPU is prohibitive, keep audio2sheet on a GPU box.
+- Open from §8: replicate §7's B1 result on the other two seeds; B2 (this ABC route) still unrun.
+
+_Not authority — re-derive from the artifacts (`python status.py`)._
