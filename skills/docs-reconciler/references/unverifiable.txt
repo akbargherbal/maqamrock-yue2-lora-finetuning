@@ -219,3 +219,5 @@ docs/PRON_LORA_RESCUE.md :: _rescue_status.log
 docs/PRON_LORA_RESCUE.md :: out/abc_v2_batch12/_driver.log
 docs/PRON_LORA_RESCUE.md :: _driver.log
 docs/PRON_LORA_RESCUE.md :: --branch
+# same runtime artifact, cited in the workflow design doc
+docs/music-cover-workflow.md :: _rescue_index.json

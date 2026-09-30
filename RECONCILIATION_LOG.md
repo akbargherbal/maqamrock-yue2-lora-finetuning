@@ -758,3 +758,15 @@ covers both._
 - Authority: `docs/music-cover-feasibility.md` §2.1/§10 + `INFERENCE/generate.py`,
   `sheetsage2_transcribe.py`, `run_one.sh` (read for the guards). No run config or
   hyperparameter changed.
+
+## 2026-09-30 — new `docs/music-cover-workflow.md` (workflow design reference)
+
+- New **`docs/music-cover-workflow.md`**: the end-to-end design of the cover/rescue workflow —
+  the two adapters + the ABC guide, B1 vs B2, the `<name>_<seed>` spine, phases 0–5, the G0–G6
+  gate summary, the unit-cost table, proven-vs-assumed, and the failure-mode class. It is a
+  **design reference**: commands defer to `docs/PRON_LORA_RESCUE.md`, evidence/numbers to
+  `docs/music-cover-feasibility.md` (§2.1/§4.2/§7/§10) and `docs/GPU_L4_VS_A100.md`.
+- Indexed in `docs/README.md`; row added to `SOURCE_OF_TRUTH.md` with the authority split made
+  explicit (design here, procedure in the runbook, evidence in the feasibility record).
+- Authority: synthesised from `docs/music-cover-feasibility.md` + `docs/PRON_LORA_RESCUE.md`;
+  no new measurement, no run config or hyperparameter changed.
