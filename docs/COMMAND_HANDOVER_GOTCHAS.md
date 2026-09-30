@@ -285,3 +285,35 @@ human and invisible to the agent — so they get written down here.
   `python -m pytest tests/ -q -k 'not test_j11_status_inference_section_from_real_run'`.
   (Hardening not done: scope the liveness probe to `INFER_OUT`, or xfail the case when a live run
   exists.)
+
+## 2026-09-30 — a rescue `--songs-json` uses flat `/content/…` dirs that setup.sh never stages and the backup never mirrors
+
+- **Fact:** `INFERENCE/rescue_selection.batch_12_rock_v2_winning.json` (and the `batch_12_rock_v2`
+  one) name their dirs flat — `pass1_dir /content/batch_12_rock_v2_winning`,
+  `abc_dir /content/abc_v2_batch12_winning`, `out_dir /content/rescue_v2abc_batch12_winning` —
+  while `bootstrap/setup.sh --inference` stages only `/content/audiocpp_inference/**` and
+  `backup_to_gcp.py --inference` mirrors only `INFERENCE_ROOT/{out,prompts,scripts}` +
+  `/content/converter/out` + `/content/logs` + `agent_notes/`. On a fresh VM neither the pass-1
+  dir nor the abc dir exists locally; a restored box may have one and not the other.
+- **Failure prevented:** handing over the rescue command and getting
+  `[error] no batch_manifest.json under /content/batch_12_rock_v2_winning (is this a generate.py
+  --out-dir?)` — the driver only checks that the file is a manifest, not that the dir exists, so the
+  message reads like a shape error when the dir is simply absent. And, separately, assuming a rescue
+  run is durable when its flat `out_dir` is outside every backup target.
+- **Correct pattern:** before the first rescue command, stage the pass-1 dir from GCS to the exact
+  flat path in the JSON —
+  `gsutil -m cp -r "$GCP_BACKUP_BASE/audiocpp_inference/workspace/out/batch_12_rock_v2_winning" /content/` —
+  and cover the flat dirs in the backup run with explicit extras:
+  `python backup_to_gcp.py --inference --extra /content/batch_12_rock_v2_winning:workspace/out/batch_12_rock_v2_winning --extra /content/rescue_v2abc_batch12_winning:workspace/out/rescue_v2abc_batch12_winning`.
+
+## 2026-09-30 — `setup.sh` sources `/root/.secrets.env`, which can blank real env vars
+
+- **Fact:** `bootstrap/setup.sh` does `if [ -f /root/.secrets.env ]; then source /root/.secrets.env; fi`
+  before its `HF_TOKEN` presence check. On a box where that file exists but holds empty values
+  (`export HF_TOKEN=`), sourcing **overwrites** an otherwise-good `HF_TOKEN` in the environment, and
+  setup fails with `[FAIL] HF_TOKEN is empty` even though `env` shows a token.
+- **Failure prevented:** diagnosing a spurious auth failure, or "fixing" it by exporting the token in
+  the foreground command (which the `source` then clobbers anyway).
+- **Correct pattern:** check `env | grep HF_TOKEN` and `cat /root/.secrets.env` separately; if the file
+  is blank, stage the pieces setup.sh would (GCS `tools/build/audiocpp_cli`, `tools/{prompts,scripts}`,
+  `hf download audio-cpp/Yue2-3B-GGUF …`) directly, or fix the secrets file first.
