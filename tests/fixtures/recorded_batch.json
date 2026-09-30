@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "note": "Tier A record->replay contract for the GPU-free e2e tiers (docs/E2E_TESTING_PLAN.md §4). Hand-authored from real recorded sidecars under results/maqam_lyric_swap/sidecars/ (NVIDIA L4 run, 2026-09-25); the WAV is resynthesized at the recorded duration_s and audio bytes are provenance, never asserted.",
+  "recorded_at": "2026-09-30T00:00:00Z",
+  "provenance": {
+    "source": "results/maqam_lyric_swap/sidecars/HijazStyle_KurdLyrics__c3050_a0.5.json",
+    "gpu": "NVIDIA L4",
+    "compute_cap": "8.9",
+    "audio_cpp_commit": "ac16661d",
+    "checkpoint_step": 3000,
+    "binary_sha256": "97028a71fd4d86378161162364dc6cdc85a569461d3afb6bf78f83ea572ad3d4",
+    "model_gguf_sha256": "e37c461329f3db45552f6f6d7453f0b1944f3fd8344855a2e50083ea9db6ee98",
+    "vae_gguf_sha256": "d4f4a05d8f291ae820cd1e43609da3fa91b56465810091a2b08c3350b751719d"
+  },
+  "tracks": [
+    {
+      "idx": 1,
+      "name": "Hijaz",
+      "take": 0,
+      "seed": 20260924,
+      "cap": 6500,
+      "duration_s": 190.84,
+      "exit": 0,
+      "log_text": "[TRACE] yue2 generation start\n[TRACE] seed=20260924 semantic_max_tokens=6500\n[TIMING] ar 41.2s nar 148.9s total 193.1s\n[TRACE] truncated=0\n"
+    },
+    {
+      "idx": 2,
+      "name": "Hijaz",
+      "take": 1,
+      "seed": 20260925,
+      "cap": 6500,
+      "duration_s": 187.36,
+      "exit": 0,
+      "log_text": "[TRACE] yue2 generation start\n[TRACE] seed=20260925 semantic_max_tokens=6500\n[TIMING] ar 40.8s nar 146.3s total 190.4s\n[TRACE] truncated=0\n"
+    },
+    {
+      "idx": 3,
+      "name": "Kurd",
+      "take": 0,
+      "seed": 20260924,
+      "cap": 7250,
+      "duration_s": 205.5,
+      "exit": 0,
+      "log_text": "[TRACE] yue2 generation start\n[TRACE] seed=20260924 semantic_max_tokens=7250\n[TIMING] ar 44.1s nar 160.0s total 207.6s\n[TRACE] truncated=0\n"
+    }
+  ]
+}

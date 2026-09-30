@@ -526,3 +526,24 @@ covers both._
   `SOURCE_OF_TRUTH.md` gained a row for the new plan topic.
 - Authority: the new plan's own banner ("proposed, not yet implemented") + the
   on-disk file tree; no config or hyperparameter touched; no frozen doc rewritten.
+
+## 2026-09-30 — E2E plan Session 1 landed (T2 scaffold + J1)
+
+- Implemented `docs/E2E_TESTING_PLAN.md` §9 Session 1 on the Colab CPU runtime:
+  `tests/e2e/replay.py` (`make_replay_runner`), `tests/e2e/conftest.py`
+  (`fake_gpu`, `staged_inference`, `run_generate`), `tests/e2e/test_inference_e2e.py`
+  (J1), `tests/fixtures/{recorded_batch.json,manifest.json,README.md,fetch.sh}`,
+  and the `gpu`/`fixtures_heavy`/`live` markers + default `-m` filter in `pytest.ini`.
+- Updated the plan to match reality: banner "in progress", §3 T2 status "partial",
+  §9 Session 1 marked done, and §12 rewritten from "decisions needed" to the three
+  resolved decisions (Colab free T4 gate; Tier A git / Tier B GCS; fake `run.py`).
+  `SOURCE_OF_TRUTH.md` row note updated to match.
+- Mechanical pass: 2131 claims / 49 files, 1301 checkable, **0 flagged (0.0 %)**.
+  Curated `skills/docs-reconciler/references/unverifiable.txt`: dropped the broad
+  `tests/e2e/*` and `tests/fixtures/*` globs (those files now exist) and kept only
+  the still-unbuilt Session 2–4 paths + bare filenames the extractor cannot map into
+  the new dirs; added the `conftest.py` / `tests/test_*` false-positive suppressions.
+- Verified: `python -m pytest` → **181 passed, 1 skipped** (the existing
+  `torch`-dependent skip), including the new J1.
+- Authority: plan §5.1/§9 + the on-disk test tree; no config, hyperparameter, or
+  frozen doc changed.

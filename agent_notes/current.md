@@ -1,70 +1,73 @@
 # current
 
-_Updated 2026-09-30 (local). **Next session: Colab **CPU** runtime. Task: implement
-`docs/E2E_TESTING_PLAN.md` Session 1 — GPU-free.** A CPU runtime is the faithful host:
-it has `/content` and no `nvidia-smi`, exactly what the plan's T2/T3 tiers need. No GPU
-work this session. Branch `music-cover` (plan + reconcile committed at `1513027`)._
+_Updated 2026-09-30 (local). **Session 1 of `docs/E2E_TESTING_PLAN.md` is
+complete** (Colab CPU, GPU-free): 181 passed, 1 skipped. Next session: **Session 2 —
+T2 inference journeys J1–J4, J6 + the provenance guard test.** No GPU work until
+the Session 4 gate (now decided: **Colab free T4**). Branch `music-cover`
+(uncommitted Session 1 changes in the working tree — see `git status`)._
 
 ## 0. Orientation — read these first, in order
 
 1. `AGENTS.md` §2 (identify mode/environment) and §8 (the never list). This is **not** a
    §2 runbook mode; the authority is the plan doc below.
 2. `docs/E2E_TESTING_PLAN.md` — §4 (record→replay), §5 (journey matrix), §8 (test wiring),
-   §9 (sequencing = what Session 1 is), §12 (the 3 decisions to confirm with the user).
+   §9 (sequencing = what Session 2 is), §12 (decisions, now resolved).
 3. `SOURCE_OF_TRUTH.md`, row "End-to-end test plan / tiers".
 
-## 1. Session 1 scope (plan §9)
+## 1. What landed in Session 1
 
-- Build the `tests/e2e/` scaffold: `replay.py` (`make_replay_runner`), `conftest.py`
-  (`fake_gpu`, staged fake assets), and pytest markers (`gpu`, `fixtures_heavy`, `live`).
-- Harvest fixtures from **existing** artifacts — no GPU: `results/replay_l4_*.json`,
-  `results/*/sidecars/`, `manifests/`, and GCS run dirs; write `tests/fixtures/recorded_batch.json`.
-- Exit criterion: **J1** (inference happy path driven through `generate.main` with only
-  `gpu_info` + `runner` substituted) passes on the CPU runtime with a hand-authored fixture.
+- `tests/e2e/replay.py` — `make_replay_runner` (writes the `run_one.sh` file set from
+  `recorded_batch.json`; synthesizes the WAV via stdlib `wave`), `load_recorded_batch`,
+  `_synth_wav`.
+- `tests/e2e/conftest.py` — `fake_gpu`, `staged_inference` (all preflight files in tmp),
+  `run_generate` (drives the **real** `generate.main` with only `gpu_info` +
+  `training_active` + `run_batch`'s `runner` substituted — plan §5.1).
+- `tests/e2e/test_inference_e2e.py` — **J1** happy path (2 songs, 3 tracks, explicit seeds):
+  prompts, `batch_manifest.json`, per-track sidecar provenance, WAV duration, summary,
+  `out/latest`, `_runs_status.log`.
+- `tests/fixtures/{recorded_batch.json,manifest.json,README.md,fetch.sh}` — Tier A
+  hand-authored from `results/maqam_lyric_swap/sidecars/`; Tier B (GCS) declared empty.
+- `pytest.ini` — markers `gpu` / `fixtures_heavy` / `live`; default
+  `-m "not gpu and not fixtures_heavy and not live"`.
+- Docs reconciled: plan banner/§3/§9/§12 updated; `SOURCE_OF_TRUTH.md` row note;
+  suppression list narrowed; `RECONCILIATION_LOG.md` appended. Mechanical pass **0 flagged**.
 
-## 2. Environment bring-up (you run these in a Colab terminal)
+## 2. Decisions (resolved 2026-09-30, plan §12)
 
-Fresh VM, clone the branch, then bootstrap CPU-side. Bootstrap backgrounds the heavy jobs;
-watch `/content/logs/setup.log`.
+1. **Gate host: Colab free T4.** Kaggle / GH Actions remain fallbacks.
+2. **Fixtures: Tier A in git, Tier B in GCS** (`tests/fixtures/fetch.sh`, gitignored).
+3. **T3 scope: fake `run.py` only**; the real 10-step smoke stays at the T5 gate.
+
+## 3. Next — Session 2 (plan §9)
+
+- T2 journeys **J1–J4, J6** in `tests/e2e/test_inference_e2e.py`:
+  - J2 idempotent re-run skip + `--force`; J3 partial failure → `_failed_runs.log` → retry;
+    J4 per-song `loras:` registry routing + provenance; J6 `suno_to_songs.py` → `generate.py`.
+- **Provenance guard test** (plan §4.4): fixture `checkpoint_step` / `audio_cpp_commit`
+  vs today's code; skip cleanly when `AUDIO_CPP` is absent (CPU VM).
+- Keep the default suite GPU-free and green.
+
+## 4. Reproduce / verify (CPU runtime)
 
 ```bash
-git clone https://github.com/akbargherbal/maqamrock-yue2-lora-finetuning.git
-cd maqamrock-yue2-lora-finetuning && git checkout music-cover
-bash bootstrap/setup.sh --inference > /content/logs/setup.log 2>&1 &
-# ...do vscode.dev tunnel auth in the foreground while it runs...
-python -m pytest -q
+cd /content/maqamrock-yue2-lora-finetuning
+python -m pytest -q                     # 181 passed, 1 skipped
+python -m pytest tests/e2e -q           # J1
+python -m pytest -m gpu --collect-only  # T5 checks, deferred to the gate
 ```
 
-`--inference` deliberately installs **no** torch. Colab's image usually ships one anyway;
-if `tests/test_merge_pron_lora.py` fails to collect with `ModuleNotFoundError: torch`,
-either `pip install torch --index-url https://download.pytorch.org/whl/cpu` or run
-`python -m pytest -q --ignore=tests/test_merge_pron_lora.py` — and note which you chose.
-(On the localhost box this module is the only one that does not collect.)
+## 5. Guardrails
 
-## 3. Guardrails for this session
-
-- **CPU only.** Do not start GPU work, do not run `audiocpp_cli`, do not rely on
-  `nvidia-smi`. `preflight`'s GPU refusal is itself a test (plan §7).
-- Your terminal ≠ my shell: you type the commands; I do CPU-only repo work.
-- `agent_notes/current.md` is a handoff surface, **not authority** (§6) — re-derive state
-  with `python status.py`.
-- Fixtures: Tier A (small text/json) in git; Tier B (wav / safetensors / db / binary) is
-  GCS-backed and gitignored — never commit large binaries.
+- **CPU only.** No `audiocpp_cli`, no `nvidia-smi` dependency; `preflight`'s GPU refusal
+  is itself a test (plan §7).
+- Tier B binaries stay out of git (`tests/fixtures/**/*.wav|.safetensors|.db`,
+  `audiocpp_cli`, `out/`).
 - Do not modify run configs or `/content` datasets (§8).
+- `agent_notes/current.md` is a handoff surface, **not authority** — re-derive state with
+  `python status.py`.
 
-## 4. Confirm with the user before writing test code (plan §12)
+## 6. Pointers
 
-1. Gate host for the single GPU smoke: **Kaggle T4** (proposed) / Colab free T4 / GH Actions GPU.
-2. Fixture home: Tier A in git, Tier B in GCS — confirm.
-3. T3 scope: fake `run.py` enough for the training-lifecycle e2e, or also a real 10-step
-   smoke each recording cycle?
-
-These are the user's call — do not pick silently.
-
-## 5. Pointers
-
-- Plan: `docs/E2E_TESTING_PLAN.md`. This pass: `RECONCILIATION_LOG.md` (2026-09-30 entry).
+- Plan: `docs/E2E_TESTING_PLAN.md`. This pass: `RECONCILIATION_LOG.md` (2026-09-30 entries).
 - Reconciler: `skills/docs-reconciler/SKILL.md`; suppressions
   `skills/docs-reconciler/references/unverifiable.txt`.
-- Prior track (music-cover seed replication) is parked — its handover is in git history and
-  `docs/music-cover-feasibility.md` §7 — **not** this session's work.

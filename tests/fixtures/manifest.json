@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "generated_utc": "2026-09-30T00:00:00Z",
+  "note": "Provenance for the Tier A fixtures consumed by tests/e2e. Tier B (heavy audio/db/binaries) is GCS-backed and gitignored; fetch it with tests/fixtures/fetch.sh. The provenance guard test (plan §4.4) compares audio_cpp_commit / checkpoint_step here against the values the code computes today and fails on mismatch.",
+  "provenance": {
+    "gpu": "NVIDIA L4",
+    "compute_cap": "8.9",
+    "audio_cpp_commit": "ac16661d",
+    "checkpoint_step": 3000,
+    "recorded_at": "2026-09-25T12:00:19Z",
+    "source_gcs": "results/maqam_lyric_swap/sidecars/"
+  },
+  "tier_a": {
+    "recorded_batch.json": {
+      "sha256": "7e581c514b9fa61c2344135795dd2b0aba31de9d0916da9e0e69d1c524405062",
+      "kind": "recorded_batch",
+      "source": "hand-authored from results/maqam_lyric_swap/sidecars/*.json"
+    }
+  },
+  "tier_b": {}
+}

@@ -26,3 +26,11 @@ graphify-out/20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
 
 # scratch screenshots — local only, not repo content
 scrap_screenshot/
+
+# tests/fixtures Tier B — heavy, GCS-backed, materialized by tests/fixtures/fetch.sh
+# (Tier A text fixtures in tests/fixtures/ stay tracked; see tests/fixtures/README.md)
+tests/fixtures/**/*.wav
+tests/fixtures/**/*.safetensors
+tests/fixtures/**/*.db
+tests/fixtures/**/audiocpp_cli
+tests/fixtures/**/out/

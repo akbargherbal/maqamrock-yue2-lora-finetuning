@@ -1,6 +1,7 @@
 # End-to-end testing plan — Colab, GPU-light
 
-_Status: **proposed, not yet implemented.** Last revised 2026-09-30._
+_Status: **in progress.** Session 1 (T2 scaffold + J1) landed 2026-09-30;
+decisions in §12 resolved. Remaining tiers per §9. Last revised 2026-09-30._
 
 Goal: exercise the real user journeys end to end — as faithfully as possible —
 **without renting a GPU** for the bulk of it. A GPU is allowed exactly once or
@@ -53,7 +54,7 @@ and `duration_cap.py` are pure CPU; hashing and cap math are exercised for free.
 |---|---|---|---|---|
 | **T0** unit/logic | no | parsing, planning, validation, cap parity | localhost + Colab CPU | **done** — `tests/test_*.py` |
 | **T1** contract/fake | no | orchestration ↔ subprocess wiring | localhost + Colab CPU | **done** — `runner=`, monkeypatched probes |
-| **T2** record→replay e2e | no | the *whole pipeline* on real recorded artifacts | Colab CPU | **to build** |
+| **T2** record→replay e2e | no | the *whole pipeline* on real recorded artifacts | Colab CPU | **partial** — scaffold + J1 (Session 1) |
 | **T3** process/lifecycle e2e | no | real detach, PID, SIGINT stop, backup mirror | Colab CPU | **partial** |
 | **T4** hosted-env e2e | no | the real Colab paths/env, minus the device | Colab CPU | **to run** |
 | **T5** kernel smoke | **yes** | the binary/kernels actually run | Colab GPU *or* Kaggle T4 | **budgeted** |
@@ -181,11 +182,10 @@ After S1–S3: copy the smoke artifacts to `tests/fixtures/` Tier A/B, then swit
 back to the CPU runtime. Optionally record one failure path (S2b) by pointing at
 a missing LoRA to capture a real `exit=1` log.
 
-Free/cheap sources for the gate, in order of preference:
-**Kaggle** (~30 GPU-h/week free T4×2; best for a repeatable smoke), **Colab free
-tier** (T4, session/idle limits — fine for a 15-min smoke), **GitHub Actions GPU
-runners** (paid per minute; gate on `workflow_dispatch`, never per-PR). All write
-to the same GCS bucket, so no state is trapped in the ephemeral VM.
+Gate host (decided 2026-09-30): **Colab free T4**. Alternatives considered:
+**Kaggle** (~30 GPU-h/week free T4×2; most repeatable), **GitHub Actions GPU**
+(paid per minute; gate on `workflow_dispatch`, never per-PR). All write to the
+same GCS bucket, so no state is trapped in the ephemeral VM.
 
 ## 7. Running on the Colab CPU runtime (T4 tier)
 
@@ -238,7 +238,7 @@ run automatically.
 
 | Session | Deliverable | Exit criterion |
 |---|---|---|
-| **1** | `tests/e2e/` scaffold, `replay.py`, `recorded_batch.json` schema, markers, `fake_gpu`. Fixtures harvested from **existing** GCS artifacts first (sidecars/`results/` already exist) — no GPU yet. | J1 passes on Colab CPU with a hand-authored fixture |
+| **1** | `tests/e2e/` scaffold, `replay.py`, `recorded_batch.json` schema, markers, `fake_gpu`. Fixtures harvested from **existing** GCS artifacts first (sidecars/`results/` already exist) — no GPU yet. | J1 passes on Colab CPU with a hand-authored fixture — **done 2026-09-30** (181 passed, 1 skipped) |
 | **2** | T2 inference journeys J1–J4, J6; provenance guard test; `test_generate.py`'s `_stub_assets` reused. | `pytest -m "not gpu"` green; J3 failure/retry covered |
 | **3** | T3 lifecycle/monitor/backup J10–J12 with `fake_run.py` and a fake `gsutil`; J11 from a spec-built db. | start→stop SIGINT proven with a real process; restore diff clean |
 | **4** | T5 gate: one budgeted GPU session (S1–S3) → record fixtures → fold them into Tier A/B. | S1–S3 evidence (exit 0, WAV duration, finite loss); fixtures committed with provenance |
@@ -262,11 +262,11 @@ run automatically.
 | Network/GCS in unit tests | `live` mark; fake `gsutil`/`gcloud` shim on `PATH` for T3 |
 | A fixture recorded on the wrong build | provenance records `audio_cpp_commit` + `checkpoint_step`; mismatch fails |
 
-## 12. Decisions needed from the user
+## 12. Decisions (resolved 2026-09-30)
 
-1. **Gate host**: Kaggle (free, repeatable) vs Colab free T4 (one place) vs GH
-   Actions GPU (paid, CI-native). Default proposal: Kaggle, fallback Colab free.
-2. **Fixture home**: Tier A in git, Tier B in GCS — confirm, or keep everything
-   in git if size is acceptable.
-3. **Scope of T3**: is a fake `run.py` enough for the training-lifecycle e2e, or
-   do you also want the 10-step *real* smoke each recording cycle?
+1. **Gate host**: **Colab free T4** (see §6). Kaggle and GH Actions GPU remain
+   alternatives if Colab's session/idle limits bite.
+2. **Fixture home**: **Tier A in git, Tier B in GCS** (as proposed in §4.2). Heavy
+   fixtures fetched by `tests/fixtures/fetch.sh` and gitignored.
+3. **Scope of T3**: **fake `run.py` only** for the training-lifecycle e2e; the
+   real 10-step smoke stays at the T5 gate (§6 S3), not every cycle.
