@@ -23,9 +23,10 @@
 #
 # Selection: --songs / --songs-file / --songs-json accept song NAMES and/or full
 #   STEMS (<name>_<seed>). A name selects every take of that song; a stem selects
-#   one. --songs-json is a JSON file: {"songs": [<name-or-stem> |
-#   {"stem"|"name": "...", "note": "..."}]}; example:
-#   INFERENCE/rescue_selection.example.json.
+#   one. --songs-json is a self-contained run config: the "songs" list plus
+#   optional run-level keys (pass1_dir, abc_dir, out_dir, qf_ar, qf_nar, cot,
+#   adapter, threads, limit); an explicit CLI flag or env var always wins.
+#   Example: INFERENCE/rescue_selection.example.json.
 #
 # Env overrides:
 #   ROOT BIN MODEL THREADS   workspace / runner / model dir / cpu threads
@@ -37,7 +38,7 @@ set -u
 
 usage() {
   cat <<'EOF'
-usage: rescue_abc_batch.sh --pass1-dir DIR --abc-dir DIR --out-dir DIR
+usage: rescue_abc_batch.sh [--pass1-dir DIR --abc-dir DIR --out-dir DIR]
                            [--songs NAME|STEM,... | --songs-file FILE
                             | --songs-json FILE]
                            [--smoke] [--limit N] [--threads N]
@@ -46,10 +47,13 @@ usage: rescue_abc_batch.sh --pass1-dir DIR --abc-dir DIR --out-dir DIR
   --pass1-dir  a generate.py --out-dir (needs batch_manifest.json + prompts/)
   --abc-dir    sheetsage2_transcribe.py --out-dir (<stem>/score.abc per take)
   --out-dir    rescue output dir; MUST differ from --pass1-dir and not sit under it
+               (the three dirs are required: give them here or via --songs-json)
   --songs      comma/space/newline list of song NAMES and/or STEMS to rescue
   --songs-file one selector per line ('#' comments and blank lines ignored)
-  --songs-json a JSON file: {"songs": ["<name>|<stem>",
-               {"stem": "...", "note": "..."}]}; example in INFERENCE/
+  --songs-json a JSON run config: a "songs" selection plus optional pass1_dir/
+               abc_dir/out_dir/qf_ar/qf_nar/cot/adapter/threads/limit; a CLI
+               flag or env var wins over the file. Example:
+               INFERENCE/rescue_selection.example.json
   --plan       validate + write the index, print the plan; no GPU, no render
   --verify     re-check the stored index sha256 against disk, then exit (no render)
   --smoke      render ONLY the first planned track, then stop (the B2 quality gate)
@@ -65,12 +69,19 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="${ROOT:-/content/audiocpp_inference}"
 BIN="${BIN:-$ROOT/bin/audiocpp_cli}"
 MODEL="${MODEL:-$ROOT/models/Yue2-3B-GGUF}"
-THREADS="${THREADS:-8}"
-QF_AR="${QF_AR:-/content/converter/out/qfinal_a0.3/akbar_arabic_rock_lora_ar.safetensors}"
-QF_NAR="${QF_NAR:-/content/converter/out/qfinal_a0.3/akbar_arabic_rock_lora_nar.safetensors}"
-RESCUE_COT="${RESCUE_COT:-melody}"
-RESCUE_ADAPTER="${RESCUE_ADAPTER:-qfinal_a0.3}"
 GCS_BASE="${GCS_BASE:-gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning}"
+# Built-in defaults, kept separate so --songs-json can override the DEFAULT while
+# an explicit CLI flag or env var still wins (see the JSON apply block below).
+DEF_THREADS=8
+DEF_QF_AR=/content/converter/out/qfinal_a0.3/akbar_arabic_rock_lora_ar.safetensors
+DEF_QF_NAR=/content/converter/out/qfinal_a0.3/akbar_arabic_rock_lora_nar.safetensors
+DEF_COT=melody
+DEF_ADAPTER=qfinal_a0.3
+THREADS="${THREADS:-$DEF_THREADS}"
+QF_AR="${QF_AR:-$DEF_QF_AR}"
+QF_NAR="${QF_NAR:-$DEF_QF_NAR}"
+RESCUE_COT="${RESCUE_COT:-$DEF_COT}"
+RESCUE_ADAPTER="${RESCUE_ADAPTER:-$DEF_ADAPTER}"
 
 # /usr/bin/time is preferable (run_one.sh uses it; the bootstrap installs it) but
 # is not required — if absent we still write a `<stem>_time.txt` for resume.
@@ -99,13 +110,13 @@ while [ $# -gt 0 ]; do
     *) echo "unknown arg: $1" >&2; usage;;
   esac
 done
-[ -n "$PASS1" ] && [ -n "$ABC_DIR" ] && [ -n "$OUT_DIR" ] || usage
 _nsel=0
 [ -n "$SONGS" ] && _nsel=$((_nsel + 1))
 [ -n "$SONGS_FILE" ] && _nsel=$((_nsel + 1))
 [ -n "$SONGS_JSON" ] && _nsel=$((_nsel + 1))
 [ "$_nsel" -le 1 ] || { echo "use only one of --songs / --songs-file / --songs-json" >&2; exit 2; }
 case "$LIMIT" in ''|*[!0-9]*) echo "--limit must be an integer" >&2; exit 2;; esac
+case "$THREADS" in ''|*[!0-9]*) echo "--threads must be an integer" >&2; exit 2;; esac
 
 # Portable realpath (works for not-yet-existing paths too).
 rp() { python3 -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' "$1"; }
@@ -117,8 +128,10 @@ if [ -n "$SONGS_FILE" ]; then
 fi
 if [ -n "$SONGS_JSON" ]; then
   [ -f "$SONGS_JSON" ] || { echo "no such --songs-json: $SONGS_JSON" >&2; exit 2; }
-  # {"songs": [<name-or-stem> | {"stem"|"name": "...", "note": "..."}]} -> comma list
-  SONGS="$(python3 - "$SONGS_JSON" <<'PY'
+  # One config file: run-level paths/knobs (optional) + the "songs" selection.
+  # Each emitted line is "key<TAB>value"; applied only where the value is still
+  # the built-in default, so an explicit CLI flag or env var always wins.
+  RESOLVED="$(python3 - "$SONGS_JSON" <<'PY'
 import json, sys
 path = sys.argv[1]
 try:
@@ -126,10 +139,38 @@ try:
 except (OSError, ValueError) as e:
     sys.exit(f"[error] --songs-json not readable/valid JSON: {path}: {e}")
 if not isinstance(doc, dict):
-    sys.exit(f"[error] --songs-json must be an object with a 'songs' list: {path}")
+    sys.exit(f"[error] --songs-json must be a JSON object: {path}")
+
+KNOWN = {"pass1_dir", "abc_dir", "out_dir", "qf_ar", "qf_nar", "cot", "adapter",
+         "threads", "limit", "songs"}
+for k in doc:
+    if k not in KNOWN and not k.startswith("_"):
+        print(f"[warn] ignoring unknown --songs-json key: {k}", file=sys.stderr)
+
+def emit(key, value):
+    if any(c in value for c in "\t\n\r"):
+        sys.exit(f"[error] --songs-json '{key}' must not contain tabs/newlines")
+    print(f"{key}\t{value}")
+
+for key in ("pass1_dir", "abc_dir", "out_dir", "qf_ar", "qf_nar", "cot", "adapter"):
+    v = doc.get(key)
+    if v is None:
+        continue
+    if not isinstance(v, str) or not v.strip():
+        sys.exit(f"[error] --songs-json '{key}' must be a non-empty string")
+    emit(key, v.strip())
+
+for key in ("threads", "limit"):
+    v = doc.get(key)
+    if v is None:
+        continue
+    if not isinstance(v, int) or isinstance(v, bool) or v < 0:
+        sys.exit(f"[error] --songs-json '{key}' must be a non-negative integer")
+    emit(key, str(v))
+
 songs = doc.get("songs")
 if songs is None:
-    sys.exit(f"[error] --songs-json has no 'songs' key: {path}")
+    sys.exit(0)                      # config-only file: no selection == rescue every track
 if not isinstance(songs, list):
     sys.exit(f"[error] --songs-json 'songs' must be a list: {path}")
 out = []
@@ -146,11 +187,33 @@ for e in songs:
     if s:
         out.append(s)
 if not out:
-    sys.exit("no selectors in --songs-json; omit it to rescue every track")
-print(",".join(out))
+    sys.exit("no selectors in --songs-json 'songs'; omit the key to rescue every track")
+emit("songs", ",".join(out))
 PY
 )" || exit 2
+  while IFS=$'\t' read -r _k _v; do
+    case "$_k" in
+      "") ;;
+      songs)     [ -n "$SONGS" ] || SONGS="$_v";;
+      pass1_dir) [ -n "$PASS1" ] || PASS1="$_v";;
+      abc_dir)   [ -n "$ABC_DIR" ] || ABC_DIR="$_v";;
+      out_dir)   [ -n "$OUT_DIR" ] || OUT_DIR="$_v";;
+      qf_ar)     [ "$QF_AR" = "$DEF_QF_AR" ] && QF_AR="$_v";;
+      qf_nar)    [ "$QF_NAR" = "$DEF_QF_NAR" ] && QF_NAR="$_v";;
+      cot)       [ "$RESCUE_COT" = "$DEF_COT" ] && RESCUE_COT="$_v";;
+      adapter)   [ "$RESCUE_ADAPTER" = "$DEF_ADAPTER" ] && RESCUE_ADAPTER="$_v";;
+      threads)   [ "$THREADS" = "$DEF_THREADS" ] && THREADS="$_v";;
+      limit)     [ "$LIMIT" -eq 0 ] && LIMIT="$_v";;
+      *) echo "[warn] ignoring unknown --songs-json key: $_k" >&2;;
+    esac
+  done <<< "$RESOLVED"
 fi
+
+# pass1/abc/out may come from the CLI or from --songs-json; both absent -> usage.
+[ -n "$PASS1" ] && [ -n "$ABC_DIR" ] && [ -n "$OUT_DIR" ] || {
+  echo "missing --pass1-dir/--abc-dir/--out-dir (give on the CLI or in --songs-json)" >&2
+  usage
+}
 # An explicit-but-empty selector list must NOT silently mean "rescue everything".
 if [ -n "$SONGS" ] && [ -z "$(printf '%s' "$SONGS" | tr -d ',[:space:]')" ]; then
   echo "no selectors in --songs/--songs-file/--songs-json; omit them to rescue every track" >&2; exit 2

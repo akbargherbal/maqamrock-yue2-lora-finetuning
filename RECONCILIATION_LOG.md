@@ -865,3 +865,22 @@ covers both._
   CPU-only rehearsal, no GPU.
 - Pre-existing, unrelated: `tests/e2e/test_inference_e2e.py::test_provenance_guard` fails on this
   box (local `audio.cpp` at `9427addd`, fixture expects `30ec4596`) — environment drift, not this change.
+
+## 2026-09-30 — `--songs-json` promoted to a self-contained run config
+
+- `INFERENCE/rescue_abc_batch.sh`: `--songs-json` now also carries run-level keys (`pass1_dir`,
+  `abc_dir`, `out_dir`, `qf_ar`, `qf_nar`, `cot`, `adapter`, `threads`, `limit`) so a single file
+  drives a whole rescue; `--pass1-dir/--abc-dir/--out-dir` are no longer required on the CLI when
+  the file supplies them. Precedence: explicit CLI flag / env var > JSON > built-in default (built-in
+  defaults now named `DEF_*`). Unknown JSON keys warn; `threads`/`limit` must be non-negative ints.
+  Omitting `songs` = rescue every track (empty list still errors).
+- `INFERENCE/rescue_selection.example.json`: rewritten as that self-contained config (real `batch_12`
+  paths + mixed name/stem/object entries).
+- `tests/e2e/test_rescue_e2e.py`: +7 config-file cases (dirs-from-JSON, CLI dir override, config-only
+  ⇒ all, cot/adapter override, missing-dirs usage error, unknown-key warn, bad `threads` type);
+  file now 34 passed.
+- Docs: `docs/PRON_LORA_RESCUE.md` Phase 4 (config-file form in the plan step + selector paragraph);
+  `SOURCE_OF_TRUTH.md` cover/rescue row says the JSON is a self-contained run config.
+- Mechanical reconciler (`extract_claims.py` / `verify_claims.py`): 2428 claims, 1529 checkable,
+  **0 flagged**.
+- Authority: `INFERENCE/rescue_abc_batch.sh --help` (source + example). CPU-only plan checks; no GPU.

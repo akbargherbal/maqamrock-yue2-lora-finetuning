@@ -313,6 +313,70 @@ def test_songs_json_mutually_exclusive_with_songs_file(ws):
     assert "only one of" in r.stderr
 
 
+def run_cfg(ws: SimpleNamespace, cfg: Path, *args: str) -> subprocess.CompletedProcess:
+    """Like run() but with no --dir flags: the config file must supply them."""
+    env = dict(os.environ)
+    env.update({"BIN": str(ws.bin), "MODEL": str(ws.root / "model"), "THREADS": "1",
+                "QF_AR": str(ws.root / "ar"), "QF_NAR": str(ws.root / "nar")})
+    cmd = ["bash", str(DRIVER), "--skip-preflight", "--songs-json", str(cfg), *args]
+    return subprocess.run(cmd, capture_output=True, text=True, env=env)
+
+
+def _cfg(ws, **over) -> Path:
+    doc = {"pass1_dir": str(ws.pass1), "abc_dir": str(ws.abc), "out_dir": str(ws.out)}
+    doc.update(over)
+    p = ws.root / "cfg.json"
+    p.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
+    return p
+
+
+def test_songs_json_supplies_run_dirs(ws):
+    r = run_cfg(ws, _cfg(ws, songs=[STEMS_A[1]]), "--plan")
+    assert r.returncode == 0, r.stderr
+    assert _index(ws)["n"] == 1
+
+
+def test_songs_json_cli_dir_overrides(ws):
+    other = ws.root / "cli-out"
+    r = run_cfg(ws, _cfg(ws, songs=[STEMS_A[1]]), "--out-dir", str(other), "--plan")
+    assert r.returncode == 0, r.stderr
+    assert (other / "_rescue_index.json").is_file()
+    assert not (ws.out / "_rescue_index.json").exists()
+
+
+def test_songs_json_config_only_no_songs_rescues_all(ws):
+    r = run_cfg(ws, _cfg(ws), "--plan")
+    assert r.returncode == 0, r.stderr
+    assert _index(ws)["n"] == 3
+
+
+def test_songs_json_cot_and_adapter_override(ws):
+    r = run_cfg(ws, _cfg(ws, cot="full", adapter="custom_adapter", songs=[STEM_B]))
+    assert r.returncode == 0, r.stderr
+    side = json.loads((ws.out / f"{STEM_B}_rescue.json").read_text(encoding="utf-8"))
+    assert side["cot"] == "full" and side["adapter"] == "custom_adapter"
+
+
+def test_songs_json_missing_dirs_usage_error(ws):
+    cfg = ws.root / "cfg.json"
+    cfg.write_text(json.dumps({"songs": [STEMS_A[0]]}), encoding="utf-8")
+    r = run_cfg(ws, cfg, "--plan")
+    assert r.returncode == 2
+    assert "missing --pass1-dir" in r.stderr
+
+
+def test_songs_json_unknown_key_warns(ws):
+    r = run_cfg(ws, _cfg(ws, bogus=1, songs=[STEMS_A[0]]), "--plan")
+    assert r.returncode == 0, r.stderr
+    assert "unknown --songs-json key: bogus" in r.stderr
+
+
+def test_songs_json_bad_threads_type_errors(ws):
+    r = run_cfg(ws, _cfg(ws, threads="eight", songs=[STEMS_A[0]]), "--plan")
+    assert r.returncode == 2
+    assert "'threads' must be a non-negative integer" in r.stderr
+
+
 def test_render_failure_exits_nonzero(ws):
     r = run(ws, fail=STEM_B)
     assert r.returncode == 1

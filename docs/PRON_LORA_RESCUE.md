@@ -103,14 +103,20 @@ song `name` rescues every take of that song (see Phase 4).
 
 Selectors accept a song **name or a full stem** (`<name>_<seed>`): a name rescues every take of
 that song, a stem exactly one. Give them as `--songs` (inline), `--songs-file` (one per line), or
-`--songs-json` (a JSON selection file — easiest to edit; example
-`INFERENCE/rescue_selection.example.json`: `{"songs": [<name-or-stem> | {"stem"|"name", "note"}]}`).
+`--songs-json` — a **self-contained run config**: the `songs` list *plus* optional run-level keys
+(`pass1_dir`, `abc_dir`, `out_dir`, `qf_ar`, `qf_nar`, `cot`, `adapter`, `threads`, `limit`), so one
+file can drive a whole rescue and a CLI flag / env var overrides just one value. Edit a copy of
+`INFERENCE/rescue_selection.example.json`; an entry is a bare `<name-or-stem>` or an object
+`{"stem"|"name", "note"}` (extra keys ignored). Omit `songs` to rescue every track.
 Other flags: `--limit N` (cap the run), `--threads N`,
 `--skip-preflight` (test / off-box use). Env overrides: `ROOT`, `BIN`, `MODEL`, `THREADS`,
 `QF_AR`/`QF_NAR` (default qfinal_a0.3), `RESCUE_COT` (default `melody`), `RESCUE_ADAPTER`.
 
-1. **Build + check the index (no GPU):**
+1. **Build + check the index (no GPU):** the three dirs may be given on the CLI or in the JSON.
    ```bash
+   # config-file form: one file carries dirs + selection
+   bash INFERENCE/rescue_abc_batch.sh --songs-json /content/m_selection.json --plan
+   # or CLI form:
    bash INFERENCE/rescue_abc_batch.sh \
      --pass1-dir /content/audiocpp_inference/out/batch_12_rock_v2 \
      --abc-dir   /content/audiocpp_inference/out/abc_v2_batch12 \
@@ -130,14 +136,12 @@ Other flags: `--limit N` (cap the run), `--threads N`,
    `INFERENCE/rescue_selection.example.json`; list names and/or stems), or as `--songs-file`
    (one selector per line):
    ```bash
-   bash INFERENCE/rescue_abc_batch.sh --pass1-dir ... --abc-dir ... --out-dir ... \
-     --songs-json /content/m_selection.json
+   bash INFERENCE/rescue_abc_batch.sh --songs-json /content/m_selection.json
    ```
 
    `--songs`/`--songs-file`/`--songs-json` take song **names and/or stems** — a name rescues every
    take of that song, a stem (`<name>_<seed>`) rescues exactly one. Blank lines and `#` comments in
-   a `--songs-file` are ignored; a `--songs-json` entry may be a bare string or an object with
-   `stem`/`name` plus any extra keys (e.g. `note`, ignored by the driver).
+   a `--songs-file` are ignored.
 
    The driver calls the binary **directly** with `cot=melody abc_file=<abc>` (it does **not** use
 `run_one.sh`, whose hardcoded `cot=off` + later override is unverified) and writes, per track,
