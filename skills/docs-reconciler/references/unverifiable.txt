@@ -181,3 +181,29 @@ docs/COMMAND_HANDOVER_GOTCHAS.md :: _failed_runs.log
 # under workspace/out/abc_v2/<track>/, not a repo file. (The prior `KEY.json` entry was
 # dropped 2026-09-29 when the doc was condensed and stopped citing that deleted decoder.)
 docs/music-cover-feasibility.md :: tokens.json
+
+# 2026-09-30 — docs/E2E_TESTING_PLAN.md is a PROPOSAL (its banner says "proposed,
+# not yet implemented"). Every path below is a file the plan will create, or a
+# runtime out-dir name it cites; none exists by design, so their absence is not
+# drift. Doc-scoped, so the suppression cannot hide drift elsewhere — same class
+# as the `docs/GCP_ORGANIZATION_PLAN.md` "plan PROPOSES … not written yet" entry.
+docs/E2E_TESTING_PLAN.md :: tests/e2e
+docs/E2E_TESTING_PLAN.md :: tests/e2e/*
+docs/E2E_TESTING_PLAN.md :: tests/fixtures
+docs/E2E_TESTING_PLAN.md :: tests/fixtures/*
+docs/E2E_TESTING_PLAN.md :: tests/test_*
+docs/E2E_TESTING_PLAN.md :: replay.py
+docs/E2E_TESTING_PLAN.md :: fake_run.py
+docs/E2E_TESTING_PLAN.md :: *_e2e.py
+docs/E2E_TESTING_PLAN.md :: recorded_batch.json
+docs/E2E_TESTING_PLAN.md :: loss_log.spec.json
+docs/E2E_TESTING_PLAN.md :: manifest.json
+docs/E2E_TESTING_PLAN.md :: fetch.sh
+docs/E2E_TESTING_PLAN.md :: _driver.log
+docs/E2E_TESTING_PLAN.md :: _failed_runs.log
+
+# 2026-09-30 — the investigation record's glob `manifests/evaluation_*/MY_EVALUATION.txt`
+# was tokenised to the bare prefix `manifests/evaluation_`. The directory family it
+# stands for (evaluation_style_ablation_ajam, evaluation_v2_abc_to_qfinal,
+# evaluation_verbatim_hijaz) does exist, so this is a false positive, not drift.
+docs/music-cover-feasibility.md :: manifests/evaluation_*

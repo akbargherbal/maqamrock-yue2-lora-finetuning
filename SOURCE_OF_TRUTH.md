@@ -16,6 +16,7 @@ History files are authoritative for what happened, never for what is true now.
 | Long-aya run configs | `config/quran_long_aya_r8_s10.yml` (active) · `config/quran_long_aya_r8.yml` (full set, reserved) | never edit; dataset `_s10` = 8,100 pairs |
 | Long-aya dataset + banked artifacts | GCS `<base>/quran_long_aya_dataset_s10.tar`, `<base>/…_s10/_latent_cache.tar`, `<base>/quran_long_aya_r8_s10/output/` | dataset tar · banked cache · checkpoints+optimizer |
 | Pron LoRA source verification / offline eval | `docs/PRON_LORA_VERIFICATION.md` | A0–A7 + smoke + A100 run + AR-loss replay |
+| End-to-end test plan / tiers | `docs/E2E_TESTING_PLAN.md` | proposed, not yet implemented; GPU only for the budgeted smoke gate |
 | v2 + pron merge (scaling, ranks) | `docs/PRON_LORA_MERGE.md` + `merge_pron_lora.py --help` | alpha convention is source-verified there |
 | LoRA library (what exists, how many, where) | `docs/LORA_INVENTORY.md` | canonical: `<base>/loras/` (current: style + qfinal; superseded pron_lora_ar_only_r8 under `<base>/archive/pron_lora_ar_only_legacy/`) |
 | Alpha sweep / listening review | `docs/PRON_LORA_SWEEP.md` | procedure + Rounds 1–5; numbers in `results/{pron_sweep,pron_fine_sweep,pron_ckpt_sweep,maqam_lyric_swap,pron_knob_probe}/` |

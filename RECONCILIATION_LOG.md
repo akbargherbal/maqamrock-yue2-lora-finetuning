@@ -506,3 +506,23 @@ covers both._
   `tokens.json` are all retained by the rewrite.
 - Authority: the doc's own measured facts + round scores, unchanged; narrative-only
   restructure — no config, hyperparameter, or script behaviour touched.
+
+## 2026-09-30 — new `docs/E2E_TESTING_PLAN.md` (proposal) reconciled
+
+- New live doc `docs/E2E_TESTING_PLAN.md` (end-to-end testing plan, Colab/GPU-light)
+  added; indexed in `docs/README.md` and `SOURCE_OF_TRUTH.md`.
+- Mechanical pass: 2115 claims / 48 files, 1320 checkable, **31 flagged (2.3 %)** —
+  all `missing_path`, no structural warning.
+- **30 of 31 are the new plan's forward references** (files it will create:
+  `tests/e2e/*`, `tests/fixtures/*`, `fake_run.py`, `recorded_batch.json`, …). The doc
+  is a proposal (`proposed, not yet implemented`), so their absence is by design, not
+  drift. Suppressed with 14 doc-scoped entries in
+  `skills/docs-reconciler/references/unverifiable.txt`, mirroring the
+  `docs/GCP_ORGANIZATION_PLAN.md :: INFERENCE/gcs_layout.py` precedent.
+- **1/31 is a tokenisation false positive**: `docs/music-cover-feasibility.md:10`'s glob
+  `manifests/evaluation_*/MY_EVALUATION.txt` extracted as `manifests/evaluation_`; the
+  directory family exists. One doc-scoped suppression.
+- Re-verify: **31 → 0 flagged (0.0 %)**. No runbook, config, or script content changed;
+  `SOURCE_OF_TRUTH.md` gained a row for the new plan topic.
+- Authority: the new plan's own banner ("proposed, not yet implemented") + the
+  on-disk file tree; no config or hyperparameter touched; no frozen doc rewritten.
