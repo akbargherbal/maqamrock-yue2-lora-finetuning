@@ -2,13 +2,9 @@
 
 _Copy surface, not authority. 2026-09-30 · Colab **T4**, branch `music-cover`._
 
-## GIT — 1 commit unpushed (local only)
-`music-cover` is **ahead of `origin` by 1** (`2a13de1`) + this file. Unpushed commits are **not**
-in the GCS backup (only `agent_notes/` is mirrored), so a VM reset loses them. Push — auth is yours:
-```bash
-bash bootstrap/github_auth.sh      # foreground; hidden PAT prompt (needs `repo` scope / Contents: RW)
-git push origin music-cover
-```
+## GIT — pushed ✓
+`music-cover` is up to date with `origin` (tip `017a1d4`). Push flow if needed again: auth via
+`bash bootstrap/github_auth.sh` (or an existing `gh` login), then `git push origin music-cover`.
 
 ## RUNNING — pass-1 v2 (`batch_12_rock_v2`)
 Launched 10:13:12Z · track 1 **done** (`exit=0`, 48 kHz stereo, 242.0 s) · track 2 in progress.
