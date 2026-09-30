@@ -9,8 +9,10 @@ real `main` so preflight, fingerprint, materialize, run_batch, summary and
 from __future__ import annotations
 
 import importlib.util
+import shutil
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -18,26 +20,39 @@ import staging
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = REPO_ROOT / "tests" / "fixtures"
+HERE = Path(__file__).resolve().parent
 
 _FAKE_GPU = {"name": "Tesla T4", "memory_used": "100",
              "memory_total": "15360", "compute_cap": "7.5"}
 
 
-def _load_replay():
-    name = "e2e_replay"
+def _load_by_path(name: str, path: Path):
     if name in sys.modules:
         return sys.modules[name]
-    spec = importlib.util.spec_from_file_location(
-        name, Path(__file__).resolve().parent / "replay.py")
+    spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
 
 
+def _load_replay():
+    return _load_by_path("e2e_replay", HERE / "replay.py")
+
+
 @pytest.fixture(scope="session")
 def replay_mod():
     return _load_replay()
+
+
+@pytest.fixture(scope="session")
+def lossdb():
+    return _load_by_path("e2e_lossdb", HERE / "lossdb.py")
+
+
+@pytest.fixture(scope="session")
+def status_mod():
+    return _load_by_path("e2e_status", REPO_ROOT / "status.py")
 
 
 @pytest.fixture(scope="session")
@@ -100,3 +115,38 @@ def run_generate(gen, fake_gpu, monkeypatch):
         return gen.main(argv)
 
     return invoke
+
+
+# --- T3 (lifecycle / monitor / backup) fixtures -----------------------------
+
+@pytest.fixture(scope="session")
+def loss_log_spec(lossdb) -> dict:
+    return lossdb.load_spec(FIXTURES / "loss_log.spec.json")
+
+
+@pytest.fixture
+def build_loss_db(lossdb):
+    return lossdb.build_loss_db
+
+
+@pytest.fixture
+def fake_gsutil(tmp_path) -> SimpleNamespace:
+    """A real `fake_gsutil` executable staged on a private bin dir (J12)."""
+    bin_dir = tmp_path / "fakebin"
+    bin_dir.mkdir()
+    exe = bin_dir / "gsutil"
+    shutil.copy2(HERE / "fake_gsutil.py", exe)
+    exe.chmod(0o755)
+    return SimpleNamespace(bin_dir=bin_dir, exe=exe, root=tmp_path / "gcs")
+
+
+@pytest.fixture
+def fake_training_env(tmp_path) -> SimpleNamespace:
+    """An ai-toolkit checkout whose `run.py` is the real `fake_run.py` (J10)."""
+    ai = tmp_path / "ai-toolkit"
+    ai.mkdir()
+    shutil.copy2(HERE / "fake_run.py", ai / "run.py")
+    cfg = tmp_path / "fake_cfg.yml"
+    cfg.write_text("name: demo\n", encoding="utf-8")
+    logs = tmp_path / "logs"
+    return SimpleNamespace(ai=ai, cfg=cfg, logs=logs, run_name="demo")

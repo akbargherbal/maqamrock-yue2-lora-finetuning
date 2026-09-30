@@ -32,6 +32,14 @@ must not touch it.
 Audio bytes are never asserted (not stable across GPU/arch/driver — plan §4.2).
 Recorded `wav_sha256` is provenance metadata only.
 
+## `loss_log.spec.json`
+
+A tiny spec from which `tests/e2e/lossdb.py::build_loss_db` writes a real
+`loss_log.db` in the ai-toolkit `UILogger` schema (the one `monitor_loss.py`
+reads). J11 (`test_monitor_status_e2e.py`) builds the db from it and asserts an
+exact step/rate/ETA; no binary db is committed. `step_seconds` fixes the rate
+(`1 / step_seconds`).
+
 ## Provenance guard
 
 `manifest.json` records the `audio_cpp_commit` and `checkpoint_step` of the run

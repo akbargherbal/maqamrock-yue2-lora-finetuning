@@ -308,9 +308,11 @@ def test_provenance_guard(gen, fixtures_dir):
     tree is an arbitrary current clone, so that half is skipped until Tier B lands.
     """
     manifest = json.loads((fixtures_dir / "manifest.json").read_text(encoding="utf-8"))
+    for name, meta in manifest["tier_a"].items():
+        path = fixtures_dir / name
+        assert path.is_file(), f"tier_a fixture missing: {name}"
+        assert meta["sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
     recorded_path = fixtures_dir / "recorded_batch.json"
-    assert manifest["tier_a"]["recorded_batch.json"]["sha256"] == \
-        hashlib.sha256(recorded_path.read_bytes()).hexdigest()
     spec = json.loads(recorded_path.read_text(encoding="utf-8"))
 
     prov = manifest["provenance"]

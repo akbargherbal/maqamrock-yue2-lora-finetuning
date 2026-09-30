@@ -15,6 +15,11 @@
       "sha256": "d6b0ab0c99f1870cec44ffe80078be8e993bbc4ea62e5ac670ebe637358e0f13",
       "kind": "recorded_batch",
       "source": "hand-authored from results/maqam_lyric_swap/sidecars/*.json; one synthetic failure track"
+    },
+    "loss_log.spec.json": {
+      "sha256": "ca40e445eb6bc533407c0c0dada83545ae644a7e21432fbdf21ed23a036814ae",
+      "kind": "loss_log_spec",
+      "source": "hand-authored to the ai-toolkit UILogger schema (monitor_loss.py docstring); J11 builds loss_log.db from it"
     }
   },
   "tier_b": {}

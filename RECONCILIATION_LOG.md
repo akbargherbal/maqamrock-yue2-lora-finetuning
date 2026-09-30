@@ -580,3 +580,36 @@ covers both._
   torch skip + the provenance-guard Tier B skip).
 - Authority: plan §4.4/§5/§9 + the on-disk test tree; no config, hyperparameter,
   or frozen doc changed.
+
+## 2026-09-30 — E2E plan Session 3 landed (T3 J10–J12) + a train_ctl.py stop-race fix
+
+- Implemented `docs/E2E_TESTING_PLAN.md` §9 Session 3 on the Colab CPU runtime:
+  - `tests/e2e/fake_run.py` — a real process standing in for ai-toolkit `run.py`:
+    writes a real `loss_log.db`, appends step lines, answers SIGINT with
+    `Job stopped`.
+  - `tests/e2e/test_train_lifecycle_e2e.py` (J10): `train_ctl.py` start (own
+    session) -> status -> SIGINT stop, against the real detached process; the db
+    it wrote is then read by the real `monitor_loss.py`.
+  - `tests/e2e/lossdb.py` + `tests/fixtures/loss_log.spec.json`, and
+    `tests/e2e/test_monitor_status_e2e.py` (J11): `monitor_loss.py` on a
+    spec-built db (exact `~2.000 steps/sec` + ETA), plus `status.py`'s training
+    section on that db and its inference section on a real `generate.main` run.
+  - `tests/e2e/fake_gsutil.py` (local `gs://` mapper) and
+    `tests/e2e/test_backup_restore_e2e.py` (J12): real `backup_to_gcp.py` mirror
+    + `run_manifest.json` + a reverse-rsync restore that is byte-identical.
+- **Production change (behavior bug, not a contract/hyperparameter):**
+  `train_ctl.py::cmd_stop` broke its wait loop the moment it saw `Job stopped`
+  in the log and then immediately failed if the child had not yet reached
+  `sys.exit()` -- a real race (the log write and process exit can be descheduled
+  apart under load). It now gives the process a short 5 s grace to leave `/proc`
+  before reporting, and prints the actual elapsed instead of the timeout value.
+  The pre-existing `tests/test_train_ctl.py::test_start_detaches_then_stop_is_clean`
+  reproduced the flake only under CPU load; 15/15 passes under the same load
+  after the fix (was ~2/10). `docs/PAUSE_RESUME.md` still holds ("waits for
+  'Job stopped'").
+- `tests/fixtures/manifest.json` gained the `loss_log.spec.json` Tier A entry;
+  the provenance guard now checks every Tier A entry, not just `recorded_batch`.
+  `tests/fixtures/README.md` documents the spec.
+- Mechanical pass: 2150 claims / 49 files, 1312 checkable, **0 flagged (0.0 %)**.
+- Verified: `python -m pytest` -> **190 passed, 2 skipped** (stable across 4
+  consecutive full runs and 15 load runs of the fixed lifecycle test).

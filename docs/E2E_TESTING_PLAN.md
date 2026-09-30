@@ -1,8 +1,8 @@
 # End-to-end testing plan — Colab, GPU-light
 
-_Status: **in progress.** Sessions 1–2 landed 2026-09-30 (T2 scaffold + J1, then
-J2–J4/J6 + the provenance guard); decisions in §12 resolved. Remaining tiers per
-§9. Last revised 2026-09-30._
+_Status: **in progress.** Sessions 1–3 landed 2026-09-30 (T2 scaffold + J1; then
+J2–J4/J6 + the provenance guard; then T3 J10–J12). Only the budgeted T5 GPU gate
+remains; decisions in §12 resolved. Last revised 2026-09-30._
 
 Goal: exercise the real user journeys end to end — as faithfully as possible —
 **without renting a GPU** for the bulk of it. A GPU is allowed exactly once or
@@ -56,7 +56,7 @@ and `duration_cap.py` are pure CPU; hashing and cap math are exercised for free.
 | **T0** unit/logic | no | parsing, planning, validation, cap parity | localhost + Colab CPU | **done** — `tests/test_*.py` |
 | **T1** contract/fake | no | orchestration ↔ subprocess wiring | localhost + Colab CPU | **done** — `runner=`, monkeypatched probes |
 | **T2** record→replay e2e | no | the *whole pipeline* on real recorded artifacts | Colab CPU | **done** — J1–J4, J6 (Sessions 1–2) |
-| **T3** process/lifecycle e2e | no | real detach, PID, SIGINT stop, backup mirror | Colab CPU | **partial** |
+| **T3** process/lifecycle e2e | no | real detach, PID, SIGINT stop, backup mirror | Colab CPU | **done** — J10–J12 (Session 3) |
 | **T4** hosted-env e2e | no | the real Colab paths/env, minus the device | Colab CPU | **to run** |
 | **T5** kernel smoke | **yes** | the binary/kernels actually run | Colab GPU *or* Kaggle T4 | **budgeted** |
 
@@ -228,16 +228,20 @@ pytest.ini   markers = gpu: needs a real CUDA device
                       live: touches network/GCS (never in the default run)
              addopts = -q -m "not gpu and not fixtures_heavy and not live"
 
+tests/staging.py         # stage_inference_tree — shared by unit + e2e tests
 tests/e2e/
-  conftest.py            # replay_runner, fake_gpu, staged assets, fake gsutil on PATH
-  replay.py              # make_replay_runner, _synth_wav
+  conftest.py            # replay_runner, fake_gpu, staged assets, fake gsutil, lossdb
+  replay.py              # write_track_outputs, make_replay_runner, passthrough runner
+  lossdb.py              # build a real loss_log.db from a spec
   fake_run.py            # a run.py that writes a loss_log.db and answers SIGINT
-  test_inference_e2e.py  # J1–J4, J6
+  fake_gsutil.py         # local gs:// mapper placed on PATH for J12
+  test_inference_e2e.py  # J1–J4, J6 + the provenance guard
   test_train_lifecycle_e2e.py   # J10
   test_monitor_status_e2e.py    # J11
   test_backup_restore_e2e.py    # J12
 tests/fixtures/
-  README.md  manifest.json  fetch.sh  recorded_batch.json  inference/  training/  gpu/
+  README.md  manifest.json  fetch.sh  recorded_batch.json  loss_log.spec.json
+  inference/  training/  gpu/   (Tier B, GCS-backed)
 ```
 
 The default `pytest` must stay green and GPU-free on the CPU runtime; `pytest -m
@@ -250,7 +254,7 @@ run automatically.
 |---|---|---|
 | **1** | `tests/e2e/` scaffold, `replay.py`, `recorded_batch.json` schema, markers, `fake_gpu`. Fixtures harvested from **existing** GCS artifacts first (sidecars/`results/` already exist) — no GPU yet. | J1 passes on Colab CPU with a hand-authored fixture — **done 2026-09-30** (181 passed, 1 skipped) |
 | **2** | T2 inference journeys J1–J4, J6; provenance guard test; `test_generate.py`'s `_stub_assets` reused. | `pytest -m "not gpu"` green; J3 failure/retry covered — **done 2026-09-30** (185 passed, 2 skipped; scaffolding shared via `tests/staging.py`) |
-| **3** | T3 lifecycle/monitor/backup J10–J12 with `fake_run.py` and a fake `gsutil`; J11 from a spec-built db. | start→stop SIGINT proven with a real process; restore diff clean |
+| **3** | T3 lifecycle/monitor/backup J10–J12 with `fake_run.py` and a fake `gsutil`; J11 from a spec-built db. | start→stop SIGINT proven with a real process; restore diff clean — **done 2026-09-30** (190 passed, 2 skipped; surfaced + fixed a `train_ctl.py stop` log/exit race) |
 | **4** | T5 gate: one budgeted GPU session (S1–S3) → record fixtures → fold them into Tier A/B. | S1–S3 evidence (exit 0, WAV duration, finite loss); fixtures committed with provenance |
 
 ## 10. What this does *not* prove (be explicit)
