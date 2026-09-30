@@ -699,3 +699,22 @@ covers both._
   branch `pron-lora-ar-only`" line to `9bc008f` / `music-cover`.
 - Authority: user decision (multi-VM workflow; graphify is agent-facing); no run
   config or hyperparameter changed.
+
+## 2026-09-30 — SheetSage2 audio→ABC CPU feasibility recorded
+
+- New **§2.1** in `docs/music-cover-feasibility.md` records the measured CPU feasibility of
+  the B2 transcription step (SheetSage2 `melody_only` audio→ABC): Colab High-RAM **CPU**
+  runtime (8 cores / 50 GiB, no GPU). `RESULT song60`: 93.3 s / 3.74 GB; `RESULT
+  sample_song` (316.6 s): 235.5 s / 4.31 GB; plus thread scaling (8/4/2/1) and the 2-thread
+  full file (347.6 s / 4.30 GB). Verdict: viable for one ≤10-min track even on the free
+  2-vCPU / 12 GB tier. The §2 "chosen transcription route" bullet now points to §2.1 instead
+  of leaving CPU feasibility unmeasured; header revision bumped to 2026-09-30.
+- New record dir `results/ss2_cpu_probe/` (README + the three raw probe logs), mirroring the
+  `results/pron_*` layout; added a **results index** to `results/README.md` (it previously
+  had none) listing the record dirs.
+- `agent_notes/current.md` reduced to a pointer to §2.1 + the results dir, no numbers.
+- `SOURCE_OF_TRUTH.md`: new row for the SheetSage2 CPU-feasibility topic; `docs/README.md`
+  blurb now names §2.1.
+- Reconciler: 2193 claims / 50 files, 1334 checkable, **0 flagged (0.0%)**.
+- Authority: the probe logs (`results/ss2_cpu_probe/*.log`); no run config, hyperparameter,
+  or script behaviour changed; no frozen doc rewritten.

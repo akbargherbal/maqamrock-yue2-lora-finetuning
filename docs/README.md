@@ -40,8 +40,9 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 for the superseded `pron_lora_ar_only_r8` run.
 `investigation.md` and `yue2-gguf-lora-findings.md` are **superseded/retracted**
 (see the banners at their tops); do not follow them. [music-cover-feasibility.md](music-cover-feasibility.md)
-is an investigation record: covers/ABC conditioning, the α tradeoff (§3), the style/ABC
-levers (§4), the measured v2 training-set facts (§5), and two scored blind rounds —
+is an investigation record: covers/ABC conditioning, the measured SheetSage2 audio→ABC
+CPU feasibility (§2.1), the α tradeoff (§3), the style/ABC levers (§4), the measured v2
+training-set facts (§5), and two scored blind rounds —
 verbatim/lyric-adherence (§6) and guide-conditioned (§7, where v2's `score.abc` steers
 `qfinal_a0.3` into v2's arrangement without losing its pronunciation), plus open questions
 (§8). The §7 result is one blind n=1 listen; procedures stay with the runbooks above.

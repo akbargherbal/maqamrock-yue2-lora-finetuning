@@ -7,7 +7,8 @@ listening round (§7). The guide is the fix; replication pending (§8)._
 _Investigation record, **not a runbook**. Procedures stay with `docs/INFERENCE.md`,
 `docs/PRON_LORA_MERGE.md`, `docs/LORA_INVENTORY.md`, and
 `config/akbar_arabic_rock_lora.yml`. Round scores live in
-`manifests/evaluation_*/MY_EVALUATION.txt`. Last updated 2026-09-29._
+`manifests/evaluation_*/MY_EVALUATION.txt`. Last updated 2026-09-30 (SheetSage2 CPU
+feasibility, §2.1)._
 
 ## 1. Question
 
@@ -41,9 +42,41 @@ identity: SHS100K zero-shot cover **CLEWS Hit@1 71.3% / mAP 0.647** with score v
 - **Chosen transcription route = the official Python `m-a-p/SheetSage2`**
   (`melody_only=True`; driver `INFERENCE/sheetsage2_transcribe.py`; own env — torch 2.8
   cu126 + MERT-v2-FullSong backbone). Its ABC drops straight into `abc_file=`.
-  `INFERENCE/abc_transcribe.py` (audio.cpp path) is superseded.
+  `INFERENCE/abc_transcribe.py` (audio.cpp path) is superseded. **CPU feasibility is now
+  measured (§2.1): the step runs CPU-only at ~4.3 GB peak RAM.**
 - **The adapters trained `cot=off`** (`config/akbar_arabic_rock_lora.yml:106`), so ABC
   conditioning is **off-distribution** — hence a 1-track smoke before any batch.
+
+### 2.1 SheetSage2 audio→ABC on CPU — measured (2026-09-30)
+
+The transcription route above was measured **CPU-only** (no GPU present).
+
+**Box:** Colab High-RAM **CPU** runtime, `accelerator=None` (`nvidia-smi` absent),
+x86_64, **8 cores**, **50 GiB** RAM. Env: Python 3.11, `torch 2.8.0+cpu`,
+`transformers 4.45.2`, `m-a-p/SheetSage2` loaded by repo id, F32, `melody_only=True`.
+Model load: 10.3 s. Driver `INFERENCE/ss2_probe.sh` / `ss2_probe.py`; raw records in
+[`results/ss2_cpu_probe/`](../results/ss2_cpu_probe/).
+
+| audio | length | transcribe_s | abc_bytes | peak_ram_GB |
+|---|---|--:|--:|--:|
+| `song60.wav` (60 s clip) | 60.0 s | **93.3** | 589 | **3.74** |
+| `sample_song.mp3` (full) | 316.6 s (5:17) | **235.5** | 2937 | **4.31** |
+
+```
+RESULT song60: transcribe_s=93.3  abc_bytes=589  peak_ram_GB=3.74
+RESULT sample_song: transcribe_s=235.5  abc_bytes=2937  peak_ram_GB=4.31
+```
+
+**Verdict: CPU is viable for one ≤10-min track** — ~4.3 GB peak RAM and the measured
+5:17 file transcribed in 0.74× realtime; a free 2-vCPU / 12 GB runtime suffices and the
+50 GiB High-RAM tier is unnecessary.
+
+Core scaling (same 60 s clip, warm process, `torch.set_num_threads`): 8 threads 96.1 s,
+4 threads 101.3 s, 2 threads 139.6 s, 1 thread 261.5 s (torch's default was 4). The full
+5:17 file at **2 threads**: `RESULT sample_song_t2: transcribe_s=347.6  peak_ram_GB=4.30`.
+8 cores buy almost nothing past ~4; 2 vCPU ≈ 1.5× slower than 4 and still enough for one
+track. This measures the **B2 transcription step only** — the B2 guide round itself is
+still unrun (§4.2, §8).
 
 ## 3. The α tradeoff (why a guide is needed)
 

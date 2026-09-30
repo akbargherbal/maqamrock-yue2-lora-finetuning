@@ -1,0 +1,39 @@
+HF_TOKEN: present
+torch index: https://download.pytorch.org/whl/cpu
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- configuration_mert2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- chord_spelling_sheetsage2.py
+- labels_sheetsage2.py
+- durations_sheetsage2.py
+- schema_sheetsage2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- tokenization_sheetsage2.py
+- io_sheetsage2.py
+- notation_sheetsage2.py
+- processing_sheetsage2.py
+- midi_sheetsage2.py
+- rendering_sheetsage2.py
+- modeling_mert2.py
+- generation_sheetsage2.py
+- exports_sheetsage2.py
+- tensors_sheetsage2.py
+- audio_sheetsage2.py
+- pipeline_sheetsage2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+== env ==
+python 3.11.16 | cwd /content/maqamrock-yue2-lora-finetuning
+torch 2.8.0+cpu
+transformers 4.45.2
+huggingface_hub 0.36.0
+cuda False (cpu)
+hf user: akbargherbal
+cleared dynamic-module cache: /root/.cache/huggingface/modules/transformers_modules
+== loading m-a-p/SheetSage2 ==
+loaded in 10.3s  dtype=torch.float32  device=cpu
+== transcribe /content/song60.wav -> /content/out_ss2_probe/song60 ==
+RESULT song60: transcribe_s=93.3  abc_bytes=589  peak_ram_GB=3.74
+== transcribe /content/sample_song.mp3 -> /content/out_ss2_probe/sample_song ==
+RESULT sample_song: transcribe_s=235.5  abc_bytes=2937  peak_ram_GB=4.31
