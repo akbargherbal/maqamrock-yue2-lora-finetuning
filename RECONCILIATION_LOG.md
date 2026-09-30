@@ -613,3 +613,32 @@ covers both._
 - Mechanical pass: 2150 claims / 49 files, 1312 checkable, **0 flagged (0.0 %)**.
 - Verified: `python -m pytest` -> **190 passed, 2 skipped** (stable across 4
   consecutive full runs and 15 load runs of the fixed lifecycle test).
+
+## 2026-09-30 — E2E Session 4: T5 GPU gate (L4) + fixture fold + `setup.sh` pin
+
+- **Gate run** (Colab **L4**, sm_89, 2026-09-30): S1 `audiocpp_cli --version` exit 0
+  (`backends: cpu,cuda`); S2 real `run_one.sh Hijaz 1` exit 0 (277.16 s, 48 kHz
+  stereo, `semantic.truncated 0`); S3 `pron_lora_ar_only_smoke` 10/10 steps, finite
+  loss (final `loss/loss` 6.765791), checkpoint + optimizer written. Inference staged
+  with the **sm89-l4** binary (`sha256 97028a71…`, matches the fixture's recorded
+  `binary_sha256`); `pron_dataset/smoke` staged for S3.
+- **Fixture fold**: `tests/fixtures/manifest.json` -> `tier_b` populated
+  (`inference/Hijaz_1.wav`, `inference/audiocpp_cli` = sm89-l4, `training/loss_log.db`);
+  Tier A gained the real `inference/{Hijaz_1.log,Hijaz_1_time.txt,Hijaz_1_gpu.csv,
+  _runs_status.log}` and `training/train_smoke.log`. `recorded_batch.json` /
+  `manifest.json` provenance re-recorded to the gate: `audio_cpp_commit` `30ec4596`,
+  `checkpoint_step` 3000, L4 / 8.9, `recorded_at` 2026-09-30.
+- **Production change** (`bootstrap/setup.sh`): `job_audio_cpp` now pins
+  `/content/audio.cpp` to the commit recorded in `tests/fixtures/manifest.json`, so
+  `test_provenance_guard`'s `audio_cpp_commit` equality is deterministic on a fresh VM
+  instead of depending on upstream `main`. Falls back to HEAD if absent.
+- **Docs**: `docs/E2E_TESTING_PLAN.md` status `in progress` -> `complete`; gate host
+  corrected from the stale "Colab free T4" to **L4 (sm_89)** in §3/§6/§12; Session 4
+  row marked done; `tests/fixtures/README.md` Tier B sm75 -> sm89-l4 + tier_b-populated
+  note; `SOURCE_OF_TRUTH.md` row updated. Authority: the gate artifacts + `setup.sh` code.
+- Mechanical pass: 2160 claims / 49 files, 1318 checkable, **0 flagged (0.0 %)**.
+- Verified: `python -m pytest` -> **191 passed, 1 skipped** (the provenance guard now
+  runs instead of skipping); `bash -n bootstrap/setup.sh` ok.
+- Open item (not fixed): `AGENTS.md` §2 lists `docs/models/yue2.md` as the authority
+  for the "build the inference binary" row, but no such file exists in this repo (it
+  is upstream `audio.cpp`'s doc, per `setup.sh` / `INFERENCE.md`).

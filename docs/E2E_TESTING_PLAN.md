@@ -1,8 +1,9 @@
 # End-to-end testing plan — Colab, GPU-light
 
-_Status: **in progress.** Sessions 1–3 landed 2026-09-30 (T2 scaffold + J1; then
-J2–J4/J6 + the provenance guard; then T3 J10–J12). Only the budgeted T5 GPU gate
-remains; decisions in §12 resolved. Last revised 2026-09-30._
+_Status: **complete.** Sessions 1–3 landed 2026-09-30 (T2 scaffold + J1; then
+J2–J4/J6 + the provenance guard; then T3 J10–J12); Session 4 ran the budgeted T5
+GPU gate on a **Colab L4** (S1–S3, 2026-09-30) and folded the recording into
+Tier A/B. Decisions resolved in §12. Last revised 2026-09-30._
 
 Goal: exercise the real user journeys end to end — as faithfully as possible —
 **without renting a GPU** for the bulk of it. A GPU is allowed exactly once or
@@ -57,8 +58,8 @@ and `duration_cap.py` are pure CPU; hashing and cap math are exercised for free.
 | **T1** contract/fake | no | orchestration ↔ subprocess wiring | localhost + Colab CPU | **done** — `runner=`, monkeypatched probes |
 | **T2** record→replay e2e | no | the *whole pipeline* on real recorded artifacts | Colab CPU | **done** — J1–J4, J6 (Sessions 1–2) |
 | **T3** process/lifecycle e2e | no | real detach, PID, SIGINT stop, backup mirror | Colab CPU | **done** — J10–J12 (Session 3) |
-| **T4** hosted-env e2e | no | the real Colab paths/env, minus the device | Colab CPU | **to run** |
-| **T5** kernel smoke | **yes** | the binary/kernels actually run | Colab GPU *or* Kaggle T4 | **budgeted** |
+| **T4** hosted-env e2e | no | the real Colab paths/env, minus the device | Colab CPU | **done** — Sessions 1–3 ran on the Colab CPU runtime |
+| **T5** kernel smoke | **yes** | the binary/kernels actually run | Colab **L4** (sm_89) | **done** — S1–S3, 2026-09-30 |
 
 The whole plan is: grow T2/T3, make T4 a real step, shrink T5 to ~1 session.
 
@@ -89,7 +90,7 @@ is written by the code under test, so replay must **not** touch it.
   compact `recorded_batch.json` (per-track: name, seed, cap, `duration_s`,
   `exit`, `log_text`). Text only. This is what most tests read.
 - **Tier B — heavy, GCS-backed, gitignored.** Real `.wav`, `.safetensors`,
-  `loss_log.db`, the sm75 binary, full `out/` dirs. Fetched by hash via
+  `loss_log.db`, the sm89-l4 binary, full `out/` dirs. Fetched by hash via
   `tests/fixtures/fetch.sh`; tests needing them carry the `fixtures_heavy` mark
   and skip when absent. Keeps the repo small.
 - **Synthesized where cheap.** A valid WAV is built from the recorded
@@ -179,8 +180,8 @@ GPU-free, with a real subprocess contract.
 
 ## 6. The GPU smoke gate (T5) — allowed, budgeted
 
-One session, ~30–60 min on a T4. It records the fixtures **and** proves the
-kernels. Exact, minimal steps once a GPU runtime is attached:
+One session, ~30–60 min on an **L4** (sm_89). It records the fixtures **and**
+proves the kernels. Exact, minimal steps once a GPU runtime is attached:
 
 | Step | Command shape | Proves | Cost |
 |---|---|---|---|
@@ -192,10 +193,13 @@ After S1–S3: copy the smoke artifacts to `tests/fixtures/` Tier A/B, then swit
 back to the CPU runtime. Optionally record one failure path (S2b) by pointing at
 a missing LoRA to capture a real `exit=1` log.
 
-Gate host (decided 2026-09-30): **Colab free T4**. Alternatives considered:
-**Kaggle** (~30 GPU-h/week free T4×2; most repeatable), **GitHub Actions GPU**
-(paid per minute; gate on `workflow_dispatch`, never per-PR). All write to the
-same GCS bucket, so no state is trapped in the ephemeral VM.
+Gate host (**Colab L4 (sm_89)**, used 2026-09-30): L4 is deliberate and is the
+arch the fixtures and the `sm89-l4` binary target — the earlier "free T4" note
+was superseded (a T4 was not available/appropriate; a T4 smoke would also say
+nothing about L4, plan §10). Alternatives remain **Kaggle** (~30 GPU-h/week
+free) and **GitHub Actions GPU** (paid per minute; gate on `workflow_dispatch`,
+never per-PR). All write to the same GCS bucket, so no state is trapped in the
+ephemeral VM.
 
 ## 7. Running on the Colab CPU runtime (T4 tier)
 
@@ -255,7 +259,7 @@ run automatically.
 | **1** | `tests/e2e/` scaffold, `replay.py`, `recorded_batch.json` schema, markers, `fake_gpu`. Fixtures harvested from **existing** GCS artifacts first (sidecars/`results/` already exist) — no GPU yet. | J1 passes on Colab CPU with a hand-authored fixture — **done 2026-09-30** (181 passed, 1 skipped) |
 | **2** | T2 inference journeys J1–J4, J6; provenance guard test; `test_generate.py`'s `_stub_assets` reused. | `pytest -m "not gpu"` green; J3 failure/retry covered — **done 2026-09-30** (185 passed, 2 skipped; scaffolding shared via `tests/staging.py`) |
 | **3** | T3 lifecycle/monitor/backup J10–J12 with `fake_run.py` and a fake `gsutil`; J11 from a spec-built db. | start→stop SIGINT proven with a real process; restore diff clean — **done 2026-09-30** (190 passed, 2 skipped; surfaced + fixed a `train_ctl.py stop` log/exit race) |
-| **4** | T5 gate: one budgeted GPU session (S1–S3) → record fixtures → fold them into Tier A/B. | S1–S3 evidence (exit 0, WAV duration, finite loss); fixtures committed with provenance |
+| **4** | T5 gate: one budgeted GPU session (S1–S3) → record fixtures → fold them into Tier A/B. | S1–S3 evidence (exit 0, WAV duration, finite loss); fixtures committed with provenance — **done 2026-09-30** (L4/sm89; 191 passed, 1 skipped) |
 
 ## 10. What this does *not* prove (be explicit)
 
@@ -278,8 +282,9 @@ run automatically.
 
 ## 12. Decisions (resolved 2026-09-30)
 
-1. **Gate host**: **Colab free T4** (see §6). Kaggle and GH Actions GPU remain
-   alternatives if Colab's session/idle limits bite.
+1. **Gate host**: **Colab L4 (sm_89)** (see §6) — the target arch for the
+   recorded fixtures and binary; L4 is deliberate (a T4 was the original note
+   and was superseded). Kaggle and GH Actions GPU remain alternatives.
 2. **Fixture home**: **Tier A in git, Tier B in GCS** (as proposed in §4.2). Heavy
    fixtures fetched by `tests/fixtures/fetch.sh` and gitignored.
 3. **Scope of T3**: **fake `run.py` only** for the training-lifecycle e2e; the

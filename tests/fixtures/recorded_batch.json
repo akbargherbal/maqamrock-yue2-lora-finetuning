@@ -1,16 +1,25 @@
 {
   "schema": 1,
-  "note": "Tier A record->replay contract for the GPU-free e2e tiers (docs/E2E_TESTING_PLAN.md §4). Hand-authored from real recorded sidecars under results/maqam_lyric_swap/sidecars/ (NVIDIA L4 run, 2026-09-25); the WAV is resynthesized at the recorded duration_s and audio bytes are provenance, never asserted. The 'Saba' track is a synthetic exit=1, no-audio entry (duration_s null) that exercises J3's failure -> _failed_runs.log -> retry path.",
-  "recorded_at": "2026-09-30T00:00:00Z",
+  "note": "Tier A record->replay contract for the GPU-free e2e tiers (docs/E2E_TESTING_PLAN.md §4). Track list hand-authored from real recorded sidecars under results/maqam_lyric_swap/sidecars/ (NVIDIA L4, 2026-09-25); the WAV is resynthesized at the recorded duration_s and audio bytes are provenance, never asserted. The 'Saba' track is a synthetic exit=1, no-audio entry (duration_s null) that exercises J3. Provenance re-recorded at the T5 gate (Session 4, 2026-09-30, NVIDIA L4): the real smoke run + sm89-l4 binary are folded in as Tier B; see tests/fixtures/inference/.",
+  "recorded_at": "2026-09-30T04:15:00Z",
   "provenance": {
     "source": "results/maqam_lyric_swap/sidecars/HijazStyle_KurdLyrics__c3050_a0.5.json",
     "gpu": "NVIDIA L4",
     "compute_cap": "8.9",
-    "audio_cpp_commit": "ac16661d",
+    "audio_cpp_commit": "30ec4596",
     "checkpoint_step": 3000,
     "binary_sha256": "97028a71fd4d86378161162364dc6cdc85a569461d3afb6bf78f83ea572ad3d4",
     "model_gguf_sha256": "e37c461329f3db45552f6f6d7453f0b1944f3fd8344855a2e50083ea9db6ee98",
-    "vae_gguf_sha256": "d4f4a05d8f291ae820cd1e43609da3fa91b56465810091a2b08c3350b751719d"
+    "vae_gguf_sha256": "d4f4a05d8f291ae820cd1e43609da3fa91b56465810091a2b08c3350b751719d",
+    "recorded_at": "2026-09-30T04:15:00Z",
+    "smoke_run": {
+      "maqam": "Hijaz",
+      "seed": 1,
+      "cap": 7250,
+      "duration_s": 277.16,
+      "exit": 0,
+      "walls": "5:20.89"
+    }
   },
   "tracks": [
     {

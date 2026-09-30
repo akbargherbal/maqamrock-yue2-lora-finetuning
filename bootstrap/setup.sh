@@ -325,6 +325,28 @@ job_audio_cpp() {
   else
     rm -rf "$AUDIO_CPP" && git clone --quiet "$AUDIO_CPP_REPO" "$AUDIO_CPP"
   fi
+  # Pin to the commit the e2e fixtures were recorded against so the provenance
+  # guard test (tests/e2e/test_inference_e2e.py::test_provenance_guard) is
+  # deterministic on a fresh VM instead of depending on where upstream main
+  # happens to be that day. The value lives in tests/fixtures/manifest.json;
+  # absent a pin, HEAD is left as-is. `|| true` keeps `set -e` from aborting if
+  # the manifest is unreadable.
+  local pin
+  pin="$(python3 - "$REPO_ROOT/tests/fixtures/manifest.json" 2>/dev/null <<'PY'
+import json, sys
+try:
+    print(json.load(open(sys.argv[1], encoding="utf-8"))["provenance"]["audio_cpp_commit"])
+except Exception:
+    pass
+PY
+)" || true
+  if [ -n "$pin" ]; then
+    if git -C "$AUDIO_CPP" checkout --quiet "$pin" 2>/dev/null; then
+      echo "audio.cpp pinned to $pin (e2e fixture provenance)"
+    else
+      echo "[note] could not pin audio.cpp to $pin (commit not in clone); leaving HEAD"
+    fi
+  fi
   git -C "$AUDIO_CPP" rev-parse --short HEAD
 }
 

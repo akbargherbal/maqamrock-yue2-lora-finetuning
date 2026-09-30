@@ -5,9 +5,15 @@ Fixtures for the GPU-free e2e tiers in `docs/E2E_TESTING_PLAN.md` (§4). Two tie
 - **Tier A — tracked, small, verbatim.** `recorded_batch.json` plus text sidecars /
   `.log` / `_time.txt`. Cheap enough for git; most tests read only these.
 - **Tier B — heavy, GCS-backed, gitignored.** Real `.wav`, `.safetensors`,
-  `loss_log.db`, the sm75 binary, full `out/` dirs. Declared under `tier_b` in
+  `loss_log.db`, the sm89-l4 binary, full `out/` dirs. Declared under `tier_b` in
   `manifest.json` and fetched with `bash tests/fixtures/fetch.sh`. Tests that need
   them carry the `fixtures_heavy` marker and skip when absent.
+
+Tier B is **populated** (T5 gate, 2026-09-30, NVIDIA L4 / sm_89): the real
+`inference/Hijaz_1.wav`, the `sm89-l4` `audiocpp_cli`, and the training-smoke
+`loss_log.db`. Tier A likewise gained the gate's real text artifacts under
+`inference/` (`Hijaz_1.log`, `Hijaz_1_time.txt`, `Hijaz_1_gpu.csv`,
+`_runs_status.log`) and `training/train_smoke.log`.
 
 ## `recorded_batch.json` (schema 1)
 
@@ -48,6 +54,8 @@ longer match what the code computes today, so a stale fixture cannot silently ke
 testing an old contract. Regenerate via `fetch.sh`, or re-record at the T5 gate.
 
 `checkpoint_step` and the manifest/`recorded_batch.json` agreement are checked
-unconditionally. The `audio_cpp_commit` equality needs the Tier B binary (same
-checkout as the recording); until `tier_b` is non-empty that half skips, since a
-CPU-tier `/content/audio.cpp` is just a current clone and would fail spuriously.
+unconditionally. The `audio_cpp_commit` equality became live when `tier_b` landed
+at the T5 gate (2026-09-30): it asserts the recorded commit equals
+`git_commit(/content/audio.cpp)`. To keep that deterministic on a fresh VM,
+`bootstrap/setup.sh`'s `job_audio_cpp` now **pins** `/content/audio.cpp` to the
+commit recorded in `manifest.json` (`provenance.audio_cpp_commit`).
