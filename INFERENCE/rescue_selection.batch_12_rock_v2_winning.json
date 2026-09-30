@@ -1,0 +1,37 @@
+{
+  "_comment": [
+    "Rescue run config for INFERENCE/rescue_abc_batch.sh --songs-json.",
+    "Target: the pass-1 run batch_12_rock_v2_winning (24 realized takes, cot=off).",
+    "Full key reference: INFERENCE/rescue_selection.example.json.",
+    "",
+    "All inputs under /content on the Colab T4:",
+    "  pass1_dir  /content/audiocpp_inference/out/batch_12_rock_v2_winning    (24 WAVs + batch_manifest.json + prompts/)",
+    "  abc_dir    /content/audiocpp_inference/out/abc_v2_batch12_winning     (24x <stem>/score.abc, SheetSage2 - P2)",
+    "  out_dir    /content/audiocpp_inference/out/rescue_v2abc_batch12_winning  (MUST differ from pass1_dir; not under it)",
+    "  adapters   /content/converter/out/qfinal_a0.3/ and /qfinal_a0.5/ (setup.sh stages v2 only - pull these first)",
+    "",
+    "No 'songs' key on purpose -> rescue every take in pass1_dir/batch_manifest.json.",
+    "After listening (Phase 3), add the winners as names and/or full stems:",
+    "  a NAME  (e.g. \"06-ليلة-الرعب_rock\") selects EVERY take of that song;",
+    "  a STEM  (e.g. \"03-مشهد-الذئاب_rock_1777259711\") selects exactly that one take.",
+    "Example:  \"songs\": [\"06-ليلة-الرعب_rock\", \"03-مشهد-الذئاب_rock_1777259711\"]",
+    "",
+    "Drive it (T4, GPU):",
+    "  bash INFERENCE/rescue_abc_batch.sh --songs-json INFERENCE/rescue_selection.batch_12_rock_v2_winning.json --plan   # index, no GPU",
+    "  bash INFERENCE/rescue_abc_batch.sh --songs-json INFERENCE/rescue_selection.batch_12_rock_v2_winning.json --smoke  # 1 track: B2 quality gate, LISTEN",
+    "  bash INFERENCE/rescue_abc_batch.sh --songs-json INFERENCE/rescue_selection.batch_12_rock_v2_winning.json          # full batch"
+  ],
+  "pass1_dir": "/content/audiocpp_inference/out/batch_12_rock_v2_winning",
+  "abc_dir": "/content/audiocpp_inference/out/abc_v2_batch12_winning",
+  "out_dir": "/content/audiocpp_inference/out/rescue_v2abc_batch12_winning",
+  "loras": {
+    "qfinal_a0.3": { "dir": "/content/converter/out/qfinal_a0.3" },
+    "qfinal_a0.5": { "dir": "/content/converter/out/qfinal_a0.5" }
+  },
+  "defaults": {
+    "lora": "qfinal_a0.3",
+    "cot": "melody",
+    "threads": 8,
+    "limit": 0
+  }
+}
