@@ -40,6 +40,24 @@
   pipeline). So the LoRA distilled Suno's *rendering* of the maqam-rock spec, keyed
   to trigger `arabmaqamrock` — it learns from the audio, not the description.
 
+## Session 2 (cont. II) — 2026-10-01
+- **Q: how common is a missing encoder in open generative AI?** A: rare for the
+  **use-critical** encoder — normally you get the weights *and* the input encoder;
+  what's withheld is **data + the training recipe**. Tiers: open *weights* (run it)
+  < open *source* (retrain) < open *science* (reproduce). YuE2 was a rarer
+  "**generation-only**" release — the output knob shipped, the input knob didn't.
+- **Q: how hard was it to build what Mothersuperior built?** Diagnosis = easy;
+  *design* = hard (reverse-engineer a private code space: 32,768 codes @ 25 Hz,
+  read from MERT-v2-FullSong **layer 20**); *building* = research-hard, and
+  iterative (card shows v4 → v5 → … → v9).
+- **The key trick:** no labels exist without the encoder — because the labels *are*
+  the codes it would make. So: **run YuE2's own generation and keep the tokens it
+  emitted** (the minted corpus's `codec` field) → free (audio, codes) pairs.
+  Artifact appeared ~6 days after release, but the internals named in the card
+  (`vae2llm`/`llm2vae`) imply prior work — unlikely a cold-start agent reproduces
+  it in six days.
+- Saved a reusable line to `map.md` (label bootstrap + open-weights tiers).
+
 ---
 
 ## Parking lot (questions to come back to — not a commitment)

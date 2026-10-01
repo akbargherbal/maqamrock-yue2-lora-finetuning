@@ -32,6 +32,11 @@ Where it leaks: the scanner is **lossy** (vibe in, fine grain out — the v6–v
 "studying" is blind maths, not thought; each lab invents a **different** private
 format.
 
+Why the scanner was the *hard* part (not the idea — the build): you can't train
+"audio → codes" without labels, and the labels are the very codes the missing
+encoder would make. The trick: **run YuE2's own generation and keep the tokens it
+emitted** → free (audio, codes) pairs.
+
 ## Inference — how a song gets made (our current batch)
 
     manifest JSON  (manifests/batch_36_songs.json)
@@ -66,6 +71,8 @@ format.
   [ ] LoRA
   [ ] quantization / GGUF
   [ ] guidance_scale / temperature / repetition penalty
+  [ ] open weights vs open source vs open science  (who ships the encoder;
+      who hides the data + recipe)
 
 ## You are here
 Session 2 — the photo-lab analogy landed (encoder = the scanner YuE2 didn't
