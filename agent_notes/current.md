@@ -1,86 +1,45 @@
 # current
 
-_Copy surface, not authority. Session · 2026-10-01 · **T4 Colab**, branch `music-cover`._
+_Copy surface, not authority. Session · 2026-10-01 · **T4 High-RAM Colab**, branch `music-cover`._
 
-## Rescue batch — RUNNING (started 2026-10-01 ~06:40 UTC)
+## Rescue batch — DONE + benchmarked
 
-`qfinal_a0.3` + `cot=full` + fresh seed per take. 24 tracks; log `/content/logs/rescue_winning.log`;
-ETA ~2–2.5 h. Stop `pkill -f '[r]escue_abc_batch'; pkill -f '[a]udiocpp_cli --task gen'`; resume = same
-command (drawn seeds are reused from `_rescue_index.json`, so it skips succeeded takes).
+24/24 takes, **0 failures**, ran `06:40:05Z → 09:20:35Z` (2.67 h). Config: **`qfinal_a0.3` +
+`cot=full` + fresh seed per take**, guided by each take's SheetSage2 melody-only ABC.
 
-Prior output (the melody run) archived before launch: GCS
-`audiocpp_inference/out_archive/rescue_v2abc_batch12_winning_melody_20261001/` (12 objects, 84.5 MiB);
-local `/content/archive/rescue_v2abc_batch12_winning_melody_20261001/`.
+**Benchmark (T4 High-RAM — T4 15 GB, 8 vCPU, 50 GiB RAM):** mean **401.0 s/track (6.68 min)**,
+median 406.7, range 307.6–490.1; **~9.0 tracks/hour**; realtime **~1.62×**; peak RSS **~6.9 GB**;
+GPU ~99% / ~5.4 GB VRAM; ~3% slower than the `cot=off` pass-1 benchmark. Recorded in
+`docs/INFERENCE.md` (Rescue batch benchmark) + raw `results/rescue_batch12_t4_benchmark/per_track.json`.
 
-### settings + run command
+- **GCS (all 24):** `…/audiocpp_inference/workspace/out/rescue_v2abc_batch12_winning/`
+- **Old melody run:** archived → `…/audiocpp_inference/out_archive/rescue_v2abc_batch12_winning_melody_20261001/`.
 
-`manifests/rescue_selection.batch_12_rock_v2_winning.json` is now: `lora=qfinal_a0.3`, `cot=full`,
-`seed="random"`.
+## Next — listen / package
 
-- A **fresh seed is drawn per take**. The ABC + pass-1 WAV stay keyed to the original
-  `<name>_<pass1seed>` (recorded as `abc_source_stem`); the output is `<name>_<newseed>`.
-- Validated: `--plan` → **24** tracks, `cot=full`, `seed_mode=random`; **stable on re-plan** (drawn
-  seeds are persisted in `_rescue_index.json`; delete that file to force a re-draw).
-- Driver gained the seed override — see `RECONCILIATION_LOG.md` 2026-10-01 and
-  `INFERENCE/rescue_abc_batch.sh --help`.
+Package rescue-vs-pass-1 for blind listening with `INFERENCE/prepare_ab_eval.py` (skill
+`ab-blind-eval`). Reminder: it needs **variant subfolders with the same stem**
+(`…/<variant>/track.wav`), not a flat folder. NB the rescue names use **fresh seeds**, so the
+pass-1 stem differs — pair by song, not by identical filename.
 
-Run it (detached, GPU):
+## Housekeeping (approved plan) — status
 
-```bash
-cd /content/maqamrock-yue2-lora-finetuning
-setsid nohup bash INFERENCE/rescue_abc_batch.sh \
-  --songs-json manifests/rescue_selection.batch_12_rock_v2_winning.json \
-  > /content/logs/rescue_winning.log 2>&1 & disown
-# stop: pkill -f '[r]escue_abc_batch'; pkill -f '[a]udiocpp_cli --task gen'
-```
+- **Phase 0–2:** done. `DECISIONS.md` (frozen) reverted; reconciler **0 flagged**; docs updated.
+- **Phase 3 (graph):** **blocked** — `graphify` not on PATH; graph stale (`cfbc3dd` vs HEAD).
+- **Phase 4 (tests):** **PASS** — full suite exit 0 (1 skip); log `/content/logs/post_batch_housekeeping.log`.
+- **Phase 5 (push):** pushed; `origin/music-cover` == local HEAD.
+- **Phase 6 (backup):** daemon current; one-shot confirm `local_wavs=24 gcs_wavs=24`.
+- **Phase 7:** this file.
 
-- **No `--force` needed**: fresh seeds ⇒ new output filenames, so the 2 old takes aren't "skipped"
-  — they're just left as stale files.
-- **Stale files caveat:** `out_dir` (`/content/rescue_v2abc_batch12_winning`) still holds 2 obsolete
-  *melody* WAVs (`07-…_{3781160148,1769813156}.wav`) from the aborted run. For a pure set, add a
-  clean dir on the CLI (CLI wins), e.g. `--out-dir /content/rescue_v2abc_q03full_reroll`, and add
-  that dir to the backup `--extra`.
+## prepare_ab_eval layout fix (from earlier)
 
-## LoRA × seed matrix — RESULT
+Flat root → `error: '…' is not in the subpath …`; the tool needs `…/<variant>/<track>.wav` with a
+shared stem. PowerShell restructure + command are in `docs/COMMAND_HANDOVER_GOTCHAS.md` (2026-10-01)
+and the prior handoff.
 
-Winner: **`q03_newseed` = `qfinal_a0.3` @ seed `1012482070`**. Recorded in
-`manifests/evaluation_lora_seed_matrix/MY_EVALUATION.txt`. (n=1, one listener — signal, not verdict.)
+## Notes
 
-## prepare_ab_eval on the 6-file bundle — layout fix
-
-Needs **variant subfolders**, same stem each (`…/<variant>/track.wav`) — flat → `not in the subpath`:
-
-```powershell
-cd C:\Users\DELL\Downloads\lora_seed_matrix_07_alhar_rock
-$map = [ordered]@{
-  '01_v2_newseed_1012482070.wav'               = 'v2_newseed'
-  '02_q03_sameseed_3781160148.wav'             = 'q03_sameseed'
-  '03_q03_newseed_1012482070.wav'              = 'q03_newseed'
-  '04_q05_sameseed_3781160148.wav'             = 'q05_sameseed'
-  '05_q05_newseed_1012482070.wav'              = 'q05_newseed'
-  'reference_v2_sameseed_3781160148_pass1.wav' = 'v2_sameseed'
-}
-foreach ($k in $map.Keys) { New-Item -ItemType Directory -Force -Path $map[$k] | Out-Null; Move-Item -Force $k "$($map[$k])\track.wav" }
-```
-```powershell
-python C:\Users\DELL\Jupyter_Notebooks\maqamrock-yue2-lora-finetuning\INFERENCE\prepare_ab_eval.py `
-  --root C:\Users\DELL\Downloads\lora_seed_matrix_07_alhar_rock `
-  --output C:\Users\DELL\Downloads\lsm_ab_eval --seed 20261001 --title "LoRA x seed - Al-Har (Ajam)"
-```
-
-## State
-
-- **Rescue batch:** RUNNING (started 06:40 UTC, 24 takes). Output synced to
-  `audiocpp_inference/workspace/out/rescue_v2abc_batch12_winning/`. Old melody run archived.
-- **LoRA×seed matrix:** DONE (5/5, 40:24); uploaded; verified on GCS
-  (`audiocpp_inference/evals/lora_seed_matrix_07_alhar_rock/lora_seed_matrix_07_alhar_rock.zip`,
-  sha256 `33b02724…6bd3`).
-- **Backup:** `backup_to_gcp.py --inference` daemon up (pid 22087), current. `vm-continuity` healthy.
-- **Repo:** committed + **pushed** to `origin/music-cover` — `51a6161` (HEAD == upstream). Contains:
-  seed override + tests, `manifests/` move + new matrix manifest + eval record, docs, reconciler
-  (0 flagged), `RECONCILIATION_LOG.md`.
-- **Backgrounded:** `/content/logs/post_batch_housekeeping.sh` (waits for the batch, then Phase 4
-  `pytest` + a final `backup --once`; log `/content/logs/post_batch_housekeeping.log`). Phase 3 graph
-  refresh is **skipped — `graphify` is not on PATH**.
-- **Pending after the batch:** review test log; refresh this file; if anything changed, commit + push
-  again (auth works via the stored `gh` token).
+- Backup daemon `--inference` up (flat dirs via `--extra`); `vm-continuity` healthy; `gpu_logger` down.
+- A harness-backgrounded watcher died once (`exit 1`, no notification); the detached re-run
+  (`setsid nohup /content/logs/post_batch_housekeeping.sh`) completed. Prefer `setsid nohup` for
+  long jobs here.
