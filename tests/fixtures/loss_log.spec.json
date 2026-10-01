@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "note": "Tier A spec for a synthesized loss_log.db (plan §4.2). Hand-authored to match the ai-toolkit UILogger schema monitor_loss.py reads. step_seconds=0.5 makes the expected rate exactly 2.0 steps/sec, which tests/e2e/test_monitor_status_e2e.py asserts.",
+  "steps": 40,
+  "step_seconds": 0.5,
+  "keys": {
+    "loss": {"kind": "decay", "start": 2.5, "end": 0.7},
+    "nar_flow": {"kind": "const", "value": 0.42}
+  }
+}

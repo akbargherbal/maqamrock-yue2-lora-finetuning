@@ -33,9 +33,10 @@ Two modes, mirroring bootstrap/setup.sh's own --training/--inference split:
   training (default)  the run's training output + logs + agent_notes under
                       <base>/<run-name>/ (default run-name akbar_arabic_rock_lora).
   --inference         the audio.cpp inference workspace under
-                      <base>/audiocpp_inference/ (out, prompts, scripts) + logs +
-                      agent_notes. See INFERENCE_TARGETS. The LoRA library
-                      (<base>/loras/) is curated by hand, not mirrored here.
+                      <base>/audiocpp_inference/, sectioned as
+                      tools/{prompts,scripts} + workspace/out + logs + agent_notes.
+                      See INFERENCE_TARGETS. The LoRA library (<base>/loras/) is
+                      curated by hand and is not mirrored here.
 
 `--watch LOCAL[:SUB]` (repeatable) replaces the mode's targets with exactly the
 folders you name -- for mirroring an arbitrary location such as
@@ -141,10 +142,20 @@ def training_targets(run_name: str) -> list[tuple[Path, str, bool]]:
     ]
 
 
+# The remote side is organised into named SECTIONS, so that a path follows from
+# the KIND of thing it holds (docs/GCP_ORGANIZATION_PLAN.md, decision 2026-09-29):
+#   tools/       pinned + re-staged by bootstrap/setup.sh each VM; never accumulates
+#   workspace/   ephemeral run output; safe to prune
+#   logs/        mirror of the VM-wide /content/logs (not audiocpp-specific)
+#   agent_notes/ mirror of the repo's agent_notes (not audiocpp-specific)
+#   evals/       sweep/eval output -- NOT written by this daemon; the sweep tooling
+#                pushes it directly, so it has no entry here.
+# LOCAL paths are deliberately unchanged: only the REMOTE subfolder moves, so
+# nothing on the VM (or in run_one.sh / generate.py) is affected.
 INFERENCE_TARGETS = [
-    (INFERENCE_ROOT / "out", "out", False),
-    (INFERENCE_ROOT / "prompts", "prompts", False),
-    (INFERENCE_ROOT / "scripts", "scripts", False),
+    (INFERENCE_ROOT / "out", "workspace/out", False),
+    (INFERENCE_ROOT / "prompts", "tools/prompts", False),
+    (INFERENCE_ROOT / "scripts", "tools/scripts", False),
     (Path("/content/logs"), "logs", False),
     (REPO_ROOT / "agent_notes", "agent_notes", False),
 ]

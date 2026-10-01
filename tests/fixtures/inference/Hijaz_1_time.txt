@@ -1,0 +1,59 @@
+	Command being timed: "/content/audiocpp_inference/bin/audiocpp_cli --task gen --family yue2 --model /content/audiocpp_inference/models/Yue2-3B-GGUF --backend cuda --threads 8 --session-option yue2.model_gguf=yue2-3b-bf16.gguf --session-option yue2.vae_gguf=yue2-vae-f16.gguf --session-option yue2.ar_lora=/content/converter/out/akbar_arabic_rock_lora_ar.safetensors --session-option yue2.ar_lora_scale=1.0 --session-option yue2.nar_lora=/content/converter/out/akbar_arabic_rock_lora_nar.safetensors --session-option yue2.nar_lora_scale=1.0 --session-option yue2.attention=flash --lyrics [Intro]
+لَبَّيْتَ صَوْتًا زِبَطْرِيًّا هَرَقْتَ لَهُ
+كَأْسَ الْكَرَى وَرُضَابَ الْخُرَّدِ الْعُرُبِ...
+
+[Verse 1]
+لَبَّيْتَ صَوْتًا زِبَطْرِيًّا هَرَقْتَ لَهُ
+كَأْسَ الْكَرَى وَرُضَابَ الْخُرَّدِ الْعُرُبِ...
+عَدَاكَ حَرُّ الثُّغُورِ الْمُسْتَضَامَةِ عَنْ
+بَرْدِ الثُّغُورِ وَعَنْ سَلْسَالِهَا الْحَصِبِ...
+
+[Chorus]
+أَجَبْتَهُ مُعْلِنًا بِالسَّيْفِ مُنْصَلِتًا
+وَلَوْ أَجَبْتَ بِغَيْرِ السَّيْفِ لَمْ تُجِبِ...
+حَتَّى تَرَكْتَ عَمُودَ الشِّرْكِ مُنْعَفِرًا
+وَلَمْ تُعَرِّجْ عَلَى الْأَوْتَادِ وَالطُّنُبِ...
+
+[Verse 2]
+لَمَّا رَأَى الْحَرْبَ رَأْيَ الْعَيْنِ تُوفِلِسٌ
+وَالْحَرْبُ مُشْتَقَّةُ الْمَعْنَى مِنَ الْحَرَبِ...
+غَدَا يُصَرِّفُ بِالْأَمْوَالِ جِرْيَتَهَا
+فَعَزَّهُ الْبَحْرُ ذُو التَّيَّارِ وَالْحَدَبِ...
+هَيْهَاتَ زُعْزِعَتِ الْأَرْضُ الْوَقُورُ بِهِ
+عَنْ غَزْوِ مُحْتَسِبٍ لَا غَزْوِ مُكْتَسِبِ...
+لَمْ يُنْفِقِ الذَّهَبَ الْمُرْبِي بِكَثْرَتِهِ
+عَلَى الْحَصَى وَبِهِ فَقْرٌ إِلَى الذَّهَبِ...
+إِنَّ الْأُسُودَ أُسُودَ الْغَيْلِ هِمَّتُهَا
+يَوْمَ الْكَرِيهَةِ فِي الْمَسْلُوبِ لَا السَّلَبِ...
+
+[Chorus]
+أَجَبْتَهُ مُعْلِنًا بِالسَّيْفِ مُنْصَلِتًا
+وَلَوْ أَجَبْتَ بِغَيْرِ السَّيْفِ لَمْ تُجِبِ...
+حَتَّى تَرَكْتَ عَمُودَ الشِّرْكِ مُنْعَفِرًا
+وَلَمْ تُعَرِّجْ عَلَى الْأَوْتَادِ وَالطُّنُبِ...
+
+[Outro]
+إِنَّ الْأُسُودَ أُسُودَ الْغَيْلِ هِمَّتُهَا
+يَوْمَ الْكَرِيهَةِ فِي الْمَسْلُوبِ لَا السَّلَبِ... --request-option style=arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Hijaz. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Hijaz with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: Poignant, Chivalric, Emotional. --request-option cot=off --request-option semantic_max_tokens=7250 --seed 1 --out /content/smoke/Hijaz_1.wav --log"
+	User time (seconds): 455.10
+	System time (seconds): 24.20
+	Percent of CPU this job got: 149%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:20.89
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 8101548
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 31030
+	Minor (reclaiming a frame) page faults: 8290010
+	Voluntary context switches: 36031
+	Involuntary context switches: 139520
+	Swaps: 0
+	File system inputs: 7842528
+	File system outputs: 104040
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

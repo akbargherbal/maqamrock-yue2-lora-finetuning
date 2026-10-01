@@ -1,0 +1,103 @@
+VERBATIM / LYRIC-ADHERENCE ROUND — blind listening — fill this in
+2026-09-29
+
+Track: 01-نسيب-وظعن-الحي-ونخيل-يامن-وعرائس-النعمة
+Maqam Hijaz · LoRA v2 (step 3000) · seed 4148240095 · one track, 5 clips.
+
+Labels A–E are RANDOMLY assigned. The five clips differ ONLY in the style prompt
+and/or the lyric sheet handed to the model — same track, same seed, same adapter,
+same sampler settings. So any difference you hear is attributable to the prompt or
+the sheet. A is not "the baseline"; do not try to guess which is which.
+
+Scale: 5 = best, 1 = worst. Leave a line blank if you genuinely cannot judge it.
+Do NOT open KEYS.txt until every section is scored.
+
+Today's main question is the bottom half: LYRICS ADHERENCE and REPEAT COUNT.
+The top half is your usual set, so the round stays comparable to yesterday's.
+
+--------------------------------------------------------------------------
+INTRO MUSIC — when do the vocals start? (not bad in itself; observe only)
+	A: ~ 22 sec
+	B: ~ 21 sec
+	C: ~ 30 sec
+	D: ~ 19 sec
+	E: ~ 6 sec
+
+INTRO VERSE VOCAL QUALITY
+	A: 4.5
+	B: 5
+	C: 4
+	D: 4
+	E: 4
+
+MAQAM ROCK (v2) — is it maqamrock, or has it drifted to ballad / poem recitation?
+	A: 4.5
+	B: 4.5 
+	C: 4
+	D: 4
+	E: 4
+
+OVERALL VOCAL QUALITY
+	A: 4.5
+	B: 5
+	C: 4.5
+	D: 4
+	E: 4
+
+OVERALL PRONUNCIATION QUALITY
+	(note any tajweed/Quranic-cadence leakage, e.g. a ت with qalqalah, or a
+	 letter emphasised the way a reciter would — as you caught yesterday)
+	A: 4.5
+	B: 4.5
+	C: 5
+	D: 4
+	E: 4
+
+--------------------------------------------------------------------------
+LYRICS ADHERENCE   ← main question
+	Rate 1–5 for how faithfully the clip sings its own sheet (wording, order,
+	completeness). Caveat: one of the five was given a DIFFERENT sheet — the same
+	lyrics with its built-in intro/outro repeats removed — so a low score there may
+	mean the model re-inserted what the sheet deliberately dropped. Judge each clip
+	against what it is actually singing, and use REPEAT COUNT below to compare
+	across clips.
+	A: 5
+	B: 5
+	C: 5
+	D: 5
+	E: 5  
+
+REPEAT COUNT of the final (outro) couplet — the crux. How many times is it sung?
+	A: No repetition (It sang lyrics verbatim that it wass expected to sning; no omission; no addition) ×
+	B: No repetition (It sang lyrics verbatim that it wass expected to sning; no omission; no addition) ×
+	C: No repetition (It sang lyrics verbatim that it wass expected to sning; no omission; no addition) ×
+	D: No repetition (It sang lyrics verbatim that it wass expected to sning; no omission; no addition) ×
+	E: No repetition (It sang lyrics verbatim that it wass expected to sning; no omission; no addition) ×
+	(2× is the sheet's own design — the training songs repeat a couplet once.
+	 3× or more is the model adding a repeat that was not asked for.)
+
+PACE
+	A: 5
+	B: 4.5  
+	C: 3.5
+	D: 4
+	E: 3.5
+
+FREE NOTES — artifacts, mix, arrangement, whether the melody/arrangement resembles
+the guide track, anything that does not fit the sections above:
+	A: Overall is good; but not wow; pronunciation is negative; but that's expected from V2.
+	B: Pace is a bit slower; but it's melismatic which is a plus. This is good; not sure if I am going to pick; Again pronuciation is not perfect.
+	C: This is the shortest track in the batch; it's a bit faster; but not much ... 
+	D: Generic; Meh; neither good nor bad.
+	E: Not impressive.
+
+--------------------------------------------------------------------------
+SUMMARY (fill after scoring, before opening the key)
+	Most faithful to its sheet: What sheed, Don't understand, I am not a musician; I can't read music sheets.
+	Least added-repeat: Surprising not repetition this test!
+	Best-sounding overall: A OR B
+	Any clip you would reject outright, and why: No; but some are better than others; overall I am happy about things didn't go wrong this time.
+
+If you rendered the other two seeds too, duplicate this whole block per seed and
+label the tracks (seed 1029169725, seed 1938238049). Do not carry a label from one
+seed to another — labels are per track.

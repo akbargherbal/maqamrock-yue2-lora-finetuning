@@ -1,0 +1,105 @@
+GUIDE-CONDITIONED ROUND (v2 score.abc -> qfinal_a0.3) — blind listening — fill this in
+2026-09-29
+
+Track: 01-نسيب-وظعن-الحي-ونخيل-يامن-وعرائس-النعمة
+Maqam Hijaz · seed 4148240095 · one track, 4 clips (A–D).
+
+Labels A–D are RANDOMLY assigned. All four clips are the SAME track, SAME lyrics,
+SAME style prompt, SAME seed and SAME sampler settings. They differ ONLY in the
+adapter and in whether the model was handed a plan:
+	- two clips use the qfinal_a0.3 adapter (the good-pronunciation one), rendered
+	  `cot=off` and `cot=full`;
+	- one clip uses qfinal_a0.3 with `cot=full` PLUS an ABC score file as a guide
+	  (v2's own exported plan) — the idea under test;
+	- one clip uses the v2 adapter (the good-arrangement, weaker-pronunciation one).
+A is not "the baseline" and is not the reference; do not try to guess which is which.
+
+Scale: 5 = best, 1 = worst. Leave a line blank if you genuinely cannot judge it.
+Do NOT open KEYS.txt until every section is scored.
+
+Today's main question: does the GUIDED clip keep v2's ARRANGEMENT without losing
+qfinal's PRONUNCIATION? So judge arrangement and pronunciation independently, and
+then say whether the same clip wins both. The top half is your usual set, so the
+round stays comparable to the verbatim round (§10).
+
+--------------------------------------------------------------------------
+INTRO MUSIC — when do the vocals start? (not bad in itself; observe only)
+	A: ~ 19 sec
+	B: ~ 14 sec
+	C: ~ 28 sec
+	D: ~ 3 sec
+
+INTRO VERSE VOCAL QUALITY
+	A: 4
+	B: 4.5
+	C: 3.5
+	D: 4.5
+
+MAQAM ROCK (arrangement fidelity) — is it a full maqamrock band, or has it drifted
+to a sparse, voice-forward hymn-like ballad?
+	A: 4.5
+	B: 3.5
+	C: 3
+	D: 5
+
+ARRANGEMENT DENSITY — 5 = full rock band throughout (drums / guitars / bass
+prominent), 1 = sparse, percussion-led, voice-forward
+	A: 4.5
+	B: 4
+	C: 3.5
+	D: 4
+
+OVERALL VOCAL QUALITY
+	A: 4
+	B: 4
+	C: 3.5
+	D: 4.5
+
+OVERALL PRONUNCIATION QUALITY
+	(note any tajweed/Quranic-cadence leakage, e.g. a ت with qalqalah, or a letter
+	emphasised the way a reciter would — as you caught in the earlier rounds)
+	A: 4
+	B: 4.5
+	C: 5
+	D: 4.5
+
+--------------------------------------------------------------------------
+LYRICS ADHERENCE   — how faithfully the clip sings its own sheet (wording, order,
+completeness)
+	A: 5
+	B: 4.5
+	C:  5 (FOR THE PART IT SANG!); BUT IT DID NOT FINISH.
+	D: 5
+
+EXTRA / MISSING REPEATS — did the clip add a repeat the sheet does not have, or drop
+one it does? (the sheet repeats a couplet once by design; say "same as sheet" if it
+matches)
+	A: "same as sheet"
+	B: "same as sheet"
+	C: DIDN'T RPEAT; CAUSE IT NEVER FINISHED.
+	D: "same as sheet"
+
+PACE
+	A: 4.5
+	B: 4
+	C: 2 (fail cause it didn't finish the song!)
+	D: 5
+
+FREE NOTES — artifacts, mix, arrangement, whether the melody/arrangement resembles
+the guide track, anything that does not fit the sections above:
+	A: It's not wow; it's not bad.. but not getting excellent vocals and pronunciation mean it's underwhelming.
+	B: Don't like this level of pronunciation slopiness; like ع is way softer than it should be; it started good but didn't uphold its leve!
+	C: More like Islamic Nasheed; percussion is the only instrument present; with sparse intermittent here and there; feels like poem recitation. (nothing like maqamrock); definitely what we're trying to avoid. Pronunciation is good; and it could be the Quran lora doing its job and dominating; but it could be also pulling the music from away from rock/western feel to its gravitational field of Islmaic nasheed; ends suddenly without even finishing; it's the longest track; yet it didn't even finish the song.
+	D: It's sort of the best; but not wow; cause I wanted more crisp pronunciation.
+
+--------------------------------------------------------------------------
+SUMMARY (fill after scoring, before opening the key)
+	Fullest maqamrock band arrangement (v2-like): D
+	Best / least Quranic-cadence pronunciation: D
+	Best-sounding overall: D
+	Do arrangement and pronunciation land on the SAME clip? (yes -> which; or no): D
+	Any clip you would reject outright, and why: C
+
+If the other seeds are rendered too, duplicate this whole block per seed and label
+the tracks (seed 1029169725, seed 1938238049). Do not carry a label from one seed
+to another — labels are per track.

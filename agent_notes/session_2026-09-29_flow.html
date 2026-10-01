@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session 2026-09-29 — lyric-adherence screen (music-cover)</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #161a21; --ink: #e6e9ef; --dim: #9aa4b2;
+    --line: #2a313c; --accent: #6ea8fe; --warn: #e0a458; --ok: #64c48c;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#f7f8fa; --panel:#fff; --ink:#1b1f26; --dim:#5b6472;
+            --line:#dde2ea; --accent:#2f6fd0; --warn:#a8641a; --ok:#1f7a4d; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 20px 72px; background: var(--bg); color: var(--ink);
+    font: 15px/1.55 ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 1180px; margin: 0 auto; }
+  h1 { font-size: 25px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  h2 { font-size: 17px; margin: 40px 0 12px; padding-bottom: 7px; border-bottom: 1px solid var(--line); }
+  .sub { color: var(--dim); font-size: 13.5px; margin-bottom: 4px; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.88em; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .mermaid { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+             padding: 14px; overflow-x: auto; text-align: center; }
+  table { border-collapse: collapse; width: 100%; margin-top: 6px; font-size: 14px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--dim); font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; }
+  td.num { text-align: right; font-family: ui-monospace, Menlo, monospace; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .tag { display: inline-block; font-size: 11.5px; padding: 1px 7px; border-radius: 999px;
+         border: 1px solid var(--line); color: var(--dim); margin-left: 6px; vertical-align: 1px; }
+  .warn { border-left: 3px solid var(--warn); }
+  .ok   { border-left: 3px solid var(--ok); }
+  .accent { border-left: 3px solid var(--accent); }
+  .k { color: var(--accent); font-weight: 600; }
+  .danger { color: var(--warn); font-weight: 600; }
+  ul { margin: 8px 0 0; padding-left: 20px; }
+  li { margin: 3px 0; }
+  footer { margin-top: 44px; color: var(--dim); font-size: 12.5px; border-top: 1px solid var(--line); padding-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+
+  <h1>This session: screening the lyric-adherence arms</h1>
+  <p class="sub">2026-09-29 · branch <code>music-cover</code> @ <code>f6e2234</code> · Colab T4 ·
+  goal: settle whether the v2 adapter sings the sheet <em>verbatim</em> or injects extra repeats</p>
+
+  <div class="card accent" style="margin-top:18px">
+    <strong>One-line answer to "what are we doing?"</strong> — We already have the ABC; we are not
+    making any. We are running the same 16 prompt/knob/ABC arms as <code>batch.json</code> and
+    <code>test_batch.sh</code>, but with <span class="k">stop_after=semantic</span> so each arm emits
+    only its <span class="k">token plan</span> (no audio, ~45% cheaper) — a length + truncation
+    pre-filter that says which arms are worth rendering.
+  </div>
+
+  <h2>1 · Session flow</h2>
+  <div class="mermaid">
+flowchart TD
+    GOAL["Goal — does the v2 adapter sing the sheet<br/>verbatim, or inject extra repeats?"]
+
+    subgraph PREP["① Prep — done this session"]
+      direction TB
+      SETUP["setup.sh --inference<br/>8/8 jobs ok · 35 s<br/>GGUF 7.26 GB + v2 LoRA + cli"]
+      ABCF["ABC already on GCS: out/abc_v2/<br/>12 score.abc · written 2026-09-28<br/>pulled the guide's: sha256 14ae1ae0…"]
+      BINQ["capability check on the staged binary<br/>stop_after ✔ · export_semantic ✔<br/>semantic_prefix ✗ needs v0.8.2"]
+      MODA["arm A fixed to ONE variable<br/>hijaz_modified = winning + 110 BPM"]
+    end
+
+    subgraph SCREEN["② Screen — running now"]
+      DRV["INFERENCE/screen_arms.sh all<br/>16 arms · stop_after=semantic"]
+      SEM["semantic.json per arm<br/>codec indices · 25 fps · NO audio"]
+      SUM["screen_summary.py<br/>frames · sec · trunc · ar_s"]
+    end
+
+    subgraph READ["③ Read the result"]
+      TR{"model flag:<br/>truncated?"}
+      LONG["plan overran the 7750 cap<br/>⇒ an inserted section repeat"]
+      SHORT["plan ≈ the guide's 7743<br/>⇒ no extra section"]
+    end
+
+    subgraph NEXT["④ Next — needs audio"]
+      GEN["generate.py + test_batch.sh<br/>full renders of the winners"]
+      LISTEN["listen / blind A-B"]
+      ASR["ASR of output vs the sheet<br/>the real verbatim test — NOT built"]
+    end
+
+    GOAL --> SETUP
+    SETUP --> BINQ
+    ABCF --> DRV
+    BINQ --> MODA
+    MODA --> DRV
+    DRV --> SEM --> SUM --> TR
+    TR -->|yes| LONG
+    TR -->|no| SHORT
+    LONG --> GEN
+    SHORT --> GEN
+    GEN --> LISTEN
+    GEN -.-> ASR
+  </div>
+
+  <h2>2 · The 16 arms</h2>
+  <div class="mermaid">
+flowchart LR
+    subgraph OFF["cot = off — 11 arms"]
+      direction TB
+      A0["ctl_sunoblk_as-is<br/>v2 positive control"]
+      A1["win_as-is<br/>arm 0 baseline"]
+      A2["mod_as-is<br/>arm A: +110 BPM only"]
+      A3["win_dedup<br/>injection test"]
+      A4["win_bare<br/>tag-format test"]
+      A5["b1_window / b1raw_window<br/>penalty_window=500, penalty=1.3"]
+      A6["b2_guidance / b2raw_guidance<br/>guidance_scale=1.3"]
+      A7["b3_both / b3raw_both<br/>both knobs together"]
+    end
+
+    subgraph MEL["cot = melody — 5 arms"]
+      direction TB
+      C0["c0_cotonly / c0raw_cotonly<br/>cot-only controls"]
+      C1["c1_abc_win"]
+      C2["c2_abc_mod"]
+      C3["c3_abc_raw<br/>= l0_raw, scored 5/5 Maqam Rock"]
+    end
+
+    ABCFILE["abc_v2 guide score.abc<br/>pulled from GCS today"] --> C1
+    ABCFILE --> C2
+    ABCFILE --> C3
+    LY["lyrics: as-is / dedup / bare"] -.-> A0
+    ST["styles: sunoblk / winning / modified"] -.-> A0
+  </div>
+
+  <h2>3 · Key numbers behind the screen</h2>
+  <table>
+    <thead><tr><th>quantity</th><th class="num">value</th><th>why it matters</th></tr></thead>
+    <tbody>
+      <tr><td>guide render duration</td><td class="num">309.72 s</td>
+          <td>WAV of the v2 guide track (seed 4148240095)</td></tr>
+      <tr><td>guide semantic frames</td><td class="num">7743</td>
+          <td><code>yue2.semantic.tokens</code> — it ended on EOS</td></tr>
+      <tr><td>cap (<code>semantic_max_tokens</code>)</td><td class="num">7750</td>
+          <td>only <strong>7 frames</strong> above the guide's natural plan</td></tr>
+      <tr><td>guide <code>truncated</code>, model flag</td><td class="num">0</td>
+          <td>the model did <strong>not</strong> stop on the cap</td></tr>
+      <tr><td>guide <code>truncated</code>, generate.py sidecar</td><td class="num danger">true</td>
+          <td>its <code>duration_heuristic</code> — a false positive; do not trust it</td></tr>
+      <tr><td>AR semantic stage</td><td class="num">232 s</td>
+          <td>of the 423 s full render → the screen saves ~45%, not 85%</td></tr>
+      <tr><td>dedup-sheet cap</td><td class="num">7000</td>
+          <td>fewer letters → lower cap; not comparable across sheets</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card warn" style="margin-top:16px">
+    <strong>The sharp bit.</strong> Because the cap sits only 7 frames above the guide's natural plan,
+    <em>any</em> arm that inserts a section repeat overruns 7750 and reports
+    <code>yue2.semantic.truncated 1</code>. That makes the truncation flag a cheap, objective
+    repeat detector — no audio required.
+  </div>
+
+  <h2>4 · What the screen can and cannot tell us</h2>
+  <div class="grid">
+    <div class="card ok">
+      <strong>Can</strong>
+      <ul>
+        <li>planned length per arm (<code>frames / 25</code>) vs the guide's 309.7 s</li>
+        <li>whether the plan overran the cap (<code>truncated</code>, the model's own flag)</li>
+        <li>AR wall cost per arm (<code>yue2.semantic_ms</code>)</li>
+        <li>rank the 16 arms before spending NAR time on them</li>
+      </ul>
+    </div>
+    <div class="card warn">
+      <strong>Cannot</strong>
+      <ul>
+        <li>say <em>which line</em> was sung — <code>semantic.json</code> is codec indices with
+            <strong>no lyric↔frame alignment</strong></li>
+        <li>prove 2× vs 3× on the outro as such; only that the plan got longer</li>
+        <li>replace listening — the verbatim verdict needs the rendered audio, or an
+            ASR-vs-sheet comparison that does not exist yet</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>5 · Three things called "ABC" — keep them apart</h2>
+  <div class="grid">
+    <div class="card"><strong>1 · ABC extraction</strong><span class="tag">done yesterday</span>
+      <p style="margin:6px 0 0;color:var(--dim)">Audio → <code>score.abc</code> via SheetSage2.
+      12 files sit on GCS under <code>out/abc_v2/</code>. Today we only <em>downloaded</em> one.
+      <strong>None are being generated now.</strong></p></div>
+    <div class="card"><strong>2 · The semantic screen</strong><span class="tag">running</span>
+      <p style="margin:6px 0 0;color:var(--dim)"><code>stop_after=semantic</code> →
+      <code>semantic.json</code>. Because that option is documented as "ABC planner + semantic AR",
+      the two <code>cot=melody</code> arms <em>without</em> <code>abc_file</code> also drop a
+      <code>score.abc</code> of the model's <em>own</em> plan — a byproduct, and not the same file as
+      an <code>abc_v2/</code> transcription.</p></div>
+    <div class="card"><strong>3 · ABC as input</strong><span class="tag">c1 / c2 / c3</span>
+      <p style="margin:6px 0 0;color:var(--dim)">The guide's <code>abc_v2</code>
+      <code>score.abc</code>, passed through <code>abc_file</code>, steers the
+      <strong>melody</strong> — not the words.</p></div>
+  </div>
+
+  <h2>6 · Where it stands and what is next</h2>
+  <div class="grid">
+    <div class="card accent">
+      <strong>Now</strong>
+      <p style="margin:6px 0 0">16-arm screen running detached, log
+      <code>/content/logs/tv_screen.log</code>, artifacts in
+      <code>out/screen_semantic/&lt;arm&gt;_4148240095/</code>. Arm 1 of 16 mid AR decode;
+      ~4 min/arm ⇒ ~60–65 min.</p>
+    </div>
+    <div class="card">
+      <strong>Then</strong>
+      <ul>
+        <li><code>screen_summary.py out/screen_semantic --expect-wav &lt;guide.wav&gt;</code>
+            → per-arm frames / sec / trunc / ar_s</li>
+        <li>render only the arms that survive to audio</li>
+        <li>blind A-B the winners</li>
+      </ul>
+    </div>
+    <div class="card">
+      <strong>Open, unchanged</strong>
+      <ul>
+        <li>adapter for the batch: <code>v2</code> vs <code>qfinal_a0.3</code></li>
+        <li>Maqam clash: winning prompt was measured on <strong>Ajam</strong>, track is
+            <strong>Hijaz</strong></li>
+        <li>no objective verbatim metric exists yet (ASR-vs-sheet is unbuilt)</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    Facts sourced live this session: <code>/content/logs/timing.txt</code> (setup 8/8),
+    the guide render's sidecar + log on GCS (<code>yue2.semantic.tokens 7743</code>,
+    <code>truncated 0</code>), <code>strings</code> on
+    <code>/content/audiocpp_inference/bin/audiocpp_cli</code>, and the audio.cpp
+    <code>docs/models/yue2.md</code> options table. Handoff: <code>agent_notes/current.md</code>.
+  </footer>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'neutral',
+    flowchart: { curve: 'basis', useMaxWidth: true },
+    securityLevel: 'loose'
+  });
+</script>
+</body>
+</html>

@@ -79,7 +79,7 @@ outside it, don't invent work.**
 | Start / pause / resume training | `docs/START.md`, `docs/PAUSE_RESUME.md` | config YAML |
 | How's it going | `docs/MONITOR.md` | `loss_log.db` + `train.log` + GPU csv |
 | Inference (GGUF + LoRA) | `docs/INFERENCE.md` | repo `INFERENCE/` scripts |
-| Build the inference binary (new arch) | `docs/audiocpp_gpu_arch_builds.md` | `docs/models/yue2.md` |
+| Build the inference binary (new arch) | `docs/audiocpp_gpu_arch_builds.md` | `docs/audiocpp_gpu_arch_builds.md` + `bootstrap/setup.sh` (arch pin) |
 | Merge v2 + pron | `docs/PRON_LORA_MERGE.md` | `merge_pron_lora.py --help` |
 | Pron / long-aya training | `docs/PRON_LORA.md`, `docs/PRON_LORA_LONG.md` | its config + GCS tar |
 | Verify / offline-eval pron | `docs/PRON_LORA_VERIFICATION.md` | replay script |

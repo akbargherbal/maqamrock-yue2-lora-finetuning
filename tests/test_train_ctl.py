@@ -98,7 +98,8 @@ def test_start_detaches_then_stop_is_clean(fake_env):
         # a second copy of the same run must be refused
         assert _cli(fake_env, "start").returncode == 1
         # clean, checkpoint-safe stop
-        assert _cli(fake_env, "stop", "--timeout", "15").returncode == 0
+        stop = _cli(fake_env, "stop", "--timeout", "15")
+        assert stop.returncode == 0, stop.stdout + stop.stderr
         assert _wait_for(lambda: not os.path.isdir(f"/proc/{pid}"))
         assert "Job stopped" in (fake_env["logs"] / "train.log").read_text()
         assert not pidfile.exists()

@@ -58,7 +58,7 @@ touch "$FAILED"
 for f in "$AR" "$NAR"; do
   if [ ! -f "$f" ]; then
     echo "pron_knob_probe: missing anchor adapter: $f" >&2
-    echo "  stage it from gs://<base>/audiocpp_inference/maqam_lyric_swap/converted/$ANCHOR_CFG/" >&2
+    echo "  stage it from gs://<base>/audiocpp_inference/evals/maqam_lyric_swap/converted/$ANCHOR_CFG/" >&2
     exit 2
   fi
 done
@@ -114,6 +114,8 @@ def _gpu_stats(p):
         for line in p.read_text(encoding="utf-8", errors="replace").splitlines():
             parts = [x.strip() for x in line.split(",")]
             if len(parts) != 4:
+                continue
+            if parts[0] == "gpu_util_pct":  # header row (run_one.sh writes one)
                 continue
             try:
                 for i, v in enumerate(parts):

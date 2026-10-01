@@ -113,3 +113,262 @@ human and invisible to the agent — so they get written down here.
   `python train_ctl.py stop --config config/<run>.yml --log-name <log>`.
 - **Possible hardening (not done):** `cmd_stop`/`cmd_status` could fall back to the
   `run_name`/`config` recorded in `<log-name>_state.json` when the flags are omitted.
+
+## 2026-09-29 — to show the user a local HTML file, serve it and hand over the tunnel URL
+
+- **Fact:** `browser.preview` and `browser.tabs.open` both fail with
+  `[browser.disconnected] No desktop browser is connected to this session` unless the
+  OpenCode **desktop app** is attached — on a Colab VM it usually is not. `file://` URLs
+  are rejected outright (`Paths and file:// URLs are not browser URLs`). So the agent
+  cannot present a generated HTML artifact through the browser tools, however correct
+  the file is.
+- **Failure prevented:** concluding the artifact is broken, or retrying browser tools
+  in a loop, when only the *presentation* path is unavailable.
+- **Correct pattern:** serve the directory and hand over the forwarded URL.
+  `cd /content/webshare && python3 -m http.server 8765 --bind 0.0.0.0` (detached; log
+  `/content/logs/http.log`; stop `pkill -f 'http.server 8765'`). The running
+  `code tunnel` (`/root/.vscode/cli/code_tunnel.json` → name `inference_akbar`,
+  id `amusing-dog-glt654t`, cluster `asse`) forwards any localhost port at
+  `https://<tunnel-id>-<port>.<cluster>.devtunnels.ms`, i.e.
+  `https://amusing-dog-glt654t-8765.asse.devtunnels.ms`. Verify with
+  `curl -s -o /dev/null -w '%{http_code}'` before handing it over.
+- **Two traps:** (a) the URL returns **302/404 for the first few seconds** after the
+  server starts while the tunnel re-registers the port — retry before declaring
+  failure; (b) **killing or restarting the server breaks the page already open in the
+  user's tab** — restore service in the same turn and keep the same path working
+  (`curl` the tunnel URL to confirm 200, not just the local port).
+- **Security note:** serve a dedicated directory (e.g. `/content/webshare`), not the
+  repo root, so the tunnel does not expose the whole checkout. Checkout copies go
+  stale — re-copy after editing the source file.
+
+## 2026-09-29 — a fresh Colab clone lands on `main`, not the working branch
+
+- **Fact:** the repo's default branch is `main`; session work lives on other
+  branches (e.g. `music-cover`, 10 commits ahead on 2026-09-29). `docs/START.md:14`
+  and `docs/INFERENCE.md:11` clone with no `--branch`, so a fresh VM gets `main` and
+  is **missing** this session's files (`INFERENCE/test_batch.sh`,
+  `manifests/test_verbatim_hijaz/`, the updated `docs/music-cover-feasibility.md`).
+- **Failure prevented:** "the new files aren't there" confusion on a fresh VM, or
+  silently running an older manifest.
+- **Correct pattern:** clone with `--branch <name>`
+  (`git clone --branch music-cover <url>`), or `git fetch origin <branch> &&
+  git checkout <branch>` after a default clone. **Do not merge to `main`** —
+  decision 2026-09-29: all work stays on `music-cover`; `main` is intentionally
+  not updated.
+- **Possible hardening (not done):** add `--branch <name>` to the clone lines in
+  `START.md`/`INFERENCE.md`, or state the branch explicitly.
+
+## 2026-09-29 — `generate.py`'s trigger test is a substring search, not a prefix test
+
+- **Fact:** `INFERENCE/generate.py:316` prepends `arabmaqamrock ` iff
+  `TRIGGER.strip() not in text` — a substring test over the **whole** style file, not a
+  check of its leading token (`--no-trigger` disables the prepend entirely).
+  `run_one.sh` never prepends; it passes `STYLE_FILE` through verbatim.
+- **Why the difference is invisible for this manifest:** all three Hijaz styles contain
+  `arabmaqamrock` *somewhere*. For `hijaz_sunoblk.txt` it is inside its `genre:` line
+  (line 5), even though the file's **first** token is `[Is_MAX_MODE: …`. So the test
+  passes and no arm is prepended — making `--no-trigger` a **no-op** here.
+- **The real hazard:** the decision hinges on incidental content elsewhere in the file.
+  Edit the Suno block so `arabmaqamrock` no longer appears anywhere (e.g. drop it from
+  the `genre:` line) and the trigger is suddenly prepended, changing that arm with no
+  visible intent. Symmetrically, a style that legitimately needs the trigger but merely
+  *mentions* it in prose silently goes without.
+- **Correct pattern:** don't reason about prefixes. Check the file itself
+  (`grep -c 'arabmaqamrock' <style>`), and pass `--no-trigger` when you want the file
+  verbatim regardless of its contents.
+- **How it was found:** reading the `audiocpp_cli` command line recorded in the run's
+  `_runs_status.log`, which shows the style actually sent to the model.
+- **Correction (same day).** An earlier version of this entry claimed the default would
+  prepend the trigger *to the control arm only*, decoupling the listening audio from the
+  screen. **That was wrong** — the substring test matched the control arm too. Nothing
+  was harmed: the render passed `--no-trigger`, which was a no-op, so the rendered arms
+  are identical to the screened ones. Corrected in the same session it was written.
+- **Related:** `generate.py` writes `batch_manifest.json` + `input.json` into the run
+  dir **before** any generation, so an explicit `--out-dir` makes the batch resumable;
+  `--dry-run` validates paths/caps and needs no GPU.
+
+## 2026-09-29 — never edit a shell script while it is running
+
+- **Fact:** bash reads script files **incrementally by byte offset**, not into memory.
+  Editing the file mid-execution shifts those offsets, so the next read starts
+  mid-token. Symptom seen: `run_one.sh: line 85: ession-option: command not found` — a
+  fragment of `--session-option` (i.e. bash resumed partway through that token).
+- **What it cost:** `run_one.sh` was edited at 09:22:40 while track 4 was executing
+  (09:21:39–09:28:23). The fragment ran as its own command *carrying the trailing
+  `> "$log" 2>&1` redirect*, so it **overwrote that track's CLI log** (its TIMING lines
+  are gone), and the script's `rc=$?` captured `127` instead of the binary's `0`. The
+  driver then reported the track FAILED in `_runs_status.log`, `_failed_runs.log` **and**
+  `batch_summary.txt` (`ok: 4  failed: 1`).
+- **The audio was fine.** `/usr/bin/time` had already written `Exit status: 0`, the WAV
+  was byte-exact for its declared duration (48 kHz stereo 16-bit, diff 0) and matched its
+  screen prediction exactly (5701 frames / 228.0 s). So: a **spurious failure**, and the
+  false record nearly caused a needless 7-minute re-render.
+- **Rules:** (1) never edit a script while a batch is calling it — edit between runs,
+  or run a copy; (2) don't trust a log's `exit=` on its own — cross-check the artifact
+  (`_time.txt`'s `Exit status`, the WAV's byte length against its declared duration).
+- **A file-count check is not a success check.** Counting `*.wav` reported "5 of 5" for
+  a batch whose driver called one track FAILED. Gate on exit codes, then on artifacts.
+
+## 2026-09-30 — `generate.py`'s default run dir is timestamped; a re-run scatters the set
+
+- **Fact:** without `--out-dir`, `generate.py:477` makes `out/<YYYYMMDD-HHMMSS>_<label>/`. A
+  resumed/retried batch that omits `--out-dir` writes a **second** directory, so `*.wav` now
+  spans two runs and a transcription `--input-dir` silently sees only one (or the wrong one).
+- **Correct pattern:** always pass the same absolute `--out-dir`; resume then skips succeeded
+  tracks (`generate.py:794`). The pass-1 flow uses
+  `out/batch_12_rock_v2` (`docs/PRON_LORA_RESCUE.md`, G1).
+
+## 2026-09-30 — `sheetsage2_transcribe.py` silently skips an existing `score.abc`
+
+- **Fact:** the driver returns early when `<out-dir>/<stem>/score.abc` already exists
+  (`sheetsage2_transcribe.py:107`) — no warning. Re-render a take with the same `name`+`seed`
+  (a legitimate `--force` redo) and re-transcribe in place, and the **old** ABC is stapled to
+  the **new** audio; the rescue then guides on the wrong score.
+- **Correct pattern:** transcribe into a **fresh** `--abc-dir` (or re-run with `--force`)
+  whenever a source WAV changed. `rescue_abc_batch.sh --plan/--verify` records and re-checks
+  the ABC sha256 so a mismatch halts before any render.
+
+## 2026-09-30 — transcription auto-selects CUDA on the GPU box (not "free CPU")
+
+- **Fact:** `sheetsage2_transcribe.py:100` moves to `cuda` whenever `torch.cuda.is_available()`.
+  On the GPU VM the "free CPU" step therefore holds the rented GPU, and can OOM a queued
+  render (`run_one.sh`/rescue) because two jobs share one GPU.
+- **Correct pattern:** run it on a **free CPU runtime**, or force CPU on the GPU box with
+  `CUDA_VISIBLE_DEVICES="" /content/.venv-sheetsage2/bin/python INFERENCE/sheetsage2_transcribe.py …`.
+
+## 2026-09-30 — a rescue render has the *same WAV filename* as the pass-1 take it guides
+
+- **Fact:** `run_one.sh:42` names output `$OUT/<name>_<seed>.wav` — identical to the pass-1
+  filename. Point a rescue at the pass-1 dir (one `OUT_DIR` slip) and it **overwrites the liked
+  v2 take**, same name, no warning.
+- **Correct pattern:** render rescues into a dedicated dir; `rescue_abc_batch.sh` refuses when
+  `--out-dir == --pass1-dir` or when the target holds a `batch_manifest.json`.
+
+## 2026-09-30 — `sheetsage2_transcribe.py` silently skips stems matching `_[23]_`
+
+- **Fact:** the default exclusion is `VARIANT_MARKER = re.compile(r"_[23]_")`
+  (`sheetsage2_transcribe.py:34`), meant to drop the old `_2_`/`_3_` duplicate takes. A legit
+  stem whose name/slug happens to contain `_2_`/`_3_` is dropped with **no error** — that take
+  gets no ABC, so the rescue silently omits it.
+- **Correct pattern:** pass `--all` (or an explicit `--exclude`) for a batch whose stems are not
+  the legacy `_2_`/`_3_` variants; the rescue flow now uses `--all`
+  (`docs/PRON_LORA_RESCUE.md`, phase 2).
+
+## 2026-09-30 — pass-1 preflight wants the manifest's *whole* `loras` registry, not just the used adapter
+
+- **Fact:** `generate.py` preflight existence-checks **every** alias in `input.loras`
+  (`generate.py:581` iterating `resolve_loras`, `:253`), regardless of which `lora` the songs
+  reference. `manifests/batch_12_rock_v2.json` carries the shared 4-alias registry (v2,
+  qfinal_a0.3, qfinal_a0.5, qfinal_a0.5_explicit), so a **pass-1 v2** batch refuses to start
+  unless **all four** adapter pairs are on disk.
+- **Failure prevented:** the handed-over pass-1 command dies in preflight with
+  `missing AR LoRA adapter [qfinal_a0.5]: /content/converter/out/qfinal_a0.5/…` even though
+  pass-1 only ever uses `v2`. `docs/PRON_LORA_RESCUE.md` Phase 0 stages only v2 + qfinal_a0.3,
+  so following the runbook literally reproduces the failure. No `--skip-preflight` exists on
+  `generate.py` (unlike `rescue_abc_batch.sh`).
+- **Correct pattern:** stage every alias the manifest declares before the batch —
+  `gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/qfinal_a0.5" /content/converter/out/`
+  (`qfinal_a0.5_explicit` aliases into that same dir, so this satisfies both). Alternative:
+  trim the derived `batch_12_rock_v2.json`'s `loras` block to the adapters its songs actually reference.
+
+## 2026-09-30 — the inference test suite fails while a real render is running (host-wide liveness)
+
+- **Fact:** `status.py:158` `section_inference` decides RUNNING via `_pgrep("generate.py")` — a
+  **host-wide** process check, not scoped to the `INFER_OUT` directory it prints. So while any
+  real `generate.py` runs, `tests/e2e/test_monitor_status_e2e.py::test_j11_status_inference_section_from_real_run`
+  (which monkeypatches `INFER_OUT` to a tmp run and asserts `inference: idle`) fails with
+  `inference: RUNNING · j11 · 1/1 wavs` — the assertion, not the code, is wrong.
+- **Failure prevented:** reading that as a regression (it is not; the test is not isolated from a
+  concurrent run), and re-running the suite mid-batch — its e2e path spawns a real `generate.py`
+  that hashes the 3.9 GB GGUF, competing with the live render for CPU/disk.
+- **Correct pattern:** run the suite with no inference run active, or deselect that case:
+  `python -m pytest tests/ -q -k 'not test_j11_status_inference_section_from_real_run'`.
+  (Hardening not done: scope the liveness probe to `INFER_OUT`, or xfail the case when a live run
+  exists.)
+
+## 2026-09-30 — a rescue `--songs-json` uses flat `/content/…` dirs that setup.sh never stages and the backup never mirrors
+
+- **Fact:** `manifests/rescue_selection.batch_12_rock_v2_winning.json` (and the `batch_12_rock_v2`
+  one) name their dirs flat — `pass1_dir /content/batch_12_rock_v2_winning`,
+  `abc_dir /content/abc_v2_batch12_winning`, `out_dir /content/rescue_v2abc_batch12_winning` —
+  while `bootstrap/setup.sh --inference` stages only `/content/audiocpp_inference/**` and
+  `backup_to_gcp.py --inference` mirrors only `INFERENCE_ROOT/{out,prompts,scripts}` +
+  `/content/converter/out` + `/content/logs` + `agent_notes/`. On a fresh VM neither the pass-1
+  dir nor the abc dir exists locally; a restored box may have one and not the other.
+- **Failure prevented:** handing over the rescue command and getting
+  `[error] no batch_manifest.json under /content/batch_12_rock_v2_winning (is this a generate.py
+  --out-dir?)` — the driver only checks that the file is a manifest, not that the dir exists, so the
+  message reads like a shape error when the dir is simply absent. And, separately, assuming a rescue
+  run is durable when its flat `out_dir` is outside every backup target.
+- **Correct pattern:** before the first rescue command, stage the pass-1 dir from GCS to the exact
+  flat path in the JSON —
+  `gsutil -m cp -r "$GCP_BACKUP_BASE/audiocpp_inference/workspace/out/batch_12_rock_v2_winning" /content/` —
+  and cover the flat dirs in the backup run with explicit extras:
+  `python backup_to_gcp.py --inference --extra /content/batch_12_rock_v2_winning:workspace/out/batch_12_rock_v2_winning --extra /content/rescue_v2abc_batch12_winning:workspace/out/rescue_v2abc_batch12_winning`.
+
+## 2026-09-30 — `setup.sh` sources `/root/.secrets.env`, which can blank real env vars
+
+- **Fact:** `bootstrap/setup.sh` does `if [ -f /root/.secrets.env ]; then source /root/.secrets.env; fi`
+  before its `HF_TOKEN` presence check. On a box where that file exists but holds empty values
+  (`export HF_TOKEN=`), sourcing **overwrites** an otherwise-good `HF_TOKEN` in the environment, and
+  setup fails with `[FAIL] HF_TOKEN is empty` even though `env` shows a token.
+- **Failure prevented:** diagnosing a spurious auth failure, or "fixing" it by exporting the token in
+  the foreground command (which the `source` then clobbers anyway).
+- **Correct pattern:** check `env | grep HF_TOKEN` and `cat /root/.secrets.env` separately; if the file
+  is blank, stage the pieces setup.sh would (GCS `tools/build/audiocpp_cli`, `tools/{prompts,scripts}`,
+  `hf download audio-cpp/Yue2-3B-GGUF …`) directly, or fix the secrets file first.
+
+## 2026-10-01 — the rescue handover assumed the inference workspace, which a truly fresh VM lacks
+
+- **Fact:** the rescue selection `_comment`/`current.md` told the user to run the rescue, and (in one
+  spot) to "stage the pass-1 dir from GCS" — implicitly assuming `bootstrap/setup.sh --inference` had
+  already run. On a fresh VM it has not, so the flat-dir error above fires first and *hides* the rest:
+  `/content/audiocpp_inference/` (binary + `models/Yue2-3B-GGUF`) and
+  `/content/converter/out/qfinal_a0.{3,5}/` were all absent too. `--plan` would have passed after
+  staging pass-1 alone and the *render* would then fail in preflight on `missing: …/audiocpp_cli`.
+- **Failure prevented:** handing over / running the rescue on a VM that is one staged dir short, and
+  reading the pass-1 message as the whole problem when it is only the first of four missing inputs.
+- **Correct pattern (complete fresh-VM rescue prerequisites, in any order):**
+  1. pass-1 dir: `gsutil -m cp -r "$GCP_BACKUP_BASE/audiocpp_inference/workspace/out/batch_12_rock_v2_winning" /content/`
+  2. ABC dir: same from `.../workspace/out/abc_v2_batch12_winning` (present here; may be absent elsewhere)
+  3. qfinal adapters: `for a in qfinal_a0.3 qfinal_a0.5; do gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/$a" /content/converter/out/; done`
+  4. binary + GGUF models + style: `bash bootstrap/setup.sh --inference`
+  Then `--plan` (no GPU) and listen to `--smoke` before the batch. A single wrapper for 1+3+4:
+  `/content/logs/stage_rescue.sh` (2026-10-01 session).
+
+## 2026-10-01 — `pkill -f 'rescue_abc_batch.sh'` leaves the GPU child running, and `pkill -f` can match your own shell
+
+- **Fact 1:** the documented rescue stop (`docs/PRON_LORA_RESCUE.md` Phase 4, `agent_notes/current.md`)
+  is `pkill -f 'rescue_abc_batch.sh'`. That kills only the bash driver. The driver's child
+  `/usr/bin/time -v -o … audiocpp_cli …` and the `audiocpp_cli` process are **orphaned** and keep
+  rendering — after the driver was gone, `nvidia-smi` still read `99% / 6175 MiB`.
+- **Fact 2:** `pkill -f <pattern>` matches **any** process whose command line contains the pattern,
+  including the shell running the pkill when that command line also quotes the pattern
+  (e.g. `pgrep -af 'rescue_abc_batch.sh|audiocpp_cli…'`). The shell SIGTERMs itself mid-script, so
+  the later `sleep`/`pgrep`/`nvidia-smi` never run (`Killed by SIGTERM`).
+- **Failure prevented:** believing a run is stopped while the GPU is still busy, then starting the
+  next render on top of it (AGENTS.md §8), and a half-executed stop command.
+- **Correct pattern:** bracket the first char so the pattern cannot match its own cmdline, and stop
+  the child too:
+  `pkill -f '[r]escue_abc_batch'; pkill -f '[a]udiocpp_cli --task gen'`
+  then confirm `pgrep -af '[a]udiocpp_cli'` is empty and `nvidia-smi` shows 0 MiB before starting
+  anything. (`kill <pid>` on the `time` wrapper + `audiocpp_cli` PIDs works too, and is what fixed
+  it 2026-10-01.)
+
+## 2026-10-01 — a flat "labeled eval bundle" is NOT what `prepare_ab_eval.py` consumes
+
+- **Fact:** for the LoRA×seed matrix I hand-built a flat folder of renamed WAVs
+  (`01_v2_newseed_1012482070.wav`, …) plus a `README.txt`, to make listening easy. But
+  `INFERENCE/prepare_ab_eval.py` (skill `ab-blind-eval`) requires each render in its own **variant
+  subfolder** — `<root>[/<category>]/<variant>/<track>.wav` — deriving `variant` from the file's
+  parent and `category` from that parent relative to the root (`prepare_ab_eval.py:96-115`). Run on
+  a flat root, it raises `ValueError` for every file whose parent is the root:
+  `error: '<root's parent>' is not in the subpath of '<root>'` (uncaught `Path.relative_to`, caught
+  by `main` and printed as `error:`).
+- **Failure prevented:** handing over a "ready to evaluate" download that the eval tool rejects with
+  a message that reads like a path bug, not a layout mismatch — and the user hitting it on their box.
+- **Correct pattern:** ship the tree the tool consumes — one folder per variant, the **same track
+  stem** in each (usually `track.wav`), e.g.
+  `…/sameseed/{v2,q03,q05}/track.wav` + `…/newseed/{v2,q03,q05}/track.wav` — and run with `--root`
+  at that top folder and `--output` **outside** it. If a flat labeled set is also wanted for direct
+  listening, ship it as a *separate* copy, not the eval input.

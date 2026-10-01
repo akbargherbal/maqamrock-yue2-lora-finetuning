@@ -11,6 +11,7 @@ operating contract is `../AGENTS.md`.
 | Get training running on a fresh Colab VM | [START.md](START.md) |
 | Stop for the night and resume next session | [PAUSE_RESUME.md](PAUSE_RESUME.md) |
 | GCS mirror layout, verify a backup, restore from it | [BACKUP_RESTORE.md](BACKUP_RESTORE.md) |
+| GCS prefix organisation: sections, the frozen dataset, migration state | [GCP_ORGANIZATION_PLAN.md](GCP_ORGANIZATION_PLAN.md) |
 | Check how training is going | [MONITOR.md](MONITOR.md) |
 | Decide L4 vs A100 (cost/time) | [GPU_L4_VS_A100.md](GPU_L4_VS_A100.md) |
 | Finish a run: final backup + push checklist | [FINAL_BACKUP.md](FINAL_BACKUP.md) |
@@ -18,11 +19,15 @@ operating contract is `../AGENTS.md`.
 | Run inference (YuE2 GGUF + LoRA) on a fresh VM | [INFERENCE.md](INFERENCE.md) |
 | Train the AR-only pronunciation LoRA | [PRON_LORA.md](PRON_LORA.md) |
 | **Run / resume the long-aya Quran LoRA (`quran_long_aya_r8_s10`) — canonical hub** | [PRON_LORA_LONG.md](PRON_LORA_LONG.md) |
+| Build & multi-day plan for the long-aya run (full set; s10 pivot) | [PRON_LORA_LONG_PLAN.md](PRON_LORA_LONG_PLAN.md) |
 | Verify / offline-eval the pronunciation LoRA (source + AR-loss replay) | [PRON_LORA_VERIFICATION.md](PRON_LORA_VERIFICATION.md) |
 | Merge v2 + pron at a chosen alpha | [PRON_LORA_MERGE.md](PRON_LORA_MERGE.md) |
 | Alpha sweep + blinded listening review | [PRON_LORA_SWEEP.md](PRON_LORA_SWEEP.md) |
 | LoRA inventory: what exists, how many, where | [LORA_INVENTORY.md](LORA_INVENTORY.md) |
 | Prepare a blinded A/B(/N) audio listening package | [AB_BLIND_EVAL.md](AB_BLIND_EVAL.md) |
+| Generate with v2, transcribe to ABC, rescue pronunciation failures (B2) | [PRON_LORA_RESCUE.md](PRON_LORA_RESCUE.md) |
+| Understand the music-cover (guide/rescue) workflow end to end | [music-cover-workflow.md](music-cover-workflow.md) |
+| End-to-end testing plan (Colab, GPU-light: record→replay + budgeted smoke gate) | [E2E_TESTING_PLAN.md](E2E_TESTING_PLAN.md) |
 | Hand the user a command to run (terminal reality check) | [COMMAND_HANDOVER_GOTCHAS.md](COMMAND_HANDOVER_GOTCHAS.md) |
 | Review how it felt to work with the agent (experience, trust, friction) | [EXPERIENCE_CHECKLIST.md](EXPERIENCE_CHECKLIST.md) |
 | How the text→duration cap is derived | [text_to_duration_formula.md](text_to_duration_formula.md) |
@@ -33,8 +38,18 @@ Future ideas (not runbooks, not scheduled): [FUTURE_PRONUNCIATION_LORA.md](FUTUR
 — fixing Arabic pronunciation with a second, AR-only LoRA.
 
 Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapshot.
+[L4_HANDOFF_TASK14C.md](L4_HANDOFF_TASK14C.md) is a dated (2026-09-27) pre-work handoff
+for the superseded `pron_lora_ar_only_r8` run.
 `investigation.md` and `yue2-gguf-lora-findings.md` are **superseded/retracted**
-(see the banners at their tops); do not follow them.
+(see the banners at their tops); do not follow them. [music-cover-feasibility.md](music-cover-feasibility.md)
+is an investigation record: covers/ABC conditioning, the measured SheetSage2 audio→ABC
+CPU feasibility (§2.1), the α tradeoff (§3), the style/ABC levers (§4), the measured v2
+training-set facts (§5), and two scored blind rounds —
+verbatim/lyric-adherence (§6) and guide-conditioned (§7, where v2's `score.abc` steers
+`qfinal_a0.3` into v2's arrangement without losing its pronunciation), the **rescue workflow
+& economics** (§10, GPU-for-renders vs free-CPU-for-guide, with unit-cost table), plus open
+questions (§8). The §7 result is one blind n=1 listen; procedures stay with the runbooks
+above.
 
 ## Constants (memorize / copy)
 
@@ -52,7 +67,7 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 | LoRA library | `<GCS base>/loras/` (see [LORA_INVENTORY.md](LORA_INVENTORY.md)) |
 | Listening packages | `<GCS base>/listening/<PACKAGE>_INPUT/` (audio; not in the repo) |
 | Secrets/env | `/root/.secrets.env` (exports `HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_BACKUP_BASE`) |
-| Inference workspace | `/content/audiocpp_inference/` (GCS `<base>/audiocpp_inference/`) |
+| Inference workspace | `/content/audiocpp_inference/` (GCS `<base>/audiocpp_inference/`, sectioned `tools/` `workspace/` `evals/`) |
 | Inference output | `/content/audiocpp_inference/out/` (`_runs_status.log`, `*_time.txt`, `*.json`) |
 | Inference prompts | `/content/audiocpp_inference/prompts/<Maqam>_{style,lyrics}.txt` |
 | Converted LoRA | `/content/converter/out/akbar_arabic_rock_lora_{ar,nar}.safetensors` |

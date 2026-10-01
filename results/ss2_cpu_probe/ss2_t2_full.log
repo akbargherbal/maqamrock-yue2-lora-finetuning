@@ -1,0 +1,30 @@
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- configuration_mert2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- chord_spelling_sheetsage2.py
+- durations_sheetsage2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- io_sheetsage2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- notation_sheetsage2.py
+- generation_sheetsage2.py
+- midi_sheetsage2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- exports_sheetsage2.py
+- rendering_sheetsage2.py
+- tensors_sheetsage2.py
+- audio_sheetsage2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- labels_sheetsage2.py
+- schema_sheetsage2.py
+- tokenization_sheetsage2.py
+- processing_sheetsage2.py
+- pipeline_sheetsage2.py
+- modeling_mert2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+RESULT sample_song_t2: transcribe_s=347.6  peak_ram_GB=4.30

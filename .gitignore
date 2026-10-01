@@ -11,9 +11,13 @@ __pycache__/
 /output/
 
 # graphify: the interpreter path is VM-specific; the skill regenerates this on
-# each fresh VM (see graphify Step 1). The rest of graphify-out/ is committed on
-# main so the graph + incremental-update cache survive.
+# each fresh VM (see graphify Step 1). The graph outputs + manifest are committed
+# so the map survives on every clone; the extraction cache is NOT — it is keyed
+# by graphify version, so tracking it churns the whole dir whenever VMs run
+# different versions. It rebuilds locally for free (AST path, no LLM tokens).
+# See docs/GRAPHIFY.md.
 graphify-out/.graphify_python
+graphify-out/cache/
 # `graphify update` snapshots the previous curated graph to graphify-out/<date>/
 # before overwriting. It is a local safety net, not part of the layout (the live
 # copy is graph.json / GRAPH_REPORT.md / graph.html) — keep it out of git.
@@ -23,3 +27,14 @@ graphify-out/20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
 # <base>/listening/, not in the repo. Written by INFERENCE/prepare_ab_eval.py.
 *_INPUT/
 /ab_eval/
+
+# scratch screenshots — local only, not repo content
+scrap_screenshot/
+
+# tests/fixtures Tier B — heavy, GCS-backed, materialized by tests/fixtures/fetch.sh
+# (Tier A text fixtures in tests/fixtures/ stay tracked; see tests/fixtures/README.md)
+tests/fixtures/**/*.wav
+tests/fixtures/**/*.safetensors
+tests/fixtures/**/*.db
+tests/fixtures/**/audiocpp_cli
+tests/fixtures/**/out/

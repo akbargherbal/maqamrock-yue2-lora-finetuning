@@ -1,0 +1,24 @@
+============================================================================
+                         STYLE_ABLATION_AJAM_L0-L4                          
+               SECRET DECODER KEY — open only AFTER listening               
+                      Generated: 2026-09-29 02:35:21Z                       
+============================================================================
+seed=20260928  shuffle_per=category  variants=l0_raw, l1_full, l2_target_off, l3_anti_off, l4_min
+----------------------------------------------------------------------------
+Blind Filename | Category | Variant       | Note                            
+----------------------------------------------------------------------------
+ajam_A.mp3     | -        | l1_full       | trained flat shape, every clause
+ajam_B.mp3     | -        | l0_raw        | raw Suno block (control)        
+ajam_C.mp3     | -        | l3_anti_off   | L1 minus genre/production       
+ajam_D.mp3     | -        | l2_target_off | L1 minus vocals/instrumentation 
+ajam_E.mp3     | -        | l4_min        | minimal trigger + maqam + mood  
+============================================================================
+
+DECODE: match the label the evaluator preferred for a track against the
+'Variant' column above.
+VARIANT LEGEND
+  l0_raw = raw Suno block (control)
+  l1_full = trained flat shape, every clause
+  l2_target_off = L1 minus vocals/instrumentation
+  l3_anti_off = L1 minus genre/production
+  l4_min = minimal trigger + maqam + mood

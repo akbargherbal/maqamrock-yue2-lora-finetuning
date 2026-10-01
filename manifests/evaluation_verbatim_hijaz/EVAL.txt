@@ -1,0 +1,19 @@
+A/B BLIND AUDIO EVALUATION
+Generated: 2026-09-29 11:40:33Z
+
+You are evaluating audio blind. For each track you have one file per
+label (A, B, C, D, E), differing in configuration but with the labels
+randomly assigned. There is no quality key here on purpose.
+
+HOW TO EVALUATE
+1. Listen to all 1 track(s); within each, compare A vs B vs C vs D vs E.
+2. For each track pick a preference (a label, or 'tie'), a confidence
+   (low/medium/high), and one or two concrete observations (e.g.
+   pronunciation, timbre, arrangement, artifacts).
+3. Do not try to infer which label is the 'baseline' -- labels are
+   shuffled independently per category.
+4. Return a table: track | preferred label | confidence | notes.
+
+Send back only that table; the organizer decodes it.
+
+Files: 5 audio file(s), 1 track(s).

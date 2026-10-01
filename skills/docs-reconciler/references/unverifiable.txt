@@ -143,3 +143,88 @@ docs/EXPERIENCE_CHECKLIST.md :: config/data/course
 # pron-dataset build artifacts + ai-toolkit internals (live in /content, not the repo)
 docs/PRON_LORA_LONG_PLAN.md :: selection_report.json
 docs/PRON_LORA_LONG_PLAN.md :: dataloader_mixins.py
+
+# suno-workflow files (external repo github.com/akbargherbal/suno-workflow)
+docs/music-cover-feasibility.md :: workflow.md
+docs/music-cover-feasibility.md :: Quick_Guide.md
+
+# git flag (external tool), not a repo CLI flag
+docs/COMMAND_HANDOVER_GOTCHAS.md :: --branch
+
+# --bind is a python3 -m http.server (stdlib) flag quoted in the tunnel gotcha;
+# not repo code. Same doc as --branch above.
+docs/COMMAND_HANDOVER_GOTCHAS.md :: --bind
+
+# GCS bucket objects described by the reorganisation plan. The doc describes the
+# BUCKET, not the repo, so these are not repo paths. Reviewed one-by-one 2026-09-29
+# against each line: README.txt/LAYOUT.json are <base>/ and
+# <base>/audiocpp_inference/ objects, RETIRED.txt is a proposed _legacy/ object,
+# and WHERE_ARE_THE_KURD_WAVS.txt is the existing GCS breadcrumb.
+docs/GCP_ORGANIZATION_PLAN.md :: README.txt
+docs/GCP_ORGANIZATION_PLAN.md :: LAYOUT.json
+docs/GCP_ORGANIZATION_PLAN.md :: RETIRED.txt
+docs/GCP_ORGANIZATION_PLAN.md :: WHERE_ARE_THE_KURD_WAVS.txt
+
+# a tool the plan PROPOSES (plan item 13) and has deliberately not written yet
+docs/GCP_ORGANIZATION_PLAN.md :: INFERENCE/gcs_layout.py
+# same GCS object, but cited as a full path / with a literal ellipsis
+docs/GCP_ORGANIZATION_PLAN.md :: audiocpp_inference/WHERE_ARE_THE_KURD_WAVS.txt
+docs/GCP_ORGANIZATION_PLAN.md :: .../LAYOUT.json
+# `<base>`-relative GCS object names: the extractor strips the "<base>/" prefix and
+# then reports the bare filename as a missing repo path. Same class as above.
+SOURCE_OF_TRUTH.md :: LAYOUT.json
+
+# Contextual, non-repo mentions (each scoped to its doc, so the suppression stays narrow).
+# `_failed_runs.log` is written into a run's out-dir by the sweep drivers at runtime.
+docs/COMMAND_HANDOVER_GOTCHAS.md :: _failed_runs.log
+# research record (docs/music-cover-feasibility.md): `tokens.json` is a GCS-side artifact
+# under workspace/out/abc_v2/<track>/, not a repo file. (The prior `KEY.json` entry was
+# dropped 2026-09-29 when the doc was condensed and stopped citing that deleted decoder.)
+docs/music-cover-feasibility.md :: tokens.json
+
+# 2026-09-30 — docs/E2E_TESTING_PLAN.md. Sessions 1–4 all landed (the plan is
+# complete), so the `tests/e2e/*` and `tests/fixtures/*` files exist. What
+# remains are bare filenames the extractor resolves only against repo-root/docs
+# and cannot map into tests/e2e or tests/fixtures, plus runtime out-dir logs.
+# Doc-scoped, so the suppression cannot hide drift elsewhere — same class as the
+# `docs/GCP_ORGANIZATION_PLAN.md` "plan PROPOSES … not written yet" entry.
+# Pruned 2026-09-30: the four `tests/fixtures/…` full-path entries now resolve on
+# disk and matched no claim.
+docs/E2E_TESTING_PLAN.md :: conftest.py
+docs/E2E_TESTING_PLAN.md :: replay.py
+docs/E2E_TESTING_PLAN.md :: tests/test_*
+docs/E2E_TESTING_PLAN.md :: fake_run.py
+docs/E2E_TESTING_PLAN.md :: *_e2e.py
+docs/E2E_TESTING_PLAN.md :: recorded_batch.json
+docs/E2E_TESTING_PLAN.md :: loss_log.spec.json
+docs/E2E_TESTING_PLAN.md :: manifest.json
+docs/E2E_TESTING_PLAN.md :: fetch.sh
+docs/E2E_TESTING_PLAN.md :: _driver.log
+docs/E2E_TESTING_PLAN.md :: _failed_runs.log
+
+# 2026-09-30 — the investigation record's glob `manifests/evaluation_*/MY_EVALUATION.txt`
+# was tokenised to the bare prefix `manifests/evaluation_`. The directory family it
+# stands for (evaluation_style_ablation_ajam, evaluation_v2_abc_to_qfinal,
+# evaluation_verbatim_hijaz) does exist, so this is a false positive, not drift.
+docs/music-cover-feasibility.md :: manifests/evaluation_*
+
+# 2026-09-30 — docs/PRON_LORA_RESCUE.md runtime artifacts + the external git flag it quotes.
+# `_rescue_index.json`/`_rescue.json`/`_rescue_status.log` are written into the rescue
+# out-dir by INFERENCE/rescue_abc_batch.sh; `out/abc_v2_batch12/_driver.log` is written by
+# sheetsage2_transcribe.py. `--branch` is `git clone`'s flag, not repo code. Doc-scoped, so
+# the suppression cannot hide real drift elsewhere — same class as the E2E entries above.
+docs/PRON_LORA_RESCUE.md :: _rescue_index.json
+docs/PRON_LORA_RESCUE.md :: _rescue.json
+docs/PRON_LORA_RESCUE.md :: _rescue_status.log
+docs/PRON_LORA_RESCUE.md :: out/abc_v2_batch12/_driver.log
+docs/PRON_LORA_RESCUE.md :: _driver.log
+docs/PRON_LORA_RESCUE.md :: --branch
+# same runtime artifact, cited in the workflow design doc
+docs/music-cover-workflow.md :: _rescue_index.json
+
+# 2026-10-01 — new bare runtime/object tokens in prose. `_rescue_index.json` is the
+# rescue driver's out-dir index (SOURCE_OF_TRUTH.md row); `README.txt` here is the
+# companion object inside the GCS eval-bundle zip (not a repo file). Doc-scoped so
+# the suppression stays narrow.
+SOURCE_OF_TRUTH.md :: _rescue_index.json
+docs/COMMAND_HANDOVER_GOTCHAS.md :: README.txt

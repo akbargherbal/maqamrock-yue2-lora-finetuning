@@ -1,5 +1,20 @@
 # Offline AR-loss replay — L4 results (Task 16B)
 
+## Results index
+
+| record | what |
+|---|---|
+| [`pron_sweep/`](pron_sweep/) | α sweep, 5 merged configs × 4 maqams (Task 17) |
+| [`pron_fine_sweep/`](pron_fine_sweep/) | fine α sweep at checkpoint 3050 (Hijaz + Kurd) |
+| [`pron_ckpt_sweep/`](pron_ckpt_sweep/) | pron checkpoints 1525 vs 4575 at α 0.5 (Hijaz + Kurd) |
+| [`maqam_lyric_swap/`](maqam_lyric_swap/) | cross-maqam lyric swap (Hijaz + Kurd) |
+| [`pron_knob_probe/`](pron_knob_probe/) | request-option knob probe at ckpt 3050, α 0.5 |
+| [`pron_production_merge/`](pron_production_merge/) | v2 + pron merge candidates (checkpoint 3050) |
+| [`ss2_cpu_probe/`](ss2_cpu_probe/) | SheetSage2 audio→ABC CPU feasibility (2026-09-30) |
+| `replay_l4_full_*.json` | this file — offline AR-loss replay per checkpoint |
+
+---
+
 Full replay of the AR-only pronunciation LoRA over all **180 `val` pairs** for all
 **4 trainable checkpoints**, run on a Colab **L4** (sm_89) on 2026-09-24.
 

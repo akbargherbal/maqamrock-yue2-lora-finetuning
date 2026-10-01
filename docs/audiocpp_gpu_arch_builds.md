@@ -122,20 +122,25 @@ faster, and explicit about which GPU it targets.
 ## GCS staging convention (per-arch)
 
 ```
-$GCP_BACKUP_BASE/audiocpp_inference/build/<arch-tag>/audiocpp_cli
+$GCP_BACKUP_BASE/audiocpp_inference/tools/build/<arch-tag>/audiocpp_cli
 ```
 
 with `<arch-tag>` = `sm<CC>-<gpu>`, e.g. `sm75-t4`, `sm80-a100`, `sm89-l4`:
 
 ```bash
 gsutil cp /content/audio.cpp/build/linux-cuda-release/bin/audiocpp_cli \
-  "$GCP_BACKUP_BASE/audiocpp_inference/build/sm89-l4/audiocpp_cli"
+  "$GCP_BACKUP_BASE/audiocpp_inference/tools/build/sm89-l4/audiocpp_cli"
 ```
 
-Note: the existing T4 binary lives at the *flat* path
-`.../audiocpp_inference/build/audiocpp_cli` (predates this convention), and
-`bootstrap/setup.sh`'s `job_audiocpp_binary` currently pulls only that flat path.
-Auto-selecting the arch subdir for whatever GPU a live VM has is **not designed
+Note — updated 2026-09-29. The canonical T4 binary is now
+`.../audiocpp_inference/tools/build/audiocpp_cli`; the pre-2026-09-29 flat path
+`.../audiocpp_inference/build/audiocpp_cli` still exists as that migration's
+rollback and is retired only after the sectioned path has served a real session
+(`docs/GCP_ORGANIZATION_PLAN.md`). `bootstrap/setup.sh`'s `job_audiocpp_binary` now
+probes `tools/build/` and **falls back** to the flat path when the sectioned one is
+absent. **Stage new builds to `tools/build/`** (as above), not to the flat path —
+otherwise the binary lands where `setup.sh` no longer looks. Auto-selecting the arch
+subdir for whatever GPU a live VM has is **not designed
 yet** — that is a separate task. Until then, stage per-arch copies and fetch the
 right one by hand.
 
@@ -171,11 +176,13 @@ The T4 path is the worked example for this whole procedure.
   `/content/logs/audiocpp_build.log`.
 - **Artifact:** `build/linux-cuda-release/bin/audiocpp_cli`, ELF 64-bit, not
   stripped, **350,161,824 bytes**; `ldd` shows the CUDA libs listed above.
-- **Persisted:** `$GCP_BACKUP_BASE/audiocpp_inference/build/audiocpp_cli`
-  (the flat path; `job_audiocpp_binary` pulls it on `--inference`).
+- **Persisted:** `$GCP_BACKUP_BASE/audiocpp_inference/tools/build/audiocpp_cli`
+  (`job_audiocpp_binary` pulls it on `--inference`, falling back to the legacy flat
+  `.../audiocpp_inference/build/audiocpp_cli` — see the note under the staging
+  convention).
 - **Run proof (live T4):** the persisted CPU-runtime-built sm75 binary is
   proven end-to-end on a live T4. On 2026-09-22 `bootstrap/setup.sh --inference`
-  staged exactly this binary (`job_audiocpp_binary` pulls the flat GCS path) and
+  staged exactly this binary (`job_audiocpp_binary` pulls the sectioned GCS path) and
   `INFERENCE/run_one.sh` generated **all four held-out maqams, seed 1, exit 0**
   (real 48 kHz stereo WAVs, 216–240 s each) — `../PROGRESS.md`, "First T4
   inference run". Earlier T4 runs (2026-09-21, `audio.cpp` @ `e3de8e3`) proved

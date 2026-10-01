@@ -29,7 +29,7 @@ reproduce a track across GPU/attention architectures.
 - Sidecars: `sidecars_t4_regen/{t0.8,rp1.4}__Kurd.json` (here) — each carries a
   `regen` block naming the L4 original it stands in for, and its `gpu`/
   `compute_cap`/`binary_sha256` fields identify it as T4/sm75.
-- Raw output + README: GCS `…/audiocpp_inference/pron_knob_probe/t4_regen/`
+- Raw output + README: GCS `…/audiocpp_inference/evals/pron_knob_probe/t4_regen/`
   (deliberately a **separate prefix**, so the surviving original L4 `t0.8/Kurd`
   json/log/gpu.csv/time.txt at the canonical path are not overwritten).
 - The GCS `listening/PRON_KNOB_PROBE_INPUT/Kurd_C.mp3` (rp1.4) and `Kurd_D.mp3` (t0.8)

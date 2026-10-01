@@ -23,11 +23,11 @@ INFERENCE/run_one.sh Hijaz 1                                          # cap defa
 |---|---|---|---|
 | YuE2 GGUF main (`yue2-3b-bf16.gguf`), VAE (`yue2-vae-f16.gguf`), `sidecars/*` | **Hugging Face** `audio-cpp/Yue2-3B-GGUF` (`hf download`) | `/content/audiocpp_inference/models/Yue2-3B-GGUF/` | **No** — deliberately excluded, regenerable (`backup_to_gcp.py` comment: "models/ multi-GB GGUFs; setup.sh re-downloads them from HF") |
 | `audio.cpp` **source** | GitHub `0xShug0/audio.cpp` (clone only, never built by bootstrap) | `/content/audio.cpp` | No |
-| Prebuilt `audiocpp_cli` (sm_75 / T4) | GCS `audiocpp_inference/build/audiocpp_cli` | `/content/audiocpp_inference/bin/audiocpp_cli` | **Yes** |
+| Prebuilt `audiocpp_cli` (sm_75 / T4) | GCS `audiocpp_inference/tools/build/audiocpp_cli` | `/content/audiocpp_inference/bin/audiocpp_cli` | **Yes** |
 | Converted step-3000 LoRA, unfused (`akbar_arabic_rock_lora_{ar,nar}.safetensors`) | GCS `loras/audio_cpp/style/` (canonical library; see `docs/LORA_INVENTORY.md`) | `/content/converter/out/` | **Yes** |
 | Current pron merges (`qfinal_a0.3/0.5`) | GCS `loras/audio_cpp/pron/<cfg>/` | staged per-sweep to `/content/converter/out/<cfg>/` | **Yes** |
-| Prompts (one `*_style.txt` + `*_lyrics.txt` per maqam) | GCS `audiocpp_inference/prompts/` | `/content/audiocpp_inference/prompts/` | **Yes** |
-| Runner + cap script (`run_one.sh`, `duration_cap.py`) | **Repo `INFERENCE/`** (canonical; the GCS `audiocpp_inference/scripts/` copy is a legacy mirror) | `/content/maqamrock-yue2-lora-finetuning/INFERENCE/` | `scripts/` still mirrored, but the repo copy is what runs |
+| Prompts (one `*_style.txt` + `*_lyrics.txt` per maqam) | GCS `audiocpp_inference/tools/prompts/` | `/content/audiocpp_inference/prompts/` | **Yes** |
+| Runner + cap script (`run_one.sh`, `duration_cap.py`) | **Repo `INFERENCE/`** (canonical; the GCS `audiocpp_inference/tools/scripts/` copy is a legacy mirror) | `/content/maqamrock-yue2-lora-finetuning/INFERENCE/` | `scripts/` still mirrored, but the repo copy is what runs |
 
 The superseded `pron_lora_ar_only_r8` merges (`c3050/c4575/cfinal_a0.*`) are **archived**
 under GCS `archive/pron_lora_ar_only_legacy/` — nothing stages them; see
@@ -110,7 +110,7 @@ self-contained:
 | `<Maqam>_<seed>.wav` | the generated audio |
 | `<Maqam>_<seed>.log` | CLI `--log` (TRACE/TIMING, errors) |
 | `<Maqam>_<seed>_time.txt` | `/usr/bin/time -v` (wall, max RSS, CPU%) |
-| `<Maqam>_<seed>_gpu.csv` | 1 Hz GPU util/mem/power/temp during the run |
+| `<Maqam>_<seed>_gpu.csv` | 1 Hz `nvidia-smi` during the run — header row, then `gpu_util_pct,mem_used_mib,power_draw_w,temp_c` |
 | `_runs_status.log` | one START/END line per run (always written) |
 
 ## Generate from your own JSON (bring your own lyrics)
@@ -230,13 +230,13 @@ Flags: `--keep {downloaded-a,a,b,first}` (which take survives; default
 ## Two ways to have the binary
 
 1. **Prebuilt (default, what `setup.sh` stages).** The flat GCS object
-   `audiocpp_inference/build/audiocpp_cli` is the **sm_75 / T4** build.
+   `audiocpp_inference/tools/build/audiocpp_cli` is the **sm_75 / T4** build.
 2. **Build from source** for a different GPU (e.g. L4) — see
    [`audiocpp_gpu_arch_builds.md`](audiocpp_gpu_arch_builds.md). Place the result
    at `/content/audiocpp_inference/bin/audiocpp_cli` (where `run_one.sh` looks:
    `BIN="$ROOT/bin/audiocpp_cli"`).
 
-Per-arch GCS copies exist (e.g. `audiocpp_inference/build/sm89-l4/audiocpp_cli`),
+Per-arch GCS copies exist (e.g. `audiocpp_inference/tools/build/sm89-l4/audiocpp_cli`),
 but `job_audiocpp_binary` still pulls only the flat sm_75 path; picking the arch
 subdir from the live GPU's compute capability is not designed yet.
 
@@ -323,6 +323,38 @@ early more often than the T4's step-3000 run, so the ratio is setup-specific.
 Per config (mean wall): `a0` 235 s, `c3050_a0.5` 215 s, `cfinal_a0.5` 209 s,
 `c3050_a1.0` 107 s, `cfinal_a1.0` 107 s; per maqam 163–187 s (tracks the cap).
 Full table in the repo: `results/pron_sweep/README.md`.
+
+### Rescue batch benchmark (2026-10-01, Colab T4 High-RAM)
+
+Full **24-take** `rescue_abc_batch.sh` run (12 songs × 2 takes), each guided by its own
+SheetSage2 melody-only ABC. This is the `qfinal_a0.3` + **`cot=full`** + **fresh-seed-per-take**
+config. Wall time is `/usr/bin/time -v`'s elapsed per `audiocpp_cli` process (model load +
+generation), from each `<stem>_time.txt`.
+
+**Setup:** Colab **T4 High-RAM** — Tesla T4 (15 GB, driver 580.82.07), **8 vCPU** Xeon @ 2.0 GHz,
+**50 GiB RAM**; bf16 GGUFs, `yue2.attention=flash`, `threads=8`, `qfinal_a0.3` (AR+NAR scale 1.0),
+`cot=full`, `abc_file=<take's melody ABC>`, fresh random seed per take, `semantic_max_tokens`
+from the pass-1 manifest (7000/7500).
+
+| Metric | Value |
+|---|---|
+| Tracks | 24 (24 ok / 0 fail) |
+| **Mean wall** | **401.0 s (6.68 min/track)** |
+| Median / min / max | 406.7 / 307.6 / 490.1 s |
+| Total (sum of track walls) | 9625 s = **2.67 h** |
+| Throughput | **~9.0 tracks/hour** |
+| Audio length/track | mean 246.2 s (median 250.1; 194.9–294.2) |
+| Realtime factor (wall/audio) | **~1.62×** |
+| Peak RSS | ~6.9 GB (median 6870, max 7025 MB) |
+| GPU (observed) | ~99% util, ~5.4 GB VRAM of 15 GB |
+| Output | median 48 MB/track (48 kHz stereo) |
+
+**vs pass-1 (`cot=off`, mean 389.6 s above):** the guided `cot=full` rescue is **~3% slower per
+track** (median ~7%), i.e. ABC guidance adds little per-track cost; wall still tracks cap/audio
+length. Per-track rows: `results/rescue_batch12_t4_benchmark/per_track.json`.
+
+Rule of thumb: a guided rescue is **~6.7 min/track on a T4 (~9 tracks/hour)** — same order as
+plain generation.
 
 ## Known stale bits / open items
 

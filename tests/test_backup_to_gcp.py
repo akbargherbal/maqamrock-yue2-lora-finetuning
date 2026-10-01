@@ -425,6 +425,26 @@ def test_main_extra_with_explicit_sub(bak, monkeypatch, tmp_path, capsys):
     assert "gs://b/p/akbar_arabic_rock_lora/wavs" in dsts
 
 
+def test_inference_targets_are_sectioned(bak):
+    """Pin the REAL inference remote layout (docs/GCP_ORGANIZATION_PLAN.md).
+
+    Every other test here monkeypatches INFERENCE_TARGETS, so without this the
+    sectioned layout could silently drift back into a flat pile, and nothing
+    would fail. Also pins that the LOCAL sources are unchanged -- the whole
+    migration is remote-only, which is what makes it non-breaking.
+    """
+    assert [sub for _, sub, _ in bak.INFERENCE_TARGETS] == [
+        "workspace/out", "tools/prompts", "tools/scripts", "logs", "agent_notes",
+    ]
+    assert [str(src) for src, _, _ in bak.INFERENCE_TARGETS] == [
+        "/content/audiocpp_inference/out",
+        "/content/audiocpp_inference/prompts",
+        "/content/audiocpp_inference/scripts",
+        "/content/logs",
+        str(bak.REPO_ROOT / "agent_notes"),
+    ]
+
+
 def test_main_extra_with_inference(bak, monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(bak, "INFERENCE_TARGETS", _dirs(tmp_path, ["out", "prompts"]))
     extra = tmp_path / "notes"

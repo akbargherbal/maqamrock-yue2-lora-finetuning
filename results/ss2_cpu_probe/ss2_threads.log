@@ -1,0 +1,38 @@
+loading m-a-p/SheetSage2
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- configuration_mert2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- chord_spelling_sheetsage2.py
+- durations_sheetsage2.py
+- labels_sheetsage2.py
+- schema_sheetsage2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- notation_sheetsage2.py
+- midi_sheetsage2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- exports_sheetsage2.py
+- rendering_sheetsage2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/m-a-p/SheetSage2:
+- tokenization_sheetsage2.py
+- audio_sheetsage2.py
+- io_sheetsage2.py
+- generation_sheetsage2.py
+- tensors_sheetsage2.py
+- pipeline_sheetsage2.py
+- modeling_mert2.py
+- processing_sheetsage2.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+loaded in 7.0s
+warmup on /content/warm10.wav
+== threads=8 ==
+RESULT threads=8: clip_transcribe_s=96.1  peak_ram_GB=3.95
+== threads=4 ==
+RESULT threads=4: clip_transcribe_s=101.3  peak_ram_GB=4.10
+== threads=2 ==
+RESULT threads=2: clip_transcribe_s=139.6  peak_ram_GB=4.11
+== threads=1 ==
+RESULT threads=1: clip_transcribe_s=261.5  peak_ram_GB=4.16

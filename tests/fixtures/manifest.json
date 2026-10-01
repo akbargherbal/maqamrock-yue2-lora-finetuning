@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "generated_utc": "2026-09-30T04:15:00Z",
+  "note": "Provenance for the Tier A fixtures consumed by tests/e2e. Tier B (heavy audio/db/binaries) is GCS-backed and gitignored; fetch it with tests/fixtures/fetch.sh. The provenance guard test (plan §4.4) compares audio_cpp_commit / checkpoint_step here against the values the code computes today and fails on mismatch.",
+  "provenance": {
+    "gpu": "NVIDIA L4",
+    "compute_cap": "8.9",
+    "audio_cpp_commit": "30ec4596",
+    "checkpoint_step": 3000,
+    "recorded_at": "2026-09-30T04:15:00Z",
+    "source": "E2E Session 4 T5 gate: sm89-l4 binary + one real Hijaz/seed=1 generation + 10-step training smoke"
+  },
+  "tier_a": {
+    "recorded_batch.json": {
+      "sha256": "1c49b7bdf63257fcc30f8041767337a5b80992ac5ff2efc953f795961303db85",
+      "kind": "recorded_batch",
+      "source": "hand-authored from results/maqam_lyric_swap/sidecars/*.json; one synthetic failure track"
+    },
+    "loss_log.spec.json": {
+      "sha256": "ca40e445eb6bc533407c0c0dada83545ae644a7e21432fbdf21ed23a036814ae",
+      "kind": "loss_log_spec",
+      "source": "hand-authored to the ai-toolkit UILogger schema (monitor_loss.py docstring); J11 builds loss_log.db from it"
+    },
+    "inference/Hijaz_1.log": {
+      "sha256": "8bc617ac21184c633d71c749f620df4917ebb26d7d96707af7fd2902208fc1f0",
+      "kind": "cli_log",
+      "source": "real run_one.sh Hijaz 1 on L4, 2026-09-30; CLI --log"
+    },
+    "inference/Hijaz_1_time.txt": {
+      "sha256": "01305073d0c8b6e2f254bf49c78e56bf3fb556af4bb413f113c36e666b8b2d1b",
+      "kind": "time",
+      "source": "real /usr/bin/time -v, Exit status: 0, wall 5:20.89"
+    },
+    "inference/Hijaz_1_gpu.csv": {
+      "sha256": "6b89b0c56bd751d85ec6f0ea739376c08ae3ace01d7a3d881f6aac4c3819838c",
+      "kind": "gpu_csv",
+      "source": "real 1 Hz nvidia-smi on L4 during the smoke run"
+    },
+    "inference/_runs_status.log": {
+      "sha256": "cb4decbc99e02b3830b7a9e659e6f906a289b15ffd2d3d0a05c427cc50990624",
+      "kind": "runs_status",
+      "source": "real START/END Hijaz seed=1 exit=0"
+    },
+    "training/train_smoke.log": {
+      "sha256": "cfb9502ba890265a9d27aed08688d6dbb1ce42c39b83c9e1c6b687b6e9c927a6",
+      "kind": "train_log",
+      "source": "real 10/10-step pron_lora_ar_only_smoke on L4, 2026-09-30"
+    }
+  },
+  "tier_b": {
+    "inference/Hijaz_1.wav": {
+      "gcs": "gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/fixtures/inference/Hijaz_1.wav",
+      "sha256": "3ada7127aeace511eeb51b00a28056ec5689b7f54cd9280e5e9ba2fed1abdfe9",
+      "kind": "audio",
+      "note": "real L4 generation, 277.16s 48kHz stereo"
+    },
+    "inference/audiocpp_cli": {
+      "gcs": "gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/tools/build/sm89-l4/audiocpp_cli",
+      "sha256": "97028a71fd4d86378161162364dc6cdc85a569461d3afb6bf78f83ea572ad3d4",
+      "kind": "binary",
+      "arch": "sm89-l4",
+      "note": "sm89-l4 binary that ran the smoke; sha matches recorded_batch provenance.binary_sha256"
+    },
+    "training/loss_log.db": {
+      "gcs": "gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/fixtures/training/train_smoke_loss_log.db",
+      "sha256": "8c08895dd99c9eda45f4d69809365278e91f2ac939580477b8a78a6ccf5a08d5",
+      "kind": "loss_log_db",
+      "note": "real 10-step ai-toolkit UILogger db"
+    }
+  }
+}

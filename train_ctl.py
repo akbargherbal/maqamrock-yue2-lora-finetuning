@@ -223,6 +223,7 @@ def cmd_stop(args: argparse.Namespace) -> int:
         return 1
 
     print(f"sending SIGINT to pid {pid} (clean, checkpoint-safe stop)…")
+    started = time.monotonic()
     os.kill(pid, signal.SIGINT)
     train_log = _train_log(logs, log_name)
     deadline = time.time() + args.timeout
@@ -230,12 +231,19 @@ def cmd_stop(args: argparse.Namespace) -> int:
         if not _alive(pid):
             break
         if "Job stopped" in _tail(train_log, 40):
+            # The run writes "Job stopped" *before* it finishes exiting. Under
+            # load the log write and the actual exit can be descheduled apart,
+            # so give the process a short grace to leave /proc instead of
+            # racing it and reporting a false "still running".
+            grace = time.monotonic() + 5.0
+            while time.monotonic() < grace and _alive(pid):
+                time.sleep(0.2)
             break
         time.sleep(1.0)
 
     if _alive(pid):
-        print(f"warning: still running after {args.timeout}s — check {train_log}",
-              file=sys.stderr)
+        print(f"warning: still running after {time.monotonic() - started:.0f}s "
+              f"— check {train_log}", file=sys.stderr)
         return 1
     if "Job stopped" in _tail(train_log, 40):
         print("stopped cleanly (log shows 'Job stopped')")

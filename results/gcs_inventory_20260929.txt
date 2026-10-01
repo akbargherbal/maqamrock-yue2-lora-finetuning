@@ -1,0 +1,46 @@
+GCS prefix inventory — gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning
+Generated (UTC): 2026-09-29T09:01:58Z
+Repo HEAD at generation: b462d5b
+Plan: docs/GCP_ORGANIZATION_PLAN.md §10.
+
+READ-ONLY. Nothing was moved, created or deleted. One pass over
+'gsutil ls -l -r <prefix>/**', bucketed by top-level entry, so object counts and
+bytes come from the same listing (leaf objects at the prefix root are real rows).
+
+ENTRY                                         OBJECTS            BYTES
+------------------------------------------ ---------- ----------------
+akbar_arabic_rock_lora                            150       1747236777
+akbar_arabic_rock_lora_smoketest_archived          13         16619945
+archive                                           117       4264711388
+audiocpp_inference                               3081      18810316871
+dataset                                           534       1543175383
+LAYOUT.json                                         1             2432
+listening                                          28        125747762
+loras                                               7        605862864
+pron_alpha_sweep                                   66       1338394446
+pron_dataset                                    12592       1068728539
+pron_fine_sweep                                    39        508359268
+PRON_FINE_SWEEP_EVAL_INPUT                         10         40654446
+PRON_FINE_SWEEP_EVAL_INPUT.zip                      1         40498923
+pron_lora_ar_only_r8_obsolete                      40         83864510
+pron_production_merge                               3        440584680
+quran_long_aya_dataset                         162746      30111258977
+quran_long_aya_dataset_s10                          1        568002560
+quran_long_aya_dataset_s10.tar                      1       3161436160
+quran_long_aya_dataset_s10.tar.sha256               1              106
+quran_long_aya_r8                                  23         50723638
+quran_long_aya_r8_s10                              36        165157137
+quran_long_aya_s10_manifest.json                    1           149849
+README.txt                                          1             2329
+repo_bundles                                        1         84390358
+------------------------------------------ ---------- ----------------
+TOTAL                                          179493      64775879348
+
+FROZEN (decided 2026-09-29, NOT migrated): quran_long_aya_dataset/
+  The row above is the authority for its size. It is 90.7% of all objects in this
+  prefix, so moving it would cost a multi-GB copy plus a six-figure object
+  verification to buy only a rename. It is DOCUMENTED rather than moved, which is
+  what actually fixes 'I cannot find it'.
+
+Also not migrated: datasets/ runs/ evals/ _legacy/ are still PLANNED sections
+(see the plan's §11 for what was actually applied).

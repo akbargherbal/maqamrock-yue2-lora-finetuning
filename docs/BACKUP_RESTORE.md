@@ -13,6 +13,14 @@ is written there that refuses to let two different runs share a prefix.
 `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`; override with
 `--base gs://…`.
 
+The **inference** workspace is sectioned (2026-09-29): `tools/` holds what
+`setup.sh` re-stages each VM, `workspace/` holds run output, `evals/` holds sweep
+output (pushed by the sweep tooling, not by this daemon). Local paths are
+unchanged — only the remote subfolder moved — and the old flat paths
+(`out/`, `prompts/`, `scripts/`, …) are still present and are retired only after
+the sectioned ones have served a real session. See
+[`GCP_ORGANIZATION_PLAN.md`](GCP_ORGANIZATION_PLAN.md).
+
 ## What gets mirrored
 
 | Mode | Local | GCS (`<base>/<run-name>/`) |
@@ -20,8 +28,8 @@ is written there that refuses to let two different runs share a prefix.
 | **training** (default) `--run-name akbar_arabic_rock_lora` | `/content/ai-toolkit/output/akbar_arabic_rock_lora/` | `output/` |
 | | `/content/logs/` | `logs/` |
 | | `agent_notes/` | `agent_notes/` |
-| **inference** `--inference` (`--run-name audiocpp_inference`) | `/content/audiocpp_inference/out/` | `out/` |
-| | `/content/audiocpp_inference/{prompts,scripts}/` | `prompts/`, `scripts/` |
+| **inference** `--inference` (`--run-name audiocpp_inference`) | `/content/audiocpp_inference/out/` | `workspace/out/` |
+| | `/content/audiocpp_inference/{prompts,scripts}/` | `tools/prompts/`, `tools/scripts/` |
 | | `/content/logs/`, `agent_notes/` | `logs/`, `agent_notes/` |
 | **watch** `--watch LOCAL[:SUB]` | exactly the folders you name | prefix root, or the given `SUB` |
 | **extra** `--extra LOCAL[:SUB]` | the mode's targets **plus** these folders | each at `<base>/<run-name>/<SUB>` (SUB defaults to the folder's basename) |

@@ -19,7 +19,8 @@
 #   $OUT/<Maqam>_<seed>.wav        audio
 #   $OUT/<Maqam>_<seed>.log        CLI --log (TRACE/TIMING, errors)
 #   $OUT/<Maqam>_<seed>_time.txt   /usr/bin/time -v (wall, max RSS, CPU%)
-#   $OUT/<Maqam>_<seed>_gpu.csv    1 Hz: util, mem_used, power, temp
+#   $OUT/<Maqam>_<seed>_gpu.csv    1 Hz nvidia-smi; HEADER ROW then 4 columns:
+#                                  gpu_util_pct,mem_used_mib,power_draw_w,temp_c
 #   $OUT/_runs_status.log          one START/END line per run (always)
 set -u
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -58,6 +59,11 @@ else
 fi
 
 : > "$csv"
+# Header row first. Without it a 4-column CSV is unreadable unless you happen to
+# have the writer's comment in front of you -- and nothing recorded the column
+# order. Names mirror gpu_logger.py's FIELDS; the order MUST match the
+# nvidia-smi query below (util, mem.used, power.draw, temperature).
+echo "gpu_util_pct,mem_used_mib,power_draw_w,temp_c" >> "$csv"
 ( while :; do nvidia-smi --query-gpu=utilization.gpu,memory.used,power.draw,temperature.gpu \
     --format=csv,noheader,nounits >> "$csv" 2>/dev/null; sleep 1; done ) &
 SM=$!

@@ -1,0 +1,17 @@
+====================================================
+             A/B BLIND AUDIO EVALUATION             
+   SECRET DECODER KEY — open only AFTER listening   
+          Generated: 2026-09-29 14:57:24Z           
+====================================================
+seed=20260932  shuffle_per=category  variants=a0_cotoff, a1_cotfull_noabc, a2_cotfull_abc, ref_v2_cotoff
+----------------------------------------------------
+Blind Filename         | Category | Variant         
+----------------------------------------------------
+nesib_4148240095_A.wav | -        | ref_v2_cotoff   
+nesib_4148240095_B.wav | -        | a0_cotoff       
+nesib_4148240095_C.wav | -        | a1_cotfull_noabc
+nesib_4148240095_D.wav | -        | a2_cotfull_abc  
+====================================================
+
+DECODE: match the label the evaluator preferred for a track against the
+'Variant' column above.

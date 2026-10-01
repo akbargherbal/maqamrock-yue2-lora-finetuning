@@ -1,0 +1,183 @@
+Running 1 job
+{
+    "type": "diffusion_trainer",
+    "training_folder": "/content/ai-toolkit/output",
+    "sqlite_db_path": "/content/ai-toolkit/aitk_db.db",
+    "device": "cuda",
+    "trigger_word": "",
+    "performance_log_every": 10,
+    "network": {
+        "type": "lora",
+        "linear": 8,
+        "linear_alpha": 8,
+        "conv": 16,
+        "conv_alpha": 16,
+        "lokr_full_rank": true,
+        "lokr_factor": -1,
+        "network_kwargs": {
+            "ignore_if_contains": [
+                "transformer.nar"
+            ]
+        }
+    },
+    "log_dir": "output/pron_lora_ar_only_smoke/tensorboard",
+    "log_config": {
+        "log_every": 1
+    },
+    "save": {
+        "dtype": "bf16",
+        "save_every": 10,
+        "max_step_saves_to_keep": 12,
+        "save_format": "diffusers",
+        "push_to_hub": false
+    },
+    "datasets": [
+        {
+            "folder_path": "/content/pron_dataset/smoke",
+            "mask_path": null,
+            "mask_min_value": 0.1,
+            "default_caption": "",
+            "caption_ext": "txt",
+            "caption_dropout_rate": 0,
+            "cache_latents_to_disk": true,
+            "is_reg": false,
+            "network_weight": 1,
+            "resolution": [
+                512
+            ],
+            "controls": [],
+            "shrink_video_to_frames": true,
+            "num_frames": 1,
+            "flip_x": false,
+            "flip_y": false,
+            "num_repeats": 1
+        }
+    ],
+    "train": {
+        "batch_size": 1,
+        "bypass_guidance_embedding": false,
+        "steps": 10,
+        "gradient_accumulation": 1,
+        "train_unet": true,
+        "train_text_encoder": false,
+        "gradient_checkpointing": true,
+        "noise_scheduler": "flowmatch",
+        "optimizer": "adamw8bit",
+        "timestep_type": "sigmoid",
+        "content_or_style": "balanced",
+        "optimizer_params": {
+            "weight_decay": 0.0001
+        },
+        "unload_text_encoder": false,
+        "cache_text_embeddings": true,
+        "lr": 0.0001,
+        "ema_config": {
+            "use_ema": true,
+            "ema_decay": 0.999
+        },
+        "skip_first_sample": false,
+        "force_first_sample": false,
+        "disable_sampling": true,
+        "dtype": "bf16",
+        "diff_output_preservation": false,
+        "diff_output_preservation_multiplier": 1,
+        "diff_output_preservation_class": "person",
+        "switch_boundary_every": 1,
+        "loss_type": "mse"
+    },
+    "logging": {
+        "log_every": 1,
+        "use_ui_logger": true
+    },
+    "model": {
+        "name_or_path": "Comfy-Org/YuE2/checkpoints/yue2_3b_int8_convrot.safetensors",
+        "quantize": true,
+        "qtype": "convrot8",
+        "quantize_te": false,
+        "qtype_te": "qfloat8",
+        "arch": "yue2",
+        "low_vram": false,
+        "model_kwargs": {
+            "cot": "off",
+            "abc_dropout": 0.5,
+            "sample_ar_repetition_penalty": 1.2,
+            "ar_kl_weight": 0.2,
+            "train_window_frames": 0
+        },
+        "compile": false
+    },
+    "sample": {
+        "sampler": "flowmatch",
+        "sample_every": 250,
+        "sample_start_step": 0,
+        "width": 1024,
+        "height": 1024,
+        "neg": "",
+        "seed": 42,
+        "walk_seed": true,
+        "guidance_scale": 1,
+        "sample_steps": 32,
+        "num_frames": 1,
+        "fps": 1,
+        "duration": 360
+    }
+}
+Using EMA
+
+#############################################
+# Running job: pron_lora_ar_only_smoke
+#############################################
+
+
+Running  1 process
+Loading YuE2 from /content/ai-toolkit/models/checkpoints/yue2_3b_int8_convrot.safetensors
+Checkpoint is pre-quantized (convrot8); keeping it
+create LoRA network. base dim (rank): 8, alpha: 8
+neuron dropout: p=None, rank dropout: p=None, module dropout: p=None
+apply LoRA to Conv2d with kernel size (3,3). dim (rank): 16, alpha: 16
+create LoRA for Text Encoder: 0 modules.
+create LoRA for U-Net: 112 modules.
+enable LoRA for U-Net
+Dataset: /content/pron_dataset/smoke
+  -  Preprocessing image dimensions
+  0%|          | 0/16 [00:00<?, ?it/s] 25%|##5       | 4/16 [00:00<00:00, 38.65it/s]100%|##########| 16/16 [00:00<00:00, 88.25it/s]
+  -  Found 16 images
+Bucket sizes for /content/pron_dataset/smoke:
+16122ms: 2 files
+18581ms: 2 files
+10506ms: 2 files
+4367ms: 2 files
+5128ms: 2 files
+13144ms: 2 files
+15968ms: 2 files
+14950ms: 2 files
+8 buckets made
+Caching latents for /content/pron_dataset/smoke
+ - Saving latents to disk
+Caching latents to disk:   0%|          | 0/16 [00:00<?, ?it/s]Loading YuE2 semantic tokenizer (MERT-v2-FullSong + head)
+
+Loading weights:   0%|          | 0/876 [00:00<?, ?it/s][A
+Loading weights:  12%|#1        | 105/876 [00:00<00:00, 927.81it/s][A
+Loading weights:  23%|##2       | 198/876 [00:00<00:00, 852.37it/s][A
+Loading weights:  32%|###2      | 284/876 [00:00<00:00, 788.88it/s][A
+Loading weights:  42%|####1     | 364/876 [00:00<00:00, 742.97it/s][A
+Loading weights:  51%|#####1    | 449/876 [00:00<00:00, 774.38it/s][A
+Loading weights:  60%|######    | 528/876 [00:00<00:00, 755.75it/s][A
+Loading weights:  70%|######9   | 610/876 [00:00<00:00, 767.49it/s][A
+Loading weights:  78%|#######8  | 687/876 [00:00<00:00, 743.43it/s][A
+Loading weights:  90%|########9 | 787/876 [00:00<00:00, 814.13it/s][ALoading weights: 100%|##########| 876/876 [00:01<00:00, 816.00it/s]
+Caching latents to disk:   6%|6         | 1/16 [00:23<05:53, 23.54s/it]Caching latents to disk:  12%|#2        | 2/16 [00:23<02:17,  9.85s/it]Caching latents to disk:  19%|#8        | 3/16 [00:24<01:11,  5.48s/it]Caching latents to disk:  25%|##5       | 4/16 [00:24<00:41,  3.43s/it]Caching latents to disk:  31%|###1      | 5/16 [00:24<00:25,  2.28s/it]Caching latents to disk:  38%|###7      | 6/16 [00:24<00:15,  1.59s/it]Caching latents to disk:  44%|####3     | 7/16 [00:25<00:10,  1.15s/it]Caching latents to disk:  50%|#####     | 8/16 [00:25<00:06,  1.16it/s]Caching latents to disk:  56%|#####6    | 9/16 [00:25<00:04,  1.55it/s]Caching latents to disk:  62%|######2   | 10/16 [00:25<00:03,  1.89it/s]Caching latents to disk:  69%|######8   | 11/16 [00:25<00:02,  2.48it/s]Caching latents to disk:  75%|#######5  | 12/16 [00:26<00:01,  2.76it/s]Caching latents to disk:  81%|########1 | 13/16 [00:26<00:00,  3.46it/s]Caching latents to disk:  88%|########7 | 14/16 [00:26<00:00,  3.71it/s]Caching latents to disk:  94%|#########3| 15/16 [00:26<00:00,  4.07it/s]Caching latents to disk: 100%|##########| 16/16 [00:26<00:00,  4.27it/s]Caching latents to disk: 100%|##########| 16/16 [00:26<00:00,  1.68s/it]
+Caching text_embeddings for /content/pron_dataset/smoke
+ - Saving text embeddings to disk
+Caching text embeddings to disk:   0%|          | 0/16 [00:00<?, ?it/s]Caching text embeddings to disk:   6%|6         | 1/16 [00:03<00:47,  3.16s/it]Caching text embeddings to disk: 100%|##########| 16/16 [00:03<00:00,  4.98it/s]
+Caching embeddings and unloading text encoder
+
+***** UNLOADING TEXT ENCODER *****
+Embeddings cached to disk. We dont need the text encoder anymore
+***********************************
+
+Skipping first sample due to config setting
+pron_lora_ar_only_smoke:   0%|          | 0/10 [00:00<?, ?it/s]pron_lora_ar_only_smoke:   0%|          | 0/10 [00:07<?, ?it/s, lr: 1.0e-04 loss: 6.640e+00]pron_lora_ar_only_smoke:  10%|#         | 1/10 [00:07<01:11,  7.95s/it, lr: 1.0e-04 loss: 6.640e+00]pron_lora_ar_only_smoke:  10%|#         | 1/10 [00:09<01:11,  7.95s/it, lr: 1.0e-04 loss: 7.471e+00]pron_lora_ar_only_smoke:  20%|##        | 2/10 [00:09<00:22,  2.84s/it, lr: 1.0e-04 loss: 7.471e+00]pron_lora_ar_only_smoke:  20%|##        | 2/10 [00:11<00:22,  2.84s/it, lr: 1.0e-04 loss: 6.748e+00]pron_lora_ar_only_smoke:  30%|###       | 3/10 [00:11<00:15,  2.23s/it, lr: 1.0e-04 loss: 6.748e+00]pron_lora_ar_only_smoke:  30%|###       | 3/10 [00:12<00:15,  2.23s/it, lr: 1.0e-04 loss: 6.760e+00]pron_lora_ar_only_smoke:  40%|####      | 4/10 [00:12<00:09,  1.52s/it, lr: 1.0e-04 loss: 6.760e+00]pron_lora_ar_only_smoke:  40%|####      | 4/10 [00:13<00:09,  1.52s/it, lr: 1.0e-04 loss: 7.009e+00]pron_lora_ar_only_smoke:  50%|#####     | 5/10 [00:13<00:06,  1.36s/it, lr: 1.0e-04 loss: 7.009e+00]pron_lora_ar_only_smoke:  50%|#####     | 5/10 [00:15<00:06,  1.36s/it, lr: 1.0e-04 loss: 6.471e+00]pron_lora_ar_only_smoke:  60%|######    | 6/10 [00:15<00:05,  1.31s/it, lr: 1.0e-04 loss: 6.471e+00]pron_lora_ar_only_smoke:  60%|######    | 6/10 [00:16<00:05,  1.31s/it, lr: 1.0e-04 loss: 6.763e+00]pron_lora_ar_only_smoke:  70%|#######   | 7/10 [00:16<00:03,  1.29s/it, lr: 1.0e-04 loss: 6.763e+00]pron_lora_ar_only_smoke:  70%|#######   | 7/10 [00:17<00:03,  1.29s/it, lr: 1.0e-04 loss: 8.525e+00]pron_lora_ar_only_smoke:  80%|########  | 8/10 [00:17<00:02,  1.27s/it, lr: 1.0e-04 loss: 8.525e+00]pron_lora_ar_only_smoke:  80%|########  | 8/10 [00:18<00:02,  1.27s/it, lr: 1.0e-04 loss: 6.135e+00]pron_lora_ar_only_smoke:  90%|######### | 9/10 [00:18<00:01,  1.29s/it, lr: 1.0e-04 loss: 6.135e+00]pron_lora_ar_only_smoke:  90%|######### | 9/10 [00:20<00:01,  1.29s/it, lr: 1.0e-04 loss: 6.766e+00]pron_lora_ar_only_smoke: 100%|##########| 10/10 [00:20<00:00,  1.28s/it, lr: 1.0e-04 loss: 6.766e+00]pron_lora_ar_only_smoke: 100%|##########| 10/10 [00:20<00:00,  2.02s/it, lr: 1.0e-04 loss: 6.766e+00]
+Saved checkpoint to /content/ai-toolkit/output/pron_lora_ar_only_smoke/pron_lora_ar_only_smoke.safetensors
+Saved optimizer to /content/ai-toolkit/output/pron_lora_ar_only_smoke/optimizer.pt
+

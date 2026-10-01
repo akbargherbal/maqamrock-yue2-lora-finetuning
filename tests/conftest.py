@@ -12,6 +12,11 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INFERENCE_DIR = REPO_ROOT / "INFERENCE"
+TESTS_DIR = Path(__file__).resolve().parent
+
+# make the shared `staging` helper importable from tests/ and tests/e2e/
+if str(TESTS_DIR) not in sys.path:
+    sys.path.insert(0, str(TESTS_DIR))
 
 # captured before the autouse fixture replaces it, so it can be tested directly
 _ORIGINAL_WAIT_VRAM_FREE: dict = {}
