@@ -945,3 +945,12 @@ covers both._
   (rescue row + the binary now takes `cot=<cfg>`, `seed` noted).
 - Not moved: `INFERENCE/songs.qfinal_{suno,trigger}.report.json` (reports, not manifests).
 - Authority: `INFERENCE/rescue_abc_batch.sh --help`, the file tree, the reconciler scripts. Non-GPU.
+
+## 2026-10-01 — rescue-batch T4/High-RAM benchmark recorded
+
+- Added a benchmark of the 24-take guided rescue run (`qfinal_a0.3`, `cot=full`, fresh seed per take)
+  to `docs/INFERENCE.md` beside the existing T4/L4 benchmarks, with raw per-track data in
+  `results/rescue_batch12_t4_benchmark/per_track.json`. Headline: mean **401.0 s/track (6.68 min)**,
+  24/24 ok, **~9.0 tracks/hour**, realtime **~1.62×**, peak RSS ~6.9 GB on a **T4 High-RAM** box
+  (T4 15 GB + 50 GiB RAM); ~3% slower than the `cot=off` pass-1 benchmark. Authority: the run's own
+  `<stem>_time.txt` + `_rescue_index.json`. Non-GPU.

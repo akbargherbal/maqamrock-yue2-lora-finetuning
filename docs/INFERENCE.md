@@ -324,6 +324,38 @@ Per config (mean wall): `a0` 235 s, `c3050_a0.5` 215 s, `cfinal_a0.5` 209 s,
 `c3050_a1.0` 107 s, `cfinal_a1.0` 107 s; per maqam 163–187 s (tracks the cap).
 Full table in the repo: `results/pron_sweep/README.md`.
 
+### Rescue batch benchmark (2026-10-01, Colab T4 High-RAM)
+
+Full **24-take** `rescue_abc_batch.sh` run (12 songs × 2 takes), each guided by its own
+SheetSage2 melody-only ABC. This is the `qfinal_a0.3` + **`cot=full`** + **fresh-seed-per-take**
+config. Wall time is `/usr/bin/time -v`'s elapsed per `audiocpp_cli` process (model load +
+generation), from each `<stem>_time.txt`.
+
+**Setup:** Colab **T4 High-RAM** — Tesla T4 (15 GB, driver 580.82.07), **8 vCPU** Xeon @ 2.0 GHz,
+**50 GiB RAM**; bf16 GGUFs, `yue2.attention=flash`, `threads=8`, `qfinal_a0.3` (AR+NAR scale 1.0),
+`cot=full`, `abc_file=<take's melody ABC>`, fresh random seed per take, `semantic_max_tokens`
+from the pass-1 manifest (7000/7500).
+
+| Metric | Value |
+|---|---|
+| Tracks | 24 (24 ok / 0 fail) |
+| **Mean wall** | **401.0 s (6.68 min/track)** |
+| Median / min / max | 406.7 / 307.6 / 490.1 s |
+| Total (sum of track walls) | 9625 s = **2.67 h** |
+| Throughput | **~9.0 tracks/hour** |
+| Audio length/track | mean 246.2 s (median 250.1; 194.9–294.2) |
+| Realtime factor (wall/audio) | **~1.62×** |
+| Peak RSS | ~6.9 GB (median 6870, max 7025 MB) |
+| GPU (observed) | ~99% util, ~5.4 GB VRAM of 15 GB |
+| Output | median 48 MB/track (48 kHz stereo) |
+
+**vs pass-1 (`cot=off`, mean 389.6 s above):** the guided `cot=full` rescue is **~3% slower per
+track** (median ~7%), i.e. ABC guidance adds little per-track cost; wall still tracks cap/audio
+length. Per-track rows: `results/rescue_batch12_t4_benchmark/per_track.json`.
+
+Rule of thumb: a guided rescue is **~6.7 min/track on a T4 (~9 tracks/hour)** — same order as
+plain generation.
+
 ## Known stale bits / open items
 
 - `bootstrap/setup.sh`'s **closing banner is stale**: it still says "audio.cpp
