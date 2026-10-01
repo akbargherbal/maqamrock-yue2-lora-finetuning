@@ -1,0 +1,31 @@
+LoRA x seed matrix (Al-Har, Maqam Ajam) — blind listening — RESULT
+2026-10-01
+
+Track: 07-الحر-الشديد-وقطع-القفر-والوعول_rock
+One song, cot=off (plain generation, NO ABC guide), cap 7500, identical style/lyrics.
+Six clips; labels A–F were randomly assigned. They differ ONLY in adapter and seed:
+
+    arm            adapter        seed
+    v2_sameseed    v2 (pass-1)    3781160148
+    v2_newseed     v2             1012482070
+    q03_sameseed   qfinal_a0.3    3781160148
+    q03_newseed    qfinal_a0.3    1012482070
+    q05_sameseed   qfinal_a0.5    3781160148
+    q05_newseed    qfinal_a0.5    1012482070
+
+VERDICT (single listening pass):  WINNER = q03_newseed  (qfinal_a0.3 @ seed 1012482070)
+    07-الحر-الشديد-وقطع-القفر-والوعول_rock__q03_newseed_1012482070.wav
+(reference pass-1 take for the same-seed column: 07-…_rock_3781160148.wav = v2 @ 3781160148)
+
+No per-arm scores recorded — winner only.
+
+CAVEATS (do not over-read): n = 1 track, 1 listener, subjective. The win is consistent
+with three different stories at once — (a) qfinal_a0.3 beats v2, (b) qfinal_a0.3 beats
+qfinal_a0.5, (c) a FRESH seed beats the same seed — and this single clip cannot separate
+them. Replication on more songs/seeds is required before any of the three is claimed.
+
+Provenance
+    renders : gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/workspace/out/20261001-044005_lora_seed_matrix_07_alhar_rock/
+    package : gs://…/audiocpp_inference/evals/lora_seed_matrix_07_alhar_rock/lora_seed_matrix_07_alhar_rock.zip
+    manifest: manifests/lora_seed_matrix_07_alhar_rock.json
+    adapters: v2 = /content/converter/out ; qfinal_a0.3 = /content/converter/out/qfinal_a0.3 ; qfinal_a0.5 = /content/converter/out/qfinal_a0.5

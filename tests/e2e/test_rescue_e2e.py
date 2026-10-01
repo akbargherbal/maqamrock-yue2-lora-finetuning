@@ -430,3 +430,75 @@ def test_arabic_stem_roundtrip(ws):
     assert (ws.out / f"{STEMS_A[0]}_rescue.json").exists()
     # only the selected stem rendered
     assert _wavs(ws) == [f"{STEMS_A[0]}.wav"]
+
+
+# --- seed override: fresh seed per take, ABC stays keyed to the source stem -----
+
+def test_songs_json_seed_random_rerolls_but_keeps_abc_source(ws):
+    r = run_cfg(ws, _cfg(ws, defaults={"seed": "random"}), "--plan")
+    assert r.returncode == 0, r.stderr
+    idx = _index(ws)
+    assert idx["n"] == 3
+    for t in idx["tracks"]:
+        assert t["stem"] == f"{t['name']}_{t['seed']}"
+        assert t["abc_source_stem"] == t["src_stem"]
+        assert t["stem"] != t["src_stem"]              # fresh seed (collision ~2**-32)
+    a = [t for t in idx["tracks"] if t["name"] == SONG_A]
+    assert a[0]["stem"] != a[1]["stem"]                # independent draw per take
+    assert {t["src_stem"] for t in idx["tracks"]} == set(STEMS_A + [STEM_B])
+
+
+def test_songs_json_seed_pinned_int(ws):
+    r = run_cfg(ws, _cfg(ws, defaults={"seed": 424242}, songs=[STEMS_A[0]]), "--plan")
+    assert r.returncode == 0, r.stderr
+    t = _index(ws)["tracks"][0]
+    assert t["seed"] == 424242
+    assert t["stem"] == f"{SONG_A}_424242"
+    assert t["src_stem"] == STEMS_A[0]
+
+
+def test_songs_json_per_song_seed_beats_defaults(ws):
+    cfg = _cfg(ws, defaults={"seed": 1}, songs=[{"stem": STEMS_A[1], "seed": 999}])
+    r = run_cfg(ws, cfg, "--plan")
+    assert r.returncode == 0, r.stderr
+    t = _index(ws)["tracks"][0]
+    assert t["seed"] == 999 and t["stem"] == f"{SONG_A}_999"
+    assert t["src_stem"] == STEMS_A[1]
+
+
+def test_songs_json_bad_seed_errors(ws):
+    r = run_cfg(ws, _cfg(ws, defaults={"seed": "soon"}, songs=[STEMS_A[0]]), "--plan")
+    assert r.returncode == 2
+    assert "seed must be an integer" in r.stderr
+
+
+def test_songs_json_no_seed_override_is_back_compatible(ws):
+    r = run_cfg(ws, _cfg(ws, songs=[STEM_B]), "--plan")
+    assert r.returncode == 0, r.stderr
+    t = _index(ws)["tracks"][0]
+    assert t["stem"] == STEM_B and t["src_stem"] == STEM_B
+
+
+def test_songs_json_random_seed_render_uses_original_abc(ws):
+    r = run_cfg(ws, _cfg(ws, defaults={"seed": "random"}, songs=[STEM_B]))
+    assert r.returncode == 0, r.stderr
+    t = _index(ws)["tracks"][0]
+    out_stem = t["stem"]
+    assert t["src_stem"] == STEM_B
+    assert (ws.out / f"{out_stem}.wav").is_file()
+    side = json.loads((ws.out / f"{out_stem}_rescue.json").read_text(encoding="utf-8"))
+    assert side["abc_source_stem"] == STEM_B
+    assert side["seed"] == t["seed"]
+    args = json.loads((ws.out / f"{out_stem}.wav.args.json").read_text(encoding="utf-8"))
+    assert args["opts"]["abc_file"] == str(ws.abc / STEM_B / "score.abc")
+    assert str(t["seed"]) in args["argv"]
+
+
+def test_songs_json_random_seed_is_stable_across_replan(ws):
+    cfg = _cfg(ws, defaults={"seed": "random"}, songs=[STEM_B])
+    assert run_cfg(ws, cfg, "--plan").returncode == 0
+    first = _index(ws)["tracks"][0]["stem"]
+    assert run_cfg(ws, cfg, "--plan").returncode == 0
+    # the drawn seed is reused from the index, not re-rolled (resume-stable)
+    assert _index(ws)["tracks"][0]["stem"] == first
+    assert _index(ws)["tracks"][0]["seed_mode"] == "random"

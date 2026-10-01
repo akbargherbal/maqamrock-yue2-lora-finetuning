@@ -12,14 +12,19 @@ liked v2 take — **B2's guide quality is still unrun (§8)**, so a 1-track smok
 ## The alignment spine (read this first)
 
 The whole workflow is keyed by one string: **`<name>_<seed>`** — the pass-1 WAV stem. It is
-also the ABC folder name and the rescue WAV stem. "Which ABC belongs to which" is therefore
-structural, never hand-carried:
+also the ABC folder name (and, by default, the rescue WAV stem). "Which ABC belongs to which"
+is therefore structural, never hand-carried:
 
 | stage | artifact | produced by |
 |---|---|---|
 | pass-1 | `out/<run>/<name>_<seed>.wav` + `.json` sidecar | `generate.py` (`f"{name}_{seed}.wav"`) |
 | transcribe | `out/abc_v2/<name>_<seed>/score.abc` | `sheetsage2_transcribe.py` (folder = WAV stem) |
 | rescue | `out/<rescue>/<name>_<seed>.wav` | `rescue_abc_batch.sh` (same stem, **separate dir**) |
+
+A **seed override** (`defaults.seed` / per-song `seed`, see Phase 4) re-renders a take with a new
+seed while the guide stays keyed to the original stem: the pass-1 WAV + ABC are read from
+`<name>_<pass1seed>` (recorded as `abc_source_stem`), the output is `<name>_<newseed>`. So the
+pairing stays explicit — "the only new input is the guide, plus optionally a fresh seed".
 
 ## Gates (what makes it truthful and cheap)
 
@@ -105,11 +110,15 @@ Selectors accept a song **name or a full stem** (`<name>_<seed>`): a name rescue
 that song, a stem exactly one. Give them as `--songs` (inline), `--songs-file` (one per line), or
 `--songs-json` — a **self-contained run config** shaped like a generate.py manifest: an optional
 `loras` alias registry (`{alias: {dir}}` or `{alias: {ar, nar}}`, resolved exactly like
-`generate.py:resolve_loras`) + a `defaults` block (`lora`, `cot`, `adapter`, `threads`, `limit`) +
+`generate.py:resolve_loras`) + a `defaults` block (`lora`, `cot`, `seed`, `adapter`, `threads`, `limit`) +
 a `songs` list + the three dirs (`pass1_dir`, `abc_dir`, `out_dir`). Because a rescue reuses each
-pass-1 take's own lyrics/style/seed/cap (G6), entries are **selectors**, not song specs: a bare
-`<name-or-stem>`, or an object `{"stem"|"name", ...}` that may override `lora`/`cot` for that take
-(`note` is ignored). Precedence: per-song field > env (`cot`/`adapter`) > `defaults` > built-in; the
+pass-1 take's own lyrics/style/cap (G6), entries are **selectors**, not song specs: a bare
+`<name-or-stem>`, or an object `{"stem"|"name", ...}` that may override `lora`/`cot`/`seed` for that
+take (`note` is ignored). `seed` is a pinned int in `[0,2^32)` or `"random"` = a **fresh seed per
+take** (drawn once and persisted in `_rescue_index.json`; delete that file to re-draw), so a take can
+be re-sung with the same ABC but a new seed — output `<name>_<newseed>`, sidecar
+`abc_source_stem`. Precedence: per-song field > env (`cot`/`adapter`) > `defaults` > built-in (for
+`seed`: per-song > `defaults.seed` > the take's own); the
 adapter pair is per-song/defaults alias > env `QF_AR`/`QF_NAR`; for the three dirs a CLI flag wins.
 Edit a copy of `INFERENCE/rescue_selection.example.json`. Omit `songs` to rescue every track.
 Other flags: `--limit N` (cap the run), `--threads N`,

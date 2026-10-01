@@ -204,6 +204,11 @@ the per-arm render logs byte-for-byte (`ref` 52,208,428 / `a0` 49,313,068 / `a1`
 
 ## 8. Open questions
 
+- **(2026-10-01) LoRA/seed matrix (partial answer).** One Ajam song, `cot=off` plain generation
+  across {v2, qfinal_a0.3, qfinal_a0.5} × {pass-1 seed, fresh seed}: **`qfinal_a0.3`@fresh-seed won**
+  the blind listen (n=1, one listener) — `manifests/evaluation_lora_seed_matrix/MY_EVALUATION.txt`.
+  The rescue driver also gained a `seed` override (`"random"` = a fresh seed per take; the ABC stays
+  keyed to the original stem) — `INFERENCE/rescue_abc_batch.sh --help`.
 - [ ] **Replicate round 2** on the other two seeds (`1029169725`, `1938238049`) — the sheet
   asks for it. *(next)*
 - [ ] **B1 vs B2 guide.** Does the melody-only SheetSage2 ABC (B2) steer arrangement as well

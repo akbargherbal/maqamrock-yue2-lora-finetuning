@@ -13,11 +13,16 @@
 #     there is no duplicate option to resolve.
 #
 # Alignment guarantees (the point of the file):
-#   * one key everywhere: <name>_<seed>  (pass-1 WAV stem == ABC folder == rescue stem)
+#   * one key everywhere: <name>_<seed>  (pass-1 WAV stem == ABC folder). The
+#     rescue stem is the same <name>_<seed> UNLESS a seed override is set: then the
+#     guide stays keyed to <name>_<pass1seed> (recorded as abc_source_stem) and the
+#     output is <name>_<newseed> — so the ABC->take pairing is explicit, not implied.
 #   * refuses to write into the pass-1 dir, or anywhere under it  -> cannot clobber
 #     the liked take (run_one.sh would name the rescue <name>_<seed>.wav, identical)
-#   * seed/cap/style/lyrics come from the pass-1 batch_manifest.json + the
-#     flattened prompts/  -> nothing is retyped, the ONLY variable is the guide
+#   * cap/style/lyrics come from the pass-1 batch_manifest.json + the flattened
+#     prompts/  -> nothing is retyped; the seed is the pass-1 take's own unless a
+#     seed override is given (defaults.seed / per-song seed: an int, or "random"
+#     for a FRESH seed per take — re-rolls the performance, the guide is unchanged)
 #   * _rescue_index.json records sha256 of every pass-1 WAV and its ABC, so the
 #     pairing is proven, not assumed (use --verify to re-check before a batch)
 #
@@ -25,10 +30,10 @@
 #   STEMS (<name>_<seed>). A name selects every take of that song; a stem selects
 #   one. --songs-json mirrors a generate.py manifest: an optional "loras" alias
 #   registry + a "defaults" block + a "songs" list, plus the three rescue dirs
-#   (pass1_dir/abc_dir/out_dir). A song entry may override "lora"/"cot". Because a
-#   rescue reuses each pass-1 take's own lyrics/style/seed/cap (G6), the ONLY new
-#   input per take is its ABC guide (abc_dir/<stem>/score.abc) -> entries are
-#   SELECTORS, not full song specs. Example:
+#   (pass1_dir/abc_dir/out_dir). A song entry may override "lora"/"cot"/"seed".
+#   Because a rescue reuses each pass-1 take's own lyrics/style/cap (G6), the ONLY
+#   new input per take is its ABC guide (abc_dir/<stem>/score.abc) + an optional
+#   new seed -> entries are SELECTORS, not full song specs. Example:
 #   INFERENCE/rescue_selection.example.json.
 #
 # Env overrides:
@@ -54,10 +59,12 @@ usage: rescue_abc_batch.sh [--pass1-dir DIR --abc-dir DIR --out-dir DIR]
   --songs      comma/space/newline list of song NAMES and/or STEMS to rescue
   --songs-file one selector per line ('#' comments and blank lines ignored)
   --songs-json a JSON run config: "loras" (alias registry) + "defaults" +
-               "songs" (selectors; each may override lora/cot) + pass1_dir/
+               "songs" (selectors; each may override lora/cot/seed) + pass1_dir/
                abc_dir/out_dir. Precedence: per-song > env (cot) > defaults >
                built-in; the adapter pair: per-song/defaults alias > env pair;
-               the three dirs: CLI flag > file. Example:
+               the three dirs: CLI flag > file. "seed" (in defaults or per song)
+               is an integer in [0,2^32) or "random" (a FRESH seed per take;
+               the ABC/pass-1 stay keyed to the original stem). Example:
                INFERENCE/rescue_selection.example.json
   --plan       validate + write the index, print the plan; no GPU, no render
   --verify     re-check the stored index sha256 against disk, then exit (no render)
@@ -164,6 +171,14 @@ def need_str(obj, key, where):
         sys.exit(f"[error] --songs-json {where}.{key} must be a non-empty string")
     return v.strip()
 
+def need_seed(v, where):
+    # a fresh per-take random seed, or a pinned integer in [0, 2**32)
+    if v == "random":
+        return "random"
+    if isinstance(v, bool) or not isinstance(v, int) or not (0 <= v < 2**32):
+        sys.exit(f'[error] --songs-json {where}.seed must be an integer in [0,2**32) or "random"')
+    return v
+
 out = {"loras": {}, "defaults": {}, "songs": []}
 for key in ("pass1_dir", "abc_dir", "out_dir"):
     if key in doc:
@@ -199,11 +214,13 @@ dft = doc.get("defaults", {})
 if not isinstance(dft, dict):
     sys.exit("[error] --songs-json 'defaults' must be an object")
 for k in dft:
-    if k not in {"lora", "cot", "adapter", "threads", "limit"}:
+    if k not in {"lora", "cot", "adapter", "threads", "limit", "seed"}:
         sys.exit(f"[error] --songs-json unknown defaults key: {k}")
 for k in ("lora", "cot", "adapter"):
     if k in dft:
         out["defaults"][k] = need_str(dft, k, "defaults")
+if "seed" in dft:
+    out["defaults"]["seed"] = need_seed(dft["seed"], "defaults")
 for k in ("threads", "limit"):
     if k in dft:
         v = dft[k]
@@ -223,6 +240,8 @@ if songs is not None:
             if not sel:
                 sys.exit(f"[error] --songs-json entry needs 'stem' or 'name': {e!r}")
             ovr = {k: need_str(e, k, "song") for k in ("lora", "cot") if k in e}
+            if "seed" in e:
+                ovr["seed"] = need_seed(e["seed"], "song")
         else:
             sys.exit(f"[error] --songs-json entry must be a string or object: {e!r}")
         sel = sel.strip()
@@ -327,8 +346,8 @@ def sha(p):
     return h.hexdigest()
 bad, n, seen = 0, 0, set()
 for t in d["tracks"]:
-    if want and t.get("name") not in want and t.get("stem") not in want: continue
-    seen.add(t.get("name")); seen.add(t.get("stem")); n += 1
+    if want and t.get("name") not in want and t.get("stem") not in want and t.get("src_stem") not in want: continue
+    seen.add(t.get("name")); seen.add(t.get("stem")); seen.add(t.get("src_stem")); n += 1
     for key, p in (("pass1_wav_sha256", t["pass1_wav"]), ("abc_sha256", t["abc"])):
         try:
             if sha(p) != t[key]:
@@ -349,7 +368,7 @@ trap 'rm -f "$PLAN_TSV" "${RESOLVED_JSON:-}"' EXIT
 python3 - "$PASS1" "$ABC_DIR" "$SONGS" "$INDEX" "$RESOLVED_JSON" \
          "$ENV_QF_AR" "$ENV_QF_NAR" "$RESCUE_COT" "$RESCUE_ADAPTER" \
          <<'PY' > "$PLAN_TSV" || { echo "[error] index build failed" >&2; exit 3; }
-import hashlib, json, re, sys
+import hashlib, json, random, re, sys
 from pathlib import Path
 (pass1, abc_dir, songs_arg, index_path, resolved_json,
  fb_ar, fb_nar, fb_cot, fb_adapter) = sys.argv[1:10]
@@ -359,7 +378,7 @@ cfg = json.loads(Path(resolved_json).read_text(encoding="utf-8"))
 loras, defaults = cfg.get("loras", {}), cfg.get("defaults", {})
 ov_by = {}
 for s in cfg.get("songs", []):
-    ov_by.setdefault(s["sel"], {k: s.get(k) for k in ("lora", "cot")})
+    ov_by.setdefault(s["sel"], {k: s.get(k) for k in ("lora", "cot", "seed")})
 
 def sha(p: Path):
     h = hashlib.sha256()
@@ -375,21 +394,30 @@ tracks = man.get("tracks") or []
 if not tracks:
     sys.exit(f"[error] batch_manifest.json has no tracks: {man_path}")
 
-rows, problems, seen = [], [], set()
+# Reuse seeds drawn by a previous run in this out-dir, so "random" is drawn ONCE:
+# a resume / re-plan must not re-roll (it would re-render and never converge).
+prev = {}
+try:
+    _old = json.loads(Path(index_path).read_text(encoding="utf-8"))
+    prev = {t.get("src_stem"): t for t in _old.get("tracks", []) if t.get("src_stem")}
+except (OSError, ValueError):
+    prev = {}
+
+rows, problems, seen, used_out = [], [], set(), set()
 for t in tracks:
     name, seed = t.get("name"), t.get("seed")
     if name is None or seed is None:
         problems.append(f"manifest track missing name/seed: {t!r}"); rows.append(None); continue
-    stem = f"{name}_{seed}"
-    if want and name not in want and stem not in want:
+    src_stem = f"{name}_{seed}"
+    if want and name not in want and src_stem not in want:
         continue
-    seen.add(name); seen.add(stem)
+    seen.add(name); seen.add(src_stem)
     cap = t.get("cap")
     style_rel, lyrics_rel = t.get("style_file") or "", t.get("lyrics_file") or ""
     style = pass1 / style_rel if style_rel else None
     lyrics = pass1 / lyrics_rel if lyrics_rel else None
-    wav = pass1 / f"{stem}.wav"
-    abc = abc_dir / stem / "score.abc"
+    wav = pass1 / f"{src_stem}.wav"
+    abc = abc_dir / src_stem / "score.abc"
     bad = []
     if cap is None:                    bad.append("manifest has no cap")
     if not wav.is_file():              bad.append(f"missing pass-1 wav: {wav}")
@@ -397,10 +425,10 @@ for t in tracks:
     if style is None or not style.is_file():   bad.append(f"missing style: {style}")
     if lyrics is None or not lyrics.is_file(): bad.append(f"missing lyrics: {lyrics}")
     if bad:
-        problems += [f"{stem}: {b}" for b in bad]; rows.append(None); continue
+        problems += [f"{src_stem}: {b}" for b in bad]; rows.append(None); continue
     # adapter + cot: per-song field > defaults alias > env pair (adapter) /
     # env cot > defaults cot (cot) -- env values are already folded into fb_*.
-    ov = ov_by.get(name) or ov_by.get(stem) or {}
+    ov = ov_by.get(name) or ov_by.get(src_stem) or {}
     alias = ov.get("lora") or defaults.get("lora")
     if alias:
         ar, nar = loras[alias]["ar"], loras[alias]["nar"]
@@ -408,9 +436,42 @@ for t in tracks:
     else:
         ar, nar = fb_ar, fb_nar
         label = fb_adapter
+    # Output seed: per-song 'seed' > defaults 'seed' > the pass-1 take's own seed.
+    # "random" draws a FRESH seed per take. The guide (abc) and the pass-1 wav stay
+    # keyed to src_stem, so the ABC is provably that take's, while the render gets a
+    # new seed -> out_stem = <name>_<out_seed> (the sidecar records abc_source_stem).
+    # A drawn seed is REUSED from this dir's existing index so a resume/re-plan does
+    # not re-draw; delete _rescue_index.json to force a fresh draw.
+    seed_ov = ov.get("seed")
+    if seed_ov is None:
+        seed_ov = defaults.get("seed")
+    if seed_ov is None:
+        seed_mode, out_seed = "pass1", seed
+    elif seed_ov == "random":
+        seed_mode = "random"
+        prev_t = prev.get(src_stem) or {}
+        out_seed = prev_t.get("seed") if prev_t.get("seed_mode") == "random" else None
+        if not isinstance(out_seed, int):
+            out_seed = None
+            for _ in range(1000):
+                cand = random.randrange(2**32)
+                if f"{name}_{cand}" not in used_out:
+                    out_seed = cand; break
+            if out_seed is None:
+                problems.append(f"{src_stem}: could not draw a unique random seed")
+                rows.append(None); continue
+    else:
+        seed_mode, out_seed = "pinned", int(seed_ov)
+    out_stem = f"{name}_{out_seed}"
+    if out_stem in used_out:
+        problems.append(f"{src_stem}: output stem {out_stem} already used (duplicate seed)")
+        rows.append(None); continue
+    used_out.add(out_stem)
     rows.append({
-        "idx": t.get("idx"), "name": name, "take": t.get("take", 0), "seed": seed, "cap": cap,
-        "stem": stem, "cot": ov.get("cot") or fb_cot,
+        "idx": t.get("idx"), "name": name, "take": t.get("take", 0), "seed": out_seed,
+        "seed_mode": seed_mode, "cap": cap, "stem": out_stem,
+        "src_stem": src_stem, "abc_source_stem": src_stem,
+        "cot": ov.get("cot") or fb_cot,
         "ar": ar, "nar": nar, "adapter": label,
         "pass1_wav": str(wav), "pass1_wav_sha256": sha(wav),
         "abc": str(abc), "abc_sha256": sha(abc),
@@ -433,7 +494,7 @@ json.dump({"tool": "rescue_abc_batch", "pass1_dir": str(pass1), "abc_dir": str(a
 for r in rows:
     print("\t".join([r["name"], str(r["seed"]), str(r["cap"]), r["style_file"],
                      r["lyrics_file"], r["abc"], r["stem"], r["cot"], r["ar"],
-                     r["nar"], r["adapter"]]))
+                     r["nar"], r["adapter"], r["src_stem"]]))
 PY
 mapfile -t PLAN < "$PLAN_TSV"
 
@@ -460,7 +521,7 @@ if [ "$SKIP_PREFLIGHT" -eq 0 ]; then
   # Every adapter pair the plan actually references must be staged (per-take
   # aliases included), so a rescue can never start on a half-staged registry.
   missing_ad=0
-  while IFS=$'\t' read -r _n _s _c _st _ly _ab _stem _co ar nar _ad; do
+  while IFS=$'\t' read -r _n _s _c _st _ly _ab _stem _co ar nar _ad _src; do
     [ -n "$ar" ] || continue
     for f in "$ar" "$nar"; do
       [ -e "$f" ] || { echo "missing adapter: $f" >&2; missing_ad=1; }
@@ -472,9 +533,9 @@ if [ "$SKIP_PREFLIGHT" -eq 0 ]; then
   fi
 fi
 
-render() {  # <name> <stem> <seed> <cap> <style> <lyrics> <abc> <cot> <ar> <nar> <adapter>
+render() {  # <name> <stem> <seed> <cap> <style> <lyrics> <abc> <cot> <ar> <nar> <adapter> <src_stem>
   local name="$1" stem="$2" seed="$3" cap="$4" style="$5" lyrics="$6" abc="$7"
-  local cot="$8" ar="$9" nar="${10}" adapter="${11}"
+  local cot="$8" ar="$9" nar="${10}" adapter="${11}" src_stem="${12:-$2}"
   local wav="$OUT_DIR/${stem}.wav" log="$OUT_DIR/${stem}.log" tf="$OUT_DIR/${stem}_time.txt"
   if [ "$FORCE" -eq 0 ] && [ -s "$wav" ] && grep -q "Exit status: 0" "$tf" 2>/dev/null; then
     echo "== skip $stem (rescue already succeeded; --force to redo)"; return 0
@@ -504,11 +565,11 @@ render() {  # <name> <stem> <seed> <cap> <style> <lyrics> <abc> <cot> <ar> <nar>
   echo "=== END rescue $stem exit=$rc $(date -u +%FT%TZ) ===" >> "$OUT_DIR/_rescue_status.log"
   [ -s "$wav" ] || rc=1   # a "success" that produced no audio is a failure
   # sidecar: bind the rescue WAV to the guide it used + the pass-1 take it derives from
-  python3 - "$name" "$stem" "$seed" "$cap" "$abc" "$style" "$lyrics" "$wav" "$rc" "$cot" "$adapter" <<'PY'
+  python3 - "$name" "$stem" "$seed" "$cap" "$abc" "$style" "$lyrics" "$wav" "$rc" "$cot" "$adapter" "$src_stem" <<'PY'
 import hashlib, json, sys
 from datetime import datetime, timezone
 from pathlib import Path
-name, stem, seed, cap, abc, style, lyrics, wav, rc, cot, adapter = sys.argv[1:12]
+name, stem, seed, cap, abc, style, lyrics, wav, rc, cot, adapter, src_stem = sys.argv[1:13]
 def sha(p):
     p = Path(p)
     if not p.is_file(): return None
@@ -519,7 +580,7 @@ def sha(p):
 side = Path(wav).with_suffix("").as_posix() + "_rescue.json"
 json.dump({
     "name": name, "stem": stem, "seed": int(seed), "cap": int(cap),
-    "cot": cot, "adapter": adapter,
+    "cot": cot, "adapter": adapter, "abc_source_stem": src_stem,
     "abc_file": abc, "abc_sha256": sha(abc),
     "style_sha256": sha(style), "lyrics_sha256": sha(lyrics),
     "wav_sha256": sha(wav), "exit": int(rc),
@@ -533,8 +594,8 @@ PY
 n=0 ok=0 fail=0
 for line in "${PLAN[@]}"; do
   if [ "$LIMIT" -gt 0 ] && [ "$n" -ge "$LIMIT" ]; then break; fi
-  IFS=$'\t' read -r name seed cap style lyrics abc stem cot ar nar adapter <<<"$line"
-  if render "$name" "$stem" "$seed" "$cap" "$style" "$lyrics" "$abc" "$cot" "$ar" "$nar" "$adapter"; then ok=$((ok + 1)); else fail=$((fail + 1)); fi
+  IFS=$'\t' read -r name seed cap style lyrics abc stem cot ar nar adapter src_stem <<<"$line"
+  if render "$name" "$stem" "$seed" "$cap" "$style" "$lyrics" "$abc" "$cot" "$ar" "$nar" "$adapter" "$src_stem"; then ok=$((ok + 1)); else fail=$((fail + 1)); fi
   n=$((n + 1))
   if [ "$SMOKE" -eq 1 ]; then
     echo "[smoke] rendered 1 track ($stem). Listen to it, then re-run without --smoke."; break

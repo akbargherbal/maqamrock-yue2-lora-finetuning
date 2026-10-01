@@ -1,61 +1,81 @@
 # current
 
-_Copy surface, not authority. Session end · 2026-09-30 · **T4 Colab**, branch `music-cover`._
+_Copy surface, not authority. Session · 2026-10-01 · **T4 Colab**, branch `music-cover`._
 
-## Where things stand
+## Rescue batch — RUNNING (started 2026-10-01 ~06:40 UTC)
 
-- **B2 smoke passed** — `exit=0`, wall 278.4 s, 2ch/48 kHz, 192.9 s. Awaiting your listen:
-  - rescue: `/content/rescue_v2abc_batch12_winning/07-الحر-الشديد-وقطع-القفر-والوعول_rock_3781160148.wav`
-  - pass-1 (same stem/seed, to compare): `/content/batch_12_rock_v2_winning/07-الحر-الشديد-وقطع-القفر-والوعول_rock_3781160148.wav`
-- **Generation resumes tomorrow.** GPU idle (`Tesla T4, 0 MiB, 0%`); nothing running.
-- The earlier blocker is fixed: the pass-1 dir + adapters + binary + models were missing on this VM and were
-  staged from GCS/HF (logs `/content/logs/{rescue_stage,inference_stage}.log`).
+`qfinal_a0.3` + `cot=full` + fresh seed per take. 24 tracks; log `/content/logs/rescue_winning.log`;
+ETA ~2–2.5 h. Stop `pkill -f '[r]escue_abc_batch'; pkill -f '[a]udiocpp_cli --task gen'`; resume = same
+command (drawn seeds are reused from `_rescue_index.json`, so it skips succeeded takes).
 
-## Tomorrow — 1) listen, 2) full batch
+Prior output (the melody run) archived before launch: GCS
+`audiocpp_inference/out_archive/rescue_v2abc_batch12_winning_melody_20261001/` (12 objects, 84.5 MiB);
+local `/content/archive/rescue_v2abc_batch12_winning_melody_20261001/`.
 
-**1. Listen.** A/B the two WAVs. Gate: does the SheetSage2 melody steer the arrangement while `qfinal_a0.3`
-keeps the pronunciation? Yes → go to 2. No → stop; B2 is unproven (fallback B1: `INFERENCE/v2_abc_to_qfinal.sh`).
+### settings + run command
 
-**2. Full batch.**
-terminal: detached — survives Ctrl+C / closing the tab; log: `/content/logs/rescue_winning.log`
-(+ per-track `/content/rescue_v2abc_batch12_winning/<stem>.log`, `_rescue_status.log`);
-stop: `pkill -f 'rescue_abc_batch.sh'`; resume: the same command (skips succeeded takes).
+`manifests/rescue_selection.batch_12_rock_v2_winning.json` is now: `lora=qfinal_a0.3`, `cot=full`,
+`seed="random"`.
+
+- A **fresh seed is drawn per take**. The ABC + pass-1 WAV stay keyed to the original
+  `<name>_<pass1seed>` (recorded as `abc_source_stem`); the output is `<name>_<newseed>`.
+- Validated: `--plan` → **24** tracks, `cot=full`, `seed_mode=random`; **stable on re-plan** (drawn
+  seeds are persisted in `_rescue_index.json`; delete that file to force a re-draw).
+- Driver gained the seed override — see `RECONCILIATION_LOG.md` 2026-10-01 and
+  `INFERENCE/rescue_abc_batch.sh --help`.
+
+Run it (detached, GPU):
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
-setsid nohup bash INFERENCE/rescue_abc_batch.sh --songs-json INFERENCE/rescue_selection.batch_12_rock_v2_winning.json \
+setsid nohup bash INFERENCE/rescue_abc_batch.sh \
+  --songs-json manifests/rescue_selection.batch_12_rock_v2_winning.json \
   > /content/logs/rescue_winning.log 2>&1 & disown
+# stop: pkill -f '[r]escue_abc_batch'; pkill -f '[a]udiocpp_cli --task gen'
 ```
 
-- Rescues **all 24** takes (JSON has no `songs` key). The smoke track is skipped automatically
-  (`_time.txt` = `Exit status: 0`); `--force` redoes it. ~4.6 min/take ⇒ ~1 h 50 m for the remaining 23.
-- To rescue only winners: add a `songs` list — a bare `<name>` = every take of that song, a full
-  `<name>_<seed>` stem = exactly one.
+- **No `--force` needed**: fresh seeds ⇒ new output filenames, so the 2 old takes aren't "skipped"
+  — they're just left as stale files.
+- **Stale files caveat:** `out_dir` (`/content/rescue_v2abc_batch12_winning`) still holds 2 obsolete
+  *melody* WAVs (`07-…_{3781160148,1769813156}.wav`) from the aborted run. For a pure set, add a
+  clean dir on the CLI (CLI wins), e.g. `--out-dir /content/rescue_v2abc_q03full_reroll`, and add
+  that dir to the backup `--extra`.
 
-**3. Then** Phase 5 of `docs/PRON_LORA_RESCUE.md`: blind-package rescue vs pass-1 with
-`INFERENCE/prepare_ab_eval.py` (skill `ab-blind-eval`).
+## LoRA × seed matrix — RESULT
 
-## GitHub
+Winner: **`q03_newseed` = `qfinal_a0.3` @ seed `1012482070`**. Recorded in
+`manifests/evaluation_lora_seed_matrix/MY_EVALUATION.txt`. (n=1, one listener — signal, not verdict.)
 
-- Committed this session: refreshed `agent_notes/current.md` + two `docs/COMMAND_HANDOVER_GOTCHAS.md` entries.
-- Push requires auth on this VM: `bash bootstrap/github_auth.sh` (paste a PAT at the hidden prompt), then
-  `git push origin music-cover`.
+## prepare_ab_eval on the 6-file bundle — layout fix
 
-## Backup / continuity — NOT current
+Needs **variant subfolders**, same stem each (`…/<variant>/track.wav`) — flat → `not in the subpath`:
 
-- Sidecars are down: `backup_to_gcp.py`, `gpu_logger.py`, `vm-continuity`.
-- Already on GCS (from earlier): the pass-1 24 WAVs + 24 ABCs. **Not** on GCS: today's rescue output and the
-  local `/content/batch_12_rock_v2_winning` — `backup_to_gcp.py --inference` does not cover the flat `/content/…` dirs. One-shot:
-  ```bash
-  python backup_to_gcp.py --inference --once \
-    --extra /content/batch_12_rock_v2_winning:workspace/out/batch_12_rock_v2_winning \
-    --extra /content/rescue_v2abc_batch12_winning:workspace/out/rescue_v2abc_batch12_winning
-  ```
+```powershell
+cd C:\Users\DELL\Downloads\lora_seed_matrix_07_alhar_rock
+$map = [ordered]@{
+  '01_v2_newseed_1012482070.wav'               = 'v2_newseed'
+  '02_q03_sameseed_3781160148.wav'             = 'q03_sameseed'
+  '03_q03_newseed_1012482070.wav'              = 'q03_newseed'
+  '04_q05_sameseed_3781160148.wav'             = 'q05_sameseed'
+  '05_q05_newseed_1012482070.wav'              = 'q05_newseed'
+  'reference_v2_sameseed_3781160148_pass1.wav' = 'v2_sameseed'
+}
+foreach ($k in $map.Keys) { New-Item -ItemType Directory -Force -Path $map[$k] | Out-Null; Move-Item -Force $k "$($map[$k])\track.wav" }
+```
+```powershell
+python C:\Users\DELL\Jupyter_Notebooks\maqamrock-yue2-lora-finetuning\INFERENCE\prepare_ab_eval.py `
+  --root C:\Users\DELL\Downloads\lora_seed_matrix_07_alhar_rock `
+  --output C:\Users\DELL\Downloads\lsm_ab_eval --seed 20261001 --title "LoRA x seed - Al-Har (Ajam)"
+```
 
-## Watch-outs
+## State
 
-- Flat `/content/…` layout is not covered by the backup daemon (above).
-- The selection JSON's `_comment` still documents `/content/audiocpp_inference/out/…` while its keys are flat `/content/…` (stale comment; keys win).
-- `/usr/bin/time` absent → `_time.txt` holds only `Exit status: 0`.
-- `/root/.secrets.env` values are empty; the real `HF_TOKEN` / `GCP_BACKUP_BASE` are in the environment.
-- `AGENTS.md` §12: the `docs-reconciler` pass for the new gotcha entries is still pending.
+- **Rescue:** stopped; index rebuilt for the new settings. 2 melody takes still on disk (see caveat).
+- **LoRA×seed matrix:** DONE (5/5, 40:24); uploaded; verified on GCS
+  (`audiocpp_inference/evals/lora_seed_matrix_07_alhar_rock/lora_seed_matrix_07_alhar_rock.zip`,
+  sha256 `33b02724…6bd3`).
+- **Backup:** `backup_to_gcp.py --inference` daemon up (pid 22087), current. `vm-continuity` healthy.
+- **Repo (uncommitted):** `INFERENCE/rescue_abc_batch.sh` (seed override) + tests; `manifests/` (new
+  matrix manifest + moved 5 manifests + selection config); docs (`PRON_LORA_RESCUE.md`,
+  `SOURCE_OF_TRUTH.md`, `rescue_selection.example.json`); `RECONCILIATION_LOG.md` entry. Push needs
+  your PAT.

@@ -19,16 +19,21 @@
     "               adapter  label written to the sidecar (default: the resolved lora alias)",
     "               threads  CPU threads handed to the binary (built-in: 8)",
     "               limit    render at most N takes; 0 = no cap",
+    "               seed     a pinned int in [0,2^32) or \"random\" = a FRESH seed per take",
+    "                        (the ABC + pass-1 stay keyed to the original <name>_<seed>;",
+    "                        the output is <name>_<newseed>, abc_source_stem recorded).",
+    "                        Built-in: the pass-1 take's own seed.",
     "",
     "  songs      SELECTORS, not song specs - a rescue reuses the pass-1 take's own",
-    "             lyrics/style/seed/cap. A bare <name> rescues every take of that",
-    "             song; a full <name>_<seed> stem rescues exactly one take. An object",
-    "             entry {\"stem\"|\"name\", ...} may override 'lora' and/or 'cot' for",
-    "             that take ('note' is free text, ignored). Omit 'songs' to rescue",
+    "             lyrics/style/cap (and seed, unless overridden). A bare <name> rescues",
+    "             every take of that song; a full <name>_<seed> stem rescues exactly one.",
+    "             An object entry {\"stem\"|\"name\", ...} may override 'lora'/'cot'/'seed'",
+    "             for that take ('note' is free text, ignored). Omit 'songs' to rescue",
     "             every track in the pass-1 manifest.",
     "",
-    "Precedence: per-song field > env (cot/adapter) > 'defaults' > built-in; the",
-    "adapter pair is per-song/defaults alias > env QF_AR/QF_NAR; the three dirs:",
+    "Precedence: per-song field > env (cot/adapter) > 'defaults' > built-in; 'seed':",
+    "per-song 'seed' > 'defaults.seed' > the take's own; the adapter pair is",
+    "per-song/defaults alias > env QF_AR/QF_NAR; the three dirs:",
     "a CLI flag wins over this file. Drive it, and override one thing:",
     "  bash INFERENCE/rescue_abc_batch.sh --songs-json this.json --plan",
     "  bash INFERENCE/rescue_abc_batch.sh --songs-json this.json --limit 2"
@@ -57,7 +62,8 @@
       "stem": "01-البداية_rock_1234567890",
       "lora": "qfinal_a0.5",
       "cot": "full",
-      "note": "per-take override: different adapter + cot for this take only"
+      "seed": "random",
+      "note": "per-take override: adapter + cot + a FRESH seed for this take only"
     }
   ]
 }

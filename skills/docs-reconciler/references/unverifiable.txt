@@ -221,3 +221,10 @@ docs/PRON_LORA_RESCUE.md :: _driver.log
 docs/PRON_LORA_RESCUE.md :: --branch
 # same runtime artifact, cited in the workflow design doc
 docs/music-cover-workflow.md :: _rescue_index.json
+
+# 2026-10-01 — new bare runtime/object tokens in prose. `_rescue_index.json` is the
+# rescue driver's out-dir index (SOURCE_OF_TRUTH.md row); `README.txt` here is the
+# companion object inside the GCS eval-bundle zip (not a repo file). Doc-scoped so
+# the suppression stays narrow.
+SOURCE_OF_TRUTH.md :: _rescue_index.json
+docs/COMMAND_HANDOVER_GOTCHAS.md :: README.txt

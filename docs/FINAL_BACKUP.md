@@ -128,7 +128,7 @@ git rev-list --left-right --count origin/main...HEAD   # expect: 0	0
 - [ ] Leave local `<out>/` in place — it's the source of truth until the sync is
       verified, and the VM is ephemeral anyway.
 - [ ] Optional (separate task, not required): inference/eval comparing base vs
-      final LoRA, e.g. against `INFERENCE/evaluation_alharith.json` and the
+      final LoRA, e.g. against `manifests/evaluation_alharith.json` and the
       held-out set. v1 kept this under `output/eval_alharith/`.
 
 ---

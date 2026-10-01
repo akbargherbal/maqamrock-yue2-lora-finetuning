@@ -288,7 +288,7 @@ human and invisible to the agent — so they get written down here.
 
 ## 2026-09-30 — a rescue `--songs-json` uses flat `/content/…` dirs that setup.sh never stages and the backup never mirrors
 
-- **Fact:** `INFERENCE/rescue_selection.batch_12_rock_v2_winning.json` (and the `batch_12_rock_v2`
+- **Fact:** `manifests/rescue_selection.batch_12_rock_v2_winning.json` (and the `batch_12_rock_v2`
   one) name their dirs flat — `pass1_dir /content/batch_12_rock_v2_winning`,
   `abc_dir /content/abc_v2_batch12_winning`, `out_dir /content/rescue_v2abc_batch12_winning` —
   while `bootstrap/setup.sh --inference` stages only `/content/audiocpp_inference/**` and
@@ -317,3 +317,58 @@ human and invisible to the agent — so they get written down here.
 - **Correct pattern:** check `env | grep HF_TOKEN` and `cat /root/.secrets.env` separately; if the file
   is blank, stage the pieces setup.sh would (GCS `tools/build/audiocpp_cli`, `tools/{prompts,scripts}`,
   `hf download audio-cpp/Yue2-3B-GGUF …`) directly, or fix the secrets file first.
+
+## 2026-10-01 — the rescue handover assumed the inference workspace, which a truly fresh VM lacks
+
+- **Fact:** the rescue selection `_comment`/`current.md` told the user to run the rescue, and (in one
+  spot) to "stage the pass-1 dir from GCS" — implicitly assuming `bootstrap/setup.sh --inference` had
+  already run. On a fresh VM it has not, so the flat-dir error above fires first and *hides* the rest:
+  `/content/audiocpp_inference/` (binary + `models/Yue2-3B-GGUF`) and
+  `/content/converter/out/qfinal_a0.{3,5}/` were all absent too. `--plan` would have passed after
+  staging pass-1 alone and the *render* would then fail in preflight on `missing: …/audiocpp_cli`.
+- **Failure prevented:** handing over / running the rescue on a VM that is one staged dir short, and
+  reading the pass-1 message as the whole problem when it is only the first of four missing inputs.
+- **Correct pattern (complete fresh-VM rescue prerequisites, in any order):**
+  1. pass-1 dir: `gsutil -m cp -r "$GCP_BACKUP_BASE/audiocpp_inference/workspace/out/batch_12_rock_v2_winning" /content/`
+  2. ABC dir: same from `.../workspace/out/abc_v2_batch12_winning` (present here; may be absent elsewhere)
+  3. qfinal adapters: `for a in qfinal_a0.3 qfinal_a0.5; do gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/$a" /content/converter/out/; done`
+  4. binary + GGUF models + style: `bash bootstrap/setup.sh --inference`
+  Then `--plan` (no GPU) and listen to `--smoke` before the batch. A single wrapper for 1+3+4:
+  `/content/logs/stage_rescue.sh` (2026-10-01 session).
+
+## 2026-10-01 — `pkill -f 'rescue_abc_batch.sh'` leaves the GPU child running, and `pkill -f` can match your own shell
+
+- **Fact 1:** the documented rescue stop (`docs/PRON_LORA_RESCUE.md` Phase 4, `agent_notes/current.md`)
+  is `pkill -f 'rescue_abc_batch.sh'`. That kills only the bash driver. The driver's child
+  `/usr/bin/time -v -o … audiocpp_cli …` and the `audiocpp_cli` process are **orphaned** and keep
+  rendering — after the driver was gone, `nvidia-smi` still read `99% / 6175 MiB`.
+- **Fact 2:** `pkill -f <pattern>` matches **any** process whose command line contains the pattern,
+  including the shell running the pkill when that command line also quotes the pattern
+  (e.g. `pgrep -af 'rescue_abc_batch.sh|audiocpp_cli…'`). The shell SIGTERMs itself mid-script, so
+  the later `sleep`/`pgrep`/`nvidia-smi` never run (`Killed by SIGTERM`).
+- **Failure prevented:** believing a run is stopped while the GPU is still busy, then starting the
+  next render on top of it (AGENTS.md §8), and a half-executed stop command.
+- **Correct pattern:** bracket the first char so the pattern cannot match its own cmdline, and stop
+  the child too:
+  `pkill -f '[r]escue_abc_batch'; pkill -f '[a]udiocpp_cli --task gen'`
+  then confirm `pgrep -af '[a]udiocpp_cli'` is empty and `nvidia-smi` shows 0 MiB before starting
+  anything. (`kill <pid>` on the `time` wrapper + `audiocpp_cli` PIDs works too, and is what fixed
+  it 2026-10-01.)
+
+## 2026-10-01 — a flat "labeled eval bundle" is NOT what `prepare_ab_eval.py` consumes
+
+- **Fact:** for the LoRA×seed matrix I hand-built a flat folder of renamed WAVs
+  (`01_v2_newseed_1012482070.wav`, …) plus a `README.txt`, to make listening easy. But
+  `INFERENCE/prepare_ab_eval.py` (skill `ab-blind-eval`) requires each render in its own **variant
+  subfolder** — `<root>[/<category>]/<variant>/<track>.wav` — deriving `variant` from the file's
+  parent and `category` from that parent relative to the root (`prepare_ab_eval.py:96-115`). Run on
+  a flat root, it raises `ValueError` for every file whose parent is the root:
+  `error: '<root's parent>' is not in the subpath of '<root>'` (uncaught `Path.relative_to`, caught
+  by `main` and printed as `error:`).
+- **Failure prevented:** handing over a "ready to evaluate" download that the eval tool rejects with
+  a message that reads like a path bug, not a layout mismatch — and the user hitting it on their box.
+- **Correct pattern:** ship the tree the tool consumes — one folder per variant, the **same track
+  stem** in each (usually `track.wav`), e.g.
+  `…/sameseed/{v2,q03,q05}/track.wav` + `…/newseed/{v2,q03,q05}/track.wav` — and run with `--root`
+  at that top folder and `--output` **outside** it. If a flat labeled set is also wanted for direct
+  listening, ship it as a *separate* copy, not the eval input.

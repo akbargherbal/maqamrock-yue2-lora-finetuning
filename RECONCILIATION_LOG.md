@@ -907,3 +907,41 @@ covers both._
   **0 flagged**.
 - Authority: `INFERENCE/rescue_abc_batch.sh --help` (source + example) and `INFERENCE/generate.py`
   (`loras`/`defaults` semantics). CPU-only plan checks; no config or run touched; no GPU.
+
+## 2026-10-01 — rescue gains a per-take seed override (`seed`: int | `"random"`)
+
+- `INFERENCE/rescue_abc_batch.sh`: `defaults.seed` and per-song `seed` accepted. Value is a pinned
+  int in `[0,2^32)` or `"random"` = a fresh seed per take. The ABC + pass-1 WAV stay keyed to the
+  original `<name>_<pass1seed>`; the render gets `--seed <new>` and is written as
+  `<name>_<newseed>`; the index and sidecar record `src_stem` / `abc_source_stem` / `seed_mode`.
+  Drawn seeds are reused from an existing `_rescue_index.json` (`seed_mode=="random"`) so a resume
+  or re-plan does not re-draw/re-render; delete the index to force a fresh draw. Selectors still
+  match name / stem / src_stem. Default behavior (no `seed`) is unchanged.
+- `tests/e2e/test_rescue_e2e.py`: +6 cases (random reroll keeps `abc_source_stem`; pinned int;
+  per-song beats defaults; invalid seed errors; no-override back-compat; random render uses the
+  original ABC; re-plan is stable) → **45 passed**.
+- `manifests/rescue_selection.batch_12_rock_v2_winning.json`: `cot` melody→full, `seed` `"random"`
+  (winner adapter `qfinal_a0.3`). `--plan` → 24 tracks, `cot=full`, `seed_mode=random`, stable on
+  re-plan.
+- Docs: `INFERENCE/rescue_selection.example.json` (seed key + precedence), `docs/PRON_LORA_RESCUE.md`
+  (spine + Phase-4 keys), `SOURCE_OF_TRUTH.md` cover/rescue row.
+- Authority: `INFERENCE/rescue_abc_batch.sh --help` (source) + `--plan`. CPU-only checks; no config
+  or run started; no GPU.
+
+## 2026-10-01 — housekeeping pass: manifest move `INFERENCE/ → manifests/` (+ reconciler)
+
+- Moved (`git mv`) `rescue_selection.batch_12_rock_v2.json`, `rescue_selection.batch_12_rock_v2_winning.json`,
+  `songs.qfinal_suno.json`, `songs.qfinal_trigger.json`, `evaluation_alharith.json` from `INFERENCE/` to
+  `manifests/` (the `.example.json` files left in place). References updated in
+  `docs/COMMAND_HANDOVER_GOTCHAS.md`, `docs/FINAL_BACKUP.md`, `docs/PRON_LORA_RESCUE.md`,
+  `SOURCE_OF_TRUTH.md`, `agent_notes/current.md`, and the moved selection's own `_comment`.
+- **Frozen-doc guardrail:** `DECISIONS.md` is frozen, so its `INFERENCE/evaluation_alharith.json`
+  citation is left as history rather than "corrected"; the path change is recorded here instead.
+  (`docs/FINAL_BACKUP.md` is a live doc → updated in place.)
+- Mechanical reconciler: `extract_claims.py` → 2491 claims / 52 live docs; `verify_claims.py` → 1569
+  checkable, **0 flagged** after curating `unverifiable.txt` with two doc-scoped entries
+  (`SOURCE_OF_TRUTH.md :: _rescue_index.json`, `docs/COMMAND_HANDOVER_GOTCHAS.md :: README.txt`).
+- Docs: `docs/music-cover-feasibility.md` §8 (matrix result, dated); `docs/music-cover-workflow.md`
+  (rescue row + the binary now takes `cot=<cfg>`, `seed` noted).
+- Not moved: `INFERENCE/songs.qfinal_{suno,trigger}.report.json` (reports, not manifests).
+- Authority: `INFERENCE/rescue_abc_batch.sh --help`, the file tree, the reconciler scripts. Non-GPU.

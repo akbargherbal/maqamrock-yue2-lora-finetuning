@@ -63,7 +63,7 @@ Keyed throughout by one string: **`<name>_<seed>`** (the pass-1 WAV stem).
 | **1. Pass-1** | GPU | manifest → 2 v2 takes/song | `cot=off` (trained regime); ~6.5 min/track |
 | **2. Transcribe** | **free CPU** | takes → `score.abc` per take | SheetSage2 `melody_only=True`; ~4–6 min/track; 0 GPU units |
 | **3. Listen** | human | takes → chosen take/song + `M` (fail list) | two axes: maqamrock-OK? pronunciation-OK? |
-| **4. Rescue** | GPU | `M` takes + their ABC → rescue WAVs | `qfinal_a0.3` `cot=melody` + `abc_file`; same seed/cap/style/lyrics |
+| **4. Rescue** | GPU | `M` takes + their ABC → rescue WAVs | `qfinal_a0.3` + `abc_file`; `cot` default `melody` (a run may use `full`); `seed` default = the take's own (`"random"` = fresh per take); cap/style/lyrics from pass-1 |
 | **5. Re-listen** | human | pass-1 vs rescue, same seed | only the guide changed |
 
 The **only difference at phase 4** is the guide: seed, cap, style, and lyrics are read from the
@@ -96,8 +96,8 @@ and rationale: `PRON_LORA_RESCUE.md`. In brief:
 - **G5** `--smoke` renders one track and stops — the B2 quality gate.
 - **G6** conditioning values come from the pass-1 manifest, not the keyboard.
 
-The rescue driver calls the binary **directly** with `cot=melody` + `abc_file`; it does not use
-`run_one.sh`, whose hardcoded `cot=off` and later override is unverified.
+The rescue driver calls the binary **directly** with `cot=<cfg>` (`melody` default, `full` allowed) +
+`abc_file`; it does not use `run_one.sh`, whose hardcoded `cot=off` and later override is unverified.
 
 ## 6. Economics
 
