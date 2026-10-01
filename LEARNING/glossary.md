@@ -11,6 +11,7 @@ survive a teach-back or a real artifact.
 | inference | | |
 | training / fine-tuning | | |
 | token | | |
+| encoder / tokenizer head | | |
 | transformer | | |
 | AR / NAR | | |
 | latent | | |
@@ -19,3 +20,16 @@ survive a teach-back or a real artifact.
 | quantization | | |
 | GGUF | | |
 | guidance_scale / temperature | | |
+
+## The photo-lab picture (a reference — fill the table above in your own words)
+
+| Term | the photo-lab picture |
+|---|---|
+| model | the photo lab |
+| token / latent | the lab's private, unreadable image format |
+| AR / NAR (decoder) | the **printer** (code → photo) |
+| VAE | the printer's ink ↔ page step (latent ↔ audio) |
+| encoder / tokenizer head | the **scanner** (photo → code) — the piece YuE2 didn't ship |
+| caption | the note taped to each photo |
+| LoRA | studying the scanned photos |
+| NAR LoRA | ink / colour calibration (prints look like real photos) |

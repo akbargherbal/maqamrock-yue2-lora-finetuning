@@ -28,10 +28,22 @@
   the `current.md` note in `AGENTS.md` to point at OpenCode Web instead of `dsh web`.
 - Next: resume a parking-lot thread (e.g. encoder vs decoder, or what a latent is).
 
+## Session 2 (cont.) — 2026-10-01
+- Landed the **photo-lab analogy** (after trying book / singer / alphabet):
+  encoder = the **scanner** YuE2 didn't ship. Saved in `map.md` ("Mental model")
+  + a reference table in `glossary.md`.
+- Core finding: **Mothersuperior provided the missing encoder** — without it your
+  own audio can't be read into YuE2's token/latent code, so there are no training
+  targets. It shipped alongside a NAR "ink calibration" LoRA (the decoder fix).
+- Correction on dataset origin: the 267 training tracks are **Suno generations**
+  (the prompt script is a Suno builder; `prepare_yue2_dataset.py` consumes the Suno
+  pipeline). So the LoRA distilled Suno's *rendering* of the maqam-rock spec, keyed
+  to trigger `arabmaqamrock` — it learns from the audio, not the description.
+
 ---
 
 ## Parking lot (questions to come back to — not a commitment)
-- What is an encoder vs a decoder? Do they exist in this project?
+- What is an encoder vs a decoder? Do they exist in this project? *(started — see map.md "photo-lab analogy": encoder = the scanner)*
 - What *is* a "latent", concretely, and what does it look like here?
 - Where does the VAE sit, and why is it a separate file?
 - Why AR *and* NAR stages? What does each actually do?
