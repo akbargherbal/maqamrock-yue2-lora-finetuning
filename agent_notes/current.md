@@ -70,12 +70,17 @@ python C:\Users\DELL\Jupyter_Notebooks\maqamrock-yue2-lora-finetuning\INFERENCE\
 
 ## State
 
-- **Rescue:** stopped; index rebuilt for the new settings. 2 melody takes still on disk (see caveat).
+- **Rescue batch:** RUNNING (started 06:40 UTC, 24 takes). Output synced to
+  `audiocpp_inference/workspace/out/rescue_v2abc_batch12_winning/`. Old melody run archived.
 - **LoRA×seed matrix:** DONE (5/5, 40:24); uploaded; verified on GCS
   (`audiocpp_inference/evals/lora_seed_matrix_07_alhar_rock/lora_seed_matrix_07_alhar_rock.zip`,
   sha256 `33b02724…6bd3`).
 - **Backup:** `backup_to_gcp.py --inference` daemon up (pid 22087), current. `vm-continuity` healthy.
-- **Repo (uncommitted):** `INFERENCE/rescue_abc_batch.sh` (seed override) + tests; `manifests/` (new
-  matrix manifest + moved 5 manifests + selection config); docs (`PRON_LORA_RESCUE.md`,
-  `SOURCE_OF_TRUTH.md`, `rescue_selection.example.json`); `RECONCILIATION_LOG.md` entry. Push needs
-  your PAT.
+- **Repo:** committed + **pushed** to `origin/music-cover` — `51a6161` (HEAD == upstream). Contains:
+  seed override + tests, `manifests/` move + new matrix manifest + eval record, docs, reconciler
+  (0 flagged), `RECONCILIATION_LOG.md`.
+- **Backgrounded:** `/content/logs/post_batch_housekeeping.sh` (waits for the batch, then Phase 4
+  `pytest` + a final `backup --once`; log `/content/logs/post_batch_housekeeping.log`). Phase 3 graph
+  refresh is **skipped — `graphify` is not on PATH**.
+- **Pending after the batch:** review test log; refresh this file; if anything changed, commit + push
+  again (auth works via the stored `gh` token).
