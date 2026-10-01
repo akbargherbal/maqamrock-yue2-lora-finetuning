@@ -19,6 +19,15 @@
 - Experiment: shared file channel `scratch/between-harnesses.md` so dsh (browser)
   and opencode (terminal) can leave each other messages in the workspace.
 
+## Session 2 — 2026-10-01
+- **Decision: scrap DeepSeek Harness (`dsh`) for this branch.** Too early/buggy to
+  build on: difficult to install, slow to compile, breaks often.
+- **Standing interface for this branch from now on: OpenCode Web** (this was the
+  first Web session). TUI/CLI not used for `user-learning` going forward.
+- Cleanup: removed `scratch/between-harnesses.md` (dsh-only experiment); updated
+  the `current.md` note in `AGENTS.md` to point at OpenCode Web instead of `dsh web`.
+- Next: resume a parking-lot thread (e.g. encoder vs decoder, or what a latent is).
+
 ---
 
 ## Parking lot (questions to come back to — not a commitment)

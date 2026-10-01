@@ -139,9 +139,9 @@ re-derive from §4 / the authority docs. Overwrite it every time (never append).
 short plain answer. **Write it in the same turn you claim it** — saying it's written when
 it isn't has recurred; treat it as a hard rule.
 
-> **On `user-learning`:** `current.md` is optional here — the DeepSeek Harness
-> web UI (`dsh web`) reads workspace files directly. This branch's continuity
-> surface is `LEARNING/log.md`, updated at the end of a sitting.
+> **On `user-learning`:** `current.md` is optional here — OpenCode Web reads
+> workspace files directly. This branch's continuity surface is
+> `LEARNING/log.md`, updated at the end of a sitting.
 
 ## 7. Reading state from artifacts (never paraphrase)
 
