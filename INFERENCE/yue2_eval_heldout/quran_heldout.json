@@ -1,0 +1,42 @@
+{
+  "_note": "Held-out Quran eval aya(s). MUST NOT appear in any train split. Purpose: free-run pronunciation monitor per checkpoint (see docs/QURAN_PRON_REVIEW.md).",
+  "_chosen": "2026-10-04 (user): ayat al-Kursi 2:255 - 58 words, covers all 7 hard letters ح خ ع ق ط ض ظ in BOTH scripts, rich in madd/waqf.",
+  "_normalization": "text = NFC(Tanzil XML raw), NO embedded ayah sign; the builder appends ' \\u06dd' via make_caption (reproduces s10 exactly).",
+  "prompt_style": "Solo male voice, unaccompanied. Quran recitation. Clear precise classical Arabic diction. Spoken Words.",
+  "caption_template": "{style}\n[Lyrics]\n[Verse]\n{text} ۝\n",
+  "gen": {
+    "seed": 20261004,
+    "cap": 7500,
+    "lora": "quran_only",
+    "ar_scale": 1.0,
+    "nar_scale": 0.0,
+    "cot": "off"
+  },
+  "rubric": [
+    "error_count_per_word",
+    "error_types(ح خ ع ق ط ض ظ; subst/del/add/haraka)",
+    "waqf_correctness",
+    "madd_correctness",
+    "completed_vs_looped"
+  ],
+  "ayat": [
+    {
+      "key": "002255",
+      "surah": 2,
+      "ayah": 255,
+      "words": 58,
+      "hard_letters": [
+        "ح",
+        "خ",
+        "ض",
+        "ط",
+        "ظ",
+        "ع",
+        "ق"
+      ],
+      "uthmani": "ٱللَّهُ لَآ إِلَـٰهَ إِلَّا هُوَ ٱلْحَىُّ ٱلْقَيُّومُ ۚ لَا تَأْخُذُهُۥ سِنَةٌۭ وَلَا نَوْمٌۭ ۚ لَّهُۥ مَا فِى ٱلسَّمَـٰوَٰتِ وَمَا فِى ٱلْأَرْضِ ۗ مَن ذَا ٱلَّذِى يَشْفَعُ عِندَهُۥٓ إِلَّا بِإِذْنِهِۦ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَىْءٍۢ مِّنْ عِلْمِهِۦٓ إِلَّا بِمَا شَآءَ ۚ وَسِعَ كُرْسِيُّهُ ٱلسَّمَـٰوَٰتِ وَٱلْأَرْضَ ۖ وَلَا يَـُٔودُهُۥ حِفْظُهُمَا ۚ وَهُوَ ٱلْعَلِىُّ ٱلْعَظِيمُ",
+      "simple": "اللَّهُ لَا إِلَـٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ"
+    }
+  ],
+  "_source": "Tanzil Quran Text (Uthmani/Simple, v1.1) XML -> NFC; byte-identical to s10 training captions (verified 1:7, 2:255 both scripts)."
+}

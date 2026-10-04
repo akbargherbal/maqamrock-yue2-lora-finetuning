@@ -166,12 +166,30 @@ in the weights (§2.4), not the sampler.
 config (rank / lr / `ar_kl_weight` as chosen), with a **mandatory per-checkpoint
 free-generation eval** and a human gate before any merge.
 
-## 6. Open decisions (need user sign-off)
+## 6. Decisions (resolved by user, 2026-10-04)
 
-1. Single canonical Uthmani caption, or keep `simple` + `uthmani`?
-2. Acceptance bar — adopt "≥90% of held-out ayat with zero makhraj errors"?
-3. Which config variable to move first (§2.4): `ar_kl_weight`, rank, or lr?
-4. Confirm the AHH filtered zip is the training source, and where to stage it.
+1. **Scripts:** single caption per clip, **50/50 simple/uthmani**, assignment
+   **stratified per reciter** — covers both orthographies without duplicating
+   audio (the old builder wrote both variants per combo).
+2. **Acceptance:** free-run, held-out; bar **≥90 % of held-out ayat with zero
+   makhraj errors at α=1** (proposed; the exact gate is still being refined with
+   the objective metric).
+3. **Config variable:** **keep rank 8/8, lr, `ar_kl_weight`**. `16`/`32` deferred
+   to a gated ablation (only if the base-model ceiling probe says capacity, not
+   representation/data, is the limiter). Change only the data + eval in the next
+   run.
+4. **Source:** the **AHH filtered** set (`AHH_Quran_Long_Aya_Filtered_DATASET.zip`,
+   9,492 clips, 61.09 h) is the training source.
+5. **Training:** start **1 epoch**; keep **all** checkpoints; extend later by
+   bumping `steps` (absolute target) only if the free-run eval improves.
+6. **Held-out instrument:** **2:255 (Āyat al-Kursī)** — 58 words, all 7 hard
+   letters in both scripts, madd/waqf-rich. Manifest:
+   `INFERENCE/yue2_eval_heldout/quran_heldout.json`. Must stay out of train.
+7. **Text source — RESOLVED:** official **Tanzil XML v1.1** (Uthmani + Simple),
+   `text = NFC(raw)`, **no embedded `۝`** (the builder appends it). **Verified
+   byte-identical to the s10 training captions** (1:7 and 2:255, both scripts).
+   Committed at `quran_text/`. (alquran.cloud differs — no tatweel, e.g.
+   `إِلَٰهَ` vs Tanzil `إِلَـٰهَ`.)
 
 ## See also
 
