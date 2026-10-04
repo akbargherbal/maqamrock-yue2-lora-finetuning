@@ -17,6 +17,7 @@ History files are authoritative for what happened, never for what is true now.
 | Pron LoRA source verification / offline eval | `docs/PRON_LORA_VERIFICATION.md` | A0–A7 + smoke + A100 run + AR-loss replay |
 | v2 + pron merge (scaling, ranks) | `docs/PRON_LORA_MERGE.md` + `merge_pron_lora.py --help` | alpha convention is source-verified there |
 | Quran pron **alone** (α=1) on base model | `docs/QURAN_ONLY_EXPERIMENT.md` + `build_pron_only_fused.py` | the AR-only→fused workaround and the first-sample result |
+| Quran adapter format/caption probe | `docs/QURAN_FORMAT_PROBE.md` + `INFERENCE/songs.quran_format_probe.json` | 6-arm GPU test; prepared not yet run |
 | LoRA library (what exists, how many, where) | `docs/LORA_INVENTORY.md` | canonical: `<base>/loras/` (current: style + qfinal; superseded pron_lora_ar_only_r8 under `<base>/archive/pron_lora_ar_only_legacy/`) |
 | Alpha sweep / listening review | `docs/PRON_LORA_SWEEP.md` | procedure + Rounds 1–5; numbers in `results/{pron_sweep,pron_fine_sweep,pron_ckpt_sweep,maqam_lyric_swap,pron_knob_probe}/` |
 | Blinded listening packages (audio) | GCS `<base>/listening/` | generated mp3 packages; **not repo content** (`.gitignore` `*_INPUT/`) |

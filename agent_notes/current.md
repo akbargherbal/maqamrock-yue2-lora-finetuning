@@ -1,5 +1,40 @@
 # current
 
+## Restore THIS session in another Colab notebook
+
+Session id **`ses_ef89e8480ffejOR0B5sv6kKkO2`** ("Continuing session prep for next
+GPU session"). Backed up by vm-continuity to
+`gs://akbar-december-2024-backup/opencode_sessions/by_host/b847ef236a79/`
+(DB snapshot 15,089,664 B, sha256 `8e6aaec2…`). Run on the **target** notebook:
+
+terminal: mixed — `clone`/`pull` are long (network); `restore` is state-changing.
+
+```bash
+# 1. install vm-continuity (once per fresh VM)
+git clone https://github.com/akbargherbal/vm-continuity.git /content/vm-continuity
+bash /content/vm-continuity/install.sh
+
+# 2. GCS auth (Colab)
+python -c "from google.colab import auth; auth.authenticate_user()"
+
+# 3. confirm our namespace, then pull it
+vm-continuity hosts                          # expect by_host/b847ef236a79/
+vm-continuity pull --host b847ef236a79
+
+# 4. restore the DB — REPLACES the target's opencode DB (it is backed up to
+#    opencode.db.bak-<ts> first, and the opencode service is stopped/restarted)
+vm-continuity restore opencode -- --mode db
+
+# 5. resume the conversation
+opencode -s ses_ef89e8480ffejOR0B5sv6kKkO2
+```
+
+- Use **`--mode db` only.** `--mode export` is broken on this image: opencode
+  1.18.34's `session` command has no `export`, so the per-session JSON is 0 bytes.
+- `pull`/`restore` are per-tool; starting the backup loop on the target first is
+  safe — each VM ships to its own `by_host/<host>/` namespace.
+- After restore, re-run `opencode` from the repo dir (`cd /content/maqamrock-yue2-lora-finetuning`).
+
 ## State @ 2026-10-04 (CPU prep VM): Quran format/caption probe manifest READY
 
 Branch `experimental-quran-pron`. This session was CPU-only discussion + prep.

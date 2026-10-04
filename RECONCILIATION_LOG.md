@@ -294,3 +294,13 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   excluded from the scan).
 - Authority: user request ("so the next session knows exactly what we did"); no run config or
   hyperparameter changed.
+
+## 2026-10-04 — Quran format/caption probe documented (GPU test, pending)
+
+- Added `docs/QURAN_FORMAT_PROBE.md` (background + 6-arm design for the
+  `INFERENCE/songs.quran_format_probe.json` manifest) and indexed it in `docs/README.md`;
+  added a `SOURCE_OF_TRUTH.md` row (Quran adapter format/caption probe).
+- Reconciler after the change: **1917 claims / 47 docs, 1178 checkable, 6 flagged (0.5%)** —
+  all 6 the pre-existing `manifests/workspace_manifest.json` fixture — **0 new drift**.
+- Authority: user request ("write background about the test we're doing on the GPU VM"); no
+  run config or hyperparameter changed; no frozen doc rewritten.
