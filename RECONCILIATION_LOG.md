@@ -270,3 +270,13 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   fixture — **0 new drift**.
 - Authority: user-directed (generation failed; fix the env, report it); no run
   config or hyperparameter changed; no frozen doc rewritten.
+
+## 2026-10-04 — Quran-only (α=1) experiment recorded; `build_pron_only_fused.py`
+
+- Added `docs/QURAN_ONLY_EXPERIMENT.md` (the AR-only→fused workaround, the first-sample
+  result, and the early-self-termination finding) + repo-root `build_pron_only_fused.py`.
+  Indexed in `docs/README.md` and `SOURCE_OF_TRUTH.md` (row: Quran pron alone on base).
+- Reconciler after the change: **1885 claims / 46 docs, 1155 checkable, 6 flagged** — all 6
+  the pre-existing missing `manifests/workspace_manifest.json` fixture — **0 new drift**.
+- Authority: user request ("document everything"); no run config or hyperparameter changed;
+  no frozen doc rewritten.

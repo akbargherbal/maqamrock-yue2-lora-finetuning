@@ -20,6 +20,7 @@ operating contract is `../AGENTS.md`.
 | **Run / resume the long-aya Quran LoRA (`quran_long_aya_r8_s10`) — canonical hub** | [PRON_LORA_LONG.md](PRON_LORA_LONG.md) |
 | Verify / offline-eval the pronunciation LoRA (source + AR-loss replay) | [PRON_LORA_VERIFICATION.md](PRON_LORA_VERIFICATION.md) |
 | Merge v2 + pron at a chosen alpha | [PRON_LORA_MERGE.md](PRON_LORA_MERGE.md) |
+| Quran pron LoRA alone (α=1) on the base model | [QURAN_ONLY_EXPERIMENT.md](QURAN_ONLY_EXPERIMENT.md) |
 | Alpha sweep + blinded listening review | [PRON_LORA_SWEEP.md](PRON_LORA_SWEEP.md) |
 | LoRA inventory: what exists, how many, where | [LORA_INVENTORY.md](LORA_INVENTORY.md) |
 | Prepare a blinded A/B(/N) audio listening package | [AB_BLIND_EVAL.md](AB_BLIND_EVAL.md) |
