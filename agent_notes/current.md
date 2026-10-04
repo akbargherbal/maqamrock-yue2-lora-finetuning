@@ -53,3 +53,8 @@ See `docs/COMMAND_HANDOVER_GOTCHAS.md` (2026-10-04).
 ### Continuity / backup
 - `vm-continuity` healthy (loop running); `backup_to_gcp.py --inference` running.
 - Re-run a one-shot mirror: `python backup_to_gcp.py --inference --once`.
+- **Restore this session on a fresh VM** (this GPU session = host `3631c29a716b`):
+  `vm-continuity hosts` → `vm-continuity pull --host 3631c29a716b` →
+  `vm-continuity restore opencode -- --mode db` → reopen the session.
+- Cold start (always works): `git clone … && git checkout experimental-quran-pron`,
+  then read this file and `docs/QURAN_ONLY_EXPERIMENT.md`.
