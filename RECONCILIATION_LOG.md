@@ -304,3 +304,14 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   all 6 the pre-existing `manifests/workspace_manifest.json` fixture — **0 new drift**.
 - Authority: user request ("write background about the test we're doing on the GPU VM"); no
   run config or hyperparameter changed; no frozen doc rewritten.
+
+## 2026-10-04 — Quran format/caption probe run recorded (6/6)
+
+- `docs/QURAN_FORMAT_PROBE.md`: status "prepared, not yet run" → "run 2026-10-04, 6/6
+  rendered; listening verdict pending"; added a "Run result" section (per-arm durations +
+  `truncated=no`, objective duration reads only — no quality verdict).
+- `agent_notes/current.md`: rewritten with the live run status + result table.
+- Reconciler: **not run this pass** — deliberately deferred to the CPU VM to avoid
+  GPU-paid time; the edit is additive (a result section + a status flip), no claim inverted.
+- Authority: user request ("push to gh; discuss findings on cpu vm"); no run config or
+  hyperparameter changed.

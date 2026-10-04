@@ -1,6 +1,7 @@
 # Quran adapter — format/caption probe (GPU test)
 
-Status: **prepared 2026-10-04, not yet run** (branch `experimental-quran-pron`). The input
+Status: **run 2026-10-04 — 6/6 rendered; listening verdict pending** (branch
+`experimental-quran-pron`). The input
 manifest is [`INFERENCE/songs.quran_format_probe.json`](../INFERENCE/songs.quran_format_probe.json);
 the live copy-paste handoff is `agent_notes/current.md`. Companion to
 [`QURAN_ONLY_EXPERIMENT.md`](QURAN_ONLY_EXPERIMENT.md) (the α=1 first sample this follows up on).
@@ -85,6 +86,26 @@ Progress in `out/latest` + `_runs_status.log`. Projected worst case ~39 min on a
   in-domain ceiling.
 - Package a blind A/B with the `ab-blind-eval` skill / `INFERENCE/prepare_ab_eval.py`
   (`docs/AB_BLIND_EVAL.md`).
+
+## Run result (2026-10-04, T4)
+
+Run dir `out/20261004-154634_quran_format_probe/`. 6/6 `exit=0`, **all
+`semantic.truncated=no`** (every track stopped on a model-chosen EOS, never the
+7500 cap), total wall 18:09.
+
+| # | track | caption | dur_s | trunc |
+|---|---|---|---|---|
+| T1 | poem + `۝` | QURAN | 94.3 | no |
+| T2 | poem, no `۝` | QURAN | 75.8 | no |
+| T3 | poem + `۝` | NASHEED | 94.2 | no |
+| T4 | poem + `۝` | KHALIJI TARAB | 106.7 | no |
+| T5 | poem + `۝` | QASIDA | 107.0 | no |
+| T6 | Āyat al-Kursī + `۝` | QURAN | 49.3 | no |
+
+Objective duration reads only (quality/articulation verdict requires listening):
+`۝` adds ~18 s (T1 94.3 vs T2 75.8); the training-layout `[Verse]` fix roughly
+doubled the earlier ~52 s first sample; T6 (in-domain aya) ≈ that old ~52 s;
+caption wording moved the poem only slightly (T3/T4/T5 94–107 s).
 
 ## See also
 
