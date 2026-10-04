@@ -86,8 +86,11 @@ INFERENCE/run_one.sh <Maqam> <seed> [cap|auto]
   to override (`semantic_max_tokens`).
 - Fixed session options inside `run_one.sh`: `--family yue2`,
   `yue2.model_gguf=yue2-3b-bf16.gguf`, `yue2.vae_gguf=yue2-vae-f16.gguf`,
-  `yue2.ar_lora`/`yue2.nar_lora` (both scale 1.0, from `/content/converter/out`),
-  `yue2.attention=flash`, `cot=off`.
+  `yue2.ar_lora`/`yue2.nar_lora` (from `/content/converter/out`),
+  `yue2.attention=flash`, `cot=off`. The AR/NAR adapter **scales** default to
+  `1.0` and are overridable by the `LORA_AR_SCALE` / `LORA_NAR_SCALE` env vars;
+  audio.cpp treats a scale of `0` as "adapter off" (base weights), which is how
+  the pron-only / base-model arms are run (see `agent_notes/current.md`).
 - `run_one.sh` wraps the call in `/usr/bin/time -v` — **GNU `time` must be
   installed** (the bootstrap does). Colab's builtin `time` alone gives
   `exit 127: /usr/bin/time: No such file or directory`.

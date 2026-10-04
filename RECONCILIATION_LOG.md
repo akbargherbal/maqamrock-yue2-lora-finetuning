@@ -236,3 +236,23 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   `run_one.sh` writes a per-track `<name>_<seed>_gpu.csv` at 1 Hz. Reconciler:
   1837 claims / 45 docs, 1130 checkable, **6 flagged** (same pre-existing
   fixture) — 0 new drift.
+
+## 2026-10-04 — `run_one.sh`: per-expert adapter scales are env-overridable
+
+- `INFERENCE/run_one.sh` now reads `LORA_AR_SCALE` / `LORA_NAR_SCALE` (default
+  `1.0`), forwarded as `yue2.ar_lora_scale` / `yue2.nar_lora_scale`. Unset behavior
+  is byte-identical to before (both were the hardcoded literal `1.0`). This enables
+  the "Quran pron LoRA alone / base model" arms from `agent_notes/current.md`:
+  audio.cpp treats a scale of `0` as adapter-off (base weights), verified in
+  `docs/yue2-gguf-lora-findings.md:2.3` / PR #586.
+- `docs/INFERENCE.md` "Fixed session options" bullet updated to state the scales
+  default to 1.0 and are overridable by those env vars; no other doc claimed a
+  hardcoded scale for `run_one.sh`.
+- Tests: `tests/test_generate.py` + `tests/test_merge_pron_lora.py` pass
+  (73 passed, 1 skipped — the end-to-end converter invariant, artifacts not
+  staged). `tests/test_suno_to_songs.py` failures are the pre-existing missing
+  `manifests/workspace_manifest.json` fixture, unrelated.
+- Reconciler after the change: 1838 claims / 45 docs, 1131 checkable, **6 flagged**;
+  all 6 are that same pre-existing fixture — **0 new drift**.
+- Authority: user-directed experiment prep; no run config or hyperparameter
+  changed; no frozen doc rewritten.
