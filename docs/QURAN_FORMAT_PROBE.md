@@ -1,7 +1,7 @@
 # Quran adapter — format/caption probe (GPU test)
 
-Status: **run 2026-10-04 — 6/6 rendered; listening verdict pending** (branch
-`experimental-quran-pron`). The input
+Status: **run 2026-10-04 — 6/6 rendered; listening verdict received** (branch
+`experimental-quran-pron`; see [Listening verdict](#listening-verdict-user-2026-10-04)). The input
 manifest is [`INFERENCE/songs.quran_format_probe.json`](../INFERENCE/songs.quran_format_probe.json);
 the live copy-paste handoff is `agent_notes/current.md`. Companion to
 [`QURAN_ONLY_EXPERIMENT.md`](QURAN_ONLY_EXPERIMENT.md) (the α=1 first sample this follows up on).
@@ -106,6 +106,62 @@ Objective duration reads only (quality/articulation verdict requires listening):
 `۝` adds ~18 s (T1 94.3 vs T2 75.8); the training-layout `[Verse]` fix roughly
 doubled the earlier ~52 s first sample; T6 (in-domain aya) ≈ that old ~52 s;
 caption wording moved the poem only slightly (T3/T4/T5 94–107 s).
+
+Per-track `semantic.tokens` (from each track's log; the model emits a near-constant
+≈25 tokens/s, so duration and tokens track each other):
+
+| # | tokens | dur_s |
+|---|---|---|
+| T1 | 2358 | 94.3 |
+| T2 | 1896 | 75.8 |
+| T3 | 2355 | 94.2 |
+| T4 | 2667 | 106.7 |
+| T5 | 2675 | 107.0 |
+| T6 | 1232 | 49.3 |
+
+## Listening verdict (user, 2026-10-04)
+
+**Every arm sounds like Quran** — *madd* and *waqf* are simulated throughout, so it reads
+as a person reciting Quran rather than declaiming some other text. **But pronunciation is
+unusable in all six arms.** The makhārij errors are not one or two: roughly **one error
+every 2–3 words**, including T6 (the in-domain Āyat al-Kursī). The user's strongest
+objection: **the model cannot read the Arabic text correctly** — the training did not
+reach the intended standard.
+
+### Repetition / looping (caption-sensitive)
+
+Loops land on one specific half-line and repeat it; the **location and count change with
+the caption**, and the T6 aya did not loop at all. All six reached the final bayt.
+
+| arm | caption | repeated half-line | times |
+|---|---|---|---|
+| T1 | QURAN + `۝` | bayt 3 ʿajuz: لِبَائِدَ عَنْ أَعْطَافِهِ مَا تُرَجَّلُ | 3 |
+| T2 | QURAN, no `۝` | same bayt 3 ʿajuz | 2 |
+| T3 | NASHEED + `۝` | same bayt 3 ʿajuz | **7** |
+| T4 | KHALIJI TARAB + `۝` | bayt 4 ṣadr: بَعِيدٌ بِمَسِّ الدُّهْنِ وَالْفَلْيِ عَهْدُهُ | 3 |
+| T5 | QASIDA + `۝` | same bayt 4 ṣadr | 4 |
+| T6 | QURAN + `۝` | — (none) | — |
+
+### Ending
+
+All six reached the final bayt / end of the aya. **T6 stopped cleanly** right after
+`وَهُوَ ٱلْعَلِىُّ ٱلْعَظِيمُ` (EOS well-placed, `truncated=0`).
+
+**Read:** the adapter carries recitation *prosody* (tajweed-like madd/waqf) but not
+*phonemic accuracy*; looping is real and caption-sensitive (NASHEED 7× > QURAN 3×); and
+the in-domain aya (T6) is the one that stops cleanly, yet still fails on makhārij.
+
+**Bearing on the "ceiling risk":** `FUTURE_PRONUNCIATION_LORA.md:143-148` flagged that the
+MERT semantic (AR) tokens may not separate the pharyngeal/emphatic contrasts (ح/خ, ع/أ,
+ق/ط/ض/ظ), in which case no adapter or dataset can fix articulation. An in-domain
+recitation adapter producing ~1 makhraj error every 2–3 words is direct evidence for that
+representation limit — its decisive, cheap test is the **base model, no LoRA, held-out
+hard-letter lyrics** (`INFERENCE/yue2_eval_heldout/`, the Ajam entry), same-seed A/B.
+
+Relevant knobs to test next (not changed here): inference `repetition_penalty`
+(`docs/INFERENCE.md:104`, default 1.2 via `sample_ar_repetition_penalty`) and the training
+filter `max_repeat=2` (`docs/PRON_LORA_LONG_PLAN.md:36,67`). But the makhārij verdict
+points at the *training data/adapter*, not only the sampler.
 
 ## See also
 

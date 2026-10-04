@@ -315,3 +315,39 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   GPU-paid time; the edit is additive (a result section + a status flip), no claim inverted.
 - Authority: user request ("push to gh; discuss findings on cpu vm"); no run config or
   hyperparameter changed.
+
+## 2026-10-04 — Quran format/caption probe listening verdict recorded
+
+- `docs/QURAN_FORMAT_PROBE.md`: status "listening verdict pending" → "received"; added a
+  "Listening verdict (user)" section: prosody (madd/waqf) present in all arms, but
+  pronunciation unusable in all six (~1 makhraj error every 2–3 words, incl. in-domain T6);
+  caption-sensitive looping on a specific half-line (T1/QURAN ×3, T2 ×2, T3/NASHEED ×7,
+  T4/KHALIJI ×3, T5/QASIDA ×4, T6 none); T6 stops cleanly. Added a per-track
+  `semantic.tokens` table, and a "Bearing on the ceiling risk" note tying the makhārij
+  failure to the MERT-token representational limit (`FUTURE_PRONUNCIATION_LORA.md:143-148`).
+- `agent_notes/current.md`: rewritten with the verdict + open items.
+- Reconciler: not run this pass (still pending from the GPU commit, which deferred it to
+  the CPU VM). The edit is additive — a listening result + tokens, no claim inverted.
+- Authority: user's listening report (2026-10-04); no run config or hyperparameter changed.
+
+## 2026-10-04 — Quran-pron objective/criteria/next-run review
+
+- Added `docs/QURAN_PRON_REVIEW.md` (post-verdict audit: the reframed objective;
+  acceptance-criteria proposal; the teacher-forced-eval criteria error; the AHH
+  filtered dataset; config/ceiling/sampler hypotheses; an ordered cheap-first plan).
+  Indexed in `docs/README.md`; two `SOURCE_OF_TRUTH.md` rows added (the review, and
+  the AHH dataset repo/zip); the stale probe row note ("prepared not yet run") fixed.
+- Second revision (same day, after user clarification): added the corrected symptom
+  framing (prosody gained, words degraded), a "catastrophic-forgetting hypothesis"
+  subsection (§2.7, marked unverified), and an "assumptions & hypotheses — re-opened"
+  table. User's explicit direction: success ≠ "hear ح/ع"; the training method must be
+  re-examined.
+- Findings verified from artifacts: eval used `ar_ce`/`ar_kl` only (teacher-forced)
+  and `disable_sampling: true`; old dataset `selection_report.json` claims 81,006
+  train pairs but GCS holds 67,505 (`_simple` missing for 13,501 combos); AHH =
+  13,501 mp3 / 4,650 ayat / 3 reciters.
+- Reconciler: not run this pass (still outstanding from the GPU commit). Changes are
+  additive (new review doc + index rows); no claim inverted; no config or
+  hyperparameter edited.
+- Authority: user request ("comprehensive review … stop repeating training without
+  benefit") + the clarifications on dataset quality/reciters and Tanzil text.

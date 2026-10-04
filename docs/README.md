@@ -22,6 +22,7 @@ operating contract is `../AGENTS.md`.
 | Merge v2 + pron at a chosen alpha | [PRON_LORA_MERGE.md](PRON_LORA_MERGE.md) |
 | Quran pron LoRA alone (α=1) on the base model | [QURAN_ONLY_EXPERIMENT.md](QURAN_ONLY_EXPERIMENT.md) |
 | Probe training-format vs caption on the Quran adapter (GPU test) | [QURAN_FORMAT_PROBE.md](QURAN_FORMAT_PROBE.md) |
+| Review the Quran-pron objective, criteria & next-run plan | [QURAN_PRON_REVIEW.md](QURAN_PRON_REVIEW.md) |
 | Alpha sweep + blinded listening review | [PRON_LORA_SWEEP.md](PRON_LORA_SWEEP.md) |
 | LoRA inventory: what exists, how many, where | [LORA_INVENTORY.md](LORA_INVENTORY.md) |
 | Prepare a blinded A/B(/N) audio listening package | [AB_BLIND_EVAL.md](AB_BLIND_EVAL.md) |

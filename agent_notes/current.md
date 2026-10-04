@@ -1,43 +1,41 @@
 # current
 
-## State @ 2026-10-04 16:06 — format/caption probe RUN DONE (6/6) + repo pulled to dfcc1e8
+## State @ 2026-10-04 (CPU VM) — Quran-pron review done; 4 decisions open
 
-Branch `experimental-quran-pron`, HEAD **`dfcc1e8`** (pulled from origin this session).
-The other (web) session documented the probe; run below was executed here on a T4.
+Branch `experimental-quran-pron`, HEAD `2299571`. Probe verdict recorded
+(`docs/QURAN_FORMAT_PROBE.md`). Comprehensive review written:
+**`docs/QURAN_PRON_REVIEW.md`** (objective + acceptance criteria + audit + ordered plan).
+No config edited; no GPU work.
 
-### What's on GitHub since last pull
+### The reframed objective (user)
 
-`dfcc1e8 Document the Quran format/caption probe (GPU test background)` adds
-`docs/QURAN_FORMAT_PROBE.md` (background + 6-arm design) and indexes it; updates
-`RECONCILIATION_LOG.md`, `SOURCE_OF_TRUTH.md`, `docs/README.md`, `agent_notes/current.md`.
-That doc still says "prepared, not yet run" — **now stale** (run finished below).
+Given any aya → recite with correct tajwīd/ḥarakāt/makhārij/waqf, error-free at α=1.
+(Old "make a few letters clearer" ceiling is rejected.)
 
-### Probe run — COMPLETE
+**Corrected symptom (user, unverified):** the adapter gained recitation *prosody*
+(madd/waqf) but now **mispronounces words** — possibly mild catastrophic forgetting
+or prosody bleeding into phonemes. Not established; see review §2.7. The training
+method itself must be re-examined.
 
-- run dir: `/content/audiocpp_inference/out/20261004-154634_quran_format_probe/`
-- adapter `quran_only` (AR 1.0 / NAR 0.0), seed `20261004`, cap `7500`, `--no-trigger`.
-- 6/6 exit=0, **all `semantic.truncated=no`** (EOS, never the cap), total wall 18:09.
+### Headline audit findings
 
-| # | track | caption | dur_s | trunc |
-|---|---|---|---|---|
-| T1 | poem + `۝` | QURAN | 94.3 | no |
-| T2 | poem, no `۝` | QURAN | 75.8 | no |
-| T3 | poem + `۝` | NASHEED | 94.2 | no |
-| T4 | poem + `۝` | KHALIJI TARAB | 106.7 | no |
-| T5 | poem + `۝` | QASIDA | 107.0 | no |
-| T6 | Āyat al-Kursī + `۝` | QURAN | 49.3 | no |
+- **Criteria error:** the adapter was accepted on teacher-forced `ar_ce`/`ar_kl` only
+  (`PRON_LORA_VERIFICATION.md:98-166`), with `disable_sampling: true` — a proxy that
+  cannot see free-running pronunciation errors. → define a free-run eval first.
+- **Data:** old set = 9 reciters, uneven quality; new **AHH filtered** = 3 reciters
+  (Abdul_Basit, Hudhaify, Husary), 9,492/13,501 kept, audio-only (pair with Tanzil).
+- **Artifact mismatch:** old `selection_report.json` claims 81,006 train pairs; GCS
+  holds 67,505 (`_simple` missing for 13,501 combos).
+- **Ceiling:** base-model / no-LoRA hard-letter test must run **before** any retrain
+  (`FUTURE_PRONUNCIATION_LORA.md:143-148`).
 
-Objective read (durations only; quality needs listening):
-the `۝` adds ~18 s (T1 94.3 vs T2 75.8); the training-layout `[Verse]` fix roughly
-doubled the first sample (~52 s under song tags); T6 (in-domain aya) ≈ the first
-sample's ~52 s. Caption wording moved the poem only slightly (T3/T4/T5 94–107 s).
+### Open decisions (need user) — review §4
 
-### Next
+1. Single Uthmani caption vs keep `simple`+`uthmani`?
+2. Accept "≥90% of held-out ayat with zero makhraj errors"?
+3. Move `ar_kl_weight`, rank, or lr first?
+4. Confirm AHH zip is the training source + where to stage it.
 
-Listen / blind A/B per `docs/QURAN_FORMAT_PROBE.md` "Reading the result"
-(`ab-blind-eval` skill / `INFERENCE/prepare_ab_eval.py`); judge ح خ ع ق ط ض ظ with
-tashkeel visible. Then record the result into `docs/QURAN_FORMAT_PROBE.md`.
+### Standing
 
-### Sidecars / backups
-
-`backup_to_gcp.py --inference` (pid 15109) + `vm-continuity watch` (pid 15110) running.
+`docs-reconciler` pass still outstanding (deferred from the GPU commit).
