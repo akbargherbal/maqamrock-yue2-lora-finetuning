@@ -1,60 +1,83 @@
 # current
 
-## State @ 2026-10-04: Quran-only (α=1) first sample DONE — branch `experimental-quran-pron`
+## State @ 2026-10-04 (CPU prep VM): Quran format/caption probe manifest READY
 
-T4, host `3631c29a716b`. Nothing running except `backup_to_gcp.py --inference`. GPU idle.
-Full record: **`docs/QURAN_ONLY_EXPERIMENT.md`** (authority). This file is the handoff.
+Branch `experimental-quran-pron`. This session was CPU-only discussion + prep.
+Manifest: **`INFERENCE/songs.quran_format_probe.json`** (6 arms, dry-run clean).
+Authority for the earlier finding: `docs/QURAN_ONLY_EXPERIMENT.md`.
 
-### Result
-First song of `manifests/batch_36_songs.json` (`07-الحر-الشديد-وقطع-القفر-والوعول`),
-style replaced with the unaccompanied-recitation caption, Quran pron LoRA alone (AR 1.0,
-NAR off), seed `20261004`:
+### Confirmed cause of last session's early stop (from artifacts)
 
-- **exit 0**, wall 1:52, **52.2 s** WAV, `truncated=false`.
-- wav: `/content/audiocpp_inference/out/quran_only_sample/07-الحر-الشديد-وقطع-القفر-والوعول_20261004.wav`
-  (sha256 `ff21ed9f74fc2884ba5465aecfdedf0bd575a8727989887ef24738a0681464c2`); GCS-mirrored.
-- **It stopped after ~one aya** (1304 semantic tokens, cap 7500, `truncated 0` = natural EOS).
-  Expected: the adapter is AR-only and its training clips were single long-ayat recitations
-  (~23 s avg, `max_words=60`), so it recites ~one and stops. Not a bug; raising the cap won't
-  help. To do a full poem, chunk the lyrics to that length and stitch takes.
+Training clips are a hardcoded 4-line template (`prepare_pron_dataset.py:210`,
+`docs/PRON_LORA_LONG_PLAN.md:41`):
+`<caption>\n[Lyrics]\n[Verse]\n<one aya> ۝`. Every file uses a **bare `[Verse]`**
+and exactly **one aya** (e.g. `quran_long_aya_dataset/train/Abdul_Basit_*_002004_uthmani.txt`).
+Inference builds `[Tags]\n<style>\n[Lyrics]\n<lyrics>` (`audio.cpp pipeline.cpp:22-30`),
+so our last run fed `[Intro]`/`[Verse 1]`/`[Chorus]`/`[Outro]` — all never seen.
+Result: it recited ~one verse then natural EOS (`truncated 0`). Not a cap issue.
 
-### Adapter(s) built
-- Quran pron source: `/content/pron_src/quran_long_aya_r8_s10.safetensors` (sha `f8c842e4…`).
-- The converter **requires both AR and NAR**; the AR-only direct convert fails. Built a fused
-  `AR=pron + NAR=zeros` with `build_pron_only_fused.py`, then converted →
-  `/content/converter/out/quran_only/quran_long_aya_r8_s10_{ar,nar}.safetensors`
-  (AR rank 8 real, NAR rank 8 zeros).
-- Controls staged: `/content/converter/out/akbar_arabic_rock_lora_{ar,nar}.safetensors`
-  (v2) and, if needed, `qfinal_a0.3`/`qfinal_a0.5` (pull from `<base>/loras/audio_cpp/pron/`).
+### The 6-arm probe (why, not just numbers)
 
-### Environment gotcha (bit us once)
-On this CUDA-13 image the prebuilt sm_75 `audiocpp_cli` needs the **CUDA-12** libs that ship
-in the pip `nvidia-*-cu12` packages, or it dies instantly (`exit=127`,
-`libcublas.so.12: cannot open shared object file`). Always export first:
+Question: **is the Quran-adapter's Arabic pronunciation high-fidelity, and can the
+caption / the `۝` end-marker move it?** `۝` is treated as the *true-end* marker
+(used once, at the very end). All arms: adapter `quran_only`, seed `20261004`,
+cap `7500` (uniform, so EOS is the only intended stop), `--no-trigger`.
+
+| # | lyrics | caption | tests |
+|---|---|---|---|
+| T1 | poem, single ` ۝` on last line | QURAN | does the true-end mark make it finish? |
+| T2 | poem, no `۝` | QURAN | (vs T1) `۝` effect; (vs last session) tag fix |
+| T3 | poem, single `۝` | NASHEED | caption → articulation |
+| T4 | poem, single `۝` | KHALIJI TARAB | caption → articulation |
+| T5 | poem, single `۝` | QASIDA | caption → articulation |
+| T6 | Āyat al-Kursī (2:255, 58 w) + `۝` | QURAN | in-domain fidelity yardstick (open-source text) |
+
+Poem = the song's 8 couplets (deduped, `...` stripped), single `[Verse]` header.
+Captions are deliberately distinct, not one-word swaps. T6 aya sourced from the
+open Quran API (`api.alquran.cloud/v1/ayah/2:255/quran-uthmani`), all hard letters
+ح خ ع ق ط ض ظ present.
+
+### Next-session prerequisites (GPU)
+
+1. Stage the `quran_only` adapter (not GCS-mirrored; rebuild from the pron source —
+   steps in `docs/QURAN_ONLY_EXPERIMENT.md`):
+   `${GCP_BACKUP_BASE}/quran_long_aya_r8_s10/output/quran_long_aya_r8_s10.safetensors`
+   → `build_pron_only_fused.py` → converter → `/content/converter/out/quran_only/`.
+2. Export the CUDA-12 loader path (else the sm_75 CLI dies `exit=127`):
+   ```bash
+   export LD_LIBRARY_PATH="$(find /usr/local/lib/python3.13/dist-packages/nvidia \
+     -maxdepth 2 -type d \( -name lib -o -name lib64 \) | tr '\n' ':')/usr/lib64-nvidia"
+   ldd /content/audiocpp_inference/bin/audiocpp_cli | grep 'not found' || echo OK
+   ```
+3. Confirm GPU idle: `nvidia-smi`. Prereqs for backup sidecars per `AGENTS.md` §10.
+
+### Run command — detached
+
+terminal: detached — survives Ctrl+C / closing the tab.
+log: `/content/logs/quran_format_probe.log`; stop: `pkill -f quran_format_probe`;
+resume: re-run the same command (seeds/caps are fixed, so it reproduces; a partial
+run just leaves a new timestamped `out/` dir — check `out/latest`).
+
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
-export LD_LIBRARY_PATH="$(find /usr/local/lib/python3.13/dist-packages/nvidia \
-  -maxdepth 2 -type d \( -name lib -o -name lib64 \) | tr '\n' ':')/usr/lib64-nvidia"
-ldd /content/audiocpp_inference/bin/audiocpp_cli | grep 'not found' || echo OK
+setsid nohup python INFERENCE/generate.py \
+  INFERENCE/songs.quran_format_probe.json --no-trigger \
+  --label quran_format_probe > /content/logs/quran_format_probe.log 2>&1 & disown
 ```
-See `docs/COMMAND_HANDOVER_GOTCHAS.md` (2026-10-04).
 
-### Next steps (pick up here)
-1. **Listen** to the wav; judge articulation of the hard letters (ح خ ع أ ق ط).
-2. Run the **comparison arms** with the SAME seed + lyrics, for a blind A/B
-   (`docs/AB_BLIND_EVAL.md`, skill `ab-blind-eval`):
-   - base (AR+NAR off): `LORA_AR_SCALE=0 LORA_NAR_SCALE=0`
-   - quran-AR + v2-NAR: `quran_only` AR (1.0) + v2 NAR (1.0)
-   - `qfinal_a0.5`: both 1.0
-   `INFERENCE/run_one.sh` reads `LORA_AR_SCALE` / `LORA_NAR_SCALE` (default 1.0; 0 = off).
-3. Optional: **chunked** run (2–3 verse groups, same seed) to confirm length-per-clip and to
-   actually render the full poem.
+Progress: `tail -f /content/logs/quran_format_probe.log`; driver status in
+`out/<ts>_quran_format_probe/_runs_status.log`. Projected worst case ~39 min on a
+T4; short EOS stops will make it faster.
 
-### Continuity / backup
-- `vm-continuity` healthy (loop running); `backup_to_gcp.py --inference` running.
-- Re-run a one-shot mirror: `python backup_to_gcp.py --inference --once`.
-- **Restore this session on a fresh VM** (this GPU session = host `3631c29a716b`):
-  `vm-continuity hosts` → `vm-continuity pull --host 3631c29a716b` →
-  `vm-continuity restore opencode -- --mode db` → reopen the session.
-- Cold start (always works): `git clone … && git checkout experimental-quran-pron`,
-  then read this file and `docs/QURAN_ONLY_EXPERIMENT.md`.
+### After the runs
+
+Package a blind A/B with the `ab-blind-eval` skill /
+`INFERENCE/prepare_ab_eval.py` (new blinding seed). Judge the hard letters
+(ح خ ع ق ط ض ظ) with the tashkeel text visible; `🔊` the prior control wav for a
+floor. Reference: the 2026-10-04 run (`out/quran_only_sample/`, seed `20261004`).
+
+### Durability caveat
+
+`INFERENCE/songs.quran_format_probe.json` is **uncommitted** — a fresh GPU VM
+(clone) will not have it. Commit+push, or `gsutil cp` it to
+`${GCP_BACKUP_BASE}/audiocpp_inference/` before the VM resets.
