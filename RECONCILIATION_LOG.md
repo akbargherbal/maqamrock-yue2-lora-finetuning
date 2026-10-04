@@ -256,3 +256,17 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   all 6 are that same pre-existing fixture — **0 new drift**.
 - Authority: user-directed experiment prep; no run config or hyperparameter
   changed; no frozen doc rewritten.
+
+## 2026-10-04 — gotcha: CUDA-13 image needs CUDA-12 libs on `LD_LIBRARY_PATH`
+
+- Added a `docs/COMMAND_HANDOVER_GOTCHAS.md` entry: the prebuilt sm_75
+  `audiocpp_cli` links CUDA 12 (`libcublas.so.12`, `libcudart.so.12`); on this
+  CUDA-13 Colab image those ship only in the pip `nvidia-*-cu12` packages, so the
+  binary dies with `exit=127` unless every `nvidia/*/lib` dir is on
+  `LD_LIBRARY_PATH`. The `.so.12` files are present (verified with `ldd`); this is
+  a loader-path fix, not a missing toolkit. Prevented a second wasted launch.
+- Reconciler after the change: 1845 → 1845 claims / 45 docs, 1131 checkable,
+  **6 flagged** — all 6 the pre-existing missing `manifests/workspace_manifest.json`
+  fixture — **0 new drift**.
+- Authority: user-directed (generation failed; fix the env, report it); no run
+  config or hyperparameter changed; no frozen doc rewritten.

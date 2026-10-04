@@ -113,3 +113,26 @@ human and invisible to the agent — so they get written down here.
   `python train_ctl.py stop --config config/<run>.yml --log-name <log>`.
 - **Possible hardening (not done):** `cmd_stop`/`cmd_status` could fall back to the
   `run_name`/`config` recorded in `<log-name>_state.json` when the flags are omitted.
+
+## 2026-10-04 — CUDA-13 image: the prebuilt `audiocpp_cli` needs CUDA-12 libs on `LD_LIBRARY_PATH`
+
+- **Fact:** the staged prebuilt binary (sm_75/T4) is built against **CUDA 12**
+  (`libcublas.so.12`, `libcudart.so.12`). A Colab image whose toolkit/driver is
+  **CUDA 13** (e.g. driver 580, `/usr/local/cuda-13.0`, torch cu130) does not expose
+  those SONAMEs on the default loader path, so the process dies immediately with
+  `error while loading shared libraries: libcublas.so.12: cannot open shared object
+  file`. The CLI still says "no CUDA toolkit needed" — true for *building*, not for
+  this ABI.
+- **Failure prevented:** a "generation" that looks started but never loads the model.
+  Symptom: the run's driver log shows `START …` and `END … exit=127` in the **same
+  second**, and `<name>_time.txt` says `Command exited with non-zero status 127` (the
+  launch, not the model). `pgrep audiocpp_cli` returns nothing.
+- **Correct pattern:** the `.so.12` files ship in the pip `nvidia-*-cu12` packages;
+  put every `nvidia/*/lib` dir on the loader path *before* any run using the binary:
+  ```bash
+  export LD_LIBRARY_PATH="$(find /usr/local/lib/python3.13/dist-packages/nvidia \
+    -maxdepth 2 -type d \( -name lib -o -name lib64 \) | tr '\n' ':')/usr/lib64-nvidia"
+  ldd /content/audiocpp_inference/bin/audiocpp_cli | grep 'not found' || echo OK
+  ```
+  `ldd` reporting no `not found` lines = the binary will load. (`/usr/bin/time` being
+  present is a separate, already-documented prerequisite; exit 127 here is the loader.)
