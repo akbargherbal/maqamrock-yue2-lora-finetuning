@@ -1,6 +1,15 @@
 # current
 
-## RUNNING: Quran-only first sample — branch `experimental-quran-pron` (2026-10-04, T4)
+## DONE: Quran-only first sample — branch `experimental-quran-pron` (2026-10-04, T4)
+
+**Result:** exit 0, wall 1:52, **52.2 s** WAV, `truncated=false`. The model **self-terminated
+early** — 1304 semantic tokens (cap 7500, min 200) — so only the first part of the qasida
+was rendered. Worth noting for the listening: the Quran-only adapter + unaccompanied caption
+stopped well before the lyrics ran out (vs the ~220 s tracks the v2 benchmark produces).
+- wav: `/content/audiocpp_inference/out/quran_only_sample/07-الحر-الشديد-وقطع-القفر-والوعول_20261004.wav`
+- sha256 `ff21ed9f74fc2884ba5465aecfdedf0bd575a8727989887ef24738a0681464c2`
+- backed up to GCS `…/audiocpp_inference/out/quran_only_sample/` (11 objects, 9.57 MiB)
+
 
 Generating **one** sample from the first song of `manifests/batch_36_songs.json`
 (`07-الحر-الشديد-وقطع-القفر-والوعول`), using the **Quran pron LoRA alone (α=1)** with the
