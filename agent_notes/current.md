@@ -1,10 +1,12 @@
 # current
 
-## State @ 2026-10-04 (CPU VM) — AHH training dataset BUILT
+## State @ 2026-10-04 (CPU VM) — AHH dataset BUILT, config drafted
 
-Branch `experimental-quran-pron`, HEAD `4fea54f`. No training, no GPU, no config
-edited. Untracked: `prepare_ahh_quran_dataset.py`. This file = the decision log
-for the next run.
+Branch `pron-lora-long-aya` (renamed from `experimental-quran-pron`, 2026-10-04);
+`main` = `d345a9b` (do NOT merge this long-aya work there). No training, no GPU.
+Config `config/quran_ahh_r8.yml` DRAFTED — 4 diffs vs the s10 config: `name`,
+`log_dir`, `datasets[0].folder_path`, `steps: 9489`; all hyperparameters unchanged.
+This file = the decision log for the next run.
 
 ### Dataset — BUILT + validated (`/content/quran_ahh_dataset`)
 
@@ -34,17 +36,19 @@ Rebuild (captions only; audio hardlinked):
 ### Next (in order)
 
 1. ~~Bank the dataset to GCS~~ **DONE** (zip sha `8c68d684…e9ff9`).
-2. **Confirm final name.** Currently `quran_ahh_dataset` (dataset + run proposal
-   `quran_ahh_r8`). If renamed, rename the folder + rezip + re-push + update this file.
-3. **User OK / edit the style line.** If changed: rerun the builder (rewrites 9,489
-   `.txt` in seconds; audio untouched), rezip, re-push.
-4. **Config (user's to write):** new run identity; `steps: 9489` (= 1 epoch);
-   keep rank 8/8 · lr 1e-4 · `ar_kl_weight` 0.2 · EMA 0.999 · `cache_latents_to_disk: true`.
-5. **Phase 1 base-model ceiling probe gates any GPU training** (`QURAN_PRON_REVIEW.md` §5).
-   No training until that verdict.
+2. **Config** `config/quran_ahh_r8.yml` drafted; review/adjust before launch.
+3. **Offline eval**: adapt `INFERENCE/pron_ckpt_sweep.py` to free-run held-out 2:255
+   per checkpoint (the run has `disable_sampling: true`).
+4. **Phase 1 base-model ceiling probe gates any GPU training** (`QURAN_PRON_REVIEW.md`
+   §5). No training until that verdict.
+5. **First GPU session**: restore dataset from `quran_ahh_dataset.zip`, sidecars,
+   launch `quran_ahh_r8`; latent-cache build ~2.4 h on an L4 — bank it when done.
 
 ### Open / residual
 
-- Kind=91 `aya-1` clips (sura≠1,9) may carry a recited basmala not in the caption
+- 91 `aya-1` clips (sura≠1,9) may carry a recited basmala not in the caption
   (text/audio alignment; not fixable from metadata).
-- `docs-reconciler` pass + commit outstanding (new script + this change).
+- 3 docs still say `experimental-quran-pron` (`PROGRESS.md`,
+  `docs/QURAN_FORMAT_PROBE.md`, `docs/QURAN_ONLY_EXPERIMENT.md`); stale
+  `pron-lora-long` branch still exists (ancestor of this one).
+- `docs-reconciler` pass outstanding (new builder + config not yet in the docs index).
