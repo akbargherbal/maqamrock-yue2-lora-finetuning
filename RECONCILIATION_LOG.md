@@ -343,9 +343,11 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   table. User's explicit direction: success ≠ "hear ح/ع"; the training method must be
   re-examined.
 - Findings verified from artifacts: eval used `ar_ce`/`ar_kl` only (teacher-forced)
-  and `disable_sampling: true`; old dataset `selection_report.json` claims 81,006
-  train pairs but GCS holds 67,505 (`_simple` missing for 13,501 combos); AHH =
-  13,501 mp3 / 4,650 ayat / 3 reciters.
+  and `disable_sampling: true`; AHH = 13,501 mp3 / 4,650 ayat / 3 reciters.
+- Correction (same day, per user): the old dataset's 67,505 pairs vs the 81,006
+  planned is **by design** — the three AHH reciters (Abdul_Basit, Hudhaify, Husary)
+  were carved out, leaving them `_uthmani`-only (verified per reciter in GCS). The
+  trained set was the **8,100-pair `s10` subsample**, not 81k/67.5k.
 - Reconciler: not run this pass (still outstanding from the GPU commit). Changes are
   additive (new review doc + index rows); no claim inverted; no config or
   hyperparameter edited.

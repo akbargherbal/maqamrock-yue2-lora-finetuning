@@ -75,11 +75,17 @@ time.
   diacritized, e.g. `الْكِتَابُ` vs `ٱلْكِتَـٰبُ`). Likely benign text
   augmentation, but it doubles cost for one variable; a single canonical Uthmani
   is cleaner.
-- **Verified artifact mismatch (old dataset).** Its own
-  `selection_report.json` claims **81,006** train pairs; GCS holds **67,505**
-  (`_uthmani` 40,503 + `_simple` 27,002 — `_simple` missing for 13,501 combos).
-  The artifact did not match its manifest. Not yet root-caused; not assumed to be
-  the cause of the listen failure.
+- **The 81,006 → 67,505 difference is by design, not a bug (corrected
+  2026-10-04).** Verified per reciter in GCS: the three **AHH** reciters
+  (Abdul_Basit 4,525, Hudhaify 4,542, Husary 4,434) have **`_uthmani` only**; the
+  other six have both variants. Their 13,501 `_simple` pairs were carved out with
+  the AHH quality dataset, so `quran_long_aya_dataset/train` holds 40,503
+  `_uthmani` + 27,002 `_simple` = **67,505 pairs**. (An earlier note here called
+  this an unexplained artifact mismatch — it is not.)
+- **What was actually trained:** not the full set. The run used the
+  `quran_long_aya_dataset_s10.tar` subsample — **8,100 pairs = 10 % of the
+  40,503 combos × 2 variants** (config `steps: 8100` = 1 epoch). Neither the
+  81,006 planned rows nor the 67,505 currently on GCS is the trained set.
 
 ### 2.4 Config candidates (hypotheses to test — configs are the user's; never edited on initiative)
 
@@ -140,7 +146,7 @@ Cheap ways to tell them apart (no retrain):
 | Recording quality wasn't the variable | **revised** | quality-filtered AHH set is the base dataset (§2.3) |
 | The adapter only needs to *add* articulation | **re-opened** | adapter may add prosody while degrading words (§0, §2.7) |
 | MERT tokens carry the contrasts | **untested** | decisive base-model probe (§2.6) |
-| The old dataset matched its manifest | **false** | 67,505 actual vs 81,006 claimed pairs (§2.3) |
+| The old dataset matched its manifest | **misread** | 67,505 of 81,006 planned — by design: the three AHH reciters' `_simple` was carved out (§2.3). Training used the **8,100-pair s10 subsample**, not either total |
 
 ## 5. Ordered plan (cheapest first; each phase gates the next)
 

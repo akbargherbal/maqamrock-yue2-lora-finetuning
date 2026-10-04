@@ -24,8 +24,11 @@ method itself must be re-examined.
   cannot see free-running pronunciation errors. → define a free-run eval first.
 - **Data:** old set = 9 reciters, uneven quality; new **AHH filtered** = 3 reciters
   (Abdul_Basit, Hudhaify, Husary), 9,492/13,501 kept, audio-only (pair with Tanzil).
-- **Artifact mismatch:** old `selection_report.json` claims 81,006 train pairs; GCS
-  holds 67,505 (`_simple` missing for 13,501 combos).
+- **Data counts (corrected):** the trained set was the **`quran_long_aya_dataset_s10.tar`
+  subsample = 8,100 pairs** (10 %), NOT 81k/67.5k. `quran_long_aya_dataset/train` now
+  holds 67,505 pairs because the three AHH reciters (Abdul_Basit, Hudhaify, Husary)
+  were carved out as the new high-quality corpus, leaving them `_uthmani`-only
+  (verified per reciter) — by design, not a bug.
 - **Ceiling:** base-model / no-LoRA hard-letter test must run **before** any retrain
   (`FUTURE_PRONUNCIATION_LORA.md:143-148`).
 
