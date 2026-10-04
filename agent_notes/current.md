@@ -171,3 +171,13 @@ No α / checkpoint is "the winner" — that follows the listening
 `docs/INFERENCE.md` (runner, prompts, output layout) · `docs/LORA_INVENTORY.md`
 (what exists, hashes) · `docs/PRON_LORA_MERGE.md` (merge/scaling — history) ·
 `docs/FUTURE_PRONUNCIATION_LORA.md` §4–5 (the ح/ع ceiling risk + cheaper levers).
+
+## Session continuity (2026-10-04, CPU runtime)
+- `vm-continuity` installed + watch loop running (`/content/logs/vm_continuity.log`);
+  this session shipped to
+  `gs://akbar-december-2024-backup/opencode_sessions/by_host/365ac80abf49/`.
+- Restore this session on the fresh GPU VM:
+  `vm-continuity hosts` → `vm-continuity pull --host 365ac80abf49` →
+  `vm-continuity restore opencode -- --mode db` → reopen the session.
+  Cold start (no restore) always works from this file + the repo.
+
