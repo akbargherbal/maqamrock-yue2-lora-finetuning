@@ -96,7 +96,24 @@ narrative lives in git — pre-rewrite history at `git show 39d1bbd:PROGRESS.md`
   Tag **`v0.9.0-beta`** marks the repo's state: v2 style LoRA + long-aya Quran pronunciation
   merges (unselected candidates) + the audio.cpp inference pipeline.
 
+## M12 — Quran pron LoRA **alone** (α=1) on the base model · 2026-10-04
+
+- **First "pron-only" arm rendered** (branch `experimental-quran-pron`): the first song of
+  `manifests/batch_36_songs.json` with its style replaced by the unaccompanied-recitation
+  caption, Quran adapter alone (AR 1.0, NAR off), seed `20261004`. **exit 0**, 52.2 s WAV.
+- **Finding: it self-terminates after ~one aya** (1304 semantic tokens; cap 7500,
+  `truncated 0`). The adapter is AR-only and its training clips were single long-ayat
+  recitations (~23 s avg), so it recites one passage and emits EOS. See
+  `docs/QURAN_ONLY_EXPERIMENT.md`.
+- **Consequence for tooling:** the audio.cpp converter needs both branches (AR-only input
+  fails), and the raw pron file *is* α=1 (trained alpha==rank), so this arm needs no merge —
+  `build_pron_only_fused.py` + the converter (see `DECISIONS.md`).
+
 ## Open items
+
+- **Quran-only (α=1) listening + comparison arms.** The first sample is rendered; listen, then
+  run base / quran-AR+v2-NAR / `qfinal_a0.5` at the same seed for a blind A/B
+  (`docs/QURAN_ONLY_EXPERIMENT.md`).
 
 - **Pick α/checkpoint** for the production adapter by blinded listening (`qfinal_a0.3` vs
   `qfinal_a0.5`; also the long-aya checkpoints). User's call.

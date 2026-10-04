@@ -280,3 +280,17 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   the pre-existing missing `manifests/workspace_manifest.json` fixture — **0 new drift**.
 - Authority: user request ("document everything"); no run config or hyperparameter changed;
   no frozen doc rewritten.
+
+## 2026-10-04 — session recorded in the durable trail (`PROGRESS.md`, `DECISIONS.md`)
+
+- Added **`PROGRESS.md` M12** (Quran pron alone, α=1 — first sample rendered; self-terminates
+  at ~one aya) + an Open-item for the comparison arms.
+- Added **`DECISIONS.md`** bullets (LoRA-merge section): a pron adapter "alone" is not a merge
+  and the raw file already is α=1; the converter requires both branches →
+  `build_pron_only_fused.py`; an AR-only adapter also governs sequence length (cap can't
+  extend it).
+- Reconciler: 1885 claims / 46 docs, 1155 checkable, **6 flagged** (pre-existing
+  `workspace_manifest.json` fixture) — **0 new drift** (`PROGRESS.md`/`DECISIONS.md` are
+  excluded from the scan).
+- Authority: user request ("so the next session knows exactly what we did"); no run config or
+  hyperparameter changed.
