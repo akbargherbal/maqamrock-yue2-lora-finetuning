@@ -5,12 +5,15 @@ Design/why: [`QURAN_PRON_REVIEW.md`](QURAN_PRON_REVIEW.md). Build provenance:
 `agent_notes/current.md` + `prepare_ahh_quran_dataset.py`. Live next step:
 [`../agent_notes/current.md`](../agent_notes/current.md).
 
-Branch: **`pron-lora-long-aya`** (do NOT merge to `main`). Status 2026-10-05:
-dataset built + banked + verified; **training COMPLETE** — 9,489/9,489 (1 epoch),
-self-stopped **2026-10-05 07:39 UTC**, no traceback. Full analysis:
-`TRAINING_ANALYSIS/quran_ahh_r8/ANALYSIS.md`. The Phase 1 probe (§2) was **waived** for
-this run and moved to a **separate T4 session**; all 9 eval arms are banked in GCS
-(`…/quran_ahh_r8/convert/`), driver `INFERENCE/quran_pt_probe.py`.
+Branch: **`pron-lora-long-aya`** (do NOT merge to `main`).
+
+> **REVISED CONFIG (2026-10-05, user), not yet retrained.** The first `quran_ahh_r8`
+> training COMPLETE on 2026-10-05 07:39 UTC (9,489 steps, 1 epoch, rank-8 **AR-only**)
+> and the listening verdict was that it moved recitation *prosody* (madd/waqf) but not
+> the makhraj. The config has since been **replaced in place**: **AR + NAR jointly,
+> rank 32/32, `ar_kl_weight: 0`, 28,467 steps (3 epochs)**. The old run is the record in
+> `TRAINING_ANALYSIS/quran_ahh_r8/ANALYSIS.md`; the new L4 session starts from the revised
+> config. Gate §2 is resolved; the config is the authority, not this table's stale rows.
 
 ## Canonical session prompt (paste on the GPU VM)
 
@@ -42,7 +45,7 @@ start, resume, stop, or edit anything without me typing the command.
 | | |
 |---|---|
 | Run | `quran_ahh_r8` (1 epoch) |
-| Config | `config/quran_ahh_r8.yml` |
+| Config | `config/quran_ahh_r8.yml` — **REVISED: AR+NAR rank 32/32, `ar_kl_weight 0.0`, `steps 28467` (3 epochs)** |
 | Dataset | `/content/quran_ahh_dataset/` — **9,489 train / 6 val** (2:255 ×3 reciters ×2 scripts); ~3.8 GiB |
 | Banked | `$GCP_BACKUP_BASE/quran_ahh_dataset.zip` (3.69 GiB, sha256 `8c68d684…e9ff9`) |
 | Notebook env | `GCP_AHH_DATASET_ZIP` → the zip above; opt-in `job_ahh_dataset` in `setup.sh` restores it |
@@ -64,11 +67,11 @@ Correct-by-construction (unchanged from the working s10 run):
 | Key | Value | Verdict |
 |---|---|---|
 | `job` / `process[].type` | `extension` / `diffusion_trainer` | correct superset (`DECISIONS.md` plumbing) |
-| `network.linear/_alpha` | 8 / 8, `conv` 16/16, `lokr_full_rank: true` | rank 8/8 per review §6.3 (not moved); `conv` inert (AR-only) |
-| `network_kwargs.ignore_if_contains` | `["transformer.nar"]` | makes it **AR-only** — the intended pron objective |
+| `network.linear/_alpha` | 32 / 32, `conv` 16/16, `lokr_full_rank: true` | rank 32 (was 8) — capacity to remap phonemes; `conv` inert |
+| `network_kwargs.ignore_if_contains` | `[]` | **AR + NAR** (was `["transformer.nar"]` = AR-only) — the NAR renders the articulation, so it must be adapted too |
 | `model.name_or_path` / `qtype` | `…yue2_3b_int8_convrot.safetensors` / `convrot8` | HF-cached by bootstrap; int8 QLoRA |
-| `model_kwargs.cot` / `ar_kl_weight` / `train_window_frames` | `off` / `0.2` / `0` | locked (review §6.3); whole-clip, no SheetSage2 |
-| `train.batch_size` / `gradient_accumulation` | 1 / 1 | 1 step = 1 sample ⇒ `steps: 9489` = **1 epoch** |
+| `model_kwargs.cot` / `ar_kl_weight` / `train_window_frames` | `off` / `0.0` / `0` | `ar_kl 0` (was 0.2): don't anchor the AR to the base that's wrong; whole-clip, no SheetSage2 |
+| `train.batch_size` / `gradient_accumulation` | 1 / 1 | 1 step = 1 sample ⇒ `steps: 28467` = **3 epochs** |
 | `train.optimizer` / `lr` / `dtype` | `adamw8bit` / 1e-4 / bf16 | unchanged |
 | `ema_config` | `use_ema: true`, decay `0.999` | **saved adapters are EMA weights** |
 | `datasets[0].cache_latents_to_disk` | `true` | **mandatory for YuE2**; ~2.4 h for 9,489 on an L4 before step 1 |
@@ -104,10 +107,11 @@ LoRA line**; training `quran_ahh_r8` is not justified. Do this in the first GPU
 session, *before* any training. (If the user explicitly waives the gate, record it
 in `current.md`.)
 
-**Status: WAIVED for the L4 training session (user, 2026-10-05)** — training ran
-ungated; the probe is deferred to the **T4 session**, which now also evaluates the new
-checkpoints. All arms (`base`, `quran_only`, `c1500…c9000`, `final`) are converted and
-banked (`INFERENCE/quran_pt_probe.py`).
+**Status: run 2026-10-05, then SUPERSEDED.** The probe ran (all arms `base`,
+`quran_only`, `c1500…c9000`, `final` banked under `…/quran_ahh_r8/convert/`, driver
+`INFERENCE/quran_pt_probe.py`); its verdict — "base also wrong ⇒ representational
+ceiling" — was **rejected** as a stopping signal (the base was never trained on Quran, so
+that inference is invalid). The revised config trains **AR+NAR** accordingly.
 
 ## 3. GPU session checklist
 
@@ -158,6 +162,11 @@ banked (`INFERENCE/quran_pt_probe.py`).
 - **Auto-resume trap:** `ai-toolkit` resumes from the newest checkpoint in
   `output/quran_ahh_r8/`. For a **fresh** start the folder must be empty; a resume
   is the **identical** config + run name with the output prefix restored first.
+  For the revised run: the existing checkpoints are rank-8 **AR-only** and incompatible
+  with the rank-32 **AR+NAR** network — do **not** restore the old output prefix.
+- **Latent cache is adapter-independent** — the banked `…/quran_ahh_dataset/_latent_cache.tar`
+  (703 MiB) is still valid for the revised config (rank/scope/KL/steps do not change the
+  cache key); untar it to skip the ~50 min encode.
 - **Cache is not backed up by the daemon** — bank it by hand (§Phase D). The dataset
   is still required every VM (the loader enumerates filenames); cache alone is not enough.
 - **EMA restarts a fresh average on resume** (known, accepted). Saved adapters are EMA.
@@ -169,6 +178,11 @@ banked (`INFERENCE/quran_pt_probe.py`).
 
 ## 5. Decisions taken
 
-1. **Phase 1 gate — WAIVED** on the L4 (user, 2026-10-05); deferred to the T4 eval.
-2. **Target GPU — L4** (23 GB). Cache build measured **~50 min** for 9,489 (not ~2.4 h).
+1. **Phase 1 gate — run, verdict rejected** (2026-10-05). "Base also wrong" does not imply a
+   representational ceiling; it only means the music base was never trained on Quran.
+2. **Target GPU — L4** (23 GB). Cache build measured **~50 min** for 9,489 (not ~2.4 h);
+   reuse the banked cache for the revised run.
 3. **Acceptance bar** (`QURAN_PRON_REVIEW.md` §1): ≥90 % held-out ayat zero-makhraj at α=1.
+4. **Config revision (user, 2026-10-05):** AR-only/rank-8 could move only prosody; train
+   **AR+NAR jointly at rank 32, `ar_kl_weight 0.0`, 3 epochs** (v2's shape). Evaluate with
+   the trained NAR, not a lone-AR render.
