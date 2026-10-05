@@ -271,6 +271,28 @@ job_quran_long_dataset() {
   touch "$marker"
 }
 
+# AHH quality-filtered Quran pronunciation dataset -- the quran_ahh_r8 run's set
+# (docs/QURAN_AHH_RUN.md). Banked as a single ZIP (not a directory prefix), so it
+# is a `cp` + `unzip` rather than an rsync. Same opt-in shape/marker as the others;
+# runs only when GCP_AHH_DATASET_ZIP is exported. Marker lives at the dataset ROOT
+# (not inside train/) so a re-run on the same VM skips the re-pull.
+job_ahh_dataset() {
+  if [ -z "${GCP_AHH_DATASET_ZIP:-}" ]; then
+    echo "GCP_AHH_DATASET_ZIP unset; skipping AHH dataset (opt-in)"
+    return 0
+  fi
+  local local_dir="/content/quran_ahh_dataset"
+  local zip="/content/quran_ahh_dataset.zip"
+  local marker="${local_dir}/.bootstrap_complete"
+  if [ -f "$marker" ]; then
+    echo "AHH dataset already restored (marker $marker); skipping"
+    return 0
+  fi
+  gcloud storage cp "$GCP_AHH_DATASET_ZIP" "$zip"
+  unzip -q -o "$zip" -d /content/
+  touch "$marker"
+}
+
 # --- HF cache pre-warm: no custom directory tree, just make these a cache
 # hit instead of a stall the first time training actually asks for them. ---
 job_hf_yue2_backbone() {
@@ -387,6 +409,10 @@ if [ "$MODE" = "training" ]; then
   if [ -n "${GCP_QURAN_LONG_DATASET_PATH:-}" ]; then
     start_job quran_long_dataset job_quran_long_dataset
   fi
+  # opt-in: the AHH quran_ahh_r8 dataset (single zip)
+  if [ -n "${GCP_AHH_DATASET_ZIP:-}" ]; then
+    start_job ahh_dataset job_ahh_dataset
+  fi
   start_job hf_yue2_backbone job_hf_yue2_backbone
   start_job hf_mert job_hf_mert
   start_job hf_tokenizer_head job_hf_tokenizer_head
@@ -481,6 +507,17 @@ if [ "$MODE" = "training" ]; then
       fail=1
     else
       echo "[ok]   quran-long dataset: $ql_pairs train pairs (expect 81006)"
+    fi
+  fi
+
+  # AHH quran_ahh_r8 dataset (opt-in). Count train PAIRS (.txt), expect 9,489.
+  if [ -n "${GCP_AHH_DATASET_ZIP:-}" ]; then
+    ahh_pairs=$(find /content/quran_ahh_dataset/train -maxdepth 1 -name "*.txt" 2>/dev/null | wc -l)
+    if [ "$ahh_pairs" -ne 9489 ]; then
+      echo "[FAIL] AHH dataset: $ahh_pairs train pairs (expect 9489) — check /content/logs/ahh_dataset.log"
+      fail=1
+    else
+      echo "[ok]   AHH dataset: $ahh_pairs train pairs"
     fi
   fi
 
