@@ -6,8 +6,11 @@ Design/why: [`QURAN_PRON_REVIEW.md`](QURAN_PRON_REVIEW.md). Build provenance:
 [`../agent_notes/current.md`](../agent_notes/current.md).
 
 Branch: **`pron-lora-long-aya`** (do NOT merge to `main`). Status 2026-10-05:
-dataset built + banked + **restored & verified on the CPU VM**; config drafted and
-audited below; **no GPU work yet**. Training is **gated** by the Phase 1 probe (§2).
+dataset built + banked + verified; **training COMPLETE** — 9,489/9,489 (1 epoch),
+self-stopped **2026-10-05 07:39 UTC**, no traceback. Full analysis:
+`TRAINING_ANALYSIS/quran_ahh_r8/ANALYSIS.md`. The Phase 1 probe (§2) was **waived** for
+this run and moved to a **separate T4 session**; all 9 eval arms are banked in GCS
+(`…/quran_ahh_r8/convert/`), driver `INFERENCE/quran_pt_probe.py`.
 
 ## Canonical session prompt (paste on the GPU VM)
 
@@ -101,6 +104,11 @@ LoRA line**; training `quran_ahh_r8` is not justified. Do this in the first GPU
 session, *before* any training. (If the user explicitly waives the gate, record it
 in `current.md`.)
 
+**Status: WAIVED for the L4 training session (user, 2026-10-05)** — training ran
+ungated; the probe is deferred to the **T4 session**, which now also evaluates the new
+checkpoints. All arms (`base`, `quran_only`, `c1500…c9000`, `final`) are converted and
+banked (`INFERENCE/quran_pt_probe.py`).
+
 ## 3. GPU session checklist
 
 ### Phase A — preflight (2 min)
@@ -159,8 +167,8 @@ in `current.md`.)
 - **Extending past 9489** overwrites the final adapter — new run name + copy the
   checkpoint/optimizer in (`DECISIONS.md`).
 
-## 5. Open decisions (user sign-off)
+## 5. Decisions taken
 
-1. Confirm the **Phase 1 gate** either runs (recommended) or is waived.
-2. Target GPU (L4 vs A100) — sets cache build time and session budget.
-3. Acceptance bar (`QURAN_PRON_REVIEW.md` §1): ≥90 % held-out ayat zero-makhraj at α=1.
+1. **Phase 1 gate — WAIVED** on the L4 (user, 2026-10-05); deferred to the T4 eval.
+2. **Target GPU — L4** (23 GB). Cache build measured **~50 min** for 9,489 (not ~2.4 h).
+3. **Acceptance bar** (`QURAN_PRON_REVIEW.md` §1): ≥90 % held-out ayat zero-makhraj at α=1.

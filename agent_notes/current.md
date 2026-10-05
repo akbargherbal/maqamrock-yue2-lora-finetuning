@@ -1,11 +1,14 @@
 # current
 
-## State @ 2026-10-05 — `quran_ahh_r8` training RUNNING (L4); Phase 1 gate WAIVED to T4
+## State @ 2026-10-05 — `quran_ahh_r8` training COMPLETE (L4); eval handoff to T4
 
 Branch `pron-lora-long-aya` (do NOT merge to `main`; `main` = `ab8640d`). GPU = NVIDIA
-L4 (23 GB). Training **RUNNING** (pid 34210): 1 epoch = 9,489 steps, checkpoints at
-1500/3000/…/9000 + a final no-step save, auto-backed-up to GCS. Latent cache built +
-banked. Phase 1 ceiling probe **WAIVED** for this session and moved to a separate T4
+L4 (23 GB). Training **COMPLETE**: 9,489/9,489 (1 epoch), self-stopped at target
+**2026-10-05 07:39 UTC**, no traceback. 6 checkpoints (1500–9000) + final adapter +
+`optimizer.pt` + `loss_log.db` all backed up to GCS (`…/quran_ahh_r8/output/`). Latent
+cache built + banked. Full write-up: `TRAINING_ANALYSIS/quran_ahh_r8/ANALYSIS.md`.
+
+The Phase 1 ceiling probe was **waived** on the L4 and is now the **T4 session's** job
 (see `### T4 session` below).
 
 **Phase 1 base-model ceiling probe: WAIVED for this session (user, 2026-10-05).**
@@ -34,11 +37,10 @@ prunes non-manifest libs *and* verifies a cuDNN conv on a fresh VM. Relaunch was
 Goal: the **Phase 1 base-model ceiling probe** + per-checkpoint pron eval on held-out
 **2:255**, free-run, same seed. This is the gate deferred from the L4 training session.
 
-Ready in GCS (converted on the L4 while training ran; byte-level verified):
-`$GCP_BACKUP_BASE/quran_ahh_r8/convert/{base,quran_only,c1500,c3000,c4500,c6000,c7500}/`
+Ready in GCS (converted on the L4; byte-level verified) — **all 9 arms are final**:
+`$GCP_BACKUP_BASE/quran_ahh_r8/convert/{base,quran_only,c1500,c3000,c4500,c6000,c7500,c9000,final}/`
 — each dir has `quran_ahh_r8_ar.safetensors` (lone AR, α=1) + `quran_ahh_r8_nar.safetensors`
-(zeros, rank 8), plus `convert/adapter_manifest.json`. New checkpoints (`c9000`, `final`)
-land automatically as the run saves them; re-run the driver to pick them up.
+(zeros, rank 8), plus `convert/adapter_manifest.json` (per-arm sha256).
 
 1. Clone branch `pron-lora-long-aya`, then `bash bootstrap/setup.sh --inference`
    (T4 = the **native sm_75** binary; no arch swap).
@@ -83,7 +85,7 @@ Restored this session (CPU-only, verified):
   EMA 0.999, cot off, `ar_kl_weight` 0.2, bf16). Change only data + eval per review §6.3.
 - Eval is an OFFLINE per-checkpoint free-run on held-out 2:255; `disable_sampling: true`.
 
-### Staged GPU session (paste in order; exact flags source-verified)
+### How it ran (reference for a future resume/extension)
 
 ```bash
 # 0. code — this long-aya work lives on the branch, not main
@@ -128,9 +130,7 @@ pgrep -af 'backup_to_gcp.py|gpu_logger.py'
 ```
 
 ```bash
-# 4. GATED: do NOT launch training until the Phase 1 base-model ceiling probe verdict
-#    (docs/QURAN_PRON_REVIEW.md §5). Probe first: base (no LoRA) vs quran_only on
-#    held-out 2:255, same seed, free-run.
+# 4. LAUNCH (the Phase 1 probe was waived by the user and training ran anyway, 2026-10-05)
 ```
 
 terminal: detached (via train_ctl — a stray Ctrl+C cannot kill it); YOU type the start;
@@ -139,8 +139,8 @@ resume: the identical `train_ctl.py start` line (auto-resumes from the newest ch
 ```bash
 python train_ctl.py start --config config/quran_ahh_r8.yml --run-name quran_ahh_r8 --log-name train_quran_ahh
 ```
-First launch builds the latent cache (~2.4 h for 9,489 files on an L4) before step 1 —
-`loss_log.db` at 0 steps for a while is normal. Bank the cache when complete:
+First launch builds the latent cache before step 1 (~50 min measured for 9,489 on this L4,
+not the ~2.4 h once estimated) — `loss_log.db` at 0 steps for a while is normal. Bank the cache when complete:
 `tar -C /content/quran_ahh_dataset/train -cf - _latent_cache | gcloud storage cp - "$GCP_BACKUP_BASE/quran_ahh_dataset/_latent_cache.tar"`.
 Stop/status MUST pass the same `--config` + `--run-name` (see `docs/COMMAND_HANDOVER_GOTCHAS.md`):
 ```bash
@@ -151,11 +151,9 @@ python monitor_loss.py /content/ai-toolkit/output/quran_ahh_r8/loss_log.db
 
 ### Next / open
 
-1. **Phase 1 base-model ceiling probe** (GPU minutes) gates any training (§5). No verdict yet.
-2. **Offline eval**: adapt `INFERENCE/pron_ckpt_sweep.py` to free-run held-out 2:255 per
-   checkpoint (run has `disable_sampling: true`).
-3. After the verdict only: launch `quran_ahh_r8` (step 4 above); measure ~50 steps; do not edit config mid-run.
-4. Residual: 91 `aya-1` clips (sura≠1,9) may carry a recited basmala not in the caption.
-5. Docs: run hub `docs/QURAN_AHH_RUN.md` added + indexed; `prepare_ahh_quran_dataset.py`
-   still not in `docs/README.md`; 3 docs still say `experimental-quran-pron`;
-   `docs-reconciler` pass outstanding.
+1. **T4 pron eval** — `### T4 session` above; all 9 arms are in GCS
+   (`convert/{base,quran_only,c1500,c3000,c4500,c6000,c7500,c9000,final}`).
+2. **Blind gate** (`ab-blind-eval`) before any merge — no adapter is "best" before the listen.
+3. Residual: 91 `aya-1` clips (sura≠1,9) may carry a recited basmala not in the caption.
+4. Docs: `prepare_ahh_quran_dataset.py` still not in `docs/README.md`; 3 docs still say
+   `experimental-quran-pron`; `docs-reconciler` pass outstanding.
