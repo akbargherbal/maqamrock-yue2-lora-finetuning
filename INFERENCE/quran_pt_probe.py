@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
-"""T4 pron probe: base / quran_only / each `quran_ahh_r8` checkpoint, free-run on the
-held-out aya (2:255), one seed. Lone-AR adapters only (no v2 merge), in the exact
-training caption format.
+"""T4 pron probe: held-out aya (2:255), free-run, one seed, exact training caption
+format. Works for both arm kinds — the rank-8 lone-AR arms (AR verbatim, NAR zeros)
+and the revised rank-32 AR+NAR arms (both experts real); no v2 merge either way.
 
 The adapters are already converted on the training VM and banked in GCS under
-`<base>/quran_ahh_r8/convert/<arm>/` (`<arm>` in {base, quran_only, c<step>, final}).
-This stages them, writes a `generate.py` songs JSON, and runs it.
+`<base>/<prefix>/<arm>/` (`<prefix>` defaults to `quran_ahh_r8/convert`; `<arm>` in
+{base, quran_only, c<step>, final}). This stages them, writes a `generate.py` songs
+JSON, and runs it.
 
     python INFERENCE/quran_pt_probe.py --dry-run     # validate + print plan (no GPU)
     python INFERENCE/quran_pt_probe.py               # real run on the GPU VM
+
+    # revised run: rank-32 AR+NAR arms, a subset only
+    python INFERENCE/quran_pt_probe.py --prefix quran_ahh_r8_rank32/convert \
+        --arms c4500,c7500
 
 `base` is an all-zero adapter (AR+NAR) so the base arm runs in the same batch at
 scale 1.0. If you distrust it, run base separately with `LORA_AR_SCALE=0
@@ -34,17 +39,17 @@ SEED = 20261004
 CAP = 7500
 
 
-def dest_prefix() -> str:
+def dest_prefix(rel: str) -> str:
     base = os.environ.get("GCP_BACKUP_BASE")
     if not base:
         sys.exit("GCP_BACKUP_BASE is unset")
-    return f"{base}/quran_ahh_r8/convert"
+    return f"{base}/{rel}"
 
 
-def stage(stage_dir: Path, do_stage: bool) -> None:
+def stage(stage_dir: Path, rel: str, do_stage: bool) -> None:
     stage_dir.mkdir(parents=True, exist_ok=True)
     if do_stage:
-        subprocess.run(["gcloud", "storage", "rsync", "-r", dest_prefix(), str(stage_dir)],
+        subprocess.run(["gcloud", "storage", "rsync", "-r", dest_prefix(rel), str(stage_dir)],
                        check=True)
 
 
@@ -84,6 +89,10 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--stage", default=str(DEFAULT_STAGE), help="local dir for staged arms")
+    ap.add_argument("--prefix", default="quran_ahh_r8/convert",
+                    help="GCS prefix (relative to GCP_BACKUP_BASE) holding the converted arms")
+    ap.add_argument("--arms", default="",
+                    help="comma list of arms to keep (default: all discovered under --prefix)")
     ap.add_argument("--no-stage", action="store_true", help="skip the GCS rsync (arms already local)")
     ap.add_argument("--scripts", default="uthmani,simple",
                     help="comma list of held-out scripts to render (default both)")
@@ -93,8 +102,14 @@ def main() -> int:
     args = ap.parse_args()
 
     stage_dir = Path(args.stage)
-    stage(stage_dir, do_stage=not args.no_stage)
+    stage(stage_dir, args.prefix, do_stage=not args.no_stage)
     arms = discover(stage_dir)
+    if args.arms:
+        keep = {a.strip() for a in args.arms.split(",") if a.strip()}
+        missing = keep - set(arms)
+        if missing:
+            sys.exit(f"requested arms not found under {args.prefix}: {sorted(missing)}")
+        arms = {k: v for k, v in arms.items() if k in keep}
     if not arms:
         sys.exit(f"no arms found under {stage_dir}")
     scripts = tuple(s.strip() for s in args.scripts.split(",") if s.strip())
