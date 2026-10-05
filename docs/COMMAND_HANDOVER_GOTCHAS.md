@@ -136,3 +136,25 @@ human and invisible to the agent — so they get written down here.
   ```
   `ldd` reporting no `not found` lines = the binary will load. (`/usr/bin/time` being
   present is a separate, already-documented prerequisite; exit 127 here is the loader.)
+
+## 2026-10-05 — CUDA-13 image: orphan cuDNN libs break VAE encode (`CUDNN_STATUS_SUBLIBRARY_VERSION_MISMATCH`)
+
+- **Fact:** the base image preinstalls cuDNN libs under
+  `.../dist-packages/nvidia/cudnn/lib` that are **not** part of the pinned
+  `nvidia-cudnn-cu13==9.20.0.48` wheel (`libcudnn_engines_tensor_ir.so.9`,
+  `libcudnn_ext.so.9`). pip's uninstall only removes files in the old RECORD, so a
+  `--force-reinstall` leaves them; the 9.20 frontend loads the stale file and aborts.
+- **Failure prevented:** training dies at step 0 during the latent-cache build, in the
+  VAE `conv1d`: `RuntimeError: CUDNN_BACKEND_TENSOR_DESCRIPTOR cudnnFinalize failed …
+  CUDNN_STATUS_SUBLIBRARY_VERSION_MISMATCH`. `setup.sh`'s verify (torchaudio decode)
+  never exercises a cuDNN conv, so it reports all-`[ok]` on a broken box.
+- **Correct pattern:** remove the libs not listed in the wheel RECORD, then verify a
+  GPU conv:
+  ```bash
+  PIP=/usr/local/lib/python3.13/dist-packages/nvidia/cudnn/lib
+  RECORD=$(ls /usr/local/lib/python3.13/dist-packages/nvidia_cudnn_cu13-*.dist-info/RECORD)
+  for f in "$PIP"/libcudnn*.so.9; do grep -q "nvidia/cudnn/lib/$(basename "$f")," "$RECORD" || mv "$f" /tmp/; done
+  python -c "import torch,torch.nn.functional as F; F.conv1d(torch.randn(1,64,200,device='cuda'),torch.randn(64,64,3,device='cuda'),padding=1); print('ok')"
+  ```
+  Permanent fix belongs in `bootstrap/setup.sh` (prune non-manifest files after the
+  torch install). Files moved, not deleted, so a bad guess is reversible.
