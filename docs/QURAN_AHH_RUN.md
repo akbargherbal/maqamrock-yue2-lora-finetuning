@@ -108,7 +108,9 @@ session, *before* any training. (If the user explicitly waives the gate, record 
 in `current.md`.)
 
 **Status: run 2026-10-05, then SUPERSEDED.** The probe ran (all arms `base`,
-`quran_only`, `c1500…c9000`, `final` banked under `…/quran_ahh_r8/convert/`, driver
+`quran_only`, `c1500…c9000`, `final` banked under
+`…/archive/quran_ahh_r8_rank8_aronly/convert/` — moved out of the live run prefix on
+2026-10-05 UTC to keep the revised run's `output/` unambiguous; driver
 `INFERENCE/quran_pt_probe.py`); its verdict — "base also wrong ⇒ representational
 ceiling" — was **rejected** as a stopping signal (the base was never trained on Quran, so
 that inference is invalid). The revised config trains **AR+NAR** accordingly.
