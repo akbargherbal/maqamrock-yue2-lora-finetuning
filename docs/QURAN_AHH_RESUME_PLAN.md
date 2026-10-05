@@ -17,8 +17,8 @@ never from this prose.
 - Run **`quran_ahh_r8` revised** — `config/quran_ahh_r8.yml` = **AR+NAR, rank 32/32,
   `ar_kl_weight 0.0`, `steps 28467` (3 epochs)** — authority; **do not edit**. Branch
   `pron-lora-long-aya`.
-- Paused ~23:00 Bahrain (20:00 UTC) around **step ~18,000** (~12 checkpoints) **or** the VM died
-  overnight. Either is resumable. At handoff: ~16.7k, 11 checkpoints through 16,500.
+- Paused **2026-10-05 20:08 UTC** at step **19,738**, last save **19,500** (13 checkpoints) — or the
+  VM died overnight. Either is resumable; resume picks up from step 19,500 (≤ ~238 steps redone).
 - Banked: checkpoints + `optimizer.pt` + `loss_log.db` under `…/quran_ahh_r8/output/`; dataset
   `quran_ahh_dataset.zip` (3.97 GB) + `_latent_cache.tar` (737 MB). Round-2 adapters
   `c10500` + `c16500` under `…/quran_ahh_r8_rank32/convert/`.

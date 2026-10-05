@@ -4,19 +4,19 @@
 > — point the agent there first; it resumes training, runs the c10500/c16500 T4 probe, finishes the
 > run, then renames.
 
-## State @ 2026-10-05 ~18:50 UTC (21:50 Bahrain) — training LIVE (56.8%); rename DEFERRED
+## State @ 2026-10-05 20:08 UTC (23:08 Bahrain) — **PAUSED** at step 19,500/28,467; rename DEFERRED
 
 Branch `pron-lora-long-aya`. Run config `config/quran_ahh_r8.yml` = **AR+NAR, rank 32/32,
 `ar_kl_weight 0.0`, steps 28467 (3 epochs)** — authority; do not edit hyperparameters.
 The `r8` in the name is a **misnomer (it is rank 32)** — see "Deferred rename" below.
 
-- **Training running**: `run.py` pid **16301** (detached, started 12:35:11). Log
-  `/content/logs/train_quran_ahh.log`. At ~18:46 UTC step ~**16,158 / 28,467 (56.8%)**;
-  **10** checkpoints `_1500…_15000` + `optimizer.pt` (step 15000) + `loss_log.db`, all in GCS.
-  Next save = **18,000** (~19:28 UTC / 22:28 Bahrain). Round-2 T4 adapters (c10500 + c16500)
-  already converted + banked — ready to run.
-- ETA to 28,467 ~**02:26 Bahrain**; user stops ~23:00 Bahrain. Live snapshot:
-  `TRAINING_ANALYSIS/quran_ahh_r8_rank32/ANALYSIS.md`.
+- **Training STOPPED cleanly** (SIGINT, `Job stopped` in the log; `run.py` gone) with the last save
+  at **step 19,500** (13 checkpoints `_1500…_19500` + `optimizer.pt` **step 19500** + `loss_log.db`).
+  Reached step 19,738 before stopping — resume re-runs ≤ ~238 steps.
+- **Backup current**: forced `--once`, **3/3 synced** (20:08:37 UTC); GCS has 19,500 + optimizer.pt
+  + loss_log.db. Sidecars left running (will die with the VM; fine).
+- **Resume point = step 19,500.** Live snapshot: `TRAINING_ANALYSIS/quran_ahh_r8_rank32/ANALYSIS.md`.
+- Round-2 T4 adapters `c10500` + `c16500` banked and ready.
 
 ## Resume next morning — fresh VM (name unchanged: `quran_ahh_r8`)
 
@@ -37,12 +37,9 @@ python train_ctl.py start --config config/quran_ahh_r8.yml --run-name quran_ahh_
 grep -m1 'Found step' /content/logs/train_quran_ahh.log   # must NOT say step 0
 ```
 
-## Pause tonight (you type) — NO rename
-```bash
-cd /content/maqamrock-yue2-lora-finetuning
-python train_ctl.py stop --config config/quran_ahh_r8.yml --run-name quran_ahh_r8 --log-name train_quran_ahh
-python backup_to_gcp.py --run-name quran_ahh_r8 --once    # confirm newest ckpt + optimizer.pt in GCS
-```
+## Pause — DONE (2026-10-05 20:08 UTC)
+Stopped cleanly at checkpoint **19,500**; backup forced current. Nothing further tonight. If the VM
+survives and you want it paused, leave it stopped; if the VM is reclaimed, resume tomorrow as below.
 
 ## Deferred rename `quran_ahh_r8` -> `quran_ahh_r32` (do AFTER training completes)
 
