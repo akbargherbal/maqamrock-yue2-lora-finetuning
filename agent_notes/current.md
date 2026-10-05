@@ -9,7 +9,8 @@ The `r8` in the name is a **misnomer (it is rank 32)** — see "Deferred rename"
 - **Training running**: `run.py` pid **16301** (detached, started 12:35:11). Log
   `/content/logs/train_quran_ahh.log`. At ~18:46 UTC step ~**16,158 / 28,467 (56.8%)**;
   **10** checkpoints `_1500…_15000` + `optimizer.pt` (step 15000) + `loss_log.db`, all in GCS.
-  Next save = **16,500** (~18:54 UTC / 21:54 Bahrain).
+  Next save = **18,000** (~19:28 UTC / 22:28 Bahrain). Round-2 T4 adapters (c10500 + c16500)
+  already converted + banked — ready to run.
 - ETA to 28,467 ~**02:26 Bahrain**; user stops ~23:00 Bahrain. Live snapshot:
   `TRAINING_ANALYSIS/quran_ahh_r8_rank32/ANALYSIS.md`.
 
@@ -66,17 +67,9 @@ Then a docs-reconciler pass over the ~10 files referencing `quran_ahh_r8` (`docs
 c7500_simple** (one mistake); **simple > uthmani**; **hard letters (ح، ع) much improved vs
 rank-8** but not solved.
 
-**Round 2 (planned)** — **c10500 vs c16500** to test whether later training improves. `c10500` is
-already converted + banked (`…/quran_ahh_r8_rank32/convert/c10500/`). Once the **16500**
-checkpoint saves, convert + bank it (CPU, on the L4):
-```bash
-mkdir -p /content/converter/out && gcloud storage cp "$GCP_BACKUP_BASE/audiocpp_inference/converter/convert_aitoolkit_yue2_lora.py" /content/converter/out/
-python /content/converter/out/convert_aitoolkit_yue2_lora.py \
-  /content/ai-toolkit/output/quran_ahh_r8/quran_ahh_r8_000016500.safetensors \
-  --out-dir /content/conversion/quran_ahh_r8_rank32/c16500 --stem quran_ahh_r8
-gcloud storage rsync -r /content/conversion/quran_ahh_r8_rank32 "$GCP_BACKUP_BASE/quran_ahh_r8_rank32/convert"
-```
-Then, on a fresh T4 (`setup.sh --inference`), detached (~26 min for 4 tracks):
+**Round 2 (planned)** — **c10500 vs c16500** to test whether later training improves. Both arms
+are converted + banked (`…/quran_ahh_r8_rank32/convert/{c10500,c16500}/`). On a fresh T4
+(`setup.sh --inference`), detached (~26 min for 4 tracks):
 ```bash
 python INFERENCE/quran_pt_probe.py --prefix quran_ahh_r8_rank32/convert --arms c10500,c16500 --dry-run
 setsid nohup python INFERENCE/quran_pt_probe.py --prefix quran_ahh_r8_rank32/convert --arms c10500,c16500 \
