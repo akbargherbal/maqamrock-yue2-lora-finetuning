@@ -9,6 +9,31 @@ Branch: **`pron-lora-long-aya`** (do NOT merge to `main`). Status 2026-10-05:
 dataset built + banked + **restored & verified on the CPU VM**; config drafted and
 audited below; **no GPU work yet**. Training is **gated** by the Phase 1 probe (§2).
 
+## Canonical session prompt (paste on the GPU VM)
+
+```text
+quran_ahh_r8 — GPU session prime.
+
+Read, in this order:
+  1. docs/QURAN_AHH_RUN.md     (canonical hub: config audit + GPU checklist)
+  2. agent_notes/current.md    (live next step)
+
+Then verify the ACTUAL state from live sources — do not trust prose or memory:
+  - git: branch pron-lora-long-aya, clean/dirty, HEAD vs origin
+  - VM: nvidia-smi (GPU/VRAM), disk, and what is running
+    (pgrep -af 'run\.py'; pgrep -af backup_to_gcp.py; pgrep -af gpu_logger.py; vm-continuity status)
+  - dataset: /content/quran_ahh_dataset (9,489 train pairs) present? did setup.sh print
+    "[ok] AHH dataset: 9489 train pairs"? latent cache built/banked?
+  - run: newest checkpoint in GCS .../quran_ahh_r8/output/ and its step (none = fresh)
+  - continuity: vm-continuity status
+
+Report briefly: where we are; what is running right now; any doc-vs-reality divergence;
+the single next step with the exact command(s) for me to type.
+
+Do NOT launch training: the Phase 1 base-model ceiling probe (§2) gates it. Do not
+start, resume, stop, or edit anything without me typing the command.
+```
+
 ## Snapshot
 
 | | |
