@@ -212,6 +212,31 @@ job_ai_toolkit() {
   sed -i 's|^scipy==1\.12\.0$|scipy>=1.14|' "$AI_TOOLKIT/requirements.txt"
   sed -i 's|^torchcodec==[0-9.]*$|torchcodec==0.15.0|' "$AI_TOOLKIT/requirements_base.txt"
   pip install -q --no-input -r "$AI_TOOLKIT/requirements.txt"
+
+  # CUDA-13 base images preinstall cuDNN libs that are NOT part of the pinned
+  # nvidia-cudnn-cu13 wheel's RECORD (seen 2026-10-05: libcudnn_engines_tensor_ir.so.9,
+  # libcudnn_ext.so.9). pip cannot remove them (absent from the old RECORD), and the
+  # pinned frontend loads the stale file, so the VAE conv1d dies at step 0 with
+  # CUDNN_STATUS_SUBLIBRARY_VERSION_MISMATCH during latent caching. Prune any lib in
+  # the cuDNN dir the wheel does not own, so only the pinned version's files remain.
+  # Idempotent; moved (not deleted) to /tmp for reversibility.
+  python - <<'PY' || true
+import glob, os, shutil, sysconfig
+try:
+    import nvidia.cudnn
+except Exception:
+    raise SystemExit(0)
+lib = os.path.join(list(nvidia.cudnn.__path__)[0], "lib")
+recs = glob.glob(os.path.join(sysconfig.get_paths()["purelib"],
+                             "nvidia_cudnn_cu13-*.dist-info", "RECORD"))
+if not (lib and recs) or not os.path.isdir(lib):
+    raise SystemExit(0)
+owned = {ln.split(",", 1)[0] for ln in open(recs[0])}
+for f in glob.glob(os.path.join(lib, "libcudnn*.so.9")):
+    if "nvidia/cudnn/lib/" + os.path.basename(f) not in owned:
+        print("pruning orphan cuDNN lib:", os.path.basename(f))
+        shutil.move(f, os.path.join("/tmp", os.path.basename(f) + ".pruned"))
+PY
 }
 
 job_dataset() {
@@ -499,15 +524,23 @@ if [ "$MODE" = "training" ]; then
   # read a real dataset file. A stale `==` pin silently kept a cu128 torchaudio
   # next to a cu130 torch and broke every decode; catch that here, not at the
   # first training step mid-cache. See DECISIONS.md.
+  # Also exercise a cuDNN conv (the latent-cache VAE path). torchaudio decode alone
+  # never touches cuDNN, so it passed on a box whose cuDNN sublibs were mismatched
+  # and then died at step 0 (2026-10-05, CUDNN_STATUS_SUBLIBRARY_VERSION_MISMATCH).
   if python - <<PY >/dev/null 2>&1
 import glob, torch, torchaudio
 assert torch.version.cuda == "13.0", torch.version.cuda
 torchaudio.load(sorted(glob.glob("$DATASET_LOCAL/*.mp3"))[0])
+if torch.cuda.is_available():
+    import torch.nn.functional as F
+    F.conv1d(torch.randn(1, 64, 200, device="cuda"),
+             torch.randn(64, 64, 3, device="cuda"), padding=1)
+    torch.cuda.synchronize()
 PY
   then
-    echo "[ok]   torch/torchaudio cu130 + torchaudio decodes a dataset mp3"
+    echo "[ok]   torch/torchaudio cu130 + decode + cuDNN conv"
   else
-    echo "[FAIL] torch/torchaudio CUDA mismatch or audio decode failed — see DECISIONS.md 'torch/CUDA stack'"
+    echo "[FAIL] torch/cuDNN stack broken (decode or conv) — see COMMAND_HANDOVER_GOTCHAS.md 2026-10-05"
     fail=1
   fi
 else
