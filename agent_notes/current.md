@@ -1,15 +1,17 @@
 # current
 
-## State @ 2026-10-05 ~17:40 UTC (20:40 Bahrain) — training LIVE; rename DEFERRED to post-training
+## State @ 2026-10-05 ~18:50 UTC (21:50 Bahrain) — training LIVE (56.8%); rename DEFERRED
 
 Branch `pron-lora-long-aya`. Run config `config/quran_ahh_r8.yml` = **AR+NAR, rank 32/32,
 `ar_kl_weight 0.0`, steps 28467 (3 epochs)** — authority; do not edit hyperparameters.
 The `r8` in the name is a **misnomer (it is rank 32)** — see "Deferred rename" below.
 
 - **Training running**: `run.py` pid **16301** (detached, started 12:35:11). Log
-  `/content/logs/train_quran_ahh.log`. At ~17:20 UTC step ~**12,311 / 28,467 (~43%)**;
-  8 checkpoints `_1500…_12000` + `optimizer.pt` + `loss_log.db`, all in GCS.
-- User runs until **~23:00 Bahrain (20:00 UTC)**; training won't finish tonight (~02:30 Bahrain).
+  `/content/logs/train_quran_ahh.log`. At ~18:46 UTC step ~**16,158 / 28,467 (56.8%)**;
+  **10** checkpoints `_1500…_15000` + `optimizer.pt` (step 15000) + `loss_log.db`, all in GCS.
+  Next save = **16,500** (~18:54 UTC / 21:54 Bahrain).
+- ETA to 28,467 ~**02:26 Bahrain**; user stops ~23:00 Bahrain. Live snapshot:
+  `TRAINING_ANALYSIS/quran_ahh_r8_rank32/ANALYSIS.md`.
 
 ## Resume next morning — fresh VM (name unchanged: `quran_ahh_r8`)
 
@@ -57,13 +59,30 @@ Then a docs-reconciler pass over the ~10 files referencing `quran_ahh_r8` (`docs
 `docs/README.md`, `SOURCE_OF_TRUTH.md`, `bootstrap/setup.sh`, `INFERENCE/*`, the two
 `TRAINING_ANALYSIS/` dirs) and rename `TRAINING_ANALYSIS/quran_ahh_r8_rank32/` -> `.../quran_ahh_r32/`.
 
-## T4 probe round 1 verdict (2026-10-05, user)
+## T4 probes
 
-c4500 + c7500 (real AR+NAR), held-out 2:255 both scripts:
-`…/audiocpp_inference/out/20261005-154621_quran_pt_probe/`. All "sound like Alhusary";
-**best = c7500_simple** (one mistake); **simple > uthmani**; **hard letters (ح، ع) much improved
-vs rank-8** but not solved. Not a plateau -> **next try ~step 18000** (convert on the L4 -> bank
-to `quran_ahh_r8_rank32/convert/` (or renamed) -> `INFERENCE/quran_pt_probe.py --arms c18000`).
+**Round 1 (done, 2026-10-05)** — c4500 + c7500 (real AR+NAR), held-out 2:255 both scripts:
+`…/audiocpp_inference/out/20261005-154621_quran_pt_probe/`. All "sound like Alhusary"; **best =
+c7500_simple** (one mistake); **simple > uthmani**; **hard letters (ح، ع) much improved vs
+rank-8** but not solved.
+
+**Round 2 (planned)** — **c10500 vs c16500** to test whether later training improves. `c10500` is
+already converted + banked (`…/quran_ahh_r8_rank32/convert/c10500/`). Once the **16500**
+checkpoint saves, convert + bank it (CPU, on the L4):
+```bash
+mkdir -p /content/converter/out && gcloud storage cp "$GCP_BACKUP_BASE/audiocpp_inference/converter/convert_aitoolkit_yue2_lora.py" /content/converter/out/
+python /content/converter/out/convert_aitoolkit_yue2_lora.py \
+  /content/ai-toolkit/output/quran_ahh_r8/quran_ahh_r8_000016500.safetensors \
+  --out-dir /content/conversion/quran_ahh_r8_rank32/c16500 --stem quran_ahh_r8
+gcloud storage rsync -r /content/conversion/quran_ahh_r8_rank32 "$GCP_BACKUP_BASE/quran_ahh_r8_rank32/convert"
+```
+Then, on a fresh T4 (`setup.sh --inference`), detached (~26 min for 4 tracks):
+```bash
+python INFERENCE/quran_pt_probe.py --prefix quran_ahh_r8_rank32/convert --arms c10500,c16500 --dry-run
+setsid nohup python INFERENCE/quran_pt_probe.py --prefix quran_ahh_r8_rank32/convert --arms c10500,c16500 \
+  > /content/logs/quran_pt_probe_r32.log 2>&1 & disown
+```
+Base (no-LoRA) reference: `…/out/20261005-072738_quran_pt_probe/base_*.wav`.
 
 ## Other open items
 - Human blind gate (`ab-blind-eval`) before any merge; `docs/PAUSE_RESUME.md` still uses v2 names.
