@@ -1,11 +1,12 @@
 # current
 
-## State @ 2026-10-05 (L4 GPU VM) — training launching; Phase 1 gate WAIVED
+## State @ 2026-10-05 — `quran_ahh_r8` training RUNNING (L4); Phase 1 gate WAIVED to T4
 
-Branch `pron-lora-long-aya` (do NOT merge to `main`; `main` = `d345a9b`). GPU = NVIDIA
-L4 (23 GB), idle. Training staged + preflight-clean: dataset 9,489/6 verified,
-`config/quran_ahh_r8.yml` parses, `output/quran_ahh_r8/` absent (fresh, no auto-resume),
-no run/sidecars. `setup.sh --training` all `[ok]`.
+Branch `pron-lora-long-aya` (do NOT merge to `main`; `main` = `ab8640d`). GPU = NVIDIA
+L4 (23 GB). Training **RUNNING** (pid 34210): 1 epoch = 9,489 steps, checkpoints at
+1500/3000/…/9000 + a final no-step save, auto-backed-up to GCS. Latent cache built +
+banked. Phase 1 ceiling probe **WAIVED** for this session and moved to a separate T4
+(see `### T4 session` below).
 
 **Phase 1 base-model ceiling probe: WAIVED for this session (user, 2026-10-05).**
 Training proceeds ungated. The probe (inference stack + `quran_only` rebuild on the native
@@ -23,9 +24,41 @@ in the VAE `conv1d`: `CUDNN_STATUS_SUBLIBRARY_VERSION_MISMATCH`. No checkpoint, 
 Cause: orphan cuDNN libs from the image (`libcudnn_engines_tensor_ir.so.9`,
 `libcudnn_ext.so.9`) not in the pinned `nvidia-cudnn-cu13==9.20.0.48` wheel → moved to
 `/content/cudnn_orphans_bak/`; `conv1d` now passes. Fix + recipe:
-`docs/COMMAND_HANDOVER_GOTCHAS.md` (2026-10-05). **Permanent `setup.sh` prune still
-outstanding** (ephemeral — re-fix on every fresh VM until then). Relaunch = same
-`train_ctl.py start` line; config/run-name unchanged, so not a "changed config" resume.
+`docs/COMMAND_HANDOVER_GOTCHAS.md` (2026-10-05). Durable fix committed + pushed:
+`f68f7a6` on `pron-lora-long-aya`, cherry-picked to `main` as `ab8640d` — `setup.sh` now
+prunes non-manifest libs *and* verifies a cuDNN conv on a fresh VM. Relaunch was the same
+`train_ctl.py start` line (config/run-name unchanged; no progress lost).
+
+### T4 session (separate GPU) — pron eval handoff  ← READ THIS ON THE T4
+
+Goal: the **Phase 1 base-model ceiling probe** + per-checkpoint pron eval on held-out
+**2:255**, free-run, same seed. This is the gate deferred from the L4 training session.
+
+Ready in GCS (converted on the L4 while training ran; byte-level verified):
+`$GCP_BACKUP_BASE/quran_ahh_r8/convert/{base,quran_only,c1500,c3000,c4500,c6000,c7500}/`
+— each dir has `quran_ahh_r8_ar.safetensors` (lone AR, α=1) + `quran_ahh_r8_nar.safetensors`
+(zeros, rank 8), plus `convert/adapter_manifest.json`. New checkpoints (`c9000`, `final`)
+land automatically as the run saves them; re-run the driver to pick them up.
+
+1. Clone branch `pron-lora-long-aya`, then `bash bootstrap/setup.sh --inference`
+   (T4 = the **native sm_75** binary; no arch swap).
+2. Run the probe driver — it stages the arms from GCS, builds the songs JSON (exact
+   training caption, `[Verse]` + ` ۝`), and calls `generate.py`:
+   ```bash
+   python INFERENCE/quran_pt_probe.py --dry-run    # validate + projected time
+   python INFERENCE/quran_pt_probe.py              # real run (detach it; ~90+ min)
+   ```
+   Arms = base / `quran_only` / each checkpoint × uthmani+simple, seed 20261004.
+   `base` is an all-zero adapter so it runs in the same batch; fallback if distrusted:
+   `LORA_AR_SCALE=0 LORA_NAR_SCALE=0` against any arm (audio.cpp scale 0 = adapter off).
+3. **CUDA-13-image gotcha:** the sm_75 binary may need the CUDA-12 libs on
+   `LD_LIBRARY_PATH` (`docs/COMMAND_HANDOVER_GOTCHAS.md`, 2026-10-04).
+4. **Verdict** (`docs/QURAN_PRON_REVIEW.md` §5): base **also wrong** on the hard letters
+   ⇒ representational ceiling ⇒ **stop the LoRA line**; base OK but adapter wrong ⇒
+   training/config issue. Listen with tashkeel visible; blind-gate (`ab-blind-eval`)
+   before any merge.
+
+The L4 run continues untouched — **do not run training or this run's config on the T4.**
 
 Restored this session (CPU-only, verified):
 - `gcloud storage cp …/quran_ahh_dataset.zip /content/` → `unzip -q … -d /content/`
