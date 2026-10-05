@@ -1,13 +1,31 @@
 # current
 
-## State @ 2026-10-05 (CPU VM) — AHH dataset RESTORED + VERIFIED; GPU session staged
+## State @ 2026-10-05 (L4 GPU VM) — training launching; Phase 1 gate WAIVED
 
-Branch `pron-lora-long-aya` (do NOT merge to `main`; `main` = `d345a9b`). No GPU,
-no `nvcc` on this box. Training is **not launched** and stays gated by the Phase 1
-base-model ceiling probe (`docs/QURAN_PRON_REVIEW.md` §5, item 4 below).
+Branch `pron-lora-long-aya` (do NOT merge to `main`; `main` = `d345a9b`). GPU = NVIDIA
+L4 (23 GB), idle. Training staged + preflight-clean: dataset 9,489/6 verified,
+`config/quran_ahh_r8.yml` parses, `output/quran_ahh_r8/` absent (fresh, no auto-resume),
+no run/sidecars. `setup.sh --training` all `[ok]`.
+
+**Phase 1 base-model ceiling probe: WAIVED for this session (user, 2026-10-05).**
+Training proceeds ungated. The probe (inference stack + `quran_only` rebuild on the native
+sm_75 binary) moves to a separate T4 session — `docs/QURAN_AHH_RUN.md` §2,
+`docs/QURAN_FORMAT_PROBE.md:63`.
 
 **Plan / config audit / GPU checklist: `docs/QURAN_AHH_RUN.md`** (canonical hub;
 indexed in `docs/README.md` + `SOURCE_OF_TRUTH.md`).
+
+### Crash @ launch (2026-10-05) — fixed; not yet relaunched
+
+First `train_ctl.py start` (pid 25921) died at **step 0** during the latent-cache build,
+in the VAE `conv1d`: `CUDNN_STATUS_SUBLIBRARY_VERSION_MISMATCH`. No checkpoint, no
+`loss_log.db`; `output/quran_ahh_r8/` holds only `config.yaml` + `tensorboard/`.
+Cause: orphan cuDNN libs from the image (`libcudnn_engines_tensor_ir.so.9`,
+`libcudnn_ext.so.9`) not in the pinned `nvidia-cudnn-cu13==9.20.0.48` wheel → moved to
+`/content/cudnn_orphans_bak/`; `conv1d` now passes. Fix + recipe:
+`docs/COMMAND_HANDOVER_GOTCHAS.md` (2026-10-05). **Permanent `setup.sh` prune still
+outstanding** (ephemeral — re-fix on every fresh VM until then). Relaunch = same
+`train_ctl.py start` line; config/run-name unchanged, so not a "changed config" resume.
 
 Restored this session (CPU-only, verified):
 - `gcloud storage cp …/quran_ahh_dataset.zip /content/` → `unzip -q … -d /content/`
