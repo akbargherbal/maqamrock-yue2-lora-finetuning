@@ -1,12 +1,35 @@
 # current
 
-## State @ 2026-10-05 — `quran_ahh_r8` training COMPLETE (L4); eval handoff to T4
+## State @ 2026-10-05 — T4 eval probe COMPLETE (18/18); `quran_ahh_r8` training COMPLETE (L4)
 
-Branch `pron-lora-long-aya` (do NOT merge to `main`; `main` = `ab8640d`). GPU = NVIDIA
-L4 (23 GB). Training **COMPLETE**: 9,489/9,489 (1 epoch), self-stopped at target
-**2026-10-05 07:39 UTC**, no traceback. 6 checkpoints (1500–9000) + final adapter +
-`optimizer.pt` + `loss_log.db` all backed up to GCS (`…/quran_ahh_r8/output/`). Latent
-cache built + banked. Full write-up: `TRAINING_ANALYSIS/quran_ahh_r8/ANALYSIS.md`.
+Branch `pron-lora-long-aya` @ `106318f` (clean; == origin). This is the **T4** VM
+(separate GPU): Phase 1 ceiling probe **DONE** — **18/18** tracks rendered, all `exit=0`
+(last `final_simple` ended `08:05:50Z`). Run dir
+`/content/audiocpp_inference/out/20261005-072738_quran_pt_probe/`, log
+`/content/logs/quran_pt_probe.log`. Full 9-arm set: `base`, `quran_only`, `c1500`–`c9000`,
+`final` × `{uthmani, simple}`. GCS synced `08:08:43Z` (18/18 WAVs present). GPU idle.
+Scoring checklist: `agent_notes/T4_listening_checklist.md`. Scoring UI + `.md` export:
+`INFERENCE/eval_app/` (also staged to GCS `…/tools/pron_eval_app/`).
+
+**Next (next session):** the user is evaluating **offline** and will bring back the exported
+`pron_eval_*.md`. Then produce the verdict per `docs/QURAN_PRON_REVIEW.md` §5 — base wrong on
+hard letters ⇒ representational ceiling (stop the LoRA line); base clean but adapter wrong ⇒
+training/config issue.
+
+**Retrieval if this VM is gone (Colab is ephemeral):** audio is on GCS at
+`…/audiocpp_inference/out/20261005-072738_quran_pt_probe/` (18/18 WAVs); the scoring app is at
+`…/tools/pron_eval_app/`. The user's exported report lives on their own machine (not on GCS).
+`git`: `current.md` modified + `INFERENCE/eval_app/` untracked — local only, not pushed.
+
+**Resolved divergence:** the first batch staged **7 arms** at 07:23 (before the L4 finished
+converting). A chained follow-up (`/content/logs/quran_pt_probe_chain.sh`, log
+`/content/logs/quran_pt_probe_extra.log`) waited for it, re-staged all 9 arms, and resumed
+`generate.py --out-dir` into the **same** run dir — skipping the 14 done, adding
+`c9000`/`final` (4 tracks), then refreshing the GCS backup. **Completed `08:08:43Z`.**
+
+L4 training **COMPLETE**: 9,489/9,489 (1 epoch), self-stopped **07:39 UTC**, no traceback;
+6 checkpoints (1500–9000) + final adapter + `optimizer.pt` + `loss_log.db` backed up to
+GCS. Full write-up: `TRAINING_ANALYSIS/quran_ahh_r8/ANALYSIS.md`.
 
 The Phase 1 ceiling probe was **waived** on the L4 and is now the **T4 session's** job
 (see `### T4 session` below).
