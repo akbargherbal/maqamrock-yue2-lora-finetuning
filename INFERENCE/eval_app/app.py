@@ -52,6 +52,45 @@ def arm_label(arm: str) -> str:
     return arm
 
 
+# --- run / knob grouping -----------------------------------------------------
+# A batch can nest each config under its own folder (e.g. the Phase 2 knob probe:
+# quran_knob_<cfg>/<arm>_<script>_<seed>.wav). The folder is the knob; tracks with
+# the same arm+script in different knobs must not collide, so the folder is part
+# of a track's key. A flat folder (the Phase 1 probe) has group == "".
+KNOB_RANK = {"g1.0": 0, "g1.5": 1, "t0.8": 2, "rp1.4": 3, "pw100": 4}
+
+
+def group_name(group: str) -> str:
+    return Path(group).name if group else ""
+
+
+def group_rank(group: str) -> tuple:
+    if not group:
+        return (-1, 0, "")
+    name = group_name(group)
+    knob = name[len("quran_knob_"):] if name.startswith("quran_knob_") else name
+    return (0, KNOB_RANK.get(knob, 99), knob)
+
+
+def group_label(group: str, audio_dir: Path) -> str:
+    """Prefer the knob folder's `_knob.json` (`<cfg>: <opts>`); else the folder name."""
+    if not group:
+        return ""
+    knob_json = Path(audio_dir) / group / "_knob.json"
+    if knob_json.is_file():
+        try:
+            meta = json.loads(knob_json.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            meta = {}
+        cfg = str(meta.get("config", "")).strip()
+        opts = str(meta.get("extra_request_opts", "")).strip()
+        if opts:
+            return f"{cfg}: {opts}" if cfg else opts
+        if cfg:
+            return cfg
+    return group_name(group)
+
+
 # hard-letter anchors: (1-based word #, word, letters, target)
 ANCHORS = [
     (5, "ٱلْحَىُّ", "ح", "voiceless pharyngeal — breathy, deep in the throat (not «h» or a glottal stop)"),
@@ -143,16 +182,46 @@ def arm_rank(arm: str) -> tuple:
 
 
 def discover(audio_dir: Path) -> list[dict]:
+    """Find renders under audio_dir, recursing into per-run/per-knob subfolders.
+
+    A file is a track when its stem parses as ``<arm>_<script>_<seed>``. A track
+    living in a subfolder is keyed and labelled by that folder (the knob/run), so
+    identically named renders across knobs never collide. A flat folder (group
+    ``""``) behaves exactly as before.
+    """
     tracks = []
-    for wav in sorted(audio_dir.glob("*.wav")):
+    for wav in sorted(audio_dir.rglob("*.wav")):
         parsed = parse_track(wav.stem)
         if not parsed:
             continue
         arm, script, seed = parsed
-        tracks.append({"name": wav.stem, "arm": arm, "script": script, "seed": seed,
-                       "file": wav.name, "label": arm_label(arm)})
-    tracks.sort(key=lambda t: (SCRIPTS.index(t["script"]), arm_rank(t["arm"])))
+        rel = wav.relative_to(audio_dir)
+        group = "" if rel.parent == Path(".") else rel.parent.as_posix()
+        tracks.append({"name": rel.with_suffix("").as_posix(), "arm": arm, "script": script,
+                       "seed": seed, "file": rel.as_posix(), "group": group,
+                       "group_label": group_label(group, audio_dir), "label": arm_label(arm)})
+    tracks.sort(key=lambda t: (SCRIPTS.index(t["script"]), group_rank(t["group"]),
+                               arm_rank(t["arm"]), t["seed"]))
     return tracks
+
+
+def sections_of(tracks: list[dict]) -> list[tuple]:
+    """[(script, [(group_label, [tracks...]), ...]), ...] for the index page."""
+    out = []
+    for script in SCRIPTS:
+        sel = [t for t in tracks if t["script"] == script]
+        if not sel:
+            continue
+        groups: list = []
+        index: dict = {}
+        for t in sel:
+            g = t["group"]
+            if g not in index:
+                index[g] = len(groups)
+                groups.append((t["group_label"] if g else "", []))
+            groups[index[g]][1].append(t)
+        out.append((script, groups))
+    return out
 
 
 def load_state(path: Path) -> dict:
@@ -181,9 +250,49 @@ def _int(v, default=None):
         return default
 
 
+def _knob_verdict(tracks: list[dict], recs: dict) -> list[str]:
+    """Non-binding read-out for a grouped (knob/run) batch that has no `base` arm."""
+    lines: list[str] = []
+    labels = {t["group"]: t["group_label"] for t in tracks if t["group"]}
+    for script in SCRIPTS:
+        sel = [t for t in tracks if t["script"] == script and t["group"]]
+        if not sel:
+            continue
+        lines.append(f"**{script}** — by knob (non-binding):")
+        for g in sorted({t["group"] for t in sel}, key=group_rank):
+            rows = []
+            for t in (x for x in sel if x["group"] == g):
+                r = recs.get(t["name"], {})
+                if not is_done(r):
+                    continue
+                rows.append(f"{t['arm']}: finished {r.get('completion', '?')}, "
+                            f"{r.get('hard_err', '?')}/18 hard, {r.get('word_err', '?')}/50 words")
+            if rows:
+                lines.append(f"- {labels.get(g, g)} — " + "; ".join(rows))
+        loops = [(labels.get(t["group"], t["group"]), t["arm"]) for t in sel
+                 if str(recs.get(t["name"], {}).get("completion", "")).strip().upper() == "L"]
+        if loops:
+            lines.append("- still looping / restarting: "
+                         + ", ".join(f"{g}·{a}" for g, a in loops))
+        bleed = [(labels.get(t["group"], t["group"]), t["arm"]) for t in sel
+                 if recs.get(t["name"], {}).get("bleed") == "Y"]
+        if bleed:
+            lines.append("- mistakes in the stretched vowels (reverb-ish) on: "
+                         + ", ".join(f"{g}·{a}" for g, a in bleed))
+    if not lines:
+        lines.append("_(no rows scored yet)_")
+    lines += ["", "> No `base` arm in this batch, so the ceiling check can't run here. Compare "
+              "each knob against the default-knob anchor separately (Phase 2, "
+              "QURAN_PRON_REVIEW.md §2.5)."]
+    return lines
+
+
 def suggested_verdict(tracks: list[dict], state: dict) -> list[str]:
+    recs = state["tracks"]
+    if any(t["group"] for t in tracks) or not any(t["arm"] == "base" for t in tracks):
+        return _knob_verdict(tracks, recs)
     lines = []
-    by = {(t["arm"], t["script"]): state["tracks"].get(t["name"], {}) for t in tracks}
+    by = {(t["arm"], t["script"]): recs.get(t["name"], {}) for t in tracks}
     for script in SCRIPTS:
         base = by.get(("base", script), {})
         if not is_done(base):
@@ -222,25 +331,39 @@ def render_markdown(tracks: list[dict], state: dict, audio_dir: Path) -> str:
     meta = state.get("meta", {})
     now = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     seeds = sorted({t["seed"] for t in tracks})
+    grouped = any(t["group"] for t in tracks)
+    groups = sorted({t["group"] for t in tracks if t["group"]}, key=group_rank)
+    scope = f"{len(groups)} knobs/runs × " if grouped else ""
     L = ["# Pron-eval report — held-out 2:255 (Āyat al-Kursī)", "",
          f"_Exported {now} by `pron_eval_app`._", "", "## Setup", "",
          f"- audio dir: `{audio_dir}`",
          f"- run: `{meta.get('label', 'quran_pt_probe')}` · seed {', '.join(seeds) or '?'} · cap 7500",
-         f"- tracks: {len(tracks)} ({len({t['arm'] for t in tracks})} arms × "
+         f"- tracks: {len(tracks)} ({scope}{len({t['arm'] for t in tracks})} arms × "
          f"{len({t['script'] for t in tracks})} scripts)",
          "- instrument: 50 lexical words + 8 waqf marks (= the manifest's 58 tokens); "
          "7 hard letters over 15 anchor words (18 occurrences).",
          "- scale: words wrong /50 · hard-letter errors /18 · pausing /2 · elongation /2 · "
-         "intelligibility /2", "", "## Score table", "",
-         "| arm | script | done | finished | words wrong /50 | hard-letter errors /18 | "
-         "pausing /2 | elongation /2 | stretch-vowel bleed | intelligible /2 |",
-         "|---|---|---|---|---|---|---|---|---|---|"]
-    for t in tracks:
-        r = recs.get(t["name"], {})
-        L.append("| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
-            t["arm"], t["script"], "Y" if is_done(r) else "—",
-            r.get("completion", ""), r.get("word_err", ""), r.get("hard_err", ""),
-            r.get("waqf", ""), r.get("madd", ""), r.get("bleed", ""), r.get("intelligible", "")))
+         "intelligibility /2", "", "## Score table", ""]
+    if grouped:
+        L += ["| knob/run | arm | script | done | finished | words wrong /50 | hard-letter errors /18 | "
+              "pausing /2 | elongation /2 | stretch-vowel bleed | intelligible /2 |",
+              "|---|---|---|---|---|---|---|---|---|---|---|"]
+        for t in tracks:
+            r = recs.get(t["name"], {})
+            L.append("| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
+                t["group_label"] or t["group"], t["arm"], t["script"], "Y" if is_done(r) else "—",
+                r.get("completion", ""), r.get("word_err", ""), r.get("hard_err", ""),
+                r.get("waqf", ""), r.get("madd", ""), r.get("bleed", ""), r.get("intelligible", "")))
+    else:
+        L += ["| arm | script | done | finished | words wrong /50 | hard-letter errors /18 | "
+              "pausing /2 | elongation /2 | stretch-vowel bleed | intelligible /2 |",
+              "|---|---|---|---|---|---|---|---|---|---|"]
+        for t in tracks:
+            r = recs.get(t["name"], {})
+            L.append("| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
+                t["arm"], t["script"], "Y" if is_done(r) else "—",
+                r.get("completion", ""), r.get("word_err", ""), r.get("hard_err", ""),
+                r.get("waqf", ""), r.get("madd", ""), r.get("bleed", ""), r.get("intelligible", "")))
     L += ["", "## Suggested verdict (auto — confirm before acting)", ""]
     L += suggested_verdict(tracks, state) or ["_(no rows scored yet)_"]
     L += ["", "> Base is treated as clean if it finished and had ≤ "
@@ -374,10 +497,12 @@ INDEX = PAGE.replace("{% block body %}{% endblock %}", """
   </ol>
   <p class="help">Headphones, one fixed volume, listen at most twice per track.</p>
 </div>
-{% for script in scripts %}
+{% for script, groups in sections %}
   <h2>{{ script }}</h2>
+  {% for glabel, gts in groups %}
+  {% if glabel %}<h3 class="muted small" style="margin:14px 0 4px">{{ glabel }}</h3>{% endif %}
   <div class="grid">
-  {% for t in tracks if t.script == script %}
+  {% for t in gts %}
     <a class="track" href="{{ url_for('track', name=t.name) }}">
       <div class="arm">{{ t.label }}{% if t.name in done_names %}<span class="chip ok">scored</span>
         {% else %}<span class="chip no">to do</span>{% endif %}</div>
@@ -385,6 +510,7 @@ INDEX = PAGE.replace("{% block body %}{% endblock %}", """
     </a>
   {% endfor %}
   </div>
+  {% endfor %}
 {% endfor %}
 """)
 
@@ -520,6 +646,7 @@ def create_app(config: dict) -> Flask:
         dn = {t["name"] for t in ts if is_done(st["tracks"].get(t["name"], {}))}
         total = len(ts) or 1
         return dict(audio=str(audio_dir), out=str(out_dir), tracks=ts, scripts=SCRIPTS,
+                    sections=sections_of(ts),
                     done=len(dn), total=len(ts), done_names=dn, pct=int(100 * len(dn) / total), **kw)
 
     @app.get("/")
@@ -527,7 +654,7 @@ def create_app(config: dict) -> Flask:
         return render_template_string(INDEX, title="pron-eval · tracks",
                                       saved=request.args.get("saved") == "1", **ctx())
 
-    @app.get("/track/<name>")
+    @app.get("/track/<path:name>")
     def track(name):
         ts = discover(audio_dir)
         match = next((t for t in ts if t["name"] == name), None)
@@ -546,7 +673,7 @@ def create_app(config: dict) -> Flask:
             error_legend=" · ".join(f"{k} = {v}" for k, v in ERROR_TYPES),
             saved=request.args.get("saved") == "1", **ctx())
 
-    @app.post("/track/<name>")
+    @app.post("/track/<path:name>")
     def save(name):
         if not any(t["name"] == name for t in discover(audio_dir)):
             abort(404)
@@ -582,9 +709,10 @@ def create_app(config: dict) -> Flask:
             return redirect(url_for("track", name=target))
         return redirect(url_for("track", name=name, saved=1))
 
-    @app.get("/audio/<name>")
+    @app.get("/audio/<path:name>")
     def audio(name):
-        if not name.endswith(".wav") or "/" in name or "\\" in name:
+        p = Path(name)
+        if p.suffix.lower() != ".wav" or p.is_absolute() or ".." in p.parts:
             abort(404)
         return send_from_directory(audio_dir, name)
 
@@ -605,7 +733,9 @@ def create_app(config: dict) -> Flask:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="score the 2:255 pron probe + export Markdown")
-    ap.add_argument("--audio", default="./quran_pt_probe", help="dir with *_<script>_<seed>.wav renders")
+    ap.add_argument("--audio", default="./quran_pt_probe",
+                    help="dir with <arm>_<script>_<seed>.wav renders; run/knob subfolders "
+                         "are discovered automatically")
     ap.add_argument("--out", default="./eval_out", help="dir for evaluations.json + reports")
     ap.add_argument("--label", default="quran_pt_probe")
     ap.add_argument("--host", default="127.0.0.1")
