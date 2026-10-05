@@ -1,182 +1,97 @@
 # current
 
-## State @ 2026-10-05 — T4 eval probe COMPLETE (18/18); `quran_ahh_r8` training COMPLETE (L4)
+## State @ 2026-10-05 10:59Z — Phase 2 knob probe **COMPLETE (20/20, 0 failures)**
 
-Branch `pron-lora-long-aya` @ `106318f` (clean; == origin). This is the **T4** VM
-(separate GPU): Phase 1 ceiling probe **DONE** — **18/18** tracks rendered, all `exit=0`
-(last `final_simple` ended `08:05:50Z`). Run dir
-`/content/audiocpp_inference/out/20261005-072738_quran_pt_probe/`, log
-`/content/logs/quran_pt_probe.log`. Full 9-arm set: `base`, `quran_only`, `c1500`–`c9000`,
-`final` × `{uthmani, simple}`. GCS synced `08:08:43Z` (18/18 WAVs present). GPU idle.
-Scoring checklist: `agent_notes/T4_listening_checklist.md`. Scoring UI + `.md` export:
-`INFERENCE/eval_app/` (also staged to GCS `…/tools/pron_eval_app/`).
+> **Session paused.** The user is disconnecting this VM and will return **after scoring the 20
+> tracks with `pron_eval_app`** (Windows/PowerShell block below). This handoff is pushed to
+> `pron-lora-long-aya` so it survives the disconnect; GCS already holds the audio + the app.
 
-**Next (next session):** the user is evaluating **offline** and will bring back the exported
-`pron_eval_*.md`. Then produce the verdict per `docs/QURAN_PRON_REVIEW.md` §5 — base wrong on
-hard letters ⇒ representational ceiling (stop the LoRA line); base clean but adapter wrong ⇒
-training/config issue.
+Branch `pron-lora-long-aya` @ `f3762fa` (+ local-only `agent_notes/current.md`). T4 (sm_75,
+native binary). Fresh `/content` → `setup.sh --inference` all `[ok]` (35s).
 
-**Retrieval if this VM is gone (Colab is ephemeral):** audio is on GCS at
-`…/audiocpp_inference/out/20261005-072738_quran_pt_probe/` (18/18 WAVs); the scoring app is at
-`…/tools/pron_eval_app/`. The user's exported report lives on their own machine (not on GCS).
-`git`: `current.md` modified + `INFERENCE/eval_app/` untracked — local only, not pushed.
+### Result
 
-**Resolved divergence:** the first batch staged **7 arms** at 07:23 (before the L4 finished
-converting). A chained follow-up (`/content/logs/quran_pt_probe_chain.sh`, log
-`/content/logs/quran_pt_probe_extra.log`) waited for it, re-staged all 9 arms, and resumed
-`generate.py --out-dir` into the **same** run dir — skipping the 14 done, adding
-`c9000`/`final` (4 tracks), then refreshing the GCS backup. **Completed `08:08:43Z`.**
+`INFERENCE/quran_knob_probe.sh` — **20/20 tracks, all `exit=0`, 0 failures, no truncations.**
+- 2 arms (`c4500`,`c9000`) × 2 scripts (`uthmani`,`simple`) × 5 knobs
+  (`g1.0 g1.5 t0.8 rp1.4 pw100`), held-out **2:255**, seed `20261004`, cap 7500.
+- Wall: **first track 10:16:27Z → done 10:59:28Z = ~43 min** (per-knob 6:57 / 8:08 / 9:13 /
+  8:56 / 8:23). Audio durations 40–87 s each.
+- Local: `/content/quran_knob_probe/quran_knob_<cfg>/` (4 tracks each). Run log:
+  `/content/logs/quran_knob_probe.log`.
+- **GCS (authoritative): `$GCP_BACKUP_BASE/quran_knob_probe/`** — 20/20 WAVs + all sidecars +
+  `quran_knob_probe.log` (218.66 MiB). Sample sha256 verified vs local (`90983228…`).
+- Anchor (default knobs) is NOT here: `/content/audiocpp_inference/out/20261005-072738_quran_pt_probe/`.
 
-L4 training **COMPLETE**: 9,489/9,489 (1 epoch), self-stopped **07:39 UTC**, no traceback;
-6 checkpoints (1500–9000) + final adapter + `optimizer.pt` + `loss_log.db` backed up to
-GCS. Full write-up: `TRAINING_ANALYSIS/quran_ahh_r8/ANALYSIS.md`.
+### ⚠ Launch gotcha (fixed) — export `LD_LIBRARY_PATH`
 
-The Phase 1 ceiling probe was **waived** on the L4 and is now the **T4 session's** job
-(see `### T4 session` below).
-
-**Phase 1 base-model ceiling probe: WAIVED for this session (user, 2026-10-05).**
-Training proceeds ungated. The probe (inference stack + `quran_only` rebuild on the native
-sm_75 binary) moves to a separate T4 session — `docs/QURAN_AHH_RUN.md` §2,
-`docs/QURAN_FORMAT_PROBE.md:63`.
-
-**Plan / config audit / GPU checklist: `docs/QURAN_AHH_RUN.md`** (canonical hub;
-indexed in `docs/README.md` + `SOURCE_OF_TRUTH.md`).
-
-### Crash @ launch (2026-10-05) — fixed; not yet relaunched
-
-First `train_ctl.py start` (pid 25921) died at **step 0** during the latent-cache build,
-in the VAE `conv1d`: `CUDNN_STATUS_SUBLIBRARY_VERSION_MISMATCH`. No checkpoint, no
-`loss_log.db`; `output/quran_ahh_r8/` holds only `config.yaml` + `tensorboard/`.
-Cause: orphan cuDNN libs from the image (`libcudnn_engines_tensor_ir.so.9`,
-`libcudnn_ext.so.9`) not in the pinned `nvidia-cudnn-cu13==9.20.0.48` wheel → moved to
-`/content/cudnn_orphans_bak/`; `conv1d` now passes. Fix + recipe:
-`docs/COMMAND_HANDOVER_GOTCHAS.md` (2026-10-05). Durable fix committed + pushed:
-`f68f7a6` on `pron-lora-long-aya`, cherry-picked to `main` as `ab8640d` — `setup.sh` now
-prunes non-manifest libs *and* verifies a cuDNN conv on a fresh VM. Relaunch was the same
-`train_ctl.py start` line (config/run-name unchanged; no progress lost).
-
-### T4 session (separate GPU) — pron eval handoff  ← READ THIS ON THE T4
-
-Goal: the **Phase 1 base-model ceiling probe** + per-checkpoint pron eval on held-out
-**2:255**, free-run, same seed. This is the gate deferred from the L4 training session.
-
-Ready in GCS (converted on the L4; byte-level verified) — **all 9 arms are final**:
-`$GCP_BACKUP_BASE/quran_ahh_r8/convert/{base,quran_only,c1500,c3000,c4500,c6000,c7500,c9000,final}/`
-— each dir has `quran_ahh_r8_ar.safetensors` (lone AR, α=1) + `quran_ahh_r8_nar.safetensors`
-(zeros, rank 8), plus `convert/adapter_manifest.json` (per-arm sha256).
-
-1. Clone branch `pron-lora-long-aya`, then `bash bootstrap/setup.sh --inference`
-   (T4 = the **native sm_75** binary; no arch swap).
-2. Run the probe driver — it stages the arms from GCS, builds the songs JSON (exact
-   training caption, `[Verse]` + ` ۝`), and calls `generate.py`:
-   ```bash
-   python INFERENCE/quran_pt_probe.py --dry-run    # validate + projected time
-   python INFERENCE/quran_pt_probe.py              # real run (detach it; ~90+ min)
-   ```
-   Arms = base / `quran_only` / each checkpoint × uthmani+simple, seed 20261004.
-   `base` is an all-zero adapter so it runs in the same batch; fallback if distrusted:
-   `LORA_AR_SCALE=0 LORA_NAR_SCALE=0` against any arm (audio.cpp scale 0 = adapter off).
-3. **CUDA-13-image gotcha:** the sm_75 binary may need the CUDA-12 libs on
-   `LD_LIBRARY_PATH` (`docs/COMMAND_HANDOVER_GOTCHAS.md`, 2026-10-04).
-4. **Verdict** (`docs/QURAN_PRON_REVIEW.md` §5): base **also wrong** on the hard letters
-   ⇒ representational ceiling ⇒ **stop the LoRA line**; base OK but adapter wrong ⇒
-   training/config issue. Listen with tashkeel visible; blind-gate (`ab-blind-eval`)
-   before any merge.
-
-The L4 run continues untouched — **do not run training or this run's config on the T4.**
-
-Restored this session (CPU-only, verified):
-- `gcloud storage cp …/quran_ahh_dataset.zip /content/` → `unzip -q … -d /content/`
-- sha256 `8c68d6844d7c9ee87ca69956dfcb70419e234a3197043b41526833e81a3e9ff9` **OK**
-  (3,966,504,331 B, matches the banked `.sha256`).
-- Counts: **train 9,489 · val 6** (2:255 ×3 reciters ×2 scripts), **held-out 2:255
-  absent from train** (0 matches); per-reciter train pairs AB 2398 · Hudhaify 4142 ·
-  Husary 2949 (stratified simple/uthmani). `selection_report.json` + manifests present.
-- Config `config/quran_ahh_r8.yml` parses; diffs vs `quran_long_aya_r8_s10.yml` are
-  exactly the 4 documented (`name`, `log_dir`, `datasets[0].folder_path`, `steps: 9489`).
-
-### AHH run facts (survive)
-
-- Identity: run `quran_ahh_r8`; config `config/quran_ahh_r8.yml`; log basename
-  `train_quran_ahh`; output `/content/ai-toolkit/output/quran_ahh_r8/`.
-- Data: AHH filtered set, 9,492 clips / 3 reciters, paired with Tanzil (NFC, no
-  embedded `۝`; builder appends it). Single caption/clip, 50/50 simple/uthmani
-  stratified per reciter. Style line: `Solo male voice, unaccompanied. Quran
-  recitation in murattal style. Classical Arabic with tajwīd, precise articulation.
-  Spoken Words.` Banked: `$GCP_BACKUP_BASE/quran_ahh_dataset.zip` (sha `8c68d684…e9ff9`).
-- Hyperparameters deliberately UNCHANGED from s10 (rank 8/8, lr 1e-4, adamw8bit,
-  EMA 0.999, cot off, `ar_kl_weight` 0.2, bf16). Change only data + eval per review §6.3.
-- Eval is an OFFLINE per-checkpoint free-run on held-out 2:255; `disable_sampling: true`.
-
-### How it ran (reference for a future resume/extension)
-
+First launch (10:14:57Z) failed **every** track instantly `exit=127`:
+`libcublas.so.12: cannot open shared object file` (CUDA-12 binary on a CUDA-13 image;
+`docs/COMMAND_HANDOVER_GOTCHAS.md` 2026-10-04). The handover line omitted the export.
+**Corrected launch / resume** (re-running the raw line re-fails):
 ```bash
-# 0. code — this long-aya work lives on the branch, not main
-git clone https://github.com/akbargherbal/maqamrock-yue2-lora-finetuning.git /content/maqamrock-yue2-lora-finetuning
-cd /content/maqamrock-yue2-lora-finetuning && git checkout pron-lora-long-aya
-```
-
-```bash
-# 1. bootstrap: ai-toolkit + pinned torch + HF assets. The notebook exports
-#    GCP_AHH_DATASET_ZIP, so setup.sh's opt-in job_ahh_dataset restores the AHH zip
-#    during setup. Ensure the long-aya/pron sets are NOT requested.
-unset GCP_QURAN_LONG_DATASET_PATH GCP_PRON_DATASET_PATH
-mkdir -p /content/logs
-```
-terminal: detached — survives Ctrl+C / closing the tab;
-log: `/content/logs/setup.log`; stop: `pkill -f 'bootstrap/setup.sh'` (re-runnable);
-resume: re-run the same `setsid nohup …` line.
-```bash
-setsid nohup bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 & disown
-tail -n 25 /content/logs/setup.log          # wait for the all-[ok] verify block (torch/CUDA + decode)
-```
-
-```bash
-# 2. confirm AHH restored (setup.sh prints "[ok] AHH dataset: 9489 train pairs").
-#    Manual fallback only if the job was skipped/failed:
-gcloud storage cp "$GCP_AHH_DATASET_ZIP" /content/ && unzip -q /content/quran_ahh_dataset.zip -d /content/
-find /content/quran_ahh_dataset/train -maxdepth 1 -name '*.txt' | wc -l   # expect 9489
-```
-
-```bash
-# 3. sidecars — both detached; start AFTER /content/logs exists
 cd /content/maqamrock-yue2-lora-finetuning
+export LD_LIBRARY_PATH="$(find /usr/local/lib/python3.13/dist-packages/nvidia \
+  -maxdepth 2 -type d \( -name lib -o -name lib64 \) | tr '\n' ':')/usr/lib64-nvidia"
+setsid nohup bash INFERENCE/quran_knob_probe.sh > /content/logs/quran_knob_probe.log 2>&1 & disown
 ```
-terminal: detached ×2 — survive Ctrl+C / closing the tab;
-logs: `/content/logs/gcp_backup_stdout.log`, `/content/logs/gpu_logger_stdout.log`;
-stop: `pkill -f backup_to_gcp.py` / `pkill -f gpu_logger.py`;
-resume: re-run the same lines.
+`_failed.log`'s `g1.0 exit=1` line is that **pre-fix** attempt — ignore.
+
+### Eval app now handles the nested knob layout — `INFERENCE/eval_app/` (`f3762fa`)
+
+Old app globbed `*.wav` flat and keyed by `<arm>_<script>_<seed>` only → 0 tracks here, and
+colliding arm names across knobs. Now `discover()` recurses; each track's key/identity
+includes its run/knob folder (label read from that dir's `_knob.json`, e.g.
+`g1.5: guidance_scale=1.5`); index sections by script→knob; report gains a `knob/run` column
+and a non-binding knob verdict. Flat Phase-1 layout unchanged. Verified locally (all routes
+200, POST→report, save&next, dotted name, traversal 404).
+Staged: `$GCP_BACKUP_BASE/tools/pron_eval_app/`.
+
+**Score on a CPU VM:**
 ```bash
-setsid nohup python backup_to_gcp.py --run-name quran_ahh_r8 > /content/logs/gcp_backup_stdout.log 2>&1 & disown
-setsid nohup python gpu_logger.py --out /content/logs/gpu_usage.csv > /content/logs/gpu_logger_stdout.log 2>&1 & disown
-pgrep -af 'backup_to_gcp.py|gpu_logger.py'
+mkdir -p pron_eval_app && gsutil -m rsync -r "$GCP_BACKUP_BASE/tools/pron_eval_app" ./pron_eval_app
+cd pron_eval_app && pip install -r requirements.txt
+mkdir -p ../quran_knob_probe && gsutil -m rsync -r "$GCP_BACKUP_BASE/quran_knob_probe" ../quran_knob_probe
+python app.py --audio ../quran_knob_probe --out ../eval_out --label quran_knob_probe
 ```
 
-```bash
-# 4. LAUNCH (the Phase 1 probe was waived by the user and training ran anyway, 2026-10-05)
-```
+**Windows / PowerShell (local machine):**
+```powershell
+# Needs Google Cloud SDK (gcloud/gsutil) + Python 3 on PATH.
+#   - no `py`?          use:  python        (in all three places below)
+#   - first time here:  gcloud auth login   (bucket is your own project)
+#   - gsutil rsync REQUIRES the local destination dir to exist first -- mkdir, then rsync.
+$Bucket = "gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning"
+$Work   = "$HOME\quran_knob_eval"
+New-Item -ItemType Directory -Force -Path "$Work\pron_eval_app"    | Out-Null
+New-Item -ItemType Directory -Force -Path "$Work\quran_knob_probe" | Out-Null
+Set-Location $Work
 
-terminal: detached (via train_ctl — a stray Ctrl+C cannot kill it); YOU type the start;
-logs: `/content/logs/train_quran_ahh.log`; stop: the `train_ctl.py stop` line below (do NOT `kill`);
-resume: the identical `train_ctl.py start` line (auto-resumes from the newest checkpoint).
-```bash
-python train_ctl.py start --config config/quran_ahh_r8.yml --run-name quran_ahh_r8 --log-name train_quran_ahh
-```
-First launch builds the latent cache before step 1 (~50 min measured for 9,489 on this L4,
-not the ~2.4 h once estimated) — `loss_log.db` at 0 steps for a while is normal. Bank the cache when complete:
-`tar -C /content/quran_ahh_dataset/train -cf - _latent_cache | gcloud storage cp - "$GCP_BACKUP_BASE/quran_ahh_dataset/_latent_cache.tar"`.
-Stop/status MUST pass the same `--config` + `--run-name` (see `docs/COMMAND_HANDOVER_GOTCHAS.md`):
-```bash
-python train_ctl.py stop   --config config/quran_ahh_r8.yml --run-name quran_ahh_r8 --log-name train_quran_ahh
-python train_ctl.py status --config config/quran_ahh_r8.yml --run-name quran_ahh_r8 --log-name train_quran_ahh
-python monitor_loss.py /content/ai-toolkit/output/quran_ahh_r8/loss_log.db
-```
+gsutil -m rsync -r "$Bucket/tools/pron_eval_app" "$Work/pron_eval_app"      # the app
+gsutil -m rsync -r "$Bucket/quran_knob_probe"    "$Work/quran_knob_probe"   # the 20 renders
+(Get-ChildItem -Recurse ".\quran_knob_probe" -Filter *.wav).Count            # expect 20
 
-### Next / open
+py -m pip install -r ".\pron_eval_app\requirements.txt"
+py ".\pron_eval_app\app.py" --audio ".\quran_knob_probe" --out ".\eval_out" --label quran_knob_probe
+# open http://127.0.0.1:5000  (Ctrl+C stops it)
+```
+- The app writes only under `--out` (`.\eval_out\evaluations.json`, resume-safe); **export .md**
+  downloads `pron_eval_<stamp>.md` to your Downloads folder — hand that back for the verdict.
+- Optional — score the default-knob anchor alongside: `gsutil -m rsync -r
+  "$Bucket/audiocpp_inference/out/20261005-072738_quran_pt_probe" ".\anchor"` then a second run
+  with `--audio ".\anchor" --out ".\eval_out_anchor"`.
+- Index is grouped script → knob (`g1.0: guidance_scale=1.0`, …); tap wrong words, answer the
+  questions, **Save & next**. Audio lives in `.\quran_knob_probe\quran_knob_<cfg>\*.wav`.
 
-1. **T4 pron eval** — `### T4 session` above; all 9 arms are in GCS
-   (`convert/{base,quran_only,c1500,c3000,c4500,c6000,c7500,c9000,final}`).
-2. **Blind gate** (`ab-blind-eval`) before any merge — no adapter is "best" before the listen.
-3. Residual: 91 `aya-1` clips (sura≠1,9) may carry a recited basmala not in the caption.
-4. Docs: `prepare_ahh_quran_dataset.py` still not in `docs/README.md`; 3 docs still say
-   `experimental-quran-pron`; `docs-reconciler` pass outstanding.
+### Backup / continuity
+
+- GCS is **current** (20/20 + log; sample sha verified). The 5-min safety-net loop was stopped
+  once the authoritative upload landed. `vm-continuity` healthy (pid 7261).
+- `backup_to_gcp.py` / `gpu_logger.py` daemons were not started (not needed for this run).
+- **GitHub:** `f3762fa` is **1 ahead of origin, not pushed** (needs your PAT via
+  `bootstrap/github_auth.sh`). `agent_notes/current.md` stays local-only.
+
+### Next (open)
+
+1. Score the 20 tracks with `pron_eval_app` (CPU VM) → export `.md`.
+2. Blind package vs the anchor (`ab-blind-eval`); no merge before the listen.
+3. Outstanding: `docs-reconciler` pass; 3 docs still say `experimental-quran-pron`.

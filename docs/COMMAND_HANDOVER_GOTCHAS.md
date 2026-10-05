@@ -158,3 +158,20 @@ human and invisible to the agent — so they get written down here.
   ```
   Permanent fix belongs in `bootstrap/setup.sh` (prune non-manifest files after the
   torch install). Files moved, not deleted, so a bad guess is reversible.
+
+## 2026-10-05 — `gsutil rsync` to a local path needs the destination directory to already exist
+
+- **Fact:** both `gsutil rsync` and `gcloud storage rsync` require the **local destination
+  directory to exist first**; a non-existent local path is parsed as a bucket/object and
+  rejected with `CommandException: arg (.\pron_eval_app) does not name a directory, bucket,
+  or bucket subdir.` (Observed on Windows PowerShell fetching the eval app; same on Linux.)
+- **Failure prevented:** a handed-over block that ran `gsutil -m rsync -r gs://…/dir .\dir`
+  without creating `.\dir` fetched **nothing** (exit 0, destructive-looking), and the follow-up
+  `(Get-ChildItem …).Count` printed `0` — looks like an empty source, is really a missing dest.
+- **Correct pattern:** create every local destination first, then rsync; prefer an absolute
+  destination path:
+  ```powershell
+  New-Item -ItemType Directory -Force -Path "$Work\pron_eval_app" | Out-Null
+  gsutil -m rsync -r "$Bucket/tools/pron_eval_app" "$Work/pron_eval_app"
+  ```
+  (`mkdir -p <dst>` on Linux. The `.\dst` form works once `dst` exists.)
