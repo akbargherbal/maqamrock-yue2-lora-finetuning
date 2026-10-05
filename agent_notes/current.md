@@ -1,5 +1,9 @@
 # current
 
+> **Tomorrow's session plan:** [`docs/QURAN_AHH_RESUME_PLAN.md`](../docs/QURAN_AHH_RESUME_PLAN.md)
+> — point the agent there first; it resumes training, runs the c10500/c16500 T4 probe, finishes the
+> run, then renames.
+
 ## State @ 2026-10-05 ~18:50 UTC (21:50 Bahrain) — training LIVE (56.8%); rename DEFERRED
 
 Branch `pron-lora-long-aya`. Run config `config/quran_ahh_r8.yml` = **AR+NAR, rank 32/32,

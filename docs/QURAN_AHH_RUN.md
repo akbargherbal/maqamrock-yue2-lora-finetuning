@@ -3,7 +3,8 @@
 Canonical operating surface for the AHH Quran pronunciation LoRA (`quran_ahh_r8`).
 Design/why: [`QURAN_PRON_REVIEW.md`](QURAN_PRON_REVIEW.md). Build provenance:
 `agent_notes/current.md` + `prepare_ahh_quran_dataset.py`. Live next step:
-[`../agent_notes/current.md`](../agent_notes/current.md).
+[`../agent_notes/current.md`](../agent_notes/current.md). Session runbook (resume → completion →
+rename): [`QURAN_AHH_RESUME_PLAN.md`](QURAN_AHH_RESUME_PLAN.md).
 
 Branch: **`pron-lora-long-aya`** (do NOT merge to `main`).
 
