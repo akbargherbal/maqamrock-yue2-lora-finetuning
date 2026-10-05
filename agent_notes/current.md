@@ -39,6 +39,9 @@ python backup_to_gcp.py --run-name quran_ahh_r8 --once    # confirm newest ckpt 
 
 ## Deferred rename `quran_ahh_r8` -> `quran_ahh_r32` (do AFTER training completes)
 
+**Marker beside the checkpoints** (so the misnomer can't be missed on a fresh VM):
+`…/quran_ahh_r8/output/README.md` + `…/quran_ahh_r8/README.md` on GCS (also `docs/QURAN_AHH_RUN.md`).
+
 Decision (user, 2026-10-05): leave the name until 28467 finishes. Post-completion there is no
 resume, no live writer, no sidecar, so the two traps (the `{name}*` glob + ctime ordering) are
 irrelevant and the rename is a plain offline move. Script is ready + tested:

@@ -15,6 +15,15 @@ Branch: **`pron-lora-long-aya`** (do NOT merge to `main`).
 > `TRAINING_ANALYSIS/quran_ahh_r8/ANALYSIS.md`; the new L4 session starts from the revised
 > config. Gate §2 is resolved; the config is the authority, not this table's stale rows.
 
+> **RENAME PENDING — do not forget (2026-10-05).** `quran_ahh_r8` is a **rank-32, AR+NAR** run;
+> the `r8` is legacy from the earlier rank-8 run. The name is **deliberately left until
+> training finishes** — renaming mid-run breaks resume (output dir + checkpoint filenames come
+> from `config.name`; resume matches `{name}*.safetensors` by ctime). When the run is done,
+> rename properly with the tested `bootstrap/rename_run.py --old quran_ahh_r8 --new quran_ahh_r32`
+> then update docs. A marker also sits beside the checkpoints:
+> `…/quran_ahh_r8/output/README.md` (+ the run-prefix root) on GCS. Details:
+> [`../agent_notes/current.md`](../agent_notes/current.md) ("Deferred rename").
+
 ## Canonical session prompt (paste on the GPU VM)
 
 ```text
