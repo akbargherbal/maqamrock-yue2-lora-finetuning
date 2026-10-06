@@ -101,7 +101,7 @@ human and invisible to the agent — so they get written down here.
 - **Fact:** `stop`/`status` verify the target pid with
   `_cmdline_matches(cmdline, config, run_name)`, where `config`/`run_name` come
   from the *stop command's own args* — `--config` defaults to
-  `config/akbar_arabic_rock_lora.yml` (run name `akbar_arabic_rock_lora`). A side
+  `config/LEGACY_akbar_arabic_rock_lora.yml` (run name `akbar_arabic_rock_lora`; renamed 2026-10-06). A side
   run launched with `--config config/quran_long_aya_r8.yml` does not match that
   default, so `stop --log-name train_quran_long` (no `--config`) refuses with
   `refusing to signal pid N: not our training run`. Reproduced 2026-09-27 while

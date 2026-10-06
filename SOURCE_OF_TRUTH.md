@@ -5,7 +5,7 @@ History files are authoritative for what happened, never for what is true now.
 
 | Topic | Authority | Notes |
 |---|---|---|
-| Run config / hyperparameters | `config/akbar_arabic_rock_lora.yml` | `DECISIONS.md` explains why; agents never edit either |
+| Run config / hyperparameters | `config/L4_akbar_arabic_rock_lora.yml` · `config/A100_akbar_arabic_rock_lora.yml` (LEGACY = v1/v2) | `DECISIONS.md` explains why; agents never edit either |
 | Start / pause / resume training | `docs/START.md`, `docs/PAUSE_RESUME.md` | |
 | Run metrics & liveness | `loss_log.db` via `monitor_loss.py` | files, not prose |
 | Backup layout / restore | `docs/BACKUP_RESTORE.md` + `backup_to_gcp.py --help` | script flags beat prose |

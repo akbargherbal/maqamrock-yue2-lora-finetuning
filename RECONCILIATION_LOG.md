@@ -353,3 +353,31 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   hyperparameter edited.
 - Authority: user request ("comprehensive review … stop repeating training without
   benefit") + the clarifications on dataset quality/reciters and Tanzil text.
+
+## 2026-10-06 — config rename fallout + drift reconciliation (live docs/code), 36 → 0
+
+- Renamed `config/akbar_arabic_rock_lora.yml` → `config/LEGACY_akbar_arabic_rock_lora.yml`
+  and added per-GPU `config/L4_…` / `config/A100_…` variants (session config split).
+  Reconciler then re-pointed every live reference to the old path:
+  - `SOURCE_OF_TRUTH.md:8` + `skills/docs-reconciler/references/source_of_truth_template.md:8`
+    (authority row) → both new configs (+ LEGACY = v1/v2).
+  - `README.md:53` (tree) / `:108` (prose) → both variants + LEGACY.
+  - `skills/crash-diagnose-and-resume/SKILL.md:44`, `docs/L4_HANDOFF_TASK14C.md:95` → `config/A100_…`.
+  - `docs/COMMAND_HANDOVER_GOTCHAS.md:104` → new `train_ctl.py` default (`LEGACY_…`).
+  - `train_ctl.py:40` `DEFAULT_CONFIG` → `config/LEGACY_…` (behavior-preserving);
+    `skills/docs-reconciler/scripts/verify_claims.py:250` default likewise.
+  - `bootstrap/setup.sh:648` echoed launch hint → `config/A100_…`.
+- Historical records (`TRAINING_ANALYSIS/ANALYSIS.md:28`,
+  `INFERENCE/yue2_eval_heldout/heldout_eval_report.md:6,253`) → `LEGACY_…` (same artifact, renamed).
+- Fixed a pre-existing self-reference: `docs/QURAN_AHH_RESUME_PLAN.md:4` cited
+  `agent_notes/RESUME_PLAN.md` → `docs/QURAN_AHH_RESUME_PLAN.md`.
+- Curated `unverifiable.txt`: this session's placeholders/externals (`bad.db`, `clean.db`,
+  `BaseSDTrainProcess.py`, `--force-reinstall`) plus `workspace_manifest.json` (user-supplied
+  legacy input), `docs/investigation_generation_knobs.md` (other branch), `config/hyperparameters.`
+  (prose), `agent_notes/T4_listening_checklist.md` and the eval_app/`convert/` runtime files.
+- Reconciler after: 2237 claims, 1384 checkable, **0 flagged** (was 36 / 2.6%).
+- Deliberately untouched (frozen): `PROGRESS.md:11`,
+  `TRAINING_ANALYSIS/v1_nolyrics_archived/ANALYSIS.md:34` (still name the old path as history),
+  `graphify-out/GRAPH_REPORT.md` (generated snapshot).
+- Authority: `skills/docs-reconciler/SKILL.md`; user-approved scope ("scope agreed").
+  Config values unchanged except the pre-agreed split; no hyperparameter edited.

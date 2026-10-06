@@ -143,3 +143,32 @@ docs/EXPERIENCE_CHECKLIST.md :: config/data/course
 # pron-dataset build artifacts + ai-toolkit internals (live in /content, not the repo)
 docs/PRON_LORA_LONG_PLAN.md :: selection_report.json
 docs/PRON_LORA_LONG_PLAN.md :: dataloader_mixins.py
+
+# 2026-10-06 reconcile: external/example/placeholder tokens
+# ai-toolkit internals cited by bare name (the clone, not this repo)
+BaseSDTrainProcess.py
+# external pip flag quoted in one gotcha
+docs/COMMAND_HANDOVER_GOTCHAS.md :: --force-reinstall
+# placeholder db names in the loss_log.db repair recipe (illustrative, not repo files)
+docs/COMMAND_HANDOVER_GOTCHAS.md :: bad.db
+docs/COMMAND_HANDOVER_GOTCHAS.md :: clean.db
+# runtime/example files in the eval_app (not committed)
+INFERENCE/eval_app/README.md :: evaluations.json
+INFERENCE/eval_app/README.md :: _knob.json
+INFERENCE/eval_app/README.md :: //127.0.0.1
+# external dataset files cited in one research doc
+docs/QURAN_PRON_REVIEW.md :: FILTERED_DATASET_README.md
+docs/QURAN_PRON_REVIEW.md :: MANIFEST.csv
+# runtime adapter manifest under a run's convert/ dir
+TRAINING_ANALYSIS/quran_ahh_r8/ANALYSIS.md :: convert/adapter_manifest.json
+
+# 2026-10-06 reconcile (2nd batch): external / other-branch / false-positive tokens
+# user-supplied legacy Suno manifest (input to INFERENCE/suno_to_songs.py; not bundled)
+workspace_manifest.json
+manifests/workspace_manifest.json
+# lives on another branch (pron-lora-knobs-investigation), cited in one doc
+docs/QURAN_PRON_REVIEW.md :: docs/investigation_generation_knobs.md
+# prose phrase ("config/hyperparameters."), not a path
+docs/QURAN_AHH_RESUME_PLAN.md :: config/hyperparameters.
+# runtime/example artifact in eval_app
+INFERENCE/eval_app/README.md :: agent_notes/T4_listening_checklist.md

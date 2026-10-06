@@ -247,7 +247,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", default=".", help="repo root (default: .)")
     parser.add_argument("--claims", default=".reconcile/claims.json", help="claims JSON from extract_claims.py")
     parser.add_argument("--report", default=".reconcile/drift_report.md", help="output report path")
-    parser.add_argument("--config", default="config/akbar_arabic_rock_lora.yml", help="run config to verify keys against")
+    parser.add_argument("--config", default="config/LEGACY_akbar_arabic_rock_lora.yml", help="run config to verify keys against")
     parser.add_argument("--ignore-file", default=DEFAULT_IGNORE_FILE, help="tokens that legitimately live outside the repo")
     args = parser.parse_args(argv)
 

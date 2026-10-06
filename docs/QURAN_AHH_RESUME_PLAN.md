@@ -1,7 +1,7 @@
 # RESUME PLAN — `quran_ahh_r8` (rank 32) → run to completion, then rename
 
 _Written 2026-10-05 ~19:00 UTC for the 2026-10-06 session._
-**Point the agent here first thing:** “Follow `agent_notes/RESUME_PLAN.md` from Phase 0.”
+**Point the agent here first thing:** “Follow `docs/QURAN_AHH_RESUME_PLAN.md` from Phase 0.”
 The agent drives top-to-bottom and executes read-only / CPU / monitoring work autonomously;
 commands marked **(you type)** are the state-changing ones you run in your own terminal
 (`AGENTS.md` §8 + the `command-handover` skill). The agent re-derives state from live sources —

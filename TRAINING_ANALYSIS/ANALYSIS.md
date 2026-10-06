@@ -25,7 +25,7 @@ python TRAINING_ANALYSIS/generate_plots.py
 
 | | |
 |---|---|
-| Config | `config/akbar_arabic_rock_lora.yml` (rank 32 LoRA, EMA 0.999, `cot: off`, `train_window_frames: 0`, lr 1e-4) |
+| Config | `config/LEGACY_akbar_arabic_rock_lora.yml` (rank 32 LoRA, EMA 0.999, `cot: off`, `train_window_frames: 0`, lr 1e-4) |
 | Model | YuE2 3B int8 `convrot8`, flowmatch, batch 1 |
 | Dataset | 267 clips, 267 **lyric-bearing** captions, one combined LoRA across four maqams |
 | GPU | Colab **A100-SXM4-80GB** |

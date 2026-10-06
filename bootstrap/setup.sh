@@ -645,7 +645,7 @@ Next (in a terminal):
   # 1. start the backup daemon + GPU logger (see AGENTS.md for the exact commands)
   # 2. launch training:
   cd $AI_TOOLKIT
-  python run.py $REPO_ROOT/config/akbar_arabic_rock_lora.yml -l /content/logs/train.log
+  python run.py $REPO_ROOT/config/A100_akbar_arabic_rock_lora.yml -l /content/logs/train.log
 EOF
 else
   cat <<EOF

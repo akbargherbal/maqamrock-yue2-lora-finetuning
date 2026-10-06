@@ -50,7 +50,8 @@ pronunciation donor's final form. Open items: [`docs/IMPROVEMENTS.md`](docs/IMPR
 ## Repo layout
 
 ```
-config/akbar_arabic_rock_lora.yml   # the style-LoRA training config (rank 32, EMA, cot: off, whole-song)
+config/L4_akbar_arabic_rock_lora.yml + config/A100_akbar_arabic_rock_lora.yml   # style-LoRA training config, per-GPU variants (rank 32, EMA, cot: off, whole-song)
+config/LEGACY_akbar_arabic_rock_lora.yml   # v1/v2 predecessor (ar_kl 0.2, in-training sampling)
 config/quran_long_aya_r8_s10.yml    # active long-aya Quran pron run (AR-only rank 8, 8,100 pairs)
 config/quran_long_aya_r8.yml        # full-set ident, reserved for high-end hardware
 config/pron_lora_ar_only.yml + config/pron_lora_ar_only_smoke.yml   # superseded pron donor (historical)
@@ -105,7 +106,7 @@ is reserved and does not fit an L4 session — see `DECISIONS.md`).
 
 ## Training configs
 
-- `config/akbar_arabic_rock_lora.yml` — `process[].type: diffusion_trainer`, `arch: yue2`, on
+- `config/L4_akbar_arabic_rock_lora.yml` / `config/A100_akbar_arabic_rock_lora.yml` — `process[].type: diffusion_trainer`, `arch: yue2`, on
   `Comfy-Org/YuE2/checkpoints/yue2_3b_int8_convrot.safetensors` (`quantize: true`,
   `qtype: convrot8`). Central choices: rank 32, `ema_config.use_ema: true` (`ema_decay:
   0.999`), `model_kwargs.cot: "off"` (captions carry no melodic information, so SheetSage2 is
