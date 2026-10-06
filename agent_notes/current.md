@@ -1,40 +1,39 @@
 # current
 
 > **Session plan:** [`docs/QURAN_AHH_RESUME_PLAN.md`](../docs/QURAN_AHH_RESUME_PLAN.md)
-> — resume training → T4 round-2 probe → finish run → rename.
+> — resume training → T4 probe → finish run → rename.
+> **This file is a handoff copy surface, not a source of truth** — re-derive from live artifacts.
 
-## State @ 2026-10-06 01:15 UTC — **TRAINING RUNNING** (resumed @ step 19,500)
+## State @ 2026-10-06 04:36 UTC — **TRAINING COMPLETE** (28,467/28,467)
 
-Fresh Colab VM; `setup.sh --training` done 00:57 UTC. Branch `pron-lora-long-aya` @ `8440f64`.
-Config `config/quran_ahh_r8.yml` unchanged (rank 32/32, AR+NAR, `ar_kl_weight 0.0`, steps 28467) —
-authority. `output/quran_ahh_r8/` + `_latent_cache` restored; sidecars up (`gpu_logger` 23442,
-`backup_to_gcp --run-name quran_ahh_r8` 23443).
+`quran_ahh_r8` (revised: AR+NAR, **rank 32**, `ar_kl_weight 0.0`, `steps 28467` = 3 epochs)
+finished **cleanly** on the Colab L4 — `run.py` self-stopped, no traceback. Resumed
+`2026-10-06T01:09:51` from ckpt 19,500; final step reached 04:34 UTC.
 
-**Resume verified** (`run.py` pid 37073, started by agent on user's explicit instruction):
-```
-#### IMPORTANT RESUMING FROM /content/ai-toolkit/output/quran_ahh_r8/quran_ahh_r8_000019500.safetensors ####
-Found step 19500 in metadata, starting from there
-Loading optimizer state from /content/ai-toolkit/output/quran_ahh_r8/optimizer.pt
-```
-Stepping past 19500 with no crash (was at step ~19,639; loss ~4.2; ~1.28 s/it).
+Final artifacts (local `output/quran_ahh_r8/` **and** GCS, sizes match):
+- `quran_ahh_r8.safetensors` — 117,500,848 B (final, un-suffixed) → GCS `04:35:30`
+- `optimizer.pt` — 119,807,781 B (step 28,467) → GCS `04:35:30`
+- 18 periodic ckpts `_000001500 … _000027000`; `loss_log.db` (28,466 steps logged).
+- Forced backup `backup_to_gcp.py --run-name quran_ahh_r8 --once` = **exit 0, 3/3 folders**.
+  **Safe to disconnect / switch to T4.**
 
-### Two problems FIXED this session (in `docs/COMMAND_HANDOVER_GOTCHAS.md`)
-1. **Wrong resume point:** rsync re-created all ckpts with ~equal ctime → ai-toolkit's
-   newest-by-ctime pick chose `_000009000`. Fixed by `chmod 644 quran_ahh_r8_000019500.safetensors`.
-2. **Corrupt `loss_log.db`:** GCS backup captured a mid-checkpoint WAL db → every resume crashed
-   in `_prune_future_steps`. Rebuilt from the readable prefix (19,500 steps / 78,000 rows,
-   integrity `ok`) and swapped in. Corrupt original at `/tmp/loss_log_db_corrupt/`.
+Training analysis finalized: `TRAINING_ANALYSIS/quran_ahh_r8_rank32/ANALYSIS.md` (+5 PNGs).
+Loss plateaued hard after ~19.5k (`loss/ar_ce` ~3.19–3.22 for ~8.5k steps) — "later = better"
+is a listening question, not a loss one.
 
-## Next (agent, Phase 2)
-Monitor step/%, loss trend, VRAM, ckpt local-vs-GCS, sidecars. Saves every 1500 steps →
-`_21000` next (~04:37 UTC). Watch for the `_21000` save and confirm it lands in GCS.
+## Next — Phase 3b (T4, separate GPU)
+Convert **`c9000`** (≈epoch 1), **`c19500`** (≈epoch 2), and the **final** adapter; render all
+three on **Ayat al-Kursi (Quran 2:255)**, fixed seed; then blind-A/B (`ab-blind-eval`).
+Exact epoch ends 9489/18978/28467 don't land on saves; c9000/c19500 are the nearest.
+(T4 handover recipe: `docs/QURAN_AHH_RESUME_PLAN.md` Phase 3 / 3b.)
 
 ## Still open
-- Phase 3 T4 round-2 probe (`c10500` vs `c16500`) — separate GPU.
-- Phase 4 finalize at step 28,467 + bank final adapter/optimizer.
-- Phase 5 rename `quran_ahh_r8` → `quran_ahh_r32` + docs reconcile + blind eval.
-- Durable fixes: restore helper that fixes ckpt ctime; backup daemon that
+- Phase 3b epoch test above; round-2 `c10500` vs `c16500` also banked and untested.
+- Phase 5: rename `quran_ahh_r8` → `quran_ahh_r32`; docs-reconciler; blind gate before any merge.
+- Durable fixes (not yet done): restore helper that fixes ckpt ctime; backup daemon that
   `wal_checkpoint(TRUNCATE)`s `loss_log.db` before syncing.
 
-## Gotcha
-`run.py -l <log>` **appends** — verify resume with `grep 'Found step' <log> | tail -1`, not `-m1`.
+## Gotchas (see `docs/COMMAND_HANDOVER_GOTCHAS.md`)
+- `run.py -l <log>` **appends** — verify resume with `grep 'Found step' <log> | tail -1`, not `-m1`.
+- GCS restore randomizes ckpt ctime → auto-resume picks the wrong step; `chmod` (not `touch`) fixes it.
+- Backup can capture a mid-checkpoint WAL `loss_log.db` → crash in `_prune_future_steps`; repair by salvage.

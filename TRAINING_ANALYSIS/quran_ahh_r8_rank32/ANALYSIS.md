@@ -1,9 +1,9 @@
 # Training analysis — `quran_ahh_r8` **revised** (AR+NAR, rank 32, no KL)
 
-**LIVE SNAPSHOT** — captured **2026-10-06 ~04:13 UTC (07:13 Bahrain)** at **step 27,543 / 28,467
-(96.8%)**. The run is still training (pid 37073; resumed `2026-10-06T01:09:51` from ckpt 19,500
-after the 2026-10-05 pause); final save imminent — this is *not* the final analysis. Charts produced
-by the parametrized `TRAINING_ANALYSIS/generate_plots.py`:
+**FINAL** — completed **2026-10-06 04:34 UTC (07:34 Bahrain)** at **step 28,467 / 28,467 (100 %)**.
+`run.py` self-stopped cleanly (no traceback) after resuming `2026-10-06T01:09:51` from ckpt 19,500
+(post-2026-10-05 pause). Final adapter + `optimizer.pt` banked in GCS. Charts produced by the
+parametrized `TRAINING_ANALYSIS/generate_plots.py`:
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
@@ -35,13 +35,13 @@ python TRAINING_ANALYSIS/generate_plots.py \
 | Dataset | `/content/quran_ahh_dataset/train` — **9,489 pairs** (AHH filtered, 3 reciters, single caption/clip, 50/50 simple/uthmani stratified); `steps: 28467` = **3 epochs** |
 | GPU | Colab **L4** (23,034 MiB) |
 | Caching | banked `_latent_cache.tar` — launch pass **< 1 s** (cache HIT, no re-encode) |
-| Steps done | **27,543 / 28,467 (96.8%)** at snapshot |
-| Step time | **median 1.231 s** (p10 1.206 / p90 1.632; max 5.754) → ~**0.71 steps/s** (0.71 recent) |
+| Steps done | **28,467 / 28,467 (100 %)** — complete |
+| Step time | **median 1.231 s** (p10 1.206 / p90 1.632; max 5.754) → ~**0.72 steps/s** (0.73 recent) |
 | Save cadence | every **1500** steps (~34 min) |
 | Samples | **none** — grey verticals are checkpoint saves |
-| Checkpoints | `_000001500 … _000027000` (**18**) + `optimizer.pt` (step 27000) — local + GCS (verified); next = final un-suffixed save at **28,467** |
+| Checkpoints | `_000001500 … _000027000` (**18**) + **final un-suffixed** `quran_ahh_r8.safetensors` + `optimizer.pt` (step 28,467) — local + GCS (verified) |
 | GPU (resumed window) | mem p50 **8,730** / peak **9,152** MiB of 23,034; util p50 **49 %**, p90 100 %; temp p50 76 / max 80 °C; power p50 65 / max 76 W (limit 72) |
-| ETA | **~22 min** at the recent rate → completion ~**04:35 UTC / 07:35 Bahrain** |
+| Completion | **28,467 @ 04:34 UTC**; clean self-stop; final adapter + optimizer in GCS |
 | Health | clean — no tracebacks/OOM; VRAM flat; steady ~34 min save cadence |
 
 ## Charts
@@ -83,10 +83,11 @@ python TRAINING_ANALYSIS/generate_plots.py \
 | 24001–25000 | 3.8682 | 3.2188 | 0.6494 |
 | 25001–26000 | 3.8555 | 3.2103 | 0.6452 |
 | 26001–27000 | 3.8516 | 3.2111 | 0.6406 |
-| 27001–27543 | 3.8365 | 3.2057 | 0.6308 |
+| 27001–28000 | 3.8496 | 3.2180 | 0.6316 |
+| 28001–28466 | 3.8593 | 3.2095 | 0.6498 |
 
-First-50 vs last-50 means: `loss/loss` **5.8409 → 3.8020** (−2.039), `loss/ar_ce`
-**5.0275 → 3.1868** (−1.841), `additional_model_loss` identical. `loss/loss` minimum
+First-50 vs last-50 means: `loss/loss` **5.8409 → 3.8405** (−2.000), `loss/ar_ce`
+**5.0275 → 3.1907** (−1.837), `additional_model_loss` identical. `loss/loss` minimum
 **3.0168 @ step 27262**.
 
 Per-checkpoint 500-step windows (`loss/loss` mean) — the "is later training better?" read:
@@ -95,6 +96,9 @@ Per-checkpoint 500-step windows (`loss/loss` mean) — the "is later training be
 |---|---|---|---|---|---|---|---|---|---|
 | `loss/loss` (next 500) | 4.0024 | 3.9907 | 4.0014 | **3.8073** | 3.8653 | 3.8593 | 3.8783 | 3.8523 | 3.8391 |
 
+Final checkpoint (last 500 before 28,467): `loss/loss` **3.8631** — no late gain; the run very
+clearly plateaued after ~19.5k.
+
 ## Observations / flags
 
 1. **Only 4 metric keys**; `additional_model_loss` is byte-identical to `loss/ar_ce` (a duplicate
@@ -102,11 +106,11 @@ Per-checkpoint 500-step windows (`loss/loss` mean) — the "is later training be
    `loss/loss − ar_ce` ≈ **0.65–0.68** (0.776 → 0.674 over the run). Both experts train, but the
    log gives no clean separate read on the NAR.
 2. **`loss/ar_ce` has plateaued.** It drifted to ~3.32 by 17k, dropped to **3.1780**
-   (19001–20000), and has held at **~3.19–3.22** ever since — ~8k steps flat (a small step-down at
-   the 19,500 resume, then no further descent). A single late min (2.435 @ 27262) is noise.
+   (19001–20000), and has held at **~3.19–3.22** to the end — **~8.5k steps flat** (a small
+   step-down at the 19,500 resume, then no further descent). A single late min (2.435 @ 27262) is noise.
 3. **Later checkpoints improved, then plateaued.** Next-500 means: 4.0024 @15k → **3.8073 @19.5k**
-   → 3.8555 @25.5k → 3.8391 @27k. The step-down coincides with the 19.5k resume; since then it is
-   flat — whether the extra steps help is a listening question, not a loss one.
+   → 3.8555 @25.5k → 3.8391 @27k; final window 3.8631. The step-down coincides with the 19.5k
+   resume; since then it is flat — whether the extra steps help is a listening question, not a loss one.
 4. **`loss/loss` is AR-dominated** — not a quality metric; the held-out free-run is the signal.
 5. **The L4 is not the bottleneck.** util p50 **49 %** (p90 100 %), ~8.7 GB of 23 GB — data/CPU-bound;
    power saturates at the 72 W limit.
@@ -127,12 +131,13 @@ Adapters banked: `…/quran_ahh_r8_rank32/convert/{c4500,c7500,c10500,c16500}/`.
 ## Checkpoints (on disk + GCS)
 
 `/content/ai-toolkit/output/quran_ahh_r8/`: `quran_ahh_r8_000001500 … _000027000` (18 ×
-117,500,848 B ≈ 112 MiB) + `optimizer.pt` (step 27000) + `loss_log.db`. GCS mirror verified.
-The final un-suffixed `quran_ahh_r8.safetensors` + `optimizer.pt` land at **28,467**.
+117,500,848 B ≈ 112 MiB) + the **final un-suffixed** `quran_ahh_r8.safetensors` (117,500,848 B,
+step 28,467) + `optimizer.pt` (step 28,467) + `loss_log.db`. GCS mirror verified — local and GCS
+sizes match (adapter 117,500,848 B; optimizer 119,807,781 B).
 
 ## Caveats
 
-- **Mid-run snapshot** — re-run the command above for the final charts/bins.
+- **Final** — training complete at 28,467; these charts/bins are the full run.
 - **No validation split / no samples**; the listening read is single-aya, single-listen — a human
   blind gate (`ab-blind-eval`) is still required before any merge.
 - **Saved adapters are EMA weights** (decay 0.999).
@@ -141,7 +146,7 @@ The final un-suffixed `quran_ahh_r8.safetensors` + `optimizer.pt` land at **28,4
 
 ## Next steps
 
-- Finish to **28,467** (~07:35 Bahrain; ~22 min out at the last check).
-- **c10500 vs c16500 T4 probe** (round 2); consider a late arm (`c27000`/final) — the plateau makes
-  "later = better" a listening question.
-- Human blind gate (`ab-blind-eval`) before any merge.
+- **Phase 3b (T4):** convert `c9000`, `c19500`, and the final adapter; render all three on
+  **Ayat al-Kursi (2:255)**, fixed seed; then blind-A/B.
+- **Phase 5:** rename `quran_ahh_r8` → `quran_ahh_r32`; docs-reconciler; human blind gate
+  (`ab-blind-eval`) before any merge.

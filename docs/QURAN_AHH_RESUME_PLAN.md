@@ -85,6 +85,20 @@ Record the user’s verdict in `TRAINING_ANALYSIS/quran_ahh_r8_rank32/ANALYSIS.m
 compare against `base_*` and round-1 `c7500_simple`. Never run GPU work on the L4 while training
 runs (one GPU); the T4 is separate.
 
+### Phase 3b — end-of-epoch test on Ayat al-Kursi (Quran 2:255)
+One checkpoint per epoch, on **2:255**, fixed seed, then blind-A/B. Approximate is fine: exact epoch
+ends (9,489 / 18,978 / 28,467) don’t land on saves (`save_every: 1500`), only the final does.
+
+| epoch | end step | test checkpoint |
+|---|---|---|
+| 1 | 9,489 | **`c9000`** (nearest; alt `c10500` = first after) |
+| 2 | 18,978 | **`c19500`** (nearest, banked; alt `c18000` = last before) |
+| 3 | 28,467 | **`final`** (exact, un-suffixed — convert as a 3rd arm) |
+
+Same T4 handover as Phase 3 (`INFERENCE/quran_pt_probe.py`), arms `c9000,c19500` + the converted
+final; the 2:255 caption is style-prefix + `[Verse]` + Uthmani text of 2:255. There is **no
+epoch-end save knob** in ai-toolkit — only `save_every`.
+
 ## Phase 4 — the moment training reaches step 28,467
 - Wait for the **final un-suffixed** `quran_ahh_r8.safetensors` (the no-step save) + `optimizer.pt`;
   confirm `run.py` self-stopped with **no traceback**.
