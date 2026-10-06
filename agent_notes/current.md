@@ -4,50 +4,43 @@
 > T4 epoch test on Ayat al-Kursi (2:255) → blind A/B.
 > **This file is a handoff copy surface, not a source of truth** — re-derive from live artifacts.
 
-## State @ 2026-10-06 05:35 UTC — T4, **render running** (3/6); CUDA-12 loader fix committed
+## State @ 2026-10-06 05:45 UTC — Phase 3b **rendered + blind package banked; verdict pending**
 
-Fresh Colab **T4** (`COLAB_GPU=1`). Repo `pron-lora-long-aya`, HEAD **`72297f0`** (fix, below;
-1 commit ahead of origin — **needs push**). `setup.sh --inference` done; probe arms staged
-(`c4500 c7500 c9000 c10500 c16500 c19500 final`); `vm-continuity` loop `state=OK`.
+Repo `pron-lora-long-aya`, HEAD **`47f1575`** (all pushed to origin). Fresh Colab **T4**.
 
-### Done this session (CPU-only)
-Converted **c9000 / c19500 / final** from the banked ai-toolkit checkpoints with the canonical
-`convert_aitoolkit_yue2_lora.py` (`--stem quran_ahh_r8`; byte-level verified, rank 32) and banked
-them to `…/quran_ahh_r8_rank32/convert/`. `adapter_manifest.json` updated additively
-(old copy: `/tmp/opencode/adapter_manifest.backup.json`).
+### Done this session
+1. **Converted c9000 / c19500 / final** (canonical converter, `--stem quran_ahh_r8`, rank 32,
+   byte-level verified) → banked to `…/quran_ahh_r8_rank32/convert/`; manifest updated.
+2. **Rendered all 6 tracks** on held-out 2:255 (`quran_pt_probe.py --arms c9000,c19500,final`,
+   seed 20261004, cap 7500): all `exit=0`, no truncation, 14:12 total.
+   Run dir `…/audiocpp_inference/out/20261006-052626_quran_pt_probe/` (banked).
+3. **Blind A/B/C package** built (seed 20261006) and banked to
+   `$GCP_BACKUP_BASE/listening/QURAN_AHH_EPOCHS_INPUT/` (6 mp3 + `EVAL.txt` + `KEYS.txt`).
+   Round record: `results/quran_ahh_epochs/` (`README.md`, `KEY.json`).
+   **A=final, B=c9000, C=c19500.**
+4. **Three recurring gotchas encoded in code** (all pushed):
+   - `72297f0` — CUDA-12 loader path (`INFERENCE/cuda_loader_path.sh` + `run_one.sh` + `setup.sh`).
+   - `47f1575` — ctime restore (`bootstrap/restore_run.py`) + WAL checkpoint (`backup_to_gcp.py`).
+   - Corrected the wrong "touch does not bump ctime" gotcha claim.
 
-### Root-cause fix — CUDA-12 loader (`exit=127`), now encoded (commit `72297f0`)
-Run #1 died instantly: all 6 tracks `exit=127`, 0:00, `libcublas.so.12: cannot open shared object
-file`. Cause: the prebuilt sm_75 binary links **CUDA 12**; the image is **CUDA 13**; nothing set
-the loader path. Fixed **in code**, not by hand:
-- `INFERENCE/cuda_loader_path.sh` — self-healing, idempotent resolver for the pip `nvidia/*/lib` dirs.
-- `INFERENCE/run_one.sh` sources it before `$BIN` (choke point for every `generate.py` / `*_sweep.sh` / `maqam_lyric_swap.py` run).
-- `bootstrap/setup.sh --inference` resolves it, `pip install`s the `-cu12` wheels if absent, **fails the verify** if `ldd` still shows `not found`, and persists it in `~/.bashrc`.
-- Docs marked "Encoded"; `RECONCILIATION_LOG.md` entry added.
-- Verified: bare shell (`env -u LD_LIBRARY_PATH`) resolves; `--check` exit 0; idempotent; interactive shell resolves via `~/.bashrc`; `tests/test_generate.py test_duration_cap.py` = 69 passed.
+### Next — the listener (you)
+1. Get the package: `gcloud storage cp -r "$GCP_BACKUP_BASE/listening/QURAN_AHH_EPOCHS_INPUT" /content/ab/`
+   (or `gcloud storage ls "$GCP_BACKUP_BASE/listening/QURAN_AHH_EPOCHS_INPUT/"`).
+2. Listen to 002255_{uthmani,simple}_{A,B,C}.mp3; **do not open `KEYS.txt` first**.
+3. Send back a table: track | preferred label | confidence | notes.
+4. Agent decodes from `KEY.json`, records the verdict in
+   `TRAINING_ANALYSIS/quran_ahh_r8_rank32/ANALYSIS.md`.
 
-### Render (live) — run dir `out/20261006-052626_quran_pt_probe/`
-`setsid … quran_pt_probe.py --prefix quran_ahh_r8_rank32/convert --arms c9000,c19500,final`
-→ 6 tracks `{c9000,c19500,final} × {uthmani,simple}`, seed 20261004, cap 7500.
-log `/content/logs/quran_pt_probe_r32_epochs.log`; stop `pkill -f 'quran_pt_probe.py --prefix quran_ahh_r8_rank32'`.
-(`out/20261006-051955_quran_pt_probe/` is the failed run #1 — empty, harmless.)
-
-## After the render
-Blind A/B (`ab-blind-eval`) over the 6 tracks → play → record the verdict in
-`TRAINING_ANALYSIS/quran_ahh_r8_rank32/ANALYSIS.md`.
-
-## Still open
-- **Push `72297f0`** (VM is ephemeral; run `bash bootstrap/github_auth.sh`, then `git push`).
+### Still open
 - Phase 3b listener verdict (above).
 - Phase 5: rename `quran_ahh_r8` → `quran_ahh_r32`; docs-reconciler; blind gate before any merge.
-- Two more *documented-but-not-encoded* durable fixes (same class, training-side — not done):
-  restore helper that fixes ckpt ctime; backup daemon that `wal_checkpoint(TRUNCATE)`s `loss_log.db`.
+- Round-2 `c10500` vs `c16500` adapters remain banked and untested.
 
 ## Gotchas
-- **CUDA-12 loader path is now automatic** via `run_one.sh` + `setup.sh` (commit `72297f0`); the
-  manual `export LD_LIBRARY_PATH=…` is only for ad-hoc `ldd`/direct-CLI use. `--dry-run` still
-  does not exercise the loader, so use `INFERENCE/cuda_loader_path.sh --check <bin>` to preflight.
-- `run.py -l <log>` **appends** — verify resume with `grep 'Found step' <log> | tail -1`.
-- GCS restore randomizes ckpt ctime → auto-resume picks the wrong step; `chmod` (not `touch`) fixes it.
+- **CUDA-12 loader path, ctime-restore, and WAL-checkpoint are now automatic** (commits `72297f0`,
+  `47f1575`) — no per-session `export`/`chmod`/salvage. Preflight the loader with
+  `bash INFERENCE/cuda_loader_path.sh --check /content/audiocpp_inference/bin/audiocpp_cli`.
+- Restore a run with `python bootstrap/restore_run.py --run-name <run> --apply` (rsyncs **and**
+  fixes resume ctime order) — not a bare `rsync` + hand-`chmod`.
 - The probe re-rsyncs the whole convert prefix (~980 MB) each run and exposes no `--out-dir`, so a
   failed render restarts in a fresh folder rather than resuming.
