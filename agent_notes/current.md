@@ -2,7 +2,7 @@
 
 ## ⏸ WHERE WE STOPPED — resume here tomorrow (2026-10-07)
 
-_Run `jarir_lever_probe`. Recorded 2026-10-06 ~20:20Z, Colab Tesla T4._
+_Run `jarir_lever_probe`. Recorded 2026-10-06 ~20:25Z, Colab Tesla T4._
 
 **Why it stopped:** the user asked to stop after the in-flight track. The scale-tier **driver
 was killed** (pid 29639) while `qa_1.0_0.5` was rendering, so that one track finishes and the
@@ -10,15 +10,13 @@ chain halts — **no new arm will start**. Nothing else was touched (no config e
 
 **Exactly where:**
 - Prompt tier (8 tracks) → `out/jarir_lever_probe/prompt/` — **8/8 done**, all `trunc=no`.
-- Scale arms done → `v2_1.0_1.0`, `qa_1.0_1.0` (reused from the smoke), `qa_0.5_1.0`.
-- **Last in-flight track:** `qa_1.0_0.5` (`out/jarir_lever_probe/qa_1.0_0.5/`) — it finishes on
-  its own; treat it as done if its WAV exists, otherwise it will be redone.
+- Scale arms done → `v2_1.0_1.0`, `qa_1.0_1.0` (reused from the smoke), `qa_0.5_1.0`, `qa_1.0_0.5`.
+- **Final:** all stopped cleanly at **12/17** (`qa_1.0_0.5` exit=0, wall 11:49, `trunc=no`); GPU idle.
 - **Still pending (5 arms):** `qa_0.0_1.0`, `qa_0.5_1.0_rp1.4`, `qa_0.5_1.0_t0.8`,
   `qa_0.5_1.0_g1.0`, `qa_0.5_1.0_notrigger`.
 - `out/jarir_lever_probe/_failed.log` is **empty**.
-- The supervisor (`/content/run_lever_supervisor.sh`) is still alive and, when the last track
-  drains, will run `backup_to_gcp.py --inference --once` and write
-  `/content/logs/_supervisor_summary.txt`.
+- The supervisor (`/content/run_lever_supervisor.sh`) validated the smoke and launched the chain;
+  the last track has drained and the **final GCS sync is done** (`12/17` WAVs mirrored, `_failed.log` empty).
 
 ### Resume tomorrow (one command)
 ```bash
