@@ -1,51 +1,50 @@
 # current.md — handoff surface (overwritten each turn; not a source of truth)
 
-_Updated 2026-10-06 ~20:20Z — repo now at the new commit (rating app); Colab Tesla T4._
+## ⏸ WHERE WE STOPPED — resume here tomorrow (2026-10-07)
 
-## Run status — `jarir_lever_probe` **STOPPED by request** (resume tomorrow)
+_Run `jarir_lever_probe`. Recorded 2026-10-06 ~20:20Z, Colab Tesla T4._
 
-User asked to stop after the in-flight track and resume tomorrow. The scale **driver was killed**
-(pid 29639) while the current `generate.py` was mid-render, so `qa_1.0_0.5` is finishing and
-then the chain halts — no new arm starts. `generate.py` skips succeeded tracks, so a re-run
-resumes automatically.
+**Why it stopped:** the user asked to stop after the in-flight track. The scale-tier **driver
+was killed** (pid 29639) while `qa_1.0_0.5` was rendering, so that one track finishes and the
+chain halts — **no new arm will start**. Nothing else was touched (no config edits, no training).
 
-- **Tier 1/3 prompt matrix — 8/8 done** (`out/jarir_lever_probe/prompt/`), all `trunc=no`.
-- **Scale/sampler arms — done:** `v2_1.0_1.0`, `qa_1.0_1.0` (reused from smoke), `qa_0.5_1.0`;
-  **`qa_1.0_0.5` finishing now** (~12/17).
-- **Pending (5):** `qa_0.0_1.0`, `qa_0.5_1.0_rp1.4`, `qa_0.5_1.0_t0.8`, `qa_0.5_1.0_g1.0`,
-  `qa_0.5_1.0_notrigger`.
-- `_failed.log` empty. No config edits. GPU idle after the current track.
+**Exactly where:**
+- Prompt tier (8 tracks) → `out/jarir_lever_probe/prompt/` — **8/8 done**, all `trunc=no`.
+- Scale arms done → `v2_1.0_1.0`, `qa_1.0_1.0` (reused from the smoke), `qa_0.5_1.0`.
+- **Last in-flight track:** `qa_1.0_0.5` (`out/jarir_lever_probe/qa_1.0_0.5/`) — it finishes on
+  its own; treat it as done if its WAV exists, otherwise it will be redone.
+- **Still pending (5 arms):** `qa_0.0_1.0`, `qa_0.5_1.0_rp1.4`, `qa_0.5_1.0_t0.8`,
+  `qa_0.5_1.0_g1.0`, `qa_0.5_1.0_notrigger`.
+- `out/jarir_lever_probe/_failed.log` is **empty**.
+- The supervisor (`/content/run_lever_supervisor.sh`) is still alive and, when the last track
+  drains, will run `backup_to_gcp.py --inference --once` and write
+  `/content/logs/_supervisor_summary.txt`.
 
-### Resume (tomorrow)
+### Resume tomorrow (one command)
 ```bash
 set -a; . /root/.secrets.env; set +a
 cd /content/maqamrock-yue2-lora-finetuning
+git fetch origin pron-lora-long-aya && git checkout pron-lora-long-aya && git pull --ff-only
 setsid nohup bash INFERENCE/jarir_lever_probe.sh > /content/logs/jarir_lever_all.log 2>&1 & disown
-# prompt tier already done; this runs the remaining scale arms and skips successes.
 ```
-Prereq on a fresh VM: `bootstrap/setup.sh --inference` + restore the α0.1 adapter (see below).
+`generate.py` **skips succeeded tracks**, so this reruns only the 5 pending scale arms
+(the prompt tier is skipped automatically). Prereqs on a fresh VM:
+`bash bootstrap/setup.sh --inference`, then restore the α0.1 adapter:
+```bash
+gsutil -m cp -r "$GCP_BACKUP_BASE/quran_ahh_r8_rank32/maqamrock_merge/convert/qahh_a0p1" /content/converter/out/
+# verify ar sha256 = 4b4d2103e59de6b3279088d53cb28b15df901f96e4a37a67e2306e9bfdac0ecb
+```
+Stop anytime: `pkill -f jarir_lever_probe` (driver + generate.py).
 
-## Eval app — `INFERENCE/rating_app/` (new, general)
-
-General listening **rating** app (single-file Flask), delivered to
+## New eval app — `INFERENCE/rating_app/` (repo commit `e1f2eb6`)
+General listening **rating** app (single-file Flask). Asks for the track folder (terminal + web
+`/setup`), configurable criteria (`/criteria`), generic discovery, Markdown export. Delivered at
 `gs://…/OSTRIS_Arabic_Suno_Finetuning/tools/rating_app/` (app.py, README.md, requirements.txt).
-- Asks for the track directory (terminal prompt **and** a web `/setup` page) — **no bundled audio**.
-- Configurable criteria via the `/criteria` page or a JSON file — not hardcoded to this run.
-- Generic discovery: sub-folders become the arms; flat folders work too.
-
-Windows run:
-```powershell
-py -m pip install -r requirements.txt
-py app.py            # paste e.g. C:\Users\DELL\Downloads\jarir_lever_probe
-# open http://127.0.0.1:5000
-```
+Windows: `py -m pip install flask; py app.py` → paste `C:\Users\DELL\Downloads\jarir_lever_probe`.
+The old Quran `INFERENCE/eval_app/` is untouched.
 
 ## Environment / sidecars (verified this session)
-- secrets loaded (`GCP_BACKUP_BASE=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`)
-- α0.1 adapter at `/content/converter/out/qahh_a0p1/`; `ar` sha256
-  `4b4d2103e59de6b3279088d53cb28b15df901f96e4a37a67e2306e9bfdac0ecb` ✓
-- backup daemon `backup_to_gcp.py --inference` live · vm-continuity watch live
-- supervisor `/content/run_lever_supervisor.sh` did its job (validated smoke, launched chain);
-  it will run a final `backup --once` + write `/content/logs/_supervisor_summary.txt` when the
-  last track drains.
-- To fully stop now: `pkill -f jarir_lever_probe`.
+- branch `pron-lora-long-aya`; latest commit `e1f2eb6` (pushed).
+- secrets loaded (`GCP_BACKUP_BASE=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`).
+- α0.1 adapter present at `/content/converter/out/qahh_a0p1/`; `ar` sha256 matches.
+- backup daemon `backup_to_gcp.py --inference` **live** · vm-continuity watch **live**.
