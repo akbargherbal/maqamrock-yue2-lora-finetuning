@@ -1,0 +1,50 @@
+{
+  "generated": "2026-10-06 07:49:00Z",
+  "seed": 20261008,
+  "shuffle_per": "category",
+  "variants": [
+    "a0",
+    "a0p1",
+    "a0p2",
+    "a0p3"
+  ],
+  "audio_format": "mp3",
+  "pairs": [
+    {
+      "category": "-",
+      "blind_file": "jarir_20261006_A.mp3",
+      "label": "A",
+      "variant": "a0p3",
+      "source_path": "a0p3/jarir_20261006.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "jarir_20261006_B.mp3",
+      "label": "B",
+      "variant": "a0p1",
+      "source_path": "a0p1/jarir_20261006.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "jarir_20261006_C.mp3",
+      "label": "C",
+      "variant": "a0",
+      "source_path": "a0/jarir_20261006.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "jarir_20261006_D.mp3",
+      "label": "D",
+      "variant": "a0p2",
+      "source_path": "a0p2/jarir_20261006.wav"
+    }
+  ],
+  "labels": {
+    "": {
+      "a0p3": "A",
+      "a0p1": "B",
+      "a0": "C",
+      "a0p2": "D"
+    }
+  }
+}

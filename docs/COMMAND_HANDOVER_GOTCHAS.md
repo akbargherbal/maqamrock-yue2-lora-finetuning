@@ -249,3 +249,32 @@ human and invisible to the agent — so they get written down here.
   `*.db` under each synced folder (`checkpoint_sqlite_dbs`, called in the pass loop before
   `sync`), so the main `loss_log.db` alone is a consistent snapshot. The salvage procedure above
   remains the repair path for a capture torn before this fix.
+
+## 2026-10-06 — `gcloud storage cp -r <dir> <gs://bucket/prefix>` nests when the prefix exists
+
+- **Fact:** when the destination prefix already holds objects, `gcloud storage cp -r <localdir>
+  <gs://bucket/prefix>` copies the directory *into* the prefix (`<prefix>/<localdir>/…`) rather than
+  merging its contents flat. A first upload looks correct because the prefix does not exist yet.
+- **Failure prevented:** a re-blinded listening package landed nested under
+  `…/listening/JARIR_QAHH_INPUT/JARIR_QAHH_INPUT/`, while the top level kept serving the superseded
+  files — silently, because `cp` still exited 0.
+- **Correct pattern:** to mirror a directory's **contents** flatly, glob them and keep a trailing
+  slash on the destination: `gcloud storage cp -r /path/dir/* gs://bucket/prefix/`. To replace a
+  package, `gcloud storage rm -r <prefix>` first, then copy the contents. Verify with
+  `gcloud storage ls -l` **and** per-file hashes (`gcloud storage cat <obj> | sha256sum` vs local) —
+  never trust the exit code alone.
+
+## 2026-10-06 — `pgrep -f <pattern>` self-matches the launcher when the pattern text appears elsewhere in the same command line
+
+- **Fact:** a detached auto-chain that guards on `pgrep -f "<pattern>"` while **also echoing the
+  pattern word** (e.g. the guard message `ABORT: audiocpp_cli already active`) matches its *own*
+  shell command line. The `[x]` bracket trick only protects the pattern *as written* — it does not
+  help when the raw word appears somewhere else in the same command string.
+- **Failure prevented:** the AR-vs-NAR auto-chain printed a false `ABORT: … already active` and
+  silently never launched; the mistake was visible only by checking that the probe had actually
+  started (its log line + GPU memory), not by the chain's own exit.
+- **Correct pattern:** never put the literal pattern (or a message containing it) into the same
+  shell invocation as the `pgrep -f`. Use the bracketed form *and* keep the unbracketed word out of
+  every other string in the command; after launching a detached job, confirm it started from an
+  independent signal (a fresh log line, rising `nvidia-smi` memory), not from a "not running" guard.
+
