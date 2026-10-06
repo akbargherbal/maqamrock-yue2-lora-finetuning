@@ -175,3 +175,60 @@ human and invisible to the agent — so they get written down here.
   gsutil -m rsync -r "$Bucket/tools/pron_eval_app" "$Work/pron_eval_app"
   ```
   (`mkdir -p <dst>` on Linux. The `.\dst` form works once `dst` exists.)
+
+## 2026-10-06 — Restoring checkpoints from GCS randomizes ctime → auto-resume picks the wrong checkpoint
+
+- **Fact:** ai-toolkit's `get_latest_save_path` (`BaseSDTrainProcess.py:857`) selects
+  `max(glob("<name>*.safetensors"), key=os.path.getctime)` — **ctime, not the step
+  number**. `gcloud storage rsync` re-creates every file at restore time (in parallel),
+  so all ctimes are ~identical and the "newest" pick is arbitrary. Observed: a restore of
+  ckpts `_1500…_19500` resumed from **`_000009000`** instead of `_19500`.
+- **Failure prevented:** a resume that silently restarts ~10,500 steps back (and would
+  overwrite newer checkpoints/optimizer on the next save).
+- **Correct pattern:** after restoring, force the newest checkpoint to be the max by ctime
+  (chmod updates ctime; `touch` does **not**), then verify with the exact glob:
+  ```bash
+  cd /content/ai-toolkit/output/<run>
+  chmod 644 <run>_0000NNNNN.safetensors   # the highest step
+  python - <<'EOF'
+  import glob,os; name='<run>'
+  paths=[]
+  for p in [f"{name}*.safetensors",f"{name}*.pt",f"{name}*"]: paths+=glob.glob(p)
+  print(max([p for p in paths if os.path.exists(p)],key=os.path.getctime))
+  EOF
+  ```
+  (Durable fix belongs in `bootstrap/setup.sh` / a restore helper.)
+
+## 2026-10-06 — `grep -m1 'Found step'` on an appended log returns the *stale* line; the restored WAL loss_log.db can be malformed
+
+- **Fact (part 1):** `run.py -l <log>` **appends**. After a re-run, `grep -m1 'Found step'`
+  matches the *oldest* occurrence (the previous attempt), so a correct resume (19500) reads
+  as a wrong one (9000). Use the **last** occurrence: `grep 'Found step' <log> | tail -1`,
+  or grep the newest `#### IMPORTANT RESUMING FROM … ####` block.
+- **Fact (part 2):** the backup daemon rsyncs `loss_log.db` + its `-wal`/`-shm` as three
+  independent objects at slightly different times; the captured main db can be mid-checkpoint
+  and restore as `database disk image is malformed`. The run then dies in
+  `logging_aitk._prune_future_steps` (`DELETE FROM steps WHERE step > <resume>`).
+- **Failure prevented:** a resume that appears to start then crashes on its first loss commit,
+  with the "wrong step" red herring above.
+- **Correct pattern:** repair by salvaging the readable prefix (steps ≤ resume are usually
+  intact; only the "future" rows are corrupt), rebuild, install:
+  ```bash
+  sqlite3 bad.db ".recover" >/dev/null 2>&1 || true   # may lack sqlite_dbpage vtab
+  sqlite3 clean.db <<'SQL'
+  CREATE TABLE steps(step INTEGER PRIMARY KEY, wall_time REAL NOT NULL);
+  CREATE TABLE metric_keys(key TEXT PRIMARY KEY, first_seen_step INTEGER, last_seen_step INTEGER);
+  CREATE TABLE metrics(step INTEGER NOT NULL,key TEXT NOT NULL,value_real REAL,value_text TEXT,
+                       PRIMARY KEY(step,key), FOREIGN KEY(step) REFERENCES steps(step) ON DELETE CASCADE);
+  CREATE INDEX idx_metrics_key_step ON metrics(key,step);
+  ATTACH 'bad.db' AS src;
+  INSERT INTO steps SELECT * FROM src.steps WHERE step<=<resume>;
+  INSERT INTO metrics SELECT * FROM src.metrics WHERE step<=<resume>;
+  INSERT INTO metric_keys SELECT key,first_seen_step,<resume> FROM src.metric_keys;
+  SQL
+  sqlite3 clean.db "PRAGMA journal_mode=WAL; PRAGMA wal_checkpoint(TRUNCATE); PRAGMA integrity_check;"
+  # swap in: mv bad.db{,-shm,-wal} aside; cp clean.db <output>/loss_log.db
+  ```
+  Loss history is also in `<output>/tensorboard/<run>_<ts>/events.out.tfevents.*` (`loss`, `lr`)
+  as a cross-check. A durable fix is for the backup daemon to `PRAGMA wal_checkpoint(TRUNCATE)`
+  (or copy via the SQLite backup API) before syncing `loss_log.db`.
