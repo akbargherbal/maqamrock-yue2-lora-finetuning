@@ -1,43 +1,47 @@
 # current.md — handoff surface (overwritten each turn; not a source of truth)
 
-## Running now
-**`jarir_arnar_probe`** — AR-vs-NAR LoRA scale split, α0.1 (`qahh_a0p1`), canonical prompt,
-seed `20261010`, cap 8000. 4 arms, sequential, ~45 min:
+## Next action — run the lever probe on the GPU VM
 
-| arm | ar scale | nar scale |
-|---|---:|---:|
-| `ar100_nar100` | 1.0 | 1.0 | control |
-| `ar050_nar100` | 0.5 | 1.0 | cut cadence, keep articulation |
-| `ar100_nar050` | 1.0 | 0.5 | attribution |
-| `ar050_nar050` | 0.5 | 0.5 | halve both |
+New files (commit `jarir_lever_probe`):
+- `INFERENCE/songs.jarir_lever_probe.json` — 8-song Tier1(prompt/lyrics) × Tier3(merge) matrix,
+  seed `20261011`, cap 8000, Maqam Kurd, Jarir poem (verbatim + canonical lyrics variants).
+- `INFERENCE/songs.jarir_lever_scale.json` — 1 fixed song `jlv_scale_ref` for the scale/sampler arms.
+- `INFERENCE/jarir_lever_probe.sh` — driver for the 9 Tier0(AR/NAR scale) + Tier2(sampler) arms.
 
-- driver `/content/arnar_probe.sh` · run dir `out/jarir_arnar_probe/` · log `/content/logs/jarir_arnar_probe.log`
-- detached · stop `pkill -f arnar_probe` · resume `bash /content/arnar_probe.sh`
-- **If the VM is disconnected mid-run:** finished arms stay valid; the in-progress arm may be a
-  partial WAV (re-run to replace). Next session prerequisite: restore the α0.1 adapter to
-  `/content/converter/out/qahh_a0p1/` from `<GCS base>/quran_ahh_r8_rank32/maqamrock_merge/`
-  (or rebuild: `merge_quran_lora.py --alpha 0.1` then the converter). Repo copy of the driver:
-  `INFERENCE/quran_arnar_scale_probe.sh`.
+Driver arms (all on `jlv_scale_ref`, paired seed):
+`v2_1.0_1.0`(ref) · `qa_1.0_1.0`(baseline) · `qa_0.5_1.0` · `qa_1.0_0.5` · `qa_0.0_1.0` ·
+`qa_0.5_1.0_rp1.4` · `qa_0.5_1.0_t0.8` · `qa_0.5_1.0_g1.0` · `qa_0.5_1.0_notrigger`.
+Budget: 8 + 9 = 17 tracks ≈ ~110 min T4 / ~50 min L4.
 
-## Just completed — `jarir_prompt_probe` (3 prompts × 2 takes, α0.1, cap 8000)
-6/6 exit 0, no truncation, total wall **1:05:51**. Paired seeds p1=`2967871549`, p2=`2671488774`.
+### Prereqs
+- `bash bootstrap/setup.sh --inference` done; GPU idle (`nvidia-smi`).
+- Stage the α0.1 merge (`qahh_a0p1` = quran_ahh_r8 AR+NAR rank32 merged into v2):
+  ```
+  gsutil -m cp -r "$GCP_BACKUP_BASE/quran_ahh_r8_rank32/maqamrock_merge/convert/qahh_a0p1" \
+    /content/converter/out/
+  sha256sum /content/converter/out/qahh_a0p1/*_ar.safetensors   # expect 4b4d2103…dac0ecb
+  ```
 
-| take | canonical | yours | mine |
-|---|---:|---:|---:|
-| p1 dur_s | 213.7 | 219.6 | 225.2 |
-| p2 dur_s | 208.0 | 207.1 | 217.6 |
+### Commands
+```
+cd /content/maqamrock-yue2-lora-finetuning
+# smoke gate (1 track, ~6-11 min, foreground)
+ARMS="qa_1.0_1.0" bash INFERENCE/jarir_lever_probe.sh
+# Tier 1/3 prompt/lyrics/merge matrix (detached)
+MODE=prompt setsid nohup bash INFERENCE/jarir_lever_probe.sh > /content/logs/jarir_lever_prompt.log 2>&1 & disown
+# Tier 0/2 scale + sampler arms (detached)
+setsid nohup bash INFERENCE/jarir_lever_probe.sh > /content/logs/jarir_lever_scale.log 2>&1 & disown
+```
+stop `pkill -f jarir_lever_probe`; resume = same command (fixed `--out-dir`).
+Output: `/content/audiocpp_inference/out/jarir_lever_probe/{prompt,<arm>}/`.
 
-All 6 WAVs verified on GCS (size-exact) at
-`…/audiocpp_inference/out/jarir_prompt_probe/`. Listening verdict: **pending**.
-
-## Backup
-Daemon `backup_to_gcp.py --inference` live (pid 13256); mirrors `out/`+`prompts/`+`scripts/`+`logs/`+`agent_notes/`.
-Recent runs confirmed on GCS: `jarir_poets_qahh` (4), `jarir_a0p2_hi` (1), `jarir_poets_qahh_rand` (4), `jarir_prompt_probe` (6).
+## Branch / push
+This commit is on `pron-lora-long-aya`. Remote default is `main` — the VM must be on
+`pron-lora-long-aya` (fetch + checkout) or the new files will be absent.
 
 ## Open decisions
-`results/jarir_qahh/OPEN_DECISIONS.md` — merge-level change (NAR-only / α 0.05, deferred),
-winning prompt → re-run split, lyric tags, mood, sampler extras, git push.
+- 2nd seed / `repeat:2` for robustness (single seed isolates levers only).
+- NAR-only quran merge (Tier3 option a) — NOT built; CPU step (variant of `merge_quran_lora.py`).
 
-## Gotcha logged
-`docs/COMMAND_HANDOVER_GOTCHAS.md` — a detached chain aborted on a `pgrep -f` self-match
-(the guard message contained the searched word); confirm a detached job started from its log/GPU, not a guard.
+## Backup
+After the batch: `python backup_to_gcp.py --inference --once`.
