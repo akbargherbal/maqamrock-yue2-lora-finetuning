@@ -1,9 +1,9 @@
 # Training analysis — `quran_ahh_r8` **revised** (AR+NAR, rank 32, no KL)
 
-**LIVE SNAPSHOT** — captured **2026-10-06 ~02:27 UTC (05:27 Bahrain)** at **step 22,855 / 28,467
-(80.3%)**. The run is still training (pid 37073; resumed `2026-10-06T01:09:51` from ckpt 19,500
-after the 2026-10-05 pause); this is *not* a final analysis. Charts produced by the parametrized
-`TRAINING_ANALYSIS/generate_plots.py`:
+**LIVE SNAPSHOT** — captured **2026-10-06 ~04:13 UTC (07:13 Bahrain)** at **step 27,543 / 28,467
+(96.8%)**. The run is still training (pid 37073; resumed `2026-10-06T01:09:51` from ckpt 19,500
+after the 2026-10-05 pause); final save imminent — this is *not* the final analysis. Charts produced
+by the parametrized `TRAINING_ANALYSIS/generate_plots.py`:
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
@@ -35,13 +35,13 @@ python TRAINING_ANALYSIS/generate_plots.py \
 | Dataset | `/content/quran_ahh_dataset/train` — **9,489 pairs** (AHH filtered, 3 reciters, single caption/clip, 50/50 simple/uthmani stratified); `steps: 28467` = **3 epochs** |
 | GPU | Colab **L4** (23,034 MiB) |
 | Caching | banked `_latent_cache.tar` — launch pass **< 1 s** (cache HIT, no re-encode) |
-| Steps done | **22,855 / 28,467 (80.3%)** at snapshot |
-| Step time | **median 1.238 s** (p10 1.207 / p90 1.763; max 4.719) → ~**0.75 steps/s** (0.75 recent) |
+| Steps done | **27,543 / 28,467 (96.8%)** at snapshot |
+| Step time | **median 1.231 s** (p10 1.206 / p90 1.632; max 5.754) → ~**0.71 steps/s** (0.71 recent) |
 | Save cadence | every **1500** steps (~34 min) |
 | Samples | **none** — grey verticals are checkpoint saves |
-| Checkpoints | `_000001500 … _000022500` (**15**) + `optimizer.pt` (step 22500) — local + GCS (verified); next save = **24000** |
-| GPU (resumed window) | mem p50 **8,430** / peak **8,730** MiB of 23,034; util p50 **48 %**, p90 100 %; temp p50 76 / max 80 °C; power p50 64 / max 75 W (limit 72) |
-| ETA | **~125 min (2.1 h)** at the recent rate → completion ~**04:32 UTC / 07:32 Bahrain** |
+| Checkpoints | `_000001500 … _000027000` (**18**) + `optimizer.pt` (step 27000) — local + GCS (verified); next = final un-suffixed save at **28,467** |
+| GPU (resumed window) | mem p50 **8,730** / peak **9,152** MiB of 23,034; util p50 **49 %**, p90 100 %; temp p50 76 / max 80 °C; power p50 65 / max 76 W (limit 72) |
+| ETA | **~22 min** at the recent rate → completion ~**04:35 UTC / 07:35 Bahrain** |
 | Health | clean — no tracebacks/OOM; VRAM flat; steady ~34 min save cadence |
 
 ## Charts
@@ -78,17 +78,22 @@ python TRAINING_ANALYSIS/generate_plots.py \
 | 19001–20000 | **3.8272** | **3.1780** | 0.6492 |
 | 20001–21000 | 3.8479 | 3.2006 | 0.6474 |
 | 21001–22000 | 3.8640 | 3.2143 | 0.6498 |
-| 22001–22855 | 3.8637 | 3.2210 | 0.6427 |
+| 22001–23000 | 3.8610 | 3.2200 | 0.6411 |
+| 23001–24000 | 3.8423 | 3.1944 | 0.6478 |
+| 24001–25000 | 3.8682 | 3.2188 | 0.6494 |
+| 25001–26000 | 3.8555 | 3.2103 | 0.6452 |
+| 26001–27000 | 3.8516 | 3.2111 | 0.6406 |
+| 27001–27543 | 3.8365 | 3.2057 | 0.6308 |
 
-First-50 vs last-50 means: `loss/loss` **5.8409 → 3.8592** (−1.982), `loss/ar_ce`
-**5.0275 → 3.2093** (−1.818), `additional_model_loss` identical. `loss/loss` minimum
-**3.0433 @ step 22800**.
+First-50 vs last-50 means: `loss/loss` **5.8409 → 3.8020** (−2.039), `loss/ar_ce`
+**5.0275 → 3.1868** (−1.841), `additional_model_loss` identical. `loss/loss` minimum
+**3.0168 @ step 27262**.
 
 Per-checkpoint 500-step windows (`loss/loss` mean) — the "is later training better?" read:
 
-| from step | 15,000 | 16,500 | 18,000 | 19,500 | 21,000 | 22,500 |
-|---|---|---|---|---|---|---|
-| `loss/loss` (next 500) | 4.0024 | 3.9907 | 4.0014 | **3.8073** | 3.8653 | 3.8620 |
+| from step | 15,000 | 16,500 | 18,000 | 19,500 | 21,000 | 22,500 | 24,000 | 25,500 | 27,000 |
+|---|---|---|---|---|---|---|---|---|---|
+| `loss/loss` (next 500) | 4.0024 | 3.9907 | 4.0014 | **3.8073** | 3.8653 | 3.8593 | 3.8783 | 3.8523 | 3.8391 |
 
 ## Observations / flags
 
@@ -96,14 +101,14 @@ Per-checkpoint 500-step windows (`loss/loss` mean) — the "is later training be
    label, not a second loss). The NAR/flow term is visible only as the residual
    `loss/loss − ar_ce` ≈ **0.65–0.68** (0.776 → 0.674 over the run). Both experts train, but the
    log gives no clean separate read on the NAR.
-2. **`loss/ar_ce` has largely flattened.** It drifted to ~3.32 by 17k, dropped to **3.1780**
-   (19001–20000), and has since held at **~3.20–3.22** — the descent has plateaued over the last
-   ~4k steps (a small step-down at the 19,500 resume, then flat).
+2. **`loss/ar_ce` has plateaued.** It drifted to ~3.32 by 17k, dropped to **3.1780**
+   (19001–20000), and has held at **~3.19–3.22** ever since — ~8k steps flat (a small step-down at
+   the 19,500 resume, then no further descent). A single late min (2.435 @ 27262) is noise.
 3. **Later checkpoints improved, then plateaued.** Next-500 means: 4.0024 @15k → **3.8073 @19.5k**
-   → 3.8620 @22.5k. The step-down coincides with the 19.5k resume; since then it is flat — whether
-   the extra steps help is a listening question, not a loss one.
+   → 3.8555 @25.5k → 3.8391 @27k. The step-down coincides with the 19.5k resume; since then it is
+   flat — whether the extra steps help is a listening question, not a loss one.
 4. **`loss/loss` is AR-dominated** — not a quality metric; the held-out free-run is the signal.
-5. **The L4 is not the bottleneck.** util p50 **48 %** (p90 100 %), ~8.7 GB of 23 GB — data/CPU-bound;
+5. **The L4 is not the bottleneck.** util p50 **49 %** (p90 100 %), ~8.7 GB of 23 GB — data/CPU-bound;
    power saturates at the 72 W limit.
 6. **First 50 are warmup-inflated** (~5.84) and the per-step series is noisy — trust the bins.
    Occasional multi-second spikes (max 5.80 s/step) align with the 1500-step saves.
@@ -121,9 +126,9 @@ Adapters banked: `…/quran_ahh_r8_rank32/convert/{c4500,c7500,c10500,c16500}/`.
 
 ## Checkpoints (on disk + GCS)
 
-`/content/ai-toolkit/output/quran_ahh_r8/`: `quran_ahh_r8_000001500 … _000022500` (15 ×
-117,500,848 B ≈ 112 MiB) + `optimizer.pt` (step 22500) + `loss_log.db`. GCS mirror verified
-(15 checkpoints + optimizer + a `README.md` marker).
+`/content/ai-toolkit/output/quran_ahh_r8/`: `quran_ahh_r8_000001500 … _000027000` (18 ×
+117,500,848 B ≈ 112 MiB) + `optimizer.pt` (step 27000) + `loss_log.db`. GCS mirror verified.
+The final un-suffixed `quran_ahh_r8.safetensors` + `optimizer.pt` land at **28,467**.
 
 ## Caveats
 
@@ -136,6 +141,7 @@ Adapters banked: `…/quran_ahh_r8_rank32/convert/{c4500,c7500,c10500,c16500}/`.
 
 ## Next steps
 
-- Continue to **28,467** (~07:32 Bahrain at the current rate, if the VM stays up).
-- **c10500 vs c16500 T4 probe** (round 2) — `c16500` is now banked; the immediate test.
+- Finish to **28,467** (~07:35 Bahrain; ~22 min out at the last check).
+- **c10500 vs c16500 T4 probe** (round 2); consider a late arm (`c27000`/final) — the plateau makes
+  "later = better" a listening question.
 - Human blind gate (`ab-blind-eval`) before any merge.
