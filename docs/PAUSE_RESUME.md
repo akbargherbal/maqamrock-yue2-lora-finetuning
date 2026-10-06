@@ -43,15 +43,15 @@ step that is a multiple of 250.
 ## Resume (next morning, fresh VM)
 
 1. Follow [START.md](START.md) steps 1–3 (clone, bootstrap, then this restore).
-2. Restore the run folder from GCS **into the exact training folder path**. The
-   parent directory must exist first — `gsutil rsync` aborts with *"does not
-   name a directory"* otherwise:
+2. Restore the run folder with the helper — it rsyncs **and** restores the resume
+   ctime order (ai-toolkit picks the newest checkpoint by **ctime**, which a bare
+   rsync collapses to the restore instant), and creates the destination first:
    ```bash
-   mkdir -p /content/ai-toolkit/output/akbar_arabic_rock_lora
-   gsutil -m rsync -r \
-     gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/akbar_arabic_rock_lora/output \
-     /content/ai-toolkit/output/akbar_arabic_rock_lora
+   cd /content/maqamrock-yue2-lora-finetuning
+   python bootstrap/restore_run.py --run-name akbar_arabic_rock_lora --apply
    ```
+   A bare `gsutil -m rsync -r <base>/<run>/output <output-root>/<run>` also works but
+   leaves the ctime order to chance (see `COMMAND_HANDOVER_GOTCHAS.md`, 2026-10-06).
 3. Start the sidecars (START.md step 4).
 4. Launch, with the **identical** config and run name: `python train_ctl.py start`
    (START.md step 5). You type it — this is a planned resume, not the agent's

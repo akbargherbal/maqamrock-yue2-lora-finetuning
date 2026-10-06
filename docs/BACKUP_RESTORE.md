@@ -159,15 +159,20 @@ tail -n 20 /content/logs/gcp_backup.log
 
 ## Restore
 
-The destination's parent directory must exist first — `gsutil rsync` aborts with
-*"does not name a directory"* if it doesn't:
+Use the helper: it rsyncs the run's `output/` **and** restores the resume ctime order
+(ai-toolkit picks the newest checkpoint by **ctime**, and a bare rsync collapses every
+file's ctime to the restore instant → it can resume from the wrong checkpoint). It also
+creates the destination directory first (`gsutil rsync` aborts with *"does not name a
+directory"* otherwise):
 
 ```bash
-mkdir -p /content/ai-toolkit/output/akbar_arabic_rock_lora
-gsutil -m rsync -r \
-  gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/akbar_arabic_rock_lora/output \
-  /content/ai-toolkit/output/akbar_arabic_rock_lora
+cd /content/maqamrock-yue2-lora-finetuning
+python bootstrap/restore_run.py --run-name akbar_arabic_rock_lora            # dry-run
+python bootstrap/restore_run.py --run-name akbar_arabic_rock_lora --apply
 ```
+
+A bare `gsutil -m rsync -r <base>/<run>/output <output-root>/<run>` also works but leaves
+the ctime order to chance (see `COMMAND_HANDOVER_GOTCHAS.md`, 2026-10-06).
 
 ## Starting a genuinely new run (archive the old one)
 

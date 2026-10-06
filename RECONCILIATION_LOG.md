@@ -400,3 +400,23 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   clean on both scripts. No config or hyperparameter touched.
 - Authority: user directive ("fix things once and for all … while the root cause exists")
   + the 2026-10-04 gotcha's own "Correct pattern".
+
+## 2026-10-06 — encode the other two "documented but not enforced" gotchas (ctime restore, WAL checkpoint)
+
+- `bootstrap/restore_run.py` (new): rsyncs `<base>/<run-name>/output` → the local output
+  root, re-stamps checkpoint ctime in ascending step order, verifies the resume pick, and
+  refuses while `run.py` is alive. Replaces the bare-rsync + hand-`chmod` restore in
+  `docs/PAUSE_RESUME.md` and `docs/BACKUP_RESTORE.md` (both updated).
+- `backup_to_gcp.py`: `checkpoint_sqlite_dbs()` runs `PRAGMA wal_checkpoint(TRUNCATE)` on
+  every `*.db` under each synced folder (called in the pass loop before `sync`), so the main
+  `loss_log.db` alone is a consistent snapshot.
+- Corrected a wrong gotcha claim: `touch` **does** bump ctime on this filesystem (verified
+  2026-10-06: `…014` → `…015`); the earlier "chmod updates ctime; `touch` does not" was
+  wrong. The ctime gotcha's pattern now reads "re-stamp in ascending step order".
+- Both gotcha entries marked **Encoded 2026-10-06**.
+- Verified: WAL test (61832 → 0 bytes, `PRAGMA integrity_check=ok`, rows intact); a
+  simulated collapsed restore reproduced the original failure (arbitrary pick
+  `_000009000`) and the helper corrected it (picks `quran_ahh_r8.safetensors`); dry-run and
+  the `run.py`-alive guard exercised. No config or hyperparameter touched.
+- Authority: user directive (2026-10-06: "fix those issues … before we do another
+  inference") + the two gotchas' own "Durable fix belongs in …" notes.

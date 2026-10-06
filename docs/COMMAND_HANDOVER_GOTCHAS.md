@@ -194,7 +194,8 @@ human and invisible to the agent — so they get written down here.
 - **Failure prevented:** a resume that silently restarts ~10,500 steps back (and would
   overwrite newer checkpoints/optimizer on the next save).
 - **Correct pattern:** after restoring, force the newest checkpoint to be the max by ctime
-  (chmod updates ctime; `touch` does **not**), then verify with the exact glob:
+  (both `touch` and `chmod` bump ctime — verified 2026-10-06; what matters is re-stamping in
+  **ascending step order** so the newest is unambiguous), then verify with the exact glob:
   ```bash
   cd /content/ai-toolkit/output/<run>
   chmod 644 <run>_0000NNNNN.safetensors   # the highest step
@@ -206,6 +207,10 @@ human and invisible to the agent — so they get written down here.
   EOF
   ```
   (Durable fix belongs in `bootstrap/setup.sh` / a restore helper.)
+- **Encoded 2026-10-06:** `bootstrap/restore_run.py` rsyncs
+  `<base>/<run-name>/output` → the local output root and then re-stamps ctime order
+  (same logic as `bootstrap/rename_run.py`), verifying the pick before you resume. Use it
+  instead of a bare `rsync` + hand-`chmod`; it also creates the local destination first.
 
 ## 2026-10-06 — `grep -m1 'Found step'` on an appended log returns the *stale* line; the restored WAL loss_log.db can be malformed
 
@@ -240,3 +245,7 @@ human and invisible to the agent — so they get written down here.
   Loss history is also in `<output>/tensorboard/<run>_<ts>/events.out.tfevents.*` (`loss`, `lr`)
   as a cross-check. A durable fix is for the backup daemon to `PRAGMA wal_checkpoint(TRUNCATE)`
   (or copy via the SQLite backup API) before syncing `loss_log.db`.
+- **Encoded 2026-10-06:** `backup_to_gcp.py` now runs `PRAGMA wal_checkpoint(TRUNCATE)` on every
+  `*.db` under each synced folder (`checkpoint_sqlite_dbs`, called in the pass loop before
+  `sync`), so the main `loss_log.db` alone is a consistent snapshot. The salvage procedure above
+  remains the repair path for a capture torn before this fix.
