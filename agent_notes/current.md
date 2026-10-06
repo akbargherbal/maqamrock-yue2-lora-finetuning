@@ -27,10 +27,9 @@ Budget: 8 + 9 = 17 tracks ≈ ~110 min T4 / ~50 min L4.
 cd /content/maqamrock-yue2-lora-finetuning
 # smoke gate (1 track, ~6-11 min, foreground)
 ARMS="qa_1.0_1.0" bash INFERENCE/jarir_lever_probe.sh
-# Tier 1/3 prompt/lyrics/merge matrix (detached)
-MODE=prompt setsid nohup bash INFERENCE/jarir_lever_probe.sh > /content/logs/jarir_lever_prompt.log 2>&1 & disown
-# Tier 0/2 scale + sampler arms (detached)
-setsid nohup bash INFERENCE/jarir_lever_probe.sh > /content/logs/jarir_lever_scale.log 2>&1 & disown
+# both batches, SEQUENTIAL (never two concurrent runs -> NAR OOM), detached
+setsid nohup bash -c 'MODE=prompt bash INFERENCE/jarir_lever_probe.sh \
+  && bash INFERENCE/jarir_lever_probe.sh' > /content/logs/jarir_lever_all.log 2>&1 & disown
 ```
 stop `pkill -f jarir_lever_probe`; resume = same command (fixed `--out-dir`).
 Output: `/content/audiocpp_inference/out/jarir_lever_probe/{prompt,<arm>}/`.
