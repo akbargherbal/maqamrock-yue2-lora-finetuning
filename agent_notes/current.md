@@ -1,46 +1,39 @@
 # current.md — handoff surface (overwritten each turn; not a source of truth)
 
-## Next action — run the lever probe on the GPU VM
+_Updated 2026-10-06 18:16Z — repo `ca10723`, branch `pron-lora-long-aya`, Colab Tesla T4._
 
-New files (commit `jarir_lever_probe`):
-- `INFERENCE/songs.jarir_lever_probe.json` — 8-song Tier1(prompt/lyrics) × Tier3(merge) matrix,
-  seed `20261011`, cap 8000, Maqam Kurd, Jarir poem (verbatim + canonical lyrics variants).
-- `INFERENCE/songs.jarir_lever_scale.json` — 1 fixed song `jlv_scale_ref` for the scale/sampler arms.
-- `INFERENCE/jarir_lever_probe.sh` — driver for the 9 Tier0(AR/NAR scale) + Tier2(sampler) arms.
+## Running now — `jarir_lever_probe` (Jarir lever experiment, α0.1 `qahh_a0p1`)
 
-Driver arms (all on `jlv_scale_ref`, paired seed):
-`v2_1.0_1.0`(ref) · `qa_1.0_1.0`(baseline) · `qa_0.5_1.0` · `qa_1.0_0.5` · `qa_0.0_1.0` ·
-`qa_0.5_1.0_rp1.4` · `qa_0.5_1.0_t0.8` · `qa_0.5_1.0_g1.0` · `qa_0.5_1.0_notrigger`.
-Budget: 8 + 9 = 17 tracks ≈ ~110 min T4 / ~50 min L4.
+Prepared by a CPU agent; run autonomously. One GPU job at a time.
 
-### Prereqs
-- `bash bootstrap/setup.sh --inference` done; GPU idle (`nvidia-smi`).
-- Stage the α0.1 merge (`qahh_a0p1` = quran_ahh_r8 AR+NAR rank32 merged into v2):
-  ```
-  gsutil -m cp -r "$GCP_BACKUP_BASE/quran_ahh_r8_rank32/maqamrock_merge/convert/qahh_a0p1" \
-    /content/converter/out/
-  sha256sum /content/converter/out/qahh_a0p1/*_ar.safetensors   # expect 4b4d2103…dac0ecb
-  ```
+**Stage 1 — smoke gate (in progress):** `ARMS="qa_1.0_1.0" bash INFERENCE/jarir_lever_probe.sh`
+- log `/content/logs/jarir_lever_smoke.log` · out `out/jarir_lever_probe/qa_1.0_1.0/`
+- started 2026-10-06T18:13:09Z, ~6 min expected on T4.
 
-### Commands
+**Stage 2 — both batches sequentially (AUTO-launched by supervisor on smoke pass):**
+Supervisor `/content/run_lever_supervisor.sh` (setsid, pid 17615) waits for the smoke,
+validates a WAV + no `_failed.log` entry, then launches the chain below, waits for it to
+drain, runs `backup_to_gcp.py --inference --once`, and writes `/content/logs/_supervisor_summary.txt`.
+If the smoke fails it writes evidence to that file and stops (no chain). Chain:
 ```
-cd /content/maqamrock-yue2-lora-finetuning
-# smoke gate (1 track, ~6-11 min, foreground)
-ARMS="qa_1.0_1.0" bash INFERENCE/jarir_lever_probe.sh
-# both batches, SEQUENTIAL (never two concurrent runs -> NAR OOM), detached
-setsid nohup bash -c 'MODE=prompt bash INFERENCE/jarir_lever_probe.sh \
-  && bash INFERENCE/jarir_lever_probe.sh' > /content/logs/jarir_lever_all.log 2>&1 & disown
+setsid nohup bash -c 'MODE=prompt bash INFERENCE/jarir_lever_probe.sh && bash INFERENCE/jarir_lever_probe.sh' \
+  > /content/logs/jarir_lever_all.log 2>&1 & disown
 ```
-stop `pkill -f jarir_lever_probe`; resume = same command (fixed `--out-dir`).
-Output: `/content/audiocpp_inference/out/jarir_lever_probe/{prompt,<arm>}/`.
+- `MODE=prompt` = Tier 1/3 matrix, `INFERENCE/songs.jarir_lever_probe.json` → 8 tracks (`out/jarir_lever_probe/prompt`)
+- default = 9 scale/sampler arms, 1 track each (`out/jarir_lever_probe/<arm>`)
+- ~17 tracks; ~50 min L4 / ~110 min T4.
+- stop `pkill -f jarir_lever_probe` · resume = re-run same chain (generate.py skips succeeded tracks)
 
-## Branch / push
-This commit is on `pron-lora-long-aya`. Remote default is `main` — the VM must be on
-`pron-lora-long-aya` (fetch + checkout) or the new files will be absent.
+## Environment (verified this session)
+- secrets `/root/.secrets.env` loaded (HF_TOKEN, `GCP_BACKUP_BASE=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`)
+- `bootstrap/setup.sh --inference` done 97s; `bin/audiocpp_cli` staged (sm_75/T4)
+- α0.1 adapter restored to `/content/converter/out/qahh_a0p1/`; `ar` sha256 `4b4d2103e59de6b3279088d53cb28b15df901f96e4a37a67e2306e9bfdac0ecb` ✓
+- dry-run: 8 songs, seed `20261011`, cap 8000 ✓
 
-## Open decisions
-- 2nd seed / `repeat:2` for robustness (single seed isolates levers only).
-- NAR-only quran merge (Tier3 option a) — NOT built; CPU step (variant of `merge_quran_lora.py`).
+## Sidecars
+- backup daemon `python backup_to_gcp.py --inference` (pid 12015) · log `/content/logs/backup_inference.log`
+- vm-continuity watch (pid 7493)
 
-## Backup
-After the batch: `python backup_to_gcp.py --inference --once`.
+## Notes
+- No config edits, no commits. Training not started. GPU idle before launch.
+- Smoke-watcher tracked in OpenCode background; report on completion.
