@@ -602,6 +602,32 @@ else
     fail=1
   fi
 
+  # The prebuilt binary links CUDA-12 libs (libcublas.so.12/libcudart.so.12). A
+  # CUDA-13 image only exposes them via the pip nvidia-*-cu12 wheels, so put
+  # them on the loader path — and fail loudly if still missing, so this verify
+  # block can never report all-[ok] on a binary that will die at load (exit=127).
+  # See INFERENCE/cuda_loader_path.sh and docs/COMMAND_HANDOVER_GOTCHAS.md (2026-10-04).
+  . "$REPO_ROOT/INFERENCE/cuda_loader_path.sh"
+  if ! cuda_loader_check "$AUDIOCPP_BIN_LOCAL"; then
+    echo "[warn] audiocpp_cli CUDA-12 libs missing; installing nvidia-cu12 runtime wheels"
+    pip install -q --no-input nvidia-cublas-cu12 nvidia-cuda-runtime-cu12 || true
+    . "$REPO_ROOT/INFERENCE/cuda_loader_path.sh"
+  fi
+  if cuda_loader_check "$AUDIOCPP_BIN_LOCAL"; then
+    echo "[ok]   audiocpp_cli loads (CUDA-12 libs on LD_LIBRARY_PATH)"
+    # Persist for interactive shells so ad-hoc ldd / direct CLI use also works.
+    if ! grep -qF 'maqamrock: CUDA-12 loader path' "$HOME/.bashrc" 2>/dev/null; then
+      {
+        echo ''
+        echo '# maqamrock: CUDA-12 loader path for the prebuilt audiocpp_cli'
+        echo "[ -f \"$REPO_ROOT/INFERENCE/cuda_loader_path.sh\" ] && . \"$REPO_ROOT/INFERENCE/cuda_loader_path.sh\""
+      } >> "$HOME/.bashrc"
+    fi
+  else
+    echo "[FAIL] audiocpp_cli cannot load (missing CUDA libs) — see COMMAND_HANDOVER_GOTCHAS.md 2026-10-04"
+    fail=1
+  fi
+
   for d in "$AUDIOCPP_PROMPTS_LOCAL" "$AUDIOCPP_SCRIPTS_LOCAL"; do
     if [ -d "$d" ] && [ -n "$(ls -A "$d" 2>/dev/null)" ]; then
       echo "[ok]   $d ($(find "$d" -type f | wc -l) files)"

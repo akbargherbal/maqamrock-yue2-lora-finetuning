@@ -136,6 +136,14 @@ human and invisible to the agent — so they get written down here.
   ```
   `ldd` reporting no `not found` lines = the binary will load. (`/usr/bin/time` being
   present is a separate, already-documented prerequisite; exit 127 here is the loader.)
+- **Encoded 2026-10-06 (no longer a per-session ritual):** `INFERENCE/cuda_loader_path.sh`
+  resolves the pip `nvidia/*/lib` dirs; `INFERENCE/run_one.sh` — the single choke point
+  every batch driver (`generate.py`, the `*_sweep.sh`, `maqam_lyric_swap.py`) goes
+  through — sources it before invoking `$BIN`, and `bootstrap/setup.sh --inference`
+  sources it, `pip install`s the `-cu12` wheels if absent, and **fails the verify** if
+  `ldd` still shows `not found`. It also persists the path in `~/.bashrc` for
+  interactive shells. The manual block above is now only for ad-hoc `ldd`/direct-CLI use;
+  the run path no longer needs a hand-exported `LD_LIBRARY_PATH`.
 
 ## 2026-10-05 — CUDA-13 image: orphan cuDNN libs break VAE encode (`CUDNN_STATUS_SUBLIBRARY_VERSION_MISMATCH`)
 

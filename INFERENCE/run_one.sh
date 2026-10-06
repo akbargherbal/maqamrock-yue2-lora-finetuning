@@ -32,6 +32,12 @@ M="${1:?usage: run_one.sh <Maqam> <seed> [cap|auto]}"
 S="${2:?usage: run_one.sh <Maqam> <seed> [cap|auto]}"
 CAP_ARG="${3:-auto}"
 BIN="$ROOT/bin/audiocpp_cli"
+
+# The prebuilt binary links CUDA 12 (libcublas.so.12/libcudart.so.12); on a
+# CUDA-13 image those live only in the pip nvidia-*-cu12 wheels. Put them on
+# the loader path so the binary loads on any host (no-op when already OK).
+# shellcheck source=INFERENCE/cuda_loader_path.sh
+. "$SCRIPT_DIR/cuda_loader_path.sh"
 MODEL="$ROOT/models/Yue2-3B-GGUF"
 OUT="${OUT_DIR:-$ROOT/out}"
 mkdir -p "$OUT"

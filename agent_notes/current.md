@@ -1,39 +1,57 @@
 # current
 
-> **Session plan:** [`docs/QURAN_AHH_RESUME_PLAN.md`](../docs/QURAN_AHH_RESUME_PLAN.md)
-> — resume training → T4 probe → finish run → rename.
+> **Session plan:** [`docs/QURAN_AHH_RESUME_PLAN.md`](../docs/QURAN_AHH_RESUME_PLAN.md) Phase 3b —
+> T4 epoch test on Ayat al-Kursi (2:255) → blind A/B.
 > **This file is a handoff copy surface, not a source of truth** — re-derive from live artifacts.
 
-## State @ 2026-10-06 04:36 UTC — **TRAINING COMPLETE** (28,467/28,467)
+## State @ 2026-10-06 05:22 UTC — T4, env ready, **re-launch render with CUDA-12 loader path**
 
-`quran_ahh_r8` (revised: AR+NAR, **rank 32**, `ar_kl_weight 0.0`, `steps 28467` = 3 epochs)
-finished **cleanly** on the Colab L4 — `run.py` self-stopped, no traceback. Resumed
-`2026-10-06T01:09:51` from ckpt 19,500; final step reached 04:34 UTC.
+Fresh Colab **T4** (`COLAB_GPU=1`), GPU free. Repo `pron-lora-long-aya`, HEAD **`317399f`**.
+`setup.sh --inference` done (all `[ok]`, 38 s). Probe arms staged (`c4500 c7500 c9000 c10500
+c16500 c19500 final`). `vm-continuity` loop running, `state=OK`.
 
-Final artifacts (local `output/quran_ahh_r8/` **and** GCS, sizes match):
-- `quran_ahh_r8.safetensors` — 117,500,848 B (final, un-suffixed) → GCS `04:35:30`
-- `optimizer.pt` — 119,807,781 B (step 28,467) → GCS `04:35:30`
-- 18 periodic ckpts `_000001500 … _000027000`; `loss_log.db` (28,466 steps logged).
-- Forced backup `backup_to_gcp.py --run-name quran_ahh_r8 --once` = **exit 0, 3/3 folders**.
-  **Safe to disconnect / switch to T4.**
+### Done this session (CPU-only)
+Converted **c9000 / c19500 / final** from the banked ai-toolkit checkpoints with the canonical
+`convert_aitoolkit_yue2_lora.py` (`--stem quran_ahh_r8`; byte-level verified, rank 32) and banked
+them to `…/quran_ahh_r8_rank32/convert/`. `adapter_manifest.json` updated additively
+(old copy: `/tmp/opencode/adapter_manifest.backup.json`).
 
-Training analysis finalized: `TRAINING_ANALYSIS/quran_ahh_r8_rank32/ANALYSIS.md` (+5 PNGs).
-Loss plateaued hard after ~19.5k (`loss/ar_ce` ~3.19–3.22 for ~8.5k steps) — "later = better"
-is a listening question, not a loss one.
+### Run #1 FAILED — CUDA-12 loader (known gotcha, `COMMAND_HANDOVER_GOTCHAS.md:117`)
+`setsid … quran_pt_probe.py --arms c9000,c19500,final` → all 6 tracks `exit=127` in the same
+second, 0:00 each. Per-track log: `audiocpp_cli: error while loading shared libraries:
+libcublas.so.12: cannot open shared object file`. Cause: staged sm_75 binary is **CUDA 12**;
+Colab image is **CUDA 13**. Empty run dir: `out/20261006-051955_quran_pt_probe/` (no WAVs).
 
-## Next — Phase 3b (T4, separate GPU)
-Convert **`c9000`** (≈epoch 1), **`c19500`** (≈epoch 2), and the **final** adapter; render all
-three on **Ayat al-Kursi (Quran 2:255)**, fixed seed; then blind-A/B (`ab-blind-eval`).
-Exact epoch ends 9489/18978/28467 don't land on saves; c9000/c19500 are the nearest.
-(T4 handover recipe: `docs/QURAN_AHH_RESUME_PLAN.md` Phase 3 / 3b.)
+### Fix — export the CUDA-12 libs on `LD_LIBRARY_PATH` **before** launching (probe rewrites log; fresh out dir)
+
+```bash
+cd /content/maqamrock-yue2-lora-finetuning
+export LD_LIBRARY_PATH="$(find /usr/local/lib/python3.13/dist-packages/nvidia \
+  -maxdepth 2 -type d \( -name lib -o -name lib64 \) | tr '\n' ':')/usr/lib64-nvidia"
+ldd /content/audiocpp_inference/bin/audiocpp_cli | grep 'not found' || echo "LOADER OK"
+setsid nohup python INFERENCE/quran_pt_probe.py --prefix quran_ahh_r8_rank32/convert \
+    --arms c9000,c19500,final > /content/logs/quran_pt_probe_r32_epochs.log 2>&1 & disown
+# stop: pkill -f 'quran_pt_probe.py --prefix quran_ahh_r8_rank32'
+# progress: tail -f /content/logs/quran_pt_probe_r32_epochs.log ; ls -t /content/audiocpp_inference/out/ | head
+```
+
+The `export` must be in the **same shell** as the launch (probe → `generate.py` → `run_one.sh` →
+`audiocpp_cli` inherit it). ~39 min for 6 tracks; output → `out/<new-ts>_quran_pt_probe/`.
+
+### Recommendation (not done)
+`run_one.sh`/`generate.py` could set `LD_LIBRARY_PATH` themselves (or `setup.sh` export it), so
+the dry-run passing doesn't mask a real run that dies at the loader. Flag for a durable fix.
 
 ## Still open
-- Phase 3b epoch test above; round-2 `c10500` vs `c16500` also banked and untested.
+- Phase 3b render (above) → blind A/B (`ab-blind-eval`) → verdict in
+  `TRAINING_ANALYSIS/quran_ahh_r8_rank32/ANALYSIS.md`.
 - Phase 5: rename `quran_ahh_r8` → `quran_ahh_r32`; docs-reconciler; blind gate before any merge.
-- Durable fixes (not yet done): restore helper that fixes ckpt ctime; backup daemon that
-  `wal_checkpoint(TRUNCATE)`s `loss_log.db` before syncing.
+- Durable fixes: restore helper that fixes ckpt ctime; backup daemon that `wal_checkpoint`s `loss_log.db`.
 
-## Gotchas (see `docs/COMMAND_HANDOVER_GOTCHAS.md`)
-- `run.py -l <log>` **appends** — verify resume with `grep 'Found step' <log> | tail -1`, not `-m1`.
+## Gotchas
+- **CUDA-13 image ⇒ export the CUDA-12 `LD_LIBRARY_PATH`** before any `audiocpp_cli` run
+  (`COMMAND_HANDOVER_GOTCHAS.md:117`); `--dry-run` does not catch it.
+- `run.py -l <log>` **appends** — verify resume with `grep 'Found step' <log> | tail -1`.
 - GCS restore randomizes ckpt ctime → auto-resume picks the wrong step; `chmod` (not `touch`) fixes it.
-- Backup can capture a mid-checkpoint WAL `loss_log.db` → crash in `_prune_future_steps`; repair by salvage.
+- The probe re-rsyncs the whole convert prefix (~980 MB) each run and exposes no `--out-dir`, so a
+  failed render restarts in a fresh folder rather than resuming.

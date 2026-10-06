@@ -62,6 +62,13 @@ grep -n "\[FAIL\]" /content/logs/setup.log || echo "no failures"
 cat /content/logs/timing.txt
 ```
 
+The prebuilt binary is a **CUDA-12** build (`libcublas.so.12`/`libcudart.so.12`); on a
+CUDA-13 image those live only in the pip `nvidia-*-cu12` wheels. `setup.sh --inference`
+now puts them on `LD_LIBRARY_PATH` (installing the wheels if absent) and fails the verify
+if the binary's deps still don't resolve; `INFERENCE/run_one.sh` sources the same resolver
+(`INFERENCE/cuda_loader_path.sh`) before **every** invocation. So a bare run no longer
+dies `exit=127` at load — see `COMMAND_HANDOVER_GOTCHAS.md` ("CUDA-13 image").
+
 The verify block checks the model dir + all four sidecars + both LoRA files, and
 (added with `job_audiocpp_binary`) that the binary is executable and
 `prompts/`/`scripts/` are non-empty.

@@ -381,3 +381,22 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   `graphify-out/GRAPH_REPORT.md` (generated snapshot).
 - Authority: `skills/docs-reconciler/SKILL.md`; user-approved scope ("scope agreed").
   Config values unchanged except the pre-agreed split; no hyperparameter edited.
+
+## 2026-10-06 — encode the CUDA-12 loader path (recurring `audiocpp_cli` `exit=127`), code + docs
+
+- Fix: the prebuilt sm_75/sm89 `audiocpp_cli` links CUDA 12
+  (`libcublas.so.12`/`libcudart.so.12`); a CUDA-13 image exposes those only via the pip
+  `nvidia-*-cu12` wheels, and **nothing set the loader path** — so every fresh VM redied
+  `exit=127` and the requirement lived only as prose (gotcha 2026-10-04). Added
+  `INFERENCE/cuda_loader_path.sh` (self-healing resolver), sourced it in
+  `INFERENCE/run_one.sh` — the choke point for `generate.py` / `pron_*_sweep.sh` /
+  `maqam_lyric_swap.py` — and made `bootstrap/setup.sh --inference` resolve + `pip install`
+  the `-cu12` wheels and **fail the verify** if `ldd` still shows `not found`; it also
+  persists the path in `~/.bashrc` for interactive shells.
+- Docs: `docs/COMMAND_HANDOVER_GOTCHAS.md` (2026-10-04 entry marked "Encoded 2026-10-06");
+  `docs/INFERENCE.md` (setup section notes the automatic loader path).
+- Verified: bare shell (`env -u LD_LIBRARY_PATH`) resolves the binary; `--check` exits 0;
+  sourcing twice is idempotent; an interactive shell resolves via `~/.bashrc`; `bash -n`
+  clean on both scripts. No config or hyperparameter touched.
+- Authority: user directive ("fix things once and for all … while the root cause exists")
+  + the 2026-10-04 gotcha's own "Correct pattern".
