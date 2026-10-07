@@ -10,7 +10,7 @@ JSON file (no code edits).
     pip install -r requirements.txt
     python app.py                       # then paste the folder when asked
     python app.py --audio ~/Downloads/jarir_lever_probe --label jarir_lever_probe
-    # open http://127.0.0.1:5000
+    # open http://127.0.0.1:5000   (auto-uses the next free port if 5000 is busy)
 
 Design notes
 ------------
@@ -33,6 +33,7 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import json
+import socket
 import sys
 from pathlib import Path
 
@@ -623,6 +624,29 @@ def _read_session(out_dir: Path) -> dict:
     return {}
 
 
+def _pick_free_port(host: str, preferred: int, scan: int = 50) -> int:
+    """Return ``preferred`` if it is free, else the next free port above it.
+
+    Scans up to ``scan`` ports; if none are free, falls back to an OS-assigned
+    ephemeral port. ``preferred == 0`` means "any free port". The probe binds a
+    plain (non-reusing) socket, so a port already held by another process reads
+    busy on Linux and Windows alike; the tiny bind/close race before Werkzeug
+    binds again is harmless for a local listening app.
+    """
+    bind_host = host or "127.0.0.1"
+    candidates = (0,) if preferred <= 0 else range(preferred, preferred + scan)
+    for port in candidates:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind((bind_host, port))
+                return s.getsockname()[1]
+            except OSError:
+                continue
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind((bind_host, 0))
+        return s.getsockname()[1]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="general listening rating app")
     ap.add_argument("--audio", default=None, help="folder of rendered tracks (asked for if omitted)")
@@ -630,7 +654,10 @@ def main() -> int:
     ap.add_argument("--label", default=None, help="run label (defaults to the folder name)")
     ap.add_argument("--fields", default=None, help="optional criteria JSON path (see README)")
     ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--port", type=int, default=5000)
+    ap.add_argument("--port", type=int, default=5000,
+                    help="preferred port; if it is busy, the next free port above it is used")
+    ap.add_argument("--strict-port", action="store_true",
+                    help="bind exactly --port; fail instead of scanning upward if it is busy")
     ap.add_argument("--debug", action="store_true")
     args = ap.parse_args()
 
@@ -656,9 +683,12 @@ def main() -> int:
         found = len(discover(Path(audio).expanduser())) if audio else 0
     except OSError:
         found = 0
+    port = args.port if args.strict_port else _pick_free_port(args.host, args.port)
     print(f"rating_app: {found} track(s) in {audio or '(unset — open /setup)'}")
-    print(f"  open http://{args.host}:{args.port}")
-    app.run(host=args.host, port=args.port, debug=args.debug)
+    if not args.strict_port and port != args.port:
+        print(f"  (port {args.port} busy; using {port})")
+    print(f"  open http://{args.host}:{port}")
+    app.run(host=args.host, port=port, debug=args.debug)
     return 0
 
 

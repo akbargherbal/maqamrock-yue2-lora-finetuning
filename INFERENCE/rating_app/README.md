@@ -35,6 +35,8 @@ py app.py
 #      paste the folder that holds your WAVs, e.g.
 #      C:\Users\DELL\Downloads\jarir_lever_probe
 #   => open http://127.0.0.1:5000
+#      (if 5000 is already taken by another app, it auto-uses the next free
+#       port — e.g. 5001 — and prints that URL instead)
 ```
 
 You can also pass it directly (no prompt):
@@ -46,6 +48,11 @@ py app.py --audio "C:\Users\DELL\Downloads\jarir_lever_probe" --label jarir_leve
 `--out` (default `.\rating_out`) holds `evaluations.json`, `criteria.json`, and
 `session.json` (which remembers your last folder), so re-running with no arguments
 resumes exactly where you left off.
+
+**Ports.** `--port` (default `5000`) is just a *preference*: if it is already in
+use, the app moves up to the next free port and prints the real URL. So you can
+leave several Flask apps running side by side. Use `--strict-port` to bind exactly
+`--port` and fail if it is taken, or `--port 0` to let the OS pick any free port.
 
 ## Changing the criteria
 
