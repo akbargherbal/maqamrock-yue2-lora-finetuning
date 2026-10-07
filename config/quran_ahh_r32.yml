@@ -1,5 +1,5 @@
 # =============================================================================
-# quran_ahh_r8 -- Quran pronunciation LoRA on the quality-filtered AHH set.
+# quran_ahh_r32 -- Quran pronunciation LoRA on the quality-filtered AHH set.
 #
 #   REVISED 2026-10-05 (user): train AR + NAR jointly at rank 32 with no KL
 #   anchor, over multiple epochs. The prior AR-only, rank-8 run could only move
@@ -8,7 +8,7 @@
 #   NAR at the music base leaves the makhraj unadapted (and pushes the frozen
 #   NAR's input off-distribution). Adapt both experts.
 #
-#   Changes vs the previous quran_ahh_r8:
+#   Changes vs the previous quran_ahh_r8 (rank-8, AR-only):
 #     * network.linear / linear_alpha: 8 -> 32           (capacity)
 #     * network_kwargs.ignore_if_contains: ["transformer.nar"] -> []
 #                                                        (AR + NAR, like v2)
@@ -29,7 +29,7 @@
 ---
 job: "extension"
 config:
-  name: "quran_ahh_r8"
+  name: "quran_ahh_r32"
   process:
     - type: "diffusion_trainer"
       training_folder: "/content/ai-toolkit/output"
@@ -47,9 +47,9 @@ config:
         lokr_factor: -1
         network_kwargs:
           ignore_if_contains: []   # AR + NAR (was ["transformer.nar"] = AR-only)
-      log_dir: "output/quran_ahh_r8/tensorboard"
+      log_dir: "output/quran_ahh_r32/tensorboard"
       # log_dir is real (jobs/process/BaseTrainProcess.py) but writes into a
-      # TIMESTAMPED SUBFOLDER under this path: output/quran_ahh_r8/tensorboard/quran_ahh_r8_<YYYYMMDD-HHMMSS>/
+      # TIMESTAMPED SUBFOLDER under this path: output/quran_ahh_r32/tensorboard/quran_ahh_r32_<YYYYMMDD-HHMMSS>/
       log_config:
         log_every: 1   # dead key (toolkit/config_modules.py LoggingConfig) -- kept so nobody re-adds it
       save:

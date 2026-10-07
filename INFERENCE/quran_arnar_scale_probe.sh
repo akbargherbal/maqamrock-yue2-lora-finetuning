@@ -2,7 +2,7 @@
 # AR-vs-NAR LoRA scale split on the alpha=0.1 quran-merged adapter (qahh_a0p1).
 #
 # Diagnostic: the user's "overcorrection" = tajweed prosody (madd/waqf/idgham/
-# iqlab) bleeding into singing. config/quran_ahh_r8.yml:5-9 says the AR branch
+# iqlab) bleeding into singing. config/quran_ahh_r32.yml:5-9 says the AR branch
 # moves recitation prosody (madd/waqf) while the NAR branch renders actual
 # articulation (makhraj). This splits the two scales at runtime to attribute
 # the bleed. Same prompt (in-distribution canonical), same seed -> paired.

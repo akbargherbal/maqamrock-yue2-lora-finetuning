@@ -1,13 +1,13 @@
-# jarir_qahh — maqamrock × `quran_ahh_r8` (AR+NAR) α sweep
+# jarir_qahh — maqamrock × `quran_ahh_r32` (AR+NAR) α sweep
 
-Merge the Quran pronunciation LoRA `quran_ahh_r8` (final, AR+NAR rank 32) into the frozen
+Merge the Quran pronunciation LoRA `quran_ahh_r32` (final, AR+NAR rank 32) into the frozen
 maqamrock style adapter (v2, AR+NAR rank 32) at **α 0 / 0.1 / 0.2 / 0.3**, then blind-listen on a
 held-out Jarir poem for pronunciation sharpening **without** Quranic-style bleed.
 
 ## Why a new merge tool
 
 `merge_pron_lora.py` merges an **AR-only** donor (keeps v2's NAR, hard-errors on any
-`diffusion_model.*` key). `quran_ahh_r8` is **AR+NAR** — the revised run trained the NAR because
+`diffusion_model.*` key). `quran_ahh_r32` is **AR+NAR** — the revised run trained the NAR because
 "the NAR flow + VAE render the actual articulation". So `merge_quran_lora.py` (repo root, new) folds
 **both** branches: rank concat `32+32 → 64` on AR *and* NAR, α folded into `B_quran` (same convention
 as `PRON_LORA_MERGE.md`). α0 = v2 verbatim (verified: all 392 AR + 392 NAR tensors byte-identical to
@@ -18,7 +18,7 @@ the live converted v2).
 | input | sha256 |
 |---|---|
 | v2 fused style (`loras/source/akbar_arabic_rock_lora.safetensors`) | `b1d090987355303129a3765d257e61c983b91d48cecb8a30aa424e09cdd24cd4` |
-| quran final (`quran_ahh_r8/output/quran_ahh_r8.safetensors`) | `7e82aaf490d0e30adeedfaa4c3d4e40ad318a3327dcacddbe8b3cf9292c314a4` |
+| quran final (`quran_ahh_r32/output/quran_ahh_r32.safetensors`) | `7e82aaf490d0e30adeedfaa4c3d4e40ad318a3327dcacddbe8b3cf9292c314a4` |
 
 ## Variants
 
@@ -30,7 +30,7 @@ the live converted v2).
 | `qahh_a0p3` | 0.3 | `57d3e19fd29801accf5f265ce782f53b728fde2664bbb2adbc18139c31075c3a` | `ddb3b2da4f6dfe7fc8a1479481f8e21901af98bfa6d6eea73491cf2873d3c2ac` |
 
 Merged + converted artifacts mirrored to
-`$GCP_BACKUP_BASE/quran_ahh_r8_rank32/maqamrock_merge/{merged,convert/}`.
+`$GCP_BACKUP_BASE/quran_ahh_r32/maqamrock_merge/{merged,convert/}`.
 
 ## Prompt
 

@@ -109,16 +109,38 @@ narrative lives in git — pre-rewrite history at `git show 39d1bbd:PROGRESS.md`
   fails), and the raw pron file *is* α=1 (trained alpha==rank), so this arm needs no merge —
   `build_pron_only_fused.py` + the converter (see `DECISIONS.md`).
 
+## M13 — `jarir_lever_probe` rendered + rated; donor merge unproven · 2026-10-07
+
+- Rendered **17 WAVs** (9 scale arms + 8 prompt-tier tracks) on one fixed song, seed `20261011`,
+  via `INFERENCE/jarir_lever_probe.sh` + `songs.jarir_lever_probe.json`; all exit 0, none
+  truncated, mirrored to GCS. Adapter under test: `qahh_a0p1` (α0.1 `quran_ahh_r32` rank32 merge
+  into v2); the v2-only arm is the **no-donor ceiling reference**.
+- Labeled listening (single rater, `rating_app`) →
+  `INFERENCE/rating_app/my_evaluations/rating_20261007-1100.md`.
+- **Outcome:** the leading hypothesis — cut merged-AR to 0.5, keep NAR — is **refuted**. Cutting
+  AR hurts (`qa_0.5_1.0` 3, `qa_0.0_1.0` 2/broken); cutting NAR doesn't (`qa_1.0_0.5` 4) → the
+  merged-AR expert is the load-bearing one. Best arm is **v2-only (5, no Quran donor)**; every
+  sampler knob (`rp1.4`/`t0.8`/`g1.0`/`notrigger`) ≤ 3. Prompt keepers: `p1_verbatim_v2`,
+  `p2_articulation_qahh` (4, keep). n=1 track/arm → qualitative.
+- **Diction:** the donor shows **no demonstrated benefit** and a hint of harm — diction saturated
+  at 5 on nearly all arms, and "tajweed bleed" (أعددت→الشعياء, شربك→شلبك) appears specifically on
+  the donor (`qahh`) arms; the paired `p1_verbatim_qahh` vs `p1_verbatim_v2` came out cleaner on
+  v2. The donor's actual job (hard phonemes: ع/ش/emphatics) was **not isolated** by this rubric.
+- **Bottleneck is mood/energy** ("chill / not rising to the occasion"), not intelligibility —
+  recurring across the scale arms including the top take.
+
 ## Open items
 
-- **Quran-only (α=1) listening + comparison arms.** The first sample is rendered; listen, then
-  run base / quran-AR+v2-NAR / `qfinal_a0.5` at the same seed for a blind A/B
-  (`docs/QURAN_ONLY_EXPERIMENT.md`).
+- **Donor value in the production merge is unproven (M13).** The α0.1 Quran donor showed no
+  demonstrated diction benefit (and a tajweed-bleed hint of harm) while v2-only topped the probe.
+  Decide: run a powered donor-vs-no-donor diction test, or drop the donor.
 
-- **Pick α/checkpoint** for the production adapter by blinded listening (`qfinal_a0.3` vs
-  `qfinal_a0.5`; also the long-aya checkpoints). User's call.
-- **Long-aya checkpoints:** evaluate the 6 on a T4 (merge/convert/generate), then decide extend
-  vs conclude (`docs/PRON_LORA_LONG.md`).
+- **Quran-only (α=1) listening + comparison arms.** The first sample is rendered; listen, then
+  run base / quran-AR+v2-NAR at the same seed for a blind A/B (`docs/QURAN_ONLY_EXPERIMENT.md`).
+
+- **Pick α for the current donor** `quran_ahh_r32`. Blinded listening over `qahh_a0` / `a0p1` /
+  `a0p2` / `a0p3`. User's call. (The long-aya `qfinal_a*` and its checkpoints are moot — that
+  donor was retired 2026-10-07 → `docs/LORA_INVENTORY.md`.)
 - **Clean-VM proof** of `bootstrap/setup.sh --inference` + cold timing (warm-VM only so far).
 - **Per-arch binary auto-selection** (bootstrap stages only the flat sm_75 object).
 - **vm-continuity** Milestone 1 — idle-time only, never GPU-paid.

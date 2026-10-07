@@ -8,7 +8,7 @@
 # running ONE pinned generate.py batch per arm over a SINGLE fixed song
 # (songs.jarir_lever_scale.json), same seed, so every arm is paired.
 #
-# Adapter under test: the current alpha=0.1 merge of quran_ahh_r8 (AR+NAR rank32)
+# Adapter under test: the current alpha=0.1 merge of quran_ahh_r32 (AR+NAR rank32)
 # into v2 -- /content/converter/out/qahh_a0p1. The v2-only arm is the style +
 # diction ceiling reference (no Quran donor).
 #
@@ -24,7 +24,7 @@
 #   qa_0.5_1.0_notrigger  drop the 'arabmaqamrock ' trigger        (domain switch)
 #
 # Prereq: /content/converter/out/qahh_a0p1/akbar_arabic_rock_lora_{ar,nar}.safetensors
-#   (restore from <GCS base>/quran_ahh_r8_rank32/maqamrock_merge/, or rebuild:
+#   (restore from <GCS base>/quran_ahh_r32/maqamrock_merge/, or rebuild:
 #    merge_quran_lora.py --alpha 0.1 + the converter).
 #
 # Usage (GPU VM, inference staged):

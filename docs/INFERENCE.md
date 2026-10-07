@@ -25,7 +25,7 @@ INFERENCE/run_one.sh Hijaz 1                                          # cap defa
 | `audio.cpp` **source** | GitHub `0xShug0/audio.cpp` (clone only, never built by bootstrap) | `/content/audio.cpp` | No |
 | Prebuilt `audiocpp_cli` (sm_75 / T4) | GCS `audiocpp_inference/build/audiocpp_cli` | `/content/audiocpp_inference/bin/audiocpp_cli` | **Yes** |
 | Converted step-3000 LoRA, unfused (`akbar_arabic_rock_lora_{ar,nar}.safetensors`) | GCS `loras/audio_cpp/style/` (canonical library; see `docs/LORA_INVENTORY.md`) | `/content/converter/out/` | **Yes** |
-| Current pron merges (`qfinal_a0.3/0.5`) | GCS `loras/audio_cpp/pron/<cfg>/` | staged per-sweep to `/content/converter/out/<cfg>/` | **Yes** |
+| Current pron merges (`qahh_a0*`) | GCS `quran_ahh_r32/maqamrock_merge/convert/<cfg>/` | staged per-sweep to `/content/converter/out/<cfg>/` | **Yes** |
 | Prompts (one `*_style.txt` + `*_lyrics.txt` per maqam) | GCS `audiocpp_inference/prompts/` | `/content/audiocpp_inference/prompts/` | **Yes** |
 | Runner + cap script (`run_one.sh`, `duration_cap.py`) | **Repo `INFERENCE/`** (canonical; the GCS `audiocpp_inference/scripts/` copy is a legacy mirror) | `/content/maqamrock-yue2-lora-finetuning/INFERENCE/` | `scripts/` still mirrored, but the repo copy is what runs |
 
@@ -140,8 +140,8 @@ python INFERENCE/generate.py my_songs.json                            # real run
 {
   "loras": {
     "v2":          { "dir": "/content/converter/out" },
-    "qfinal_a0.3": { "dir": "/content/converter/out/qfinal_a0.3" },
-    "qfinal_a0.5": { "dir": "/content/converter/out/qfinal_a0.5" }
+    "qahh_a0p1": { "dir": "/content/converter/out/qahh_a0p1" },
+    "qahh_a0p3": { "dir": "/content/converter/out/qahh_a0p3" }
   },
   "defaults": { "style": "arabmaqamrock ...", "repeat": 2, "quantile": 0.95, "lora": "v2" },
   "songs": [
@@ -150,7 +150,7 @@ python INFERENCE/generate.py my_songs.json                            # real run
       "style_file": "/content/audiocpp_inference/prompts/Kurd_style.txt",
       "lyrics_file": "../my_lyrics/kurd_night.txt",
       "seeds": [101, 202, 303],
-      "lora": "qfinal_a0.5" },
+      "lora": "qahh_a0p1" },
     { "name": "quick_smoke", "style": "...", "lyrics": "...", "seed": 7, "cap": 750 }
   ]
 }

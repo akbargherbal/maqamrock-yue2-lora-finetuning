@@ -5,7 +5,7 @@
 # put the adapter's two defects at generation time -- c4500_simple loops/restarts,
 # c9000_simple has audible reverb -- while pronunciation is ~base. Is that the
 # sampler, or the weights? Vary exactly ONE audiocpp request option per config on
-# the lone-AR quran_ahh_r8 adapters and regenerate the same held-out aya.
+# the lone-AR quran_ahh_r32 adapters and regenerate the same held-out aya.
 #
 # Mechanics: build the quran_pt_probe songs JSON once (exact training caption,
 # seed 20261004, cap 7500), then call generate.py once per knob with a pinned
@@ -26,7 +26,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
 STAGE="${STAGE:-/content/converter/out/phase2}"
-CONVERT="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE is unset}/quran_ahh_r8/convert"
+CONVERT="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE is unset}/quran_ahh_r32/convert"
 PROBE="${PROBE:-/content/quran_knob_probe}"
 ANCHOR="${ANCHOR:-20261005-072738_quran_pt_probe}"
 ARMS="${ARMS:-c4500 c9000}"
@@ -47,11 +47,11 @@ opts_for() {
 # 1. Stage the arms (idempotent). 17 MB each; skip if already present.
 for arm in $ARMS; do
   d="$STAGE/$arm"
-  if [ ! -f "$d/quran_ahh_r8_ar.safetensors" ] || [ ! -f "$d/quran_ahh_r8_nar.safetensors" ]; then
+  if [ ! -f "$d/quran_ahh_r32_ar.safetensors" ] || [ ! -f "$d/quran_ahh_r32_nar.safetensors" ]; then
     echo "[stage] $arm <- $CONVERT/$arm"
     mkdir -p "$d"
-    gsutil -m cp "$CONVERT/$arm/quran_ahh_r8_ar.safetensors" \
-                  "$CONVERT/$arm/quran_ahh_r8_nar.safetensors" "$d/"
+    gsutil -m cp "$CONVERT/$arm/quran_ahh_r32_ar.safetensors" \
+                  "$CONVERT/$arm/quran_ahh_r32_nar.safetensors" "$d/"
   fi
 done
 

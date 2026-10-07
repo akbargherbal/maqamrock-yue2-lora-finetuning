@@ -1,75 +1,55 @@
 # current.md — handoff surface (overwritten each turn; not a source of truth)
 
-## NEXT SESSION → design & run the `jarir_lever_probe` listening evaluation
-_Written 2026-10-07 ~06:50Z at session end. **The VM is being disconnected**, so next session
-starts on a FRESH VM — re-stage from GitHub + GCS (see "Fresh-VM resume")._
+## NOW → the D-test: rating questions are written; GPU render is the next step
+_Written 2026-10-07. Branch `pron-lora-long-aya` (uncommitted rename+retire work in tree)._
 
-### Where we are
-The **scale-tier probe is done** — 17/17 WAVs, all `exit 0`, none truncated, mirrored to GCS.
-Nothing is running here (sidecars aside). The open item is the **listening evaluation**: we have
-NOT started it; the plan is to design it next session (blind vs labeled, rubric, tooling, who rates).
+### What we did this turn
+- Cleanup is DONE and verified: `quran_ahh_r8`→`quran_ahh_r32` renamed in GCS (93 objs) + repo
+  (22 files); legacy 9-reciter donor (`quran_long_aya_r8_s10` + `qfinal_*`) retired to
+  `<base>/archive/quran_long_aya_legacy/` (63 objs) and de-referenced from all live docs.
+- **Wrote the D-test scorecard** for the NEW app (github.com/akbargherbal/ai_music_rating_app):
+  `INFERENCE/scorecards/dtest_diction.json` — validates against the app's rules (12 criteria,
+  `summary_metric=diction`).
 
-### What the probe compared
-One fixed song `jlv_scale_ref`, seed `20261011`, cap 8000, `cot=off`, attention=flash. Adapter =
-`qahh_a0p1` (current α0.1 merge of `quran_ahh_r8` rank32 into v2). 9 scale arms:
+### The question the D-test must answer
+Does the Quran donor (`qahh_a0p1` = `quran_ahh_r32` α0.1 merge into v2) improve Arabic **diction**
+vs v2-only — and is the **AR** branch bleeding recitation (tajweed) prosody while **NAR** adds
+articulation? (The 17-track probe could not answer it: mood-dominated rubric, n=1.)
 
-| arm | AR scale | NAR scale | extra request opt | isolates |
-|---|---|---|---|---|
-| v2_1.0_1.0 | 1.0 | 1.0 | — | v2 style only, no Quran donor (reference/ceiling) |
-| qa_1.0_1.0 | 1.0 | 1.0 | — | both experts full (current baseline) |
-| qa_0.5_1.0 | 0.5 | 1.0 | — | cut merged-AR (prosody), keep NAR (**leading hypothesis**) |
-| qa_1.0_0.5 | 1.0 | 0.5 | — | keep AR, cut NAR (attribution) |
-| qa_0.0_1.0 | 0.0 | 1.0 | — | AR off, NAR full (base AR + quran NAR) |
-| qa_0.5_1.0_rp1.4 | 0.5 | 1.0 | `semantic_repetition_penalty=1.4` | attack madd/loops |
-| qa_0.5_1.0_t0.8 | 0.5 | 1.0 | `semantic_temperature=0.8` | less prosodic wander |
-| qa_0.5_1.0_g1.0 | 0.5 | 1.0 | `guidance_scale=1.0` | let base voice through |
-| qa_0.5_1.0_notrigger | 0.5 | 1.0 | `--no-trigger` | domain switch (drop `arabmaqamrock `) |
-
-Plus the **prompt tier** (8 tracks, Tier 1/3: prompt wording / lyric canonicalization / merge donor)
-under `.../jarir_lever_probe/prompt/` — separate axis, evaluate if wanted.
-
-### Evidence (checkable)
-- Driver log `done (rc_total=0)` at **06:20:12Z** (`/content/logs/jarir_lever_all.log`, mirrored to GCS `logs/`).
-- Per-arm `batch_summary.txt` (exit/wall/dur/trunc), `_knob.json`, and per-track `.json/.log/_time.txt`.
-- The 5 arms rendered this session — all **`trunc=no`**:
-  `qa_0.0_1.0` 10:49/269.9s · `qa_0.5_1.0_rp1.4` 10:09/197.9s · `qa_0.5_1.0_t0.8` 10:49/209.3s ·
-  `qa_0.5_1.0_g1.0` 10:21/266.8s · `qa_0.5_1.0_notrigger` 10:25/196.1s.
-- GCS holds **17 WAVs** (`<base>/audiocpp_inference/out/jarir_lever_probe/**`); `_failed.log` empty.
-
-### The evaluation — to DISCUSS next session
-Open decisions: **blind vs labeled**; **absolute rating** (`rating_app`) vs **pair-wise A/B**
-(`INFERENCE/prepare_ab_eval.py` / the `ab-blind-eval` skill); the **rubric** (diction/pronunciation,
-maqam/tune accuracy, prosody & madd, mix, artifacts/loops, keep?); **who** rates; and the decision the
-eval must produce (which lever (if any) goes into the production v2+pron merge). n=1 track per arm →
-the read is qualitative, not statistical.
-
-### Tooling ready
-- **rating_app** (`INFERENCE/rating_app/`, also in GCS `tools/rating_app/`): single-file Flask; asks
-  for the track folder; configurable criteria; Markdown export. `--port` is now a **preference**
-  (auto-picks the next free port if 5000 is busy; `--strict-port` opts out). Windows: `py -m pip install flask; py app.py`.
-- **`INFERENCE/prepare_ab_eval.py`** + `ab-blind-eval` skill for a blinded package (renamed/randomized A/B/C).
-
-### Fresh-VM resume (listening only — no GPU/render needed)
+### How to run the rating app (Windows, new app repo = the source of truth for scorecards)
 ```
-set -a; . /root/.secrets.env; set +a
-cd /content/maqamrock-yue2-lora-finetuning
-git fetch origin pron-lora-long-aya && git checkout pron-lora-long-aya && git pull --ff-only   # HEAD 5315ad4
-mkdir -p /content/audiocpp_inference/out/jarir_lever_probe          # dest must exist first (gsutil rsync)
-gsutil -m rsync -r "$GCP_BACKUP_BASE/audiocpp_inference/out/jarir_lever_probe" \
-                  /content/audiocpp_inference/out/jarir_lever_probe
+# once
+py -m pip install -r requirements.txt
+# drop the scorecard into the app
+copy  INFERENCE\scorecards\dtest_diction.json   <app>\scorecards\dtest_diction.json
+# run (blind + this scorecard; audio folder's subfolders = arms)
+py app.py --audio "C:\path\to\jarir_dtest" --config configs/blind_eval.json --scorecard dtest_diction
 ```
-To listen on your own machine, just download that run folder from GCS and point `rating_app` at it.
+- `--scorecard dtest_diction` resolves `scorecards/dtest_diction.json` (filename stem = id).
+- `--blind` shuffles with a seed stored in `runs/<id>/run.json`; report reveals arms.
+- Precedence: CLI `--scorecard` overrides the `scorecard` key in the config file.
 
-### Environment gotchas that will recur
-- **Do NOT run `bootstrap/setup.sh`** on a VM whose harness is OpenCode **2.0.24**: its `job_opencode`
-  runs `curl opencode.ai/install | bash` and downgrades to **1.18.35**, which can't read the V2-schema
-  DB → CLI + web show "configure provider" with everything grayed. Recover with
-  `cp /proc/<server-pid>/exe /root/.opencode/bin/opencode` (24→2.0.24 verified).
-- On 2.0.24 the web UI is `opencode pair` (there is **no** `opencode web`); service listens on `0.0.0.0:49374`.
-- `gsutil rsync` aborts unless the **destination directory already exists**.
+### Audio-folder convention (for the GPU render step)
+Sub-folder name = arm (report groups by parent folder). Suggested arms:
+`v2`, `qahh` (a0p1 both-full), `qahh_ar_off`, `qahh_ar_half`, `qahh_nar_half`. One `_meta.json`
+per arm folder with `{"arm": "...", "seed": ...}` for report columns.
+
+### Scorecard → verdict mapping
+- `diction` (summary), `intelligibility`, `errors_count`, `bad_sounds` → does the donor help diction?
+- `tajweed_bleed` (+`tajweed_types`), `cadence` → AR-branch overcorrection.
+- `articulation` → NAR-branch contribution.
+- `mood`, `artifacts`, `keep` → controls (must NOT drive the call).
+- Keep donor iff errors/take and tajweed-bleed ≤ v2 and diction ≥ v2 (mood not worse).
+
+### NEXT (GPU, later — user says)
+1. Render the D-test: v2 + qahh arms (AR/NAR scales), phoneme-dense stimuli, ≥3–4 seeds × 2 songs.
+   - `INFERENCE/quran_arnar_scale_probe.sh` already does the 4 AR/NAR arms on `qahh_a0p1`.
+   - Run `nvidia-smi` first; do not overlap an active run.
+2. rsync the out dir to GCS, download locally, point the app at it.
+3. Export `/report.md` + `/report.csv` and bring them back for analysis.
 
 ### Facts
-- branch `pron-lora-long-aya` @ **`5315ad4`** (pushed; origin == local). Recent: `415e236` rating_app
-  auto-port, `5315ad4` agent_notes.
-- `$GCP_BACKUP_BASE` = `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`.
-- GCS run prefix: `<base>/audiocpp_inference/out/jarir_lever_probe/`.
+- `$GCP_BACKUP_BASE` = `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`
+- Donor adapters: `<base>/quran_ahh_r32/maqamrock_merge/convert/qahh_a0p1/{ar,nar}.safetensors`
+- Existing (unused for this) split audio: `audiocpp_inference/out/jarir_lever_probe/{v2_1.0_1.0,qa_*}/`
+- `jarir_arnar_probe` on GCS is INCOMPLETE (1/4 arms).

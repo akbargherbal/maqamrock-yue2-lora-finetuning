@@ -1,4 +1,4 @@
-# Training analysis — `quran_ahh_r8` **revised** (AR+NAR, rank 32, no KL)
+# Training analysis — `quran_ahh_r32` **revised** (AR+NAR, rank 32, no KL)
 
 **FINAL** — completed **2026-10-06 04:34 UTC (07:34 Bahrain)** at **step 28,467 / 28,467 (100 %)**.
 `run.py` self-stopped cleanly (no traceback) after resuming `2026-10-06T01:09:51` from ckpt 19,500
@@ -8,20 +8,19 @@ parametrized `TRAINING_ANALYSIS/generate_plots.py`:
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
 python TRAINING_ANALYSIS/generate_plots.py \
-  --db /content/ai-toolkit/output/quran_ahh_r8/loss_log.db \
+  --db /content/ai-toolkit/output/quran_ahh_r32/loss_log.db \
   --gpu-csv /content/logs/gpu_usage.csv \
   --total-steps 28467 --save-every 1500 \
-  --outdir TRAINING_ANALYSIS/quran_ahh_r8_rank32 \
-  --title "quran_ahh_r8 (AR+NAR rank-32 AHH pronunciation LoRA)" \
+  --outdir TRAINING_ANALYSIS/quran_ahh_r32 \
+  --title "quran_ahh_r32 (AR+NAR rank-32 AHH pronunciation LoRA)" \
   --event-label "checkpoint save"
 ```
 
-> **This directory is the revised rank-32 run.** The prior **AR-only, rank-8** run of the same
-> name — completed 2026-10-05 07:39 UTC — is analyzed at
-> [`../quran_ahh_r8/ANALYSIS.md`](../quran_ahh_r8/ANALYSIS.md). The run name `quran_ahh_r8` is a
-> **misnomer (it is rank 32)**; the rename is **deferred until training completes** (renaming
-> mid-run breaks resume) — see `agent_notes/current.md`. Not to be confused with the archived
-> rank-8 `…/archive/quran_ahh_r8_rank8_aronly/`.
+> **This directory is the revised rank-32 run** (`quran_ahh_r32`). The prior **AR-only, rank-8**
+> run — completed 2026-10-05 07:39 UTC, originally named `quran_ahh_r8` — is analyzed at
+> [`../quran_ahh_r8_rank8_aronly/ANALYSIS.md`](../quran_ahh_r8_rank8_aronly/ANALYSIS.md). The run
+> was **renamed `quran_ahh_r8` → `quran_ahh_r32` on 2026-10-07** (it is rank 32, AR+NAR). The
+> archived rank-8 lineage is `…/archive/quran_ahh_r8_rank8_aronly/`.
 
 > Training-loss only — no in-training validation, **no samples** (`disable_sampling: true`).
 > A first listening verdict (T4 probe c4500/c7500) is below.
@@ -30,7 +29,7 @@ python TRAINING_ANALYSIS/generate_plots.py \
 
 | | |
 |---|---|
-| Config | `config/quran_ahh_r8.yml` (rank **32**/32 LoRA, **AR + NAR** via `ignore_if_contains: []`, `ar_kl_weight: 0.0`, EMA 0.999, `cot: off`, `train_window_frames: 0`, lr 1e-4, `adamw8bit`, bf16) |
+| Config | `config/quran_ahh_r32.yml` (rank **32**/32 LoRA, **AR + NAR** via `ignore_if_contains: []`, `ar_kl_weight: 0.0`, EMA 0.999, `cot: off`, `train_window_frames: 0`, lr 1e-4, `adamw8bit`, bf16) |
 | Model | YuE2 3B int8 `convrot8`, flowmatch, batch 1, grad-accum 1 |
 | Dataset | `/content/quran_ahh_dataset/train` — **9,489 pairs** (AHH filtered, 3 reciters, single caption/clip, 50/50 simple/uthmani stratified); `steps: 28467` = **3 epochs** |
 | GPU | Colab **L4** (23,034 MiB) |
@@ -39,7 +38,7 @@ python TRAINING_ANALYSIS/generate_plots.py \
 | Step time | **median 1.231 s** (p10 1.206 / p90 1.632; max 5.754) → ~**0.72 steps/s** (0.73 recent) |
 | Save cadence | every **1500** steps (~34 min) |
 | Samples | **none** — grey verticals are checkpoint saves |
-| Checkpoints | `_000001500 … _000027000` (**18**) + **final un-suffixed** `quran_ahh_r8.safetensors` + `optimizer.pt` (step 28,467) — local + GCS (verified) |
+| Checkpoints | `_000001500 … _000027000` (**18**) + **final un-suffixed** `quran_ahh_r32.safetensors` + `optimizer.pt` (step 28,467) — local + GCS (verified) |
 | GPU (resumed window) | mem p50 **8,730** / peak **9,152** MiB of 23,034; util p50 **49 %**, p90 100 %; temp p50 76 / max 80 °C; power p50 65 / max 76 W (limit 72) |
 | Completion | **28,467 @ 04:34 UTC**; clean self-stop; final adapter + optimizer in GCS |
 | Health | clean — no tracebacks/OOM; VRAM flat; steady ~34 min save cadence |
@@ -125,13 +124,13 @@ improved vs rank-8** but not solved. Genuine improvement; not a plateau.
 
 ## Next — round 2 (T4, c10500 vs c16500)
 
-Adapters banked: `…/quran_ahh_r8_rank32/convert/{c4500,c7500,c10500,c16500}/`. Run:
-`INFERENCE/quran_pt_probe.py --prefix quran_ahh_r8_rank32/convert --arms c10500,c16500`.
+Adapters banked: `…/quran_ahh_r32/convert/{c4500,c7500,c10500,c16500}/`. Run:
+`INFERENCE/quran_pt_probe.py --prefix quran_ahh_r32/convert --arms c10500,c16500`.
 
 ## Checkpoints (on disk + GCS)
 
-`/content/ai-toolkit/output/quran_ahh_r8/`: `quran_ahh_r8_000001500 … _000027000` (18 ×
-117,500,848 B ≈ 112 MiB) + the **final un-suffixed** `quran_ahh_r8.safetensors` (117,500,848 B,
+`/content/ai-toolkit/output/quran_ahh_r32/`: `quran_ahh_r32_000001500 … _000027000` (18 ×
+117,500,848 B ≈ 112 MiB) + the **final un-suffixed** `quran_ahh_r32.safetensors` (117,500,848 B,
 step 28,467) + `optimizer.pt` (step 28,467) + `loss_log.db`. GCS mirror verified — local and GCS
 sizes match (adapter 117,500,848 B; optimizer 119,807,781 B).
 
@@ -142,11 +141,12 @@ sizes match (adapter 117,500,848 B; optimizer 119,807,781 B).
   blind gate (`ab-blind-eval`) is still required before any merge.
 - **Saved adapters are EMA weights** (decay 0.999).
 - Absolute loss is not comparable to the rank-8 run (different rank/scope/epoch count).
-- **Run name is a misnomer** (rank 32); rename deferred to post-training.
+- **Renamed** `quran_ahh_r8` → `quran_ahh_r32` on **2026-10-07** (it is rank 32, AR+NAR); the
+  old `_r8` name is retired.
 
 ## Next steps
 
 - **Phase 3b (T4):** convert `c9000`, `c19500`, and the final adapter; render all three on
   **Ayat al-Kursi (2:255)**, fixed seed; then blind-A/B.
-- **Phase 5:** rename `quran_ahh_r8` → `quran_ahh_r32`; docs-reconciler; human blind gate
+- **Phase 5 (done 2026-10-07):** renamed to `quran_ahh_r32`; docs-reconciler; human blind gate
   (`ab-blind-eval`) before any merge.

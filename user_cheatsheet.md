@@ -23,7 +23,7 @@ OUT=/content/ai-toolkit/output/$RUN
 | Train log / GPU csv | `/content/logs/train.log`, `/content/logs/gpu_usage.csv` |
 | Secrets/env | `/root/.secrets.env` (`HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_BACKUP_BASE`) — staged by the notebook |
 | Inference workspace | `/content/audiocpp_inference/` (out/, prompts/, bin/, models/) |
-| Converted LoRAs | `/content/converter/out/` (style) + `qfinal_a0.3/`, `qfinal_a0.5/` |
+| Converted LoRAs | `/content/converter/out/` (style) + `qahh_a0p1/`, `qahh_a0p3/` |
 
 ## 0. Ground truth — always start here
 
@@ -114,14 +114,14 @@ nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu,
 ## 5. Inference: stage LoRAs, then generate
 
 Stage the adapter pairs a batch references (v2 is files directly in
-`/content/converter/out/`; qfinal are subdirs). Idempotent — re-run to resume.
+`/content/converter/out/`; qahh are subdirs). Idempotent — re-run to resume.
 
 ```bash
 export GCP_BACKUP_BASE=$GCS_BASE
 mkdir -p /content/converter/out
 gsutil -m rsync -r "$GCS_BASE/loras/audio_cpp/style" /content/converter/out
-gsutil -m cp -r "$GCS_BASE/loras/audio_cpp/pron/qfinal_a0.3" /content/converter/out/
-gsutil -m cp -r "$GCS_BASE/loras/audio_cpp/pron/qfinal_a0.5" /content/converter/out/
+gcloud storage rsync -r "$GCS_BASE/quran_ahh_r32/maqamrock_merge/convert/qahh_a0p1" /content/converter/out/qahh_a0p1
+gcloud storage rsync -r "$GCS_BASE/quran_ahh_r32/maqamrock_merge/convert/qahh_a0p3" /content/converter/out/qahh_a0p3
 ```
 
 Validate a JSON batch (no GPU, writes nothing), then run it detached:

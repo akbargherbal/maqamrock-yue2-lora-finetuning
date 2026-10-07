@@ -14,8 +14,8 @@ checkpoints' ctime in ascending step order and VERIFY that ``getctime`` selects
 the newest. Run it **before** ``train_ctl.py start``; never while ``run.py`` is
 alive. Mirrors the ctime logic in ``bootstrap/rename_run.py``.
 
-    python bootstrap/restore_run.py --run-name quran_ahh_r8             # dry-run
-    python bootstrap/restore_run.py --run-name quran_ahh_r8 --apply
+    python bootstrap/restore_run.py --run-name quran_ahh_r32             # dry-run
+    python bootstrap/restore_run.py --run-name quran_ahh_r32 --apply
 """
 from __future__ import annotations
 

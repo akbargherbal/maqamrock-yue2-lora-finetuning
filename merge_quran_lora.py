@@ -5,7 +5,7 @@ Why this exists
 ---------------
 `merge_pron_lora.py` merges an **AR-only** pronunciation donor into v2: it keeps
 v2's NAR untouched and hard-errors on any `diffusion_model.*` key in the donor.
-The current Quran pronunciation donor (`quran_ahh_r8`, the revised rank-32 run)
+The current Quran pronunciation donor (`quran_ahh_r32`, the revised rank-32 run)
 is **AR+NAR** — the run was retrained with `ignore_if_contains: []` precisely
 because "the NAR flow + VAE render the actual articulation", so the letter
 (makhraj) fix it is meant to sharpen lives in the NAR branch. Merging that donor
@@ -32,7 +32,7 @@ Usage
 -----
     python merge_quran_lora.py --alpha 0.2 \
         --v2   /content/merge_src/v2/akbar_arabic_rock_lora.safetensors \
-        --quran /content/merge_src/quran/quran_ahh_r8.safetensors \
+        --quran /content/merge_src/quran/quran_ahh_r32.safetensors \
         --out  /content/merged/qahh_a0.2.safetensors
 
 CPU only; never selects an accelerator device.
@@ -51,7 +51,7 @@ AR_PREFIX = "text_encoders."
 NAR_PREFIX = "diffusion_model."
 
 DEFAULT_V2 = Path("/content/merge_src/v2/akbar_arabic_rock_lora.safetensors")
-DEFAULT_QURAN = Path("/content/merge_src/quran/quran_ahh_r8.safetensors")
+DEFAULT_QURAN = Path("/content/merge_src/quran/quran_ahh_r32.safetensors")
 
 
 class MergeError(Exception):

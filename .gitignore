@@ -25,3 +25,6 @@ graphify-out/20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
 # <base>/listening/, not in the repo. Written by INFERENCE/prepare_ab_eval.py.
 *_INPUT/
 /ab_eval/
+
+# Stray ad-hoc screenshots (not part of the project).
+scrap_screenshot/

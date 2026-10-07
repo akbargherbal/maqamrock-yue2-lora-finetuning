@@ -1,6 +1,6 @@
-# `quran_ahh_r8` — run hub, config audit & GPU checklist
+# `quran_ahh_r32` — run hub, config audit & GPU checklist
 
-Canonical operating surface for the AHH Quran pronunciation LoRA (`quran_ahh_r8`).
+Canonical operating surface for the AHH Quran pronunciation LoRA (`quran_ahh_r32`).
 Design/why: [`QURAN_PRON_REVIEW.md`](QURAN_PRON_REVIEW.md). Build provenance:
 `agent_notes/current.md` + `prepare_ahh_quran_dataset.py`. Live next step:
 [`../agent_notes/current.md`](../agent_notes/current.md). Session runbook (resume → completion →
@@ -8,27 +8,24 @@ rename): [`QURAN_AHH_RESUME_PLAN.md`](QURAN_AHH_RESUME_PLAN.md).
 
 Branch: **`pron-lora-long-aya`** (do NOT merge to `main`).
 
-> **REVISED CONFIG (2026-10-05, user), not yet retrained.** The first `quran_ahh_r8`
-> training COMPLETE on 2026-10-05 07:39 UTC (9,489 steps, 1 epoch, rank-8 **AR-only**)
-> and the listening verdict was that it moved recitation *prosody* (madd/waqf) but not
-> the makhraj. The config has since been **replaced in place**: **AR + NAR jointly,
-> rank 32/32, `ar_kl_weight: 0`, 28,467 steps (3 epochs)**. The old run is the record in
-> `TRAINING_ANALYSIS/quran_ahh_r8/ANALYSIS.md`; the new L4 session starts from the revised
-> config. Gate §2 is resolved; the config is the authority, not this table's stale rows.
+> **REVISED CONFIG (2026-10-05, user).** The first run — originally `quran_ahh_r8` —
+> COMPLETED on 2026-10-05 07:39 UTC (9,489 steps, 1 epoch, rank-8 **AR-only**) and the
+> listening verdict was that it moved recitation *prosody* (madd/waqf) but not the
+> makhraj. The config was **replaced in place**: **AR + NAR jointly, rank 32/32,
+> `ar_kl_weight: 0`, 28,467 steps (3 epochs)** — completed 2026-10-06. The rank-8 run's
+> record is `TRAINING_ANALYSIS/quran_ahh_r8_rank8_aronly/ANALYSIS.md`; the current run is
+> **`quran_ahh_r32`**. The config is the authority, not stale rows.
 
-> **RENAME PENDING — do not forget (2026-10-05).** `quran_ahh_r8` is a **rank-32, AR+NAR** run;
-> the `r8` is legacy from the earlier rank-8 run. The name is **deliberately left until
-> training finishes** — renaming mid-run breaks resume (output dir + checkpoint filenames come
-> from `config.name`; resume matches `{name}*.safetensors` by ctime). When the run is done,
-> rename properly with the tested `bootstrap/rename_run.py --old quran_ahh_r8 --new quran_ahh_r32`
-> then update docs. A marker also sits beside the checkpoints:
-> `…/quran_ahh_r8/output/README.md` (+ the run-prefix root) on GCS. Details:
-> [`../agent_notes/current.md`](../agent_notes/current.md) ("Deferred rename").
+> **RENAME DONE (2026-10-07).** The run was `quran_ahh_r8` (legacy rank-8 name) and is now
+> **`quran_ahh_r32`** — rank 32, AR+NAR. Renamed end-to-end (repo config + local output +
+> GCS prefix/checkpoints) with `bootstrap/rename_run.py --old quran_ahh_r8 --new quran_ahh_r32`.
+> GCS: `<base>/quran_ahh_r32/{output,convert,maqamrock_merge}`; the old `quran_ahh_r8/` +
+> `quran_ahh_r8_rank32/` prefixes are gone.
 
 ## Canonical session prompt (paste on the GPU VM)
 
 ```text
-quran_ahh_r8 — GPU session prime.
+quran_ahh_r32 — GPU session prime.
 
 Read, in this order:
   1. docs/QURAN_AHH_RUN.md     (canonical hub: config audit + GPU checklist)
@@ -40,7 +37,7 @@ Then verify the ACTUAL state from live sources — do not trust prose or memory:
     (pgrep -af 'run\.py'; pgrep -af backup_to_gcp.py; pgrep -af gpu_logger.py; vm-continuity status)
   - dataset: /content/quran_ahh_dataset (9,489 train pairs) present? did setup.sh print
     "[ok] AHH dataset: 9489 train pairs"? latent cache built/banked?
-  - run: newest checkpoint in GCS .../quran_ahh_r8/output/ and its step (none = fresh)
+  - run: newest checkpoint in GCS .../quran_ahh_r32/output/ and its step (none = fresh)
   - continuity: vm-continuity status
 
 Report briefly: where we are; what is running right now; any doc-vs-reality divergence;
@@ -54,17 +51,17 @@ start, resume, stop, or edit anything without me typing the command.
 
 | | |
 |---|---|
-| Run | `quran_ahh_r8` (1 epoch) |
-| Config | `config/quran_ahh_r8.yml` — **REVISED: AR+NAR rank 32/32, `ar_kl_weight 0.0`, `steps 28467` (3 epochs)** |
+| Run | `quran_ahh_r32` (1 epoch) |
+| Config | `config/quran_ahh_r32.yml` — **REVISED: AR+NAR rank 32/32, `ar_kl_weight 0.0`, `steps 28467` (3 epochs)** |
 | Dataset | `/content/quran_ahh_dataset/` — **9,489 train / 6 val** (2:255 ×3 reciters ×2 scripts); ~3.8 GiB |
 | Banked | `$GCP_BACKUP_BASE/quran_ahh_dataset.zip` (3.69 GiB, sha256 `8c68d684…e9ff9`) |
 | Notebook env | `GCP_AHH_DATASET_ZIP` → the zip above; opt-in `job_ahh_dataset` in `setup.sh` restores it |
-| Run output | `/content/ai-toolkit/output/quran_ahh_r8/` → `<base>/quran_ahh_r8/output/` |
+| Run output | `/content/ai-toolkit/output/quran_ahh_r32/` → `<base>/quran_ahh_r32/output/` |
 | Logs / metrics | `/content/logs/train_quran_ahh.log` · `<output>/loss_log.db` · `/content/logs/gpu_usage.csv` |
 | Latent cache | `/content/quran_ahh_dataset/train/_latent_cache` (**bank** as `$GCP_BACKUP_BASE/quran_ahh_dataset/_latent_cache.tar`) |
-| Launch / stop | `train_ctl.py start|stop|status --config config/quran_ahh_r8.yml --run-name quran_ahh_r8 --log-name train_quran_ahh` |
+| Launch / stop | `train_ctl.py start|stop|status --config config/quran_ahh_r32.yml --run-name quran_ahh_r32 --log-name train_quran_ahh` |
 
-## 1. Config audit — `config/quran_ahh_r8.yml`
+## 1. Config audit — `config/quran_ahh_r32.yml`
 
 **Provenance: byte-identical to `config/quran_long_aya_r8_s10.yml` except 4 keys**
 (verified `diff`): `config.name`, `process[].log_dir`,
@@ -113,7 +110,7 @@ Flags for the user (recommendations only — configs are never edited on initiat
 `QURAN_PRON_REVIEW.md` §5: run the **base model (no LoRA) vs the existing
 `quran_only` adapter** on the held-out hard-letter ayat (2:255), same seed,
 **free-run**. If the base is also wrong → representational ceiling → **stop the
-LoRA line**; training `quran_ahh_r8` is not justified. Do this in the first GPU
+LoRA line**; training `quran_ahh_r32` is not justified. Do this in the first GPU
 session, *before* any training. (If the user explicitly waives the gate, record it
 in `current.md`.)
 
@@ -129,7 +126,7 @@ that inference is invalid). The revised config trains **AR+NAR** accordingly.
 
 ### Phase A — preflight (2 min)
 - [ ] `nvidia-smi` (which GPU/VRAM) — **one GPU, shared; confirm nothing is running**
-- [ ] branch = `pron-lora-long-aya`; `config/quran_ahh_r8.yml` parses
+- [ ] branch = `pron-lora-long-aya`; `config/quran_ahh_r32.yml` parses
 - [ ] disk free (dataset 3.8 G + cache ~0.6 G + checkpoints fit); `vm-continuity status`
 
 ### Phase B — bootstrap + restore (~parallel; see `START.md`)
@@ -148,7 +145,7 @@ that inference is invalid). The revised config trains **AR+NAR** accordingly.
 
 ### Phase D — sidecars + launch (only if the gate passes)
 - [ ] sidecars detached (backup + gpu logger); `pgrep -af 'backup_to_gcp.py|gpu_logger.py'`
-- [ ] launch (user types it, detached): `python train_ctl.py start --config config/quran_ahh_r8.yml --run-name quran_ahh_r8 --log-name train_quran_ahh`
+- [ ] launch (user types it, detached): `python train_ctl.py start --config config/quran_ahh_r32.yml --run-name quran_ahh_r32 --log-name train_quran_ahh`
 - [ ] first-launch latent-cache build runs **before step 1** — `loss_log.db` at 0
       steps for ~2.4 h is normal (no step-0 sample to mask it)
 - [ ] **the moment the cache completes**, bank it:
@@ -164,15 +161,15 @@ that inference is invalid). The revised config trains **AR+NAR** accordingly.
       before the listen
 
 ### Phase F — close each session
-- [ ] `train_ctl.py stop --config config/quran_ahh_r8.yml --run-name quran_ahh_r8 --log-name train_quran_ahh`
-- [ ] `backup_to_gcp.py --run-name quran_ahh_r8 --once` → confirm newest
+- [ ] `train_ctl.py stop --config config/quran_ahh_r32.yml --run-name quran_ahh_r32 --log-name train_quran_ahh`
+- [ ] `backup_to_gcp.py --run-name quran_ahh_r32 --once` → confirm newest
       `*.safetensors` **and** `optimizer.pt` in GCS
 - [ ] `vm-continuity status` (must read `state=OK`); update `current.md`
 
 ## 4. Continuity & hazards
 
 - **Auto-resume trap:** `ai-toolkit` resumes from the newest checkpoint in
-  `output/quran_ahh_r8/`. For a **fresh** start the folder must be empty; a resume
+  `output/quran_ahh_r32/`. For a **fresh** start the folder must be empty; a resume
   is the **identical** config + run name with the output prefix restored first.
   For the revised run: the existing checkpoints are rank-8 **AR-only** and incompatible
   with the rank-32 **AR+NAR** network — do **not** restore the old output prefix.

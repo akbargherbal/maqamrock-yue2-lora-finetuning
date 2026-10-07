@@ -113,10 +113,10 @@ AUDIOCPP_BIN_LOCAL="$AUDIOCPP_INFERENCE/bin/audiocpp_cli"
 AUDIOCPP_PROMPTS_LOCAL="$AUDIOCPP_INFERENCE/prompts"
 AUDIOCPP_SCRIPTS_LOCAL="$AUDIOCPP_INFERENCE/scripts"
 if [ "$MODE" = "inference" ]; then
-  # Canonical LoRA library (docs/LORA_INVENTORY.md): the current style adapter.
-  # Current pron merges (qfinal_a*) live under loras/audio_cpp/pron/<cfg>/ and are
-  # staged per-sweep, not by the bootstrap. The pron_lora_ar_only_r8 family is
-  # superseded/archived (archive/pron_lora_ar_only_legacy/).
+  # Canonical LoRA library (docs/LORA_INVENTORY.md): the style adapter only.
+  # Current pron merges (qahh_a0*) live under <base>/quran_ahh_r32/maqamrock_merge/
+  # and are staged per-sweep, not by the bootstrap. Superseded donors are archived:
+  # pron_lora_ar_only_r8 -> archive/pron_lora_ar_only_legacy/; long-aya -> archive/quran_long_aya_legacy/.
   LORA_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/loras/audio_cpp/style"
   CONVERTER_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/audiocpp_inference/converter"
   AUDIOCPP_BIN_GCS="$GCP_BACKUP_BASE/audiocpp_inference/build/audiocpp_cli"
@@ -296,7 +296,7 @@ job_quran_long_dataset() {
   touch "$marker"
 }
 
-# AHH quality-filtered Quran pronunciation dataset -- the quran_ahh_r8 run's set
+# AHH quality-filtered Quran pronunciation dataset -- the quran_ahh_r32 run's set
 # (docs/QURAN_AHH_RUN.md). Banked as a single ZIP (not a directory prefix), so it
 # is a `cp` + `unzip` rather than an rsync. Same opt-in shape/marker as the others;
 # runs only when GCP_AHH_DATASET_ZIP is exported. Marker lives at the dataset ROOT
@@ -434,7 +434,7 @@ if [ "$MODE" = "training" ]; then
   if [ -n "${GCP_QURAN_LONG_DATASET_PATH:-}" ]; then
     start_job quran_long_dataset job_quran_long_dataset
   fi
-  # opt-in: the AHH quran_ahh_r8 dataset (single zip)
+  # opt-in: the AHH quran_ahh_r32 dataset (single zip)
   if [ -n "${GCP_AHH_DATASET_ZIP:-}" ]; then
     start_job ahh_dataset job_ahh_dataset
   fi
@@ -535,7 +535,7 @@ if [ "$MODE" = "training" ]; then
     fi
   fi
 
-  # AHH quran_ahh_r8 dataset (opt-in). Count train PAIRS (.txt), expect 9,489.
+  # AHH quran_ahh_r32 dataset (opt-in). Count train PAIRS (.txt), expect 9,489.
   if [ -n "${GCP_AHH_DATASET_ZIP:-}" ]; then
     ahh_pairs=$(find /content/quran_ahh_dataset/train -maxdepth 1 -name "*.txt" 2>/dev/null | wc -l)
     if [ "$ahh_pairs" -ne 9489 ]; then

@@ -165,10 +165,10 @@ def test_resolve_loras_registry_and_per_song_alias(gen, tmp_path, lyrics_ar):
 
 def test_resolve_loras_explicit_pair_and_errors(gen, tmp_path, lyrics_ar):
     loras = gen.resolve_loras(
-        {"loras": {"qfinal_a0.3": {"dir": "adapters/q03"},
+        {"loras": {"qahh_a0p1": {"dir": "adapters/q03"},
                    "p": {"ar": "A.safetensors", "nar": "N.safetensors"}}}, tmp_path)
-    assert loras["qfinal_a0.3"] == (tmp_path / "adapters/q03" / gen.LORA_AR_NAME,
-                                    tmp_path / "adapters/q03" / gen.LORA_NAR_NAME)
+    assert loras["qahh_a0p1"] == (tmp_path / "adapters/q03" / gen.LORA_AR_NAME,
+                                  tmp_path / "adapters/q03" / gen.LORA_NAR_NAME)
     assert loras["p"] == (tmp_path / "A.safetensors", tmp_path / "N.safetensors")
     with pytest.raises(gen.PlanError) as ei:
         gen.resolve_songs({"songs": [{"name": "x", "style": "s", "lyrics": lyrics_ar,

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# RETIRED 2026-10-07 — do not run. The long-aya donor + qfinal merges are archived
+# (archive/quran_long_aya_legacy/); superseded by quran_ahh_r32 + qahh_a0*.
+#
 # qfinal x {Suno-native, trigger-only} x alpha {0.3, 0.5}: 4 batches x 8 songs = 32 tracks.
 #
 # qfinal = quran_long_aya_r8_s10 final merged with the v2 style adapter (built by

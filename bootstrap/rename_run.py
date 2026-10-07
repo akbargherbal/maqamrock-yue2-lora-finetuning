@@ -14,8 +14,8 @@ Safe by default: DRY-RUN unless `--apply`, and it refuses to `--apply` while a
 `run.py` for `--old` is alive (override with `--force`). GCS is copy-then-verify-then
 -delete (server-side). Run it with training STOPPED.
 
-    python bootstrap/rename_run.py --old quran_ahh_r8 --new quran_ahh_r32                 # dry-run
-    python bootstrap/rename_run.py --old quran_ahh_r8 --new quran_ahh_r32 --apply         # do it
+    python bootstrap/rename_run.py --old <old-run> --new <new-run>                 # dry-run
+    python bootstrap/rename_run.py --old <old-run> --new <new-run> --apply         # do it
 """
 from __future__ import annotations
 
@@ -150,9 +150,22 @@ def main() -> int:
         if adapters:
             ada = subprocess.run(["gcloud", "storage", "ls", f"{gcs}/{adapters}/"],
                                  capture_output=True, text=True)
-            if ada.returncode == 0 and ada.stdout.strip():
-                run(["gcloud", "storage", "rsync", "-r",
-                     f"{gcs}/{adapters}/convert", f"{gcs}/{new}/convert"], dry)
+            subs = [l.strip().rstrip("/").rsplit("/", 1)[-1]
+                    for l in ada.stdout.splitlines() if l.strip().endswith("/")]
+            if ada.returncode == 0 and subs:
+                # Move EVERY subdir under <adapters>/ (convert/, maqamrock_merge/, ...),
+                # not just convert/ -- then the rm below can't silently drop siblings.
+                for sub in subs:
+                    run(["gcloud", "storage", "rsync", "-r",
+                         f"{gcs}/{adapters}/{sub}", f"{gcs}/{new}/{sub}"], dry)
+                if not dry:
+                    a_set = rel_objects(f"{gcs}/{adapters}/")
+                    n_set = rel_objects(f"{gcs}/{new}/")
+                    miss = {p for p in a_set if p not in n_set}
+                    print(f"  adapters objects: {len(a_set)} (missing under {new}: {len(miss)})")
+                    if miss:
+                        sys.exit("ERROR: adapters copy incomplete "
+                                 f"({sorted(miss)[:5]}) -- adapters prefix NOT deleted")
                 run(["gcloud", "storage", "rm", "-r", f"{gcs}/{adapters}"], dry)
             else:
                 print(f"[gcs] adapters prefix {gcs}/{adapters}/ absent -- skipped")

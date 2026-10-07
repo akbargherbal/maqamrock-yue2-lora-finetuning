@@ -4,7 +4,7 @@ format. Works for both arm kinds — the rank-8 lone-AR arms (AR verbatim, NAR z
 and the revised rank-32 AR+NAR arms (both experts real); no v2 merge either way.
 
 The adapters are already converted on the training VM and banked in GCS under
-`<base>/<prefix>/<arm>/` (`<prefix>` defaults to `quran_ahh_r8/convert`; `<arm>` in
+`<base>/<prefix>/<arm>/` (`<prefix>` defaults to `quran_ahh_r32/convert`; `<arm>` in
 {base, quran_only, c<step>, final}). This stages them, writes a `generate.py` songs
 JSON, and runs it.
 
@@ -12,7 +12,7 @@ JSON, and runs it.
     python INFERENCE/quran_pt_probe.py               # real run on the GPU VM
 
     # revised run: rank-32 AR+NAR arms, a subset only
-    python INFERENCE/quran_pt_probe.py --prefix quran_ahh_r8_rank32/convert \
+    python INFERENCE/quran_pt_probe.py --prefix quran_ahh_r32/convert \
         --arms c4500,c7500
 
 `base` is an all-zero adapter (AR+NAR) so the base arm runs in the same batch at
@@ -56,7 +56,7 @@ def stage(stage_dir: Path, rel: str, do_stage: bool) -> None:
 def discover(stage_dir: Path) -> dict[str, dict[str, str]]:
     arms: dict[str, dict[str, str]] = {}
     for d in sorted(stage_dir.iterdir()):
-        ar, nar = d / "quran_ahh_r8_ar.safetensors", d / "quran_ahh_r8_nar.safetensors"
+        ar, nar = d / "quran_ahh_r32_ar.safetensors", d / "quran_ahh_r32_nar.safetensors"
         if d.is_dir() and ar.is_file() and nar.is_file():
             arms[d.name] = {"ar": str(ar), "nar": str(nar)}
     return arms
@@ -89,7 +89,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--stage", default=str(DEFAULT_STAGE), help="local dir for staged arms")
-    ap.add_argument("--prefix", default="quran_ahh_r8/convert",
+    ap.add_argument("--prefix", default="quran_ahh_r32/convert",
                     help="GCS prefix (relative to GCP_BACKUP_BASE) holding the converted arms")
     ap.add_argument("--arms", default="",
                     help="comma list of arms to keep (default: all discovered under --prefix)")

@@ -3,15 +3,15 @@
     "v2": {
       "dir": "/content/converter/out"
     },
-    "qfinal_a0.3": {
-      "dir": "/content/converter/out/qfinal_a0.3"
+    "qahh_a0p1": {
+      "dir": "/content/converter/out/qahh_a0p1"
     },
-    "qfinal_a0.5": {
-      "dir": "/content/converter/out/qfinal_a0.5"
+    "qahh_a0p3": {
+      "dir": "/content/converter/out/qahh_a0p3"
     },
-    "qfinal_a0.5_explicit": {
-      "ar": "/content/converter/out/qfinal_a0.5/akbar_arabic_rock_lora_ar.safetensors",
-      "nar": "/content/converter/out/qfinal_a0.5/akbar_arabic_rock_lora_nar.safetensors"
+    "qahh_a0p1_explicit": {
+      "ar": "/content/converter/out/qahh_a0p1/akbar_arabic_rock_lora_ar.safetensors",
+      "nar": "/content/converter/out/qahh_a0p1/akbar_arabic_rock_lora_nar.safetensors"
     }
   },
   "defaults": {
@@ -34,15 +34,15 @@
       "lyrics_file": "/content/audiocpp_inference/prompts/Hijaz_lyrics.txt"
     },
     {
-      "name": "pron_a03_two_takes",
-      "lora": "qfinal_a0.3",
+      "name": "pron_a0p1_two_takes",
+      "lora": "qahh_a0p1",
       "style": "arabmaqamrock Heavy rock ballad, driving distorted guitars, weighty acoustic drums, close-miked lead vocals, Maqam Kurd. deep male vocals with precise Arabic diction and long sustained phrase endings. Audiophile recording, punchy centered mix, forward vocals, large dynamic range. Mood: Defiant, Nocturnal.",
       "lyrics": "[Intro]\nيا صَباحَ الوَطَنِ المَشدودِ بِالأَلَمِ\n\n[Verse 1]\nنادِ الفَجْرَ وَخُذْ بِيَ إلى النَّدَى\n\n[Chorus]\nوَإِذا ما سَأَلوني عَن حَبيبي\nقُلتُ: ذاكَ الصَّوتُ في قَلبِ المَدى\n\n[Outro]\nيا صَباحَ الوَطَنِ المَشدودِ بِالأَلَمِ",
       "repeat": 2
     },
     {
-      "name": "pron_a05_explicit_pair",
-      "lora": "qfinal_a0.5_explicit",
+      "name": "pron_a0p1_explicit_pair",
+      "lora": "qahh_a0p1_explicit",
       "style_file": "/content/audiocpp_inference/prompts/Kurd_style.txt",
       "lyrics_file": "/content/audiocpp_inference/prompts/Kurd_lyrics.txt",
       "seeds": [101, 202, 303],

@@ -21,13 +21,14 @@ Nothing is training right now.
   A100-SXM4-80GB. Style/timbre/arrangement match the target strongly; pronunciation improved
   over v1 to **~9/10** (a few letters still soften: ح→خ/ه, ع→أ). Dataset: 267
   lyric-conditioned pairs (`./yue2_dataset`; GCS `dataset/`).
-- **Pronunciation donor** — the AR-only `pron_lora_ar_only_r8` (6100/6100) was **superseded**
-  by the long-aya Quran run **`quran_long_aya_r8_s10`** (8,100 pairs, 8100/8100 on an L4,
-  ~2.8 h). The old family is archived (`<base>/archive/pron_lora_ar_only_legacy/`).
-- **Current candidates (unselected):** `qfinal_a0.3` / `qfinal_a0.5` — v2 style merged with
-  the long-aya Quran donor at α 0.3 / 0.5 via `merge_pron_lora.py`. **No α/checkpoint is
-  selected**; the choice follows a blinded listening review. See
-  [`docs/LORA_INVENTORY.md`](docs/LORA_INVENTORY.md).
+- **Pronunciation donor** — **`quran_ahh_r32`** (rank 32, AR+NAR; AHH-filtered **3 reciters**
+  — Husary, Hudhaify, Abdul Basit — 9,489 pairs, 28,467 steps). Merged into v2 with
+  `merge_quran_lora.py` at **α0.1** → the `qahh_a0*` candidates. The earlier
+  `pron_lora_ar_only_r8` family and the 9-reciter long-aya donor (`quran_long_aya_r8_s10` +
+  `qfinal_a*`) are **retired/archived**.
+- **Current candidates (unselected):** the `qahh_a0*` α sweep (α 0 / 0.1 / 0.2 / 0.3) — v2
+  style merged with `quran_ahh_r32` via `merge_quran_lora.py`. **No α is selected**; the choice
+  follows the listening review. See [`docs/LORA_INVENTORY.md`](docs/LORA_INVENTORY.md).
 - **Inference** — the style LoRA and the merges run against held-out lyrics on audio.cpp
   (GGUF + converted unfused LoRA), driven by [`INFERENCE/run_one.sh`](INFERENCE/run_one.sh)
   and the JSON batch driver [`INFERENCE/generate.py`](INFERENCE/generate.py); GPU-free tests
@@ -46,14 +47,17 @@ pronunciation donor's final form. Open items: [`docs/IMPROVEMENTS.md`](docs/IMPR
 - **`pron_lora_ar_only_r8`** and its 15 `c3050/c4575/cfinal_a0.*` merges — archived under
   `<base>/archive/pron_lora_ar_only_legacy/` (md5-verified); the run prefix was renamed
   `<base>/pron_lora_ar_only_r8_obsolete/`.
+- **Long-aya Quran donor** (`quran_long_aya_r8_s10`, 9 reciters, 8,100 pairs) and its
+  `qfinal_a0.3` / `qfinal_a0.5` merges — **retired 2026-10-07**, archived under
+  `<base>/archive/quran_long_aya_legacy/`. Superseded by `quran_ahh_r32`.
 
 ## Repo layout
 
 ```
 config/L4_akbar_arabic_rock_lora.yml + config/A100_akbar_arabic_rock_lora.yml   # style-LoRA training config, per-GPU variants (rank 32, EMA, cot: off, whole-song)
 config/LEGACY_akbar_arabic_rock_lora.yml   # v1/v2 predecessor (ar_kl 0.2, in-training sampling)
-config/quran_long_aya_r8_s10.yml    # active long-aya Quran pron run (AR-only rank 8, 8,100 pairs)
-config/quran_long_aya_r8.yml        # full-set ident, reserved for high-end hardware
+config/quran_long_aya_r8_s10.yml    # RETIRED long-aya Quran pron run (AR-only rank 8, 8,100 pairs)
+config/quran_long_aya_r8.yml        # RETIRED full-set ident (never trained)
 config/pron_lora_ar_only.yml + config/pron_lora_ar_only_smoke.yml   # superseded pron donor (historical)
 prepare_yue2_dataset.py             # v1 build: style-only captions (obsolete dataset)
 prepare_pron_dataset.py             # pron dataset build (Task 13)
@@ -74,7 +78,7 @@ INFERENCE/duration_cap.py           # canonical text->duration cap (docs/text_to
 INFERENCE/prepare_ab_eval.py        # generic blinded A/B(/N) listening package (EVAL.txt / KEYS.txt)
 INFERENCE/rating_app/                # general listening rating app (asks for the track folder; configurable criteria)
 INFERENCE/eval_app/                  # Quran 2:255 word-grid eval app (specific, unchanged)
-INFERENCE/{pron_alpha_sweep,pron_fine_sweep,pron_knob_probe,qfinal_suno_sweep}.sh   # sweep drivers
+INFERENCE/{pron_alpha_sweep,pron_fine_sweep,pron_knob_probe,qfinal_suno_sweep}.sh   # sweep drivers (qfinal_suno_sweep: RETIRED)
 INFERENCE/{suno_to_songs,pron_ckpt_sweep,maqam_lyric_swap}.py                       # sweep/convert tooling
 manifests/workspace_manifest.json   # legacy Suno manifest; input to INFERENCE/suno_to_songs.py
 TRAINING_ANALYSIS/                  # per-run loss curves + final analysis (v1 archived under it)

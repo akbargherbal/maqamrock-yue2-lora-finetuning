@@ -416,7 +416,7 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
 - Both gotcha entries marked **Encoded 2026-10-06**.
 - Verified: WAL test (61832 → 0 bytes, `PRAGMA integrity_check=ok`, rows intact); a
   simulated collapsed restore reproduced the original failure (arbitrary pick
-  `_000009000`) and the helper corrected it (picks `quran_ahh_r8.safetensors`); dry-run and
+  `_000009000`) and the helper corrected it (picks `quran_ahh_r32.safetensors`); dry-run and
   the `run.py`-alive guard exercised. No config or hyperparameter touched.
 - Authority: user directive (2026-10-06: "fix those issues … before we do another
   inference") + the two gotchas' own "Durable fix belongs in …" notes.

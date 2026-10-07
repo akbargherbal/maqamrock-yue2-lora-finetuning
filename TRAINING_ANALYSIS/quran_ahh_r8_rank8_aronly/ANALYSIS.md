@@ -1,5 +1,10 @@
 # Training analysis — `quran_ahh_r8` (AR-only AHH pronunciation LoRA)
 
+> **HISTORICAL — retired name.** This is the **rank-8, AR-only** first AHH run, originally named
+> `quran_ahh_r8`. That name is **retired**; the current rank-32, AR+NAR run is **`quran_ahh_r32`**
+> (see [`../quran_ahh_r32/ANALYSIS.md`](../quran_ahh_r32/ANALYSIS.md)). Archived in GCS under
+> `…/archive/quran_ahh_r8_rank8_aronly/`.
+
 **COMPLETE** — finished **2026-10-05 07:39 UTC** at **step 9,489 / 9,489 (100%)** (1 epoch
 over the 9,489-pair AHH set). `run.py` **self-stopped at its target**: final adapter +
 `optimizer.pt` written, **no traceback, no OOM**. Charts produced by the parametrized

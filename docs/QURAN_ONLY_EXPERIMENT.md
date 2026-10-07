@@ -7,7 +7,7 @@ the durable record of the experiment; the live next-step handoff is `agent_notes
 
 Hear the pronunciation adapter **by itself** — no v2 style LoRA — at full strength (α=1) on
 the base YuE2 model, and judge it on articulation. Every current library candidate is a
-*merge* (`qfinal_a0.3`/`a0.5` = v2 style + Quran pron), so the adapter's isolated effect was
+*merge* (`qahh_a0*` = v2 style + Quran pron), so the adapter's isolated effect was
 untested. Background/why: `docs/FUTURE_PRONUNCIATION_LORA.md`, `docs/LORA_INVENTORY.md`.
 
 ## Why "α=1" needs no scaling

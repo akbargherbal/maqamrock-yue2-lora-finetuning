@@ -160,7 +160,7 @@ INFERENCE/eval_app/README.md :: //127.0.0.1
 docs/QURAN_PRON_REVIEW.md :: FILTERED_DATASET_README.md
 docs/QURAN_PRON_REVIEW.md :: MANIFEST.csv
 # runtime adapter manifest under a run's convert/ dir
-TRAINING_ANALYSIS/quran_ahh_r8/ANALYSIS.md :: convert/adapter_manifest.json
+TRAINING_ANALYSIS/quran_ahh_r32/ANALYSIS.md :: convert/adapter_manifest.json
 
 # 2026-10-06 reconcile (2nd batch): external / other-branch / false-positive tokens
 # user-supplied legacy Suno manifest (input to INFERENCE/suno_to_songs.py; not bundled)

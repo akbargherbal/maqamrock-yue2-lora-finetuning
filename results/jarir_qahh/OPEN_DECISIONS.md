@@ -10,7 +10,7 @@ is the durable one. Update it as things get decided.
   ب heard as ب, ر clearly — **without** tajweed prosody bleeding into the singing
   (madd/waqf cadence, idghām, iqlāb — e.g. ب surfacing as م). "Not mere correct
   pronunciation — Tajweed principles followed by vocals."
-- **α = 0.1**, quran_ahh_r8 (AR+NAR rank-32) merged into v2 via `merge_quran_lora.py`.
+- **α = 0.1**, quran_ahh_r32 (AR+NAR rank-32) merged into v2 via `merge_quran_lora.py`.
 
 ## Running / queued (2026-10-06)
 
@@ -41,7 +41,7 @@ is the durable one. Update it as things get decided.
 
 ## Why (evidence)
 
-- `config/quran_ahh_r8.yml:5-9` — *"the prior AR-only, rank-8 run could only move
+- `config/quran_ahh_r32.yml:5-9` — *"the prior AR-only, rank-8 run could only move
   recitation prosody (madd/waqf): in YuE2 the **AR** picks the discrete semantic codes, but
   the **NAR** flow + VAE render the actual articulation"* ⇒ **AR = prosody, NAR = makhraj**.
 - `docs/QURAN_FORMAT_PROBE.md` — quran_only (AR-only) carried recitation *prosody*, not
