@@ -28,6 +28,7 @@ Design notes
   Optional per-file labels: ``labels.json`` at the root, mapping relative path
   (or filename) -> label.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -37,8 +38,16 @@ import socket
 import sys
 from pathlib import Path
 
-from flask import (Flask, Response, abort, redirect, render_template_string,
-                   request, send_from_directory, url_for)
+from flask import (
+    Flask,
+    Response,
+    abort,
+    redirect,
+    render_template_string,
+    request,
+    send_from_directory,
+    url_for,
+)
 
 AUDIO_EXTS = (".wav", ".mp3", ".flac", ".m4a", ".ogg", ".opus")
 
@@ -46,33 +55,83 @@ AUDIO_EXTS = (".wav", ".mp3", ".flac", ".m4a", ".ogg", ".opus")
 # The default, run-agnostic scorecard. Override with a criteria.json (see module
 # docstring) — you should not need to touch this file again.
 DEFAULT_CRITERIA = [
-    {"key": "overall", "label": "Overall quality", "type": "rating", "max": 5,
-     "help": "Your gut call on the whole take."},
-    {"key": "diction", "label": "Vocal diction / clarity", "type": "rating", "max": 5,
-     "help": "Are the words clear and correctly pronounced?"},
-    {"key": "melody", "label": "Melody / maqam fit", "type": "rating", "max": 5,
-     "help": "Does the melodic line sit in the intended maqam / mood?"},
-    {"key": "prosody", "label": "Prosody / rhythm / timing", "type": "rating", "max": 5,
-     "help": "Phrasing, groove, breath, and timing."},
-    {"key": "mix", "label": "Mix / audio quality", "type": "rating", "max": 5,
-     "help": "Balance, clarity, artifacts of the mix itself."},
-    {"key": "artifacts", "label": "Artifacts", "type": "choice",
-     "options": [{"v": "none", "t": "None"}, {"v": "minor", "t": "Minor"},
-                 {"v": "major", "t": "Major"}, {"v": "broken", "t": "Broken / unusable"}]},
-    {"key": "keep", "label": "Would you keep this take?", "type": "choice",
-     "options": [{"v": "yes", "t": "Yes"}, {"v": "maybe", "t": "Maybe"},
-                 {"v": "no", "t": "No"}]},
-    {"key": "notes", "label": "Notes", "type": "notes", "required": False,
-     "help": "Anything worth remembering (e.g. loops at 0:40, wrong word, takes off)."},
+    {
+        "key": "overall",
+        "label": "Overall quality",
+        "type": "rating",
+        "max": 5,
+        "help": "Your gut call on the whole take.",
+    },
+    {
+        "key": "diction",
+        "label": "Vocal diction / clarity",
+        "type": "rating",
+        "max": 5,
+        "help": "Are the words clear and correctly pronounced?",
+    },
+    {
+        "key": "melody",
+        "label": "Melody / maqam fit",
+        "type": "rating",
+        "max": 5,
+        "help": "Does the melodic line sit in the intended maqam / mood?",
+    },
+    {
+        "key": "prosody",
+        "label": "Prosody / rhythm / timing",
+        "type": "rating",
+        "max": 5,
+        "help": "Phrasing, groove, breath, and timing.",
+    },
+    {
+        "key": "mix",
+        "label": "Mix / audio quality",
+        "type": "rating",
+        "max": 5,
+        "help": "Balance, clarity, artifacts of the mix itself.",
+    },
+    {
+        "key": "artifacts",
+        "label": "Artifacts",
+        "type": "choice",
+        "options": [
+            {"v": "none", "t": "None"},
+            {"v": "minor", "t": "Minor"},
+            {"v": "major", "t": "Major"},
+            {"v": "broken", "t": "Broken / unusable"},
+        ],
+    },
+    {
+        "key": "keep",
+        "label": "Would you keep this take?",
+        "type": "choice",
+        "options": [
+            {"v": "yes", "t": "Yes"},
+            {"v": "maybe", "t": "Maybe"},
+            {"v": "no", "t": "No"},
+        ],
+    },
+    {
+        "key": "notes",
+        "label": "Notes",
+        "type": "notes",
+        "required": False,
+        "help": "Anything worth remembering (e.g. loops at 0:40, wrong word, takes off).",
+    },
 ]
-SUMMARY_METRIC = "overall"   # which rating to rank by (override in criteria.json)
+SUMMARY_METRIC = "overall"  # which rating to rank by (override in criteria.json)
 
 
 def _norm_options(opts):
     out = []
     for o in opts or []:
         if isinstance(o, dict):
-            out.append({"v": o.get("v", o.get("value", "")), "t": o.get("t", o.get("label", str(o.get("v", ""))))})
+            out.append(
+                {
+                    "v": o.get("v", o.get("value", "")),
+                    "t": o.get("t", o.get("label", str(o.get("v", "")))),
+                }
+            )
         else:  # bare value
             out.append({"v": o, "t": str(o)})
     return out
@@ -94,7 +153,9 @@ def normalize_criteria(crit: list) -> list:
     return out
 
 
-def load_criteria(audio_dir: Path | None, out_dir: Path, fields_path: str | None) -> list:
+def load_criteria(
+    audio_dir: Path | None, out_dir: Path, fields_path: str | None
+) -> list:
     """Precedence: --fields > <out>/criteria.json > <audio>/_criteria.json > default."""
     candidates = []
     if fields_path:
@@ -165,8 +226,16 @@ def discover(audio_dir: Path) -> list[dict]:
         glabel = meta_label(audio_dir / group) if group else ""
         name = rel.as_posix()
         label = str(flabels.get(name) or flabels.get(f.name) or f.stem)
-        tracks.append({"name": name, "file": rel.as_posix(), "stem": f.stem,
-                       "group": group, "group_label": glabel, "label": label})
+        tracks.append(
+            {
+                "name": name,
+                "file": rel.as_posix(),
+                "stem": f.stem,
+                "group": group,
+                "group_label": glabel,
+                "label": label,
+            }
+        )
     tracks.sort(key=lambda t: (t["group"], t["stem"]))
     return tracks
 
@@ -194,7 +263,9 @@ def load_state(path: Path) -> dict:
 
 def save_state(path: Path, state: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def is_done(rec: dict, criteria: list) -> bool:
@@ -214,27 +285,44 @@ def _num(v):
 
 
 # --------------------------------------------------------------------------- markdown
-def render_markdown(tracks: list[dict], state: dict, criteria: list, audio_dir: Path, label: str) -> str:
+def render_markdown(
+    tracks: list[dict], state: dict, criteria: list, audio_dir: Path, label: str
+) -> str:
     recs = state["tracks"]
     now = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     groups = sorted({t["group"] for t in tracks if t["group"]})
     gl = {t["group"]: t["group_label"] for t in tracks}
     rating_keys = [c for c in criteria if c["type"] == "rating"]
-    metric = SUMMARY_METRIC if any(c["key"] == SUMMARY_METRIC and c["type"] == "rating" for c in criteria) \
+    metric = (
+        SUMMARY_METRIC
+        if any(c["key"] == SUMMARY_METRIC and c["type"] == "rating" for c in criteria)
         else (rating_keys[0]["key"] if rating_keys else None)
-    L = [f"# Listening rating report — {label}", "",
-         f"_Exported {now} by `rating_app`._", "", "## Setup", "",
-         f"- audio dir: `{audio_dir}`",
-         f"- tracks: {len(tracks)}" + (f" in {len(groups)} folders/arms" if groups else ""),
-         f"- criteria: " + ", ".join(c["label"] for c in criteria), "",
-         "## Score table", ""]
+    )
+    L = [
+        f"# Listening rating report — {label}",
+        "",
+        f"_Exported {now} by `rating_app`._",
+        "",
+        "## Setup",
+        "",
+        f"- audio dir: `{audio_dir}`",
+        f"- tracks: {len(tracks)}"
+        + (f" in {len(groups)} folders/arms" if groups else ""),
+        f"- criteria: " + ", ".join(c["label"] for c in criteria),
+        "",
+        "## Score table",
+        "",
+    ]
     head = ["folder/arm", "track", "done"] + [c["label"] for c in criteria]
     L.append("| " + " | ".join(head) + " |")
     L.append("|" + "---|" * len(head))
     for t in tracks:
         r = recs.get(t["name"], {})
-        row = [t["group_label"] or t["group"] or "—", t["label"],
-               "Y" if is_done(r, criteria) else "—"]
+        row = [
+            t["group_label"] or t["group"] or "—",
+            t["label"],
+            "Y" if is_done(r, criteria) else "—",
+        ]
         row += [str(r.get(c["key"], "")) for c in criteria]
         L.append("| " + " | ".join(row) + " |")
     L += ["", "## Summary by folder/arm", ""]
@@ -252,10 +340,16 @@ def render_markdown(tracks: list[dict], state: dict, criteria: list, audio_dir: 
             s["n"] += 1
             s["sum"] += v
         if stat:
-            L += [f"Mean **{mlabel}** per folder (n scored):", "",
-                  "| folder/arm | mean | n |", "|---|---|---|"]
+            L += [
+                f"Mean **{mlabel}** per folder (n scored):",
+                "",
+                "| folder/arm | mean | n |",
+                "|---|---|---|",
+            ]
             for g, s in sorted(stat.items(), key=lambda kv: -kv[1]["sum"] / kv[1]["n"]):
-                L.append(f"| {gl.get(g) or g or '—'} | {s['sum'] / s['n']:.2f} | {s['n']} |")
+                L.append(
+                    f"| {gl.get(g) or g or '—'} | {s['sum'] / s['n']:.2f} | {s['n']} |"
+                )
         else:
             L.append(f"_(no **{mlabel}** ratings yet)_")
     L += ["", "## Per-track notes", ""]
@@ -268,14 +362,29 @@ def render_markdown(tracks: list[dict], state: dict, criteria: list, audio_dir: 
             continue
         anyn = True
         L.append(f"### `{t['name']}`")
-        L.append("- " + " · ".join(f"{c['label']}: {r.get(c['key'], '')}"
-                                   for c in criteria if str(r.get(c["key"], "")).strip() != ""))
+        L.append(
+            "- "
+            + " · ".join(
+                f"{c['label']}: {r.get(c['key'], '')}"
+                for c in criteria
+                if str(r.get(c["key"], "")).strip() != ""
+            )
+        )
         L.append("")
     if not anyn:
         L += ["_(none yet)_", ""]
-    L += ["## Raw evaluation data", "", "```json",
-          json.dumps({"meta": state.get("meta", {}), "tracks": recs}, ensure_ascii=False, indent=2),
-          "```", ""]
+    L += [
+        "## Raw evaluation data",
+        "",
+        "```json",
+        json.dumps(
+            {"meta": state.get("meta", {}), "tracks": recs},
+            ensure_ascii=False,
+            indent=2,
+        ),
+        "```",
+        "",
+    ]
     return "\n".join(L)
 
 
@@ -320,7 +429,7 @@ PAGE = """<!doctype html><html lang="en"><head><meta charset="utf-8">
    border:1px solid var(--line);border-radius:9px;font-size:15px}
  input.wide{width:100%}
  textarea{width:100%;min-height:80px;background:#0d1117;color:var(--fg);border:1px solid var(--line);
-   border-radius:10px;padding:10px;font:inherit}
+   border-radius:10px;padding:10px;font:inherit;field-sizing:content}
  pre{background:#0b0e13;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;
    white-space:pre-wrap;word-break:break-word}
  table{width:100%;border-collapse:collapse;font-size:14px}
@@ -340,7 +449,9 @@ PAGE = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <div class="wrap">{% block body %}{% endblock %}</div>
 </body></html>"""
 
-SETUP = PAGE.replace("{% block body %}{% endblock %}", """
+SETUP = PAGE.replace(
+    "{% block body %}{% endblock %}",
+    """
 <div class="card">
   <h1>Track directory</h1>
   <p class="muted">Paste the folder that holds your rendered tracks (it is read in place — nothing is copied).
@@ -357,9 +468,12 @@ SETUP = PAGE.replace("{% block body %}{% endblock %}", """
     </div>
   </form>
 </div>
-""")
+""",
+)
 
-CRITERIA = PAGE.replace("{% block body %}{% endblock %}", """
+CRITERIA = PAGE.replace(
+    "{% block body %}{% endblock %}",
+    """
 <div class="card">
   <h1>Scorecard (criteria)</h1>
   <p class="muted">Edit the JSON below to change the questions. It is saved to
@@ -375,9 +489,12 @@ CRITERIA = PAGE.replace("{% block body %}{% endblock %}", """
   </form>
   {% if err %}<div class="card" style="border-color:var(--bad)">Could not save: {{ err }}</div>{% endif %}
 </div>
-""")
+""",
+)
 
-INDEX = PAGE.replace("{% block body %}{% endblock %}", """
+INDEX = PAGE.replace(
+    "{% block body %}{% endblock %}",
+    """
 {% if saved %}<div class="card" style="border-color:var(--ok)">Saved.</div>{% endif %}
 {% if not total %}
 <div class="card"><h1>No tracks found</h1>
@@ -404,9 +521,12 @@ INDEX = PAGE.replace("{% block body %}{% endblock %}", """
   </div>
 {% endfor %}
 {% endif %}
-""")
+""",
+)
 
-TRACK = PAGE.replace("{% block body %}{% endblock %}", """
+TRACK = PAGE.replace(
+    "{% block body %}{% endblock %}",
+    """
 <div class="card">
   <div class="row">
     <div>
@@ -449,16 +569,20 @@ TRACK = PAGE.replace("{% block body %}{% endblock %}", """
     {% if next_name %}<button type="submit" class="btn big" name="advance" value="1">Save &amp; next →</button>{% endif %}
   </div>
 </form>
-""")
+""",
+)
 
-REPORT = PAGE.replace("{% block body %}{% endblock %}", """
+REPORT = PAGE.replace(
+    "{% block body %}{% endblock %}",
+    """
 <div class="card">
   <div class="row"><h1 style="margin:0">Report</h1><span class="sp" style="flex:1"></span>
     <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('md').innerText).then(()=>this.textContent='copied')">copy markdown</button>
     <a class="btn ghost" href="{{ url_for('report_md') }}">download .md</a></div>
   <pre id="md">{{ md }}</pre>
 </div>
-""")
+""",
+)
 
 
 # --------------------------------------------------------------------------- app
@@ -470,10 +594,17 @@ def create_app(cfg: dict) -> Flask:
 
     def persist_session():
         out_dir.mkdir(parents=True, exist_ok=True)
-        session_path.write_text(json.dumps({"audio": cfg["audio"], "label": cfg["label"]},
-                                           ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        session_path.write_text(
+            json.dumps(
+                {"audio": cfg["audio"], "label": cfg["label"]},
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
 
-    if cfg.get("audio"):          # remember the chosen folder for next time
+    if cfg.get("audio"):  # remember the chosen folder for next time
         try:
             persist_session()
         except OSError:
@@ -488,7 +619,9 @@ def create_app(cfg: dict) -> Flask:
     def state():
         st = load_state(state_path)
         st.setdefault("meta", {})
-        st["meta"].update({"label": cfg["label"], "audio": cfg.get("audio"), "out": str(out_dir)})
+        st["meta"].update(
+            {"label": cfg["label"], "audio": cfg.get("audio"), "out": str(out_dir)}
+        )
         st.setdefault("tracks", {})
         return st
 
@@ -500,10 +633,20 @@ def create_app(cfg: dict) -> Flask:
         st = state()
         dn = {t["name"] for t in ts if is_done(st["tracks"].get(t["name"], {}), crit)}
         total = len(ts) or 1
-        return dict(audio=cfg.get("audio") or "", label=cfg["label"], criteria=crit,
-                    sections=sections_of(ts), tracks=ts, done=len(dn), total=len(ts),
-                    done_names=dn, pct=int(100 * len(dn) / total), session=str(session_path),
-                    consumed=consumed, **kw)
+        return dict(
+            audio=cfg.get("audio") or "",
+            label=cfg["label"],
+            criteria=crit,
+            sections=sections_of(ts),
+            tracks=ts,
+            done=len(dn),
+            total=len(ts),
+            done_names=dn,
+            pct=int(100 * len(dn) / total),
+            session=str(session_path),
+            consumed=consumed,
+            **kw,
+        )
 
     @app.get("/setup")
     def setup():
@@ -521,9 +664,14 @@ def create_app(cfg: dict) -> Flask:
         p = out_dir / "criteria.json"
         eff = criteria()
         data = {"summary_metric": SUMMARY_METRIC, "criteria": eff}
-        return render_template_string(CRITERIA, title="rating · criteria",
-                                      json=json.dumps(data, ensure_ascii=False, indent=2),
-                                      path=str(p), err=request.args.get("err"), **ctx())
+        return render_template_string(
+            CRITERIA,
+            title="rating · criteria",
+            json=json.dumps(data, ensure_ascii=False, indent=2),
+            path=str(p),
+            err=request.args.get("err"),
+            **ctx(),
+        )
 
     @app.post("/criteria")
     def criteria_save():
@@ -537,13 +685,19 @@ def create_app(cfg: dict) -> Flask:
         except (ValueError, TypeError) as e:
             return redirect(url_for("criteria_page", err=str(e)))
         out_dir.mkdir(parents=True, exist_ok=True)
-        (out_dir / "criteria.json").write_text(raw if raw.endswith("\n") else raw + "\n", encoding="utf-8")
+        (out_dir / "criteria.json").write_text(
+            raw if raw.endswith("\n") else raw + "\n", encoding="utf-8"
+        )
         return redirect(url_for("index"))
 
     @app.get("/")
     def index():
-        return render_template_string(INDEX, title="rating · tracks",
-                                      saved=request.args.get("saved") == "1", **ctx())
+        return render_template_string(
+            INDEX,
+            title="rating · tracks",
+            saved=request.args.get("saved") == "1",
+            **ctx(),
+        )
 
     @app.get("/track/<path:name>")
     def track(name):
@@ -555,10 +709,15 @@ def create_app(cfg: dict) -> Flask:
         i = ts.index(match)
         st = state()
         return render_template_string(
-            TRACK, title=f"{match['label']} · rating", t=match, rec=st["tracks"].get(name, {}),
+            TRACK,
+            title=f"{match['label']} · rating",
+            t=match,
+            rec=st["tracks"].get(name, {}),
             pos=i + 1,
             prev_name=ts[i - 1]["name"] if i > 0 else None,
-            next_name=ts[i + 1]["name"] if i + 1 < len(ts) else None, **ctx())
+            next_name=ts[i + 1]["name"] if i + 1 < len(ts) else None,
+            **ctx(),
+        )
 
     @app.post("/track/<path:name>")
     def save(name):
@@ -573,13 +732,21 @@ def create_app(cfg: dict) -> Flask:
             if v == "":
                 rec.pop(c["key"], None)
             elif c["type"] == "number":
-                rec[c["key"]] = _num(v) if _num(v) is not None and "." in v else (int(v) if v.isdigit() else v)
+                rec[c["key"]] = (
+                    _num(v)
+                    if _num(v) is not None and "." in v
+                    else (int(v) if v.isdigit() else v)
+                )
             else:
                 rec[c["key"]] = v
-        rec["updated"] = _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds")
+        rec["updated"] = _dt.datetime.now(_dt.timezone.utc).isoformat(
+            timespec="seconds"
+        )
         st["tracks"][name] = rec
         save_state(state_path, st)
-        target = request.form.get("next") if request.form.get("advance") == "1" else None
+        target = (
+            request.form.get("next") if request.form.get("advance") == "1" else None
+        )
         if target:
             return redirect(url_for("track", name=target))
         return redirect(url_for("track", name=name, saved=1))
@@ -607,8 +774,11 @@ def create_app(cfg: dict) -> Flask:
         ts = discover(a) if a and Path(a).is_dir() else []
         md = render_markdown(ts, state(), criteria(), a or Path("."), cfg["label"])
         stamp = _dt.datetime.now().strftime("%Y%m%d-%H%M")
-        return Response(md, mimetype="text/markdown", headers={
-            "Content-Disposition": f"attachment; filename=rating_{stamp}.md"})
+        return Response(
+            md,
+            mimetype="text/markdown",
+            headers={"Content-Disposition": f"attachment; filename=rating_{stamp}.md"},
+        )
 
     return app
 
@@ -649,15 +819,32 @@ def _pick_free_port(host: str, preferred: int, scan: int = 50) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="general listening rating app")
-    ap.add_argument("--audio", default=None, help="folder of rendered tracks (asked for if omitted)")
-    ap.add_argument("--out", default="./rating_out", help="dir for evaluations.json, criteria.json, session.json")
-    ap.add_argument("--label", default=None, help="run label (defaults to the folder name)")
-    ap.add_argument("--fields", default=None, help="optional criteria JSON path (see README)")
+    ap.add_argument(
+        "--audio", default=None, help="folder of rendered tracks (asked for if omitted)"
+    )
+    ap.add_argument(
+        "--out",
+        default="./rating_out",
+        help="dir for evaluations.json, criteria.json, session.json",
+    )
+    ap.add_argument(
+        "--label", default=None, help="run label (defaults to the folder name)"
+    )
+    ap.add_argument(
+        "--fields", default=None, help="optional criteria JSON path (see README)"
+    )
     ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--port", type=int, default=5000,
-                    help="preferred port; if it is busy, the next free port above it is used")
-    ap.add_argument("--strict-port", action="store_true",
-                    help="bind exactly --port; fail instead of scanning upward if it is busy")
+    ap.add_argument(
+        "--port",
+        type=int,
+        default=5000,
+        help="preferred port; if it is busy, the next free port above it is used",
+    )
+    ap.add_argument(
+        "--strict-port",
+        action="store_true",
+        help="bind exactly --port; fail instead of scanning upward if it is busy",
+    )
     ap.add_argument("--debug", action="store_true")
     args = ap.parse_args()
 
@@ -668,14 +855,18 @@ def main() -> int:
     if not audio:
         if sys.stdin and sys.stdin.isatty():
             try:
-                audio = input("Track directory (e.g. C:\\Users\\DELL\\Downloads\\jarir_lever_probe): ").strip()
+                audio = input(
+                    "Track directory (e.g. C:\\Users\\DELL\\Downloads\\jarir_lever_probe): "
+                ).strip()
             except EOFError:
                 audio = ""
         audio = (audio or "").strip().strip('"').strip("'")
     if not label:
         label = Path(audio).name if audio else "listening"
     if audio and not Path(audio).expanduser().is_dir():
-        print(f"rating_app: warning — folder not found yet: {audio} (you can fix it on /setup)")
+        print(
+            f"rating_app: warning — folder not found yet: {audio} (you can fix it on /setup)"
+        )
 
     cfg = {"audio": audio, "out": str(out_dir), "label": label, "fields": args.fields}
     app = create_app(cfg)
