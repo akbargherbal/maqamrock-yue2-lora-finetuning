@@ -172,3 +172,31 @@ docs/QURAN_PRON_REVIEW.md :: docs/investigation_generation_knobs.md
 docs/QURAN_AHH_RESUME_PLAN.md :: config/hyperparameters.
 # runtime/example artifact in eval_app
 INFERENCE/eval_app/README.md :: agent_notes/T4_listening_checklist.md
+
+# 2026-10-07 — external listening/rating app (github.com/akbargherbal/ai_music_rating_app):
+# its files, flags and run artifacts live in the external repo, not this one. Doc-scoped to
+# the docs that describe it (the superseded in-repo INFERENCE/rating_app/ is excluded wholesale).
+docs/LISTENING_EVAL.md :: app.py
+docs/LISTENING_EVAL.md :: card.json
+docs/LISTENING_EVAL.md :: run.json
+docs/LISTENING_EVAL.md :: requirements.txt
+docs/LISTENING_EVAL.md :: scorecards/dtest_diction.json
+docs/LISTENING_EVAL.md :: results.json
+docs/LISTENING_EVAL.md :: scorecard.snapshot.json
+docs/LISTENING_EVAL.md :: EVAL.txt
+docs/LISTENING_EVAL.md :: KEYS.txt
+docs/LISTENING_EVAL.md :: rating_app/report.py
+docs/LISTENING_EVAL.md :: --scorecard
+docs/LISTENING_EVAL.md :: --blind
+skills/listening-eval/SKILL.md :: app.py
+skills/listening-eval/SKILL.md :: card.json
+skills/listening-eval/SKILL.md :: run.json
+skills/listening-eval/SKILL.md :: --scorecard
+skills/listening-eval/SKILL.md :: --blind
+user_cheatsheet.md :: app.py
+user_cheatsheet.md :: card.json
+user_cheatsheet.md :: requirements.txt
+user_cheatsheet.md :: --scorecard
+user_cheatsheet.md :: --blind
+docs/AB_BLIND_EVAL.md :: --blind
+

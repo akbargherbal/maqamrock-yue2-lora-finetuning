@@ -1,44 +1,37 @@
-# current.md — handoff surface (overwritten each turn; not a source of truth)
+# current — 2026-10-07 16:47Z
 
-## NOW → launch the D-test render on the GPU VM (background)
-_Written 2026-10-07. Branch `pron-lora-long-aya` @ `81df998` (pushed)._
+**D-test render: DONE.** 20/20 takes, **0 failed**. Driver `INFERENCE/jarir_lever_probe.sh`
+(exited rc_total=0 at 16:34:24Z). Backed up and verified.
 
-### Where we are
-- Rename + legacy-retire DONE (repo + GCS). D-test scorecard written
-  (`INFERENCE/scorecards/dtest_diction.json`).
-- **Next action: render the D-test audio** — v2 vs qahh `a0p1`, AR/NAR split, 4 paired seeds.
+## Ground truth (`python status.py`, 16:46Z)
 
-### What to render (5 arms × 4 seeds = 20 takes, ~65–70 min)
-Arms: `v2_1.0_1.0` (no donor) · `qa_1.0_1.0` (both) · `qa_0.5_1.0` (AR half) ·
-`qa_1.0_0.5` (NAR half) · `qa_0.0_1.0` (AR off). Fixture: `INFERENCE/songs.dtest.json`
-(pinned Jarir song `jlv_dtest`, seeds 20261021–024, cap 8000).
+- training: not running · GPU **free** (0% / 0 MiB).
+- inference: **complete** — 20 WAVs in `out/jarir_dtest/`:
+  `v2_1.0_1.0` 4/4 · `qa_1.0_1.0` 4/4 · `qa_0.5_1.0` 4/4 · `qa_1.0_0.5` 4/4 · `qa_0.0_1.0` 4/4.
+  `_failed.log` empty. Wall 37:30.
+  (`status.py`'s `inference:` line reports a stale single-arm count — trust the folder.)
+- backup: last pass **16:44:45Z**, 5/5 folders synced. GCS `…/out/jarir_dtest/` = **20/20**,
+  newest upload 16:39:28Z (after the last take). Local 20 = GCS 20. ✅
+- sidecars: `backup_to_gcp.py`=11254 · `gpu_logger.py`=DOWN (not needed for inference) ·
+  `vm-continuity`=healthy. disk 64.2 GB free. graph STALE (HEAD `3690f98`).
 
-### Launch (detached; returns immediately)
-```
-cd /content/maqamrock-yue2-lora-finetuning
-git fetch origin pron-lora-long-aya && git checkout pron-lora-long-aya && git pull --ff-only   # -> 81df998
-nvidia-smi    # GPU must be free
-mkdir -p /content/logs
-ARMS="v2_1.0_1.0 qa_1.0_1.0 qa_0.5_1.0 qa_1.0_0.5 qa_0.0_1.0" \
-SCALE_JSON="/content/maqamrock-yue2-lora-finetuning/INFERENCE/songs.dtest.json" \
-OUTROOT="/content/audiocpp_inference/out/jarir_dtest" \
-setsid nohup bash INFERENCE/jarir_lever_probe.sh > /content/logs/jarir_dtest.log 2>&1 & disown
-```
-- **Stop:** `pkill -f jarir_lever_probe.sh; pkill -f audiocpp_cli`
-- **Resume:** re-run the same command (generate.py skips tracks whose `_time.txt` says exit 0).
-- **Monitor:** `tail -f /content/logs/jarir_dtest.log` · per-arm WAVs in
-  `/content/audiocpp_inference/out/jarir_dtest/<arm>/jlv_dtest_<seed>.wav`.
+## Next: listen to the D-test
 
-### Prereqs (verify before launch; do NOT guess)
-- v2: `/content/converter/out/akbar_arabic_rock_lora_{ar,nar}.safetensors`
-- donor: `/content/converter/out/qahh_a0p1/akbar_arabic_rock_lora_{ar,nar}.safetensors`
-  (restore: `gsutil -m cp "$GCP_BACKUP_BASE/quran_ahh_r32/maqamrock_merge/convert/qahh_a0p1/*" /content/converter/out/qahh_a0p1/`)
-- binary `.../audiocpp_inference/bin/audiocpp_cli` + models `Yue2-3B-GGUF`
+1. Re-sync the audio to your PC:
+   ```powershell
+   gsutil -m rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/out/jarir_dtest .\jarir_dtest\
+   ```
+2. Launch the rating app (one command, add `--blind` for the unbiased pass):
+   ```powershell
+   python app.py --audio "C:\Users\DELL\Downloads\jarir_dtest" --label dtest_diction --scorecard "C:\path\to\dtest_diction.json"
+   ```
+   Scorecard source: `INFERENCE/scorecards/dtest_diction.json`. Confirm the startup line
+   `rating_app: ready for 'dtest_diction' [scorecard: …]` (not `[scorecard: default]`).
+3. Rate; export `/report.md`. Resume is safe: every save writes `runs/dtest_diction/results.json`.
+   Runbook: `docs/LISTENING_EVAL.md`.
 
-### After render
-rsync `out/jarir_dtest` → GCS `audiocpp_inference/out/jarir_dtest`, download locally, point the
-new rating app at it: `py app.py --audio <dir> --config configs/blind_eval.json --scorecard dtest_diction`.
+## Also
 
-### Facts
-- `$GCP_BACKUP_BASE` = `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`
-- New scorecard id: `dtest_diction`; arms = subfolder names (report groups by parent).
+- **Uncommitted doc change set**: evaluation documented on the external app
+  (`docs/LISTENING_EVAL.md` + `skills/listening-eval/`, plus DECISIONS/PROGRESS/README/
+  SOURCE_OF_TRUTH/user_cheatsheet/AB_BLIND_EVAL edits, reconciler pass log). Not committed.

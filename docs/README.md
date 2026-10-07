@@ -27,6 +27,7 @@ operating contract is `../AGENTS.md`.
 | Alpha sweep + blinded listening review | [PRON_LORA_SWEEP.md](PRON_LORA_SWEEP.md) |
 | LoRA inventory: what exists, how many, where | [LORA_INVENTORY.md](LORA_INVENTORY.md) |
 | Prepare a blinded A/B(/N) audio listening package | [AB_BLIND_EVAL.md](AB_BLIND_EVAL.md) |
+| Score rendered variants (listening evaluation / rating app) | [LISTENING_EVAL.md](LISTENING_EVAL.md) |
 | Hand the user a command to run (terminal reality check) | [COMMAND_HANDOVER_GOTCHAS.md](COMMAND_HANDOVER_GOTCHAS.md) |
 | Review how it felt to work with the agent (experience, trust, friction) | [EXPERIENCE_CHECKLIST.md](EXPERIENCE_CHECKLIST.md) |
 | How the text→duration cap is derived | [text_to_duration_formula.md](text_to_duration_formula.md) |

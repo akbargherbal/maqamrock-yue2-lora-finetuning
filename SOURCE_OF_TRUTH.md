@@ -24,7 +24,8 @@ History files are authoritative for what happened, never for what is true now.
 | LoRA library (what exists, how many, where) | `docs/LORA_INVENTORY.md` | canonical `<base>/loras/`: **style** + `source/`; current pron donor `quran_ahh_r32` (merges `qahh_a0*` under `<base>/quran_ahh_r32/maqamrock_merge/`); superseded donors under `<base>/archive/` |
 | Alpha sweep / listening review | `docs/PRON_LORA_SWEEP.md` | procedure + Rounds 1–5; numbers in `results/{pron_sweep,pron_fine_sweep,pron_ckpt_sweep,maqam_lyric_swap,pron_knob_probe}/` |
 | Blinded listening packages (audio) | GCS `<base>/listening/` | generated mp3 packages; **not repo content** (`.gitignore` `*_INPUT/`) |
-| Blinded A/B listening package | `docs/AB_BLIND_EVAL.md` + `INFERENCE/prepare_ab_eval.py --help` | script flags beat prose; skill `ab-blind-eval` |
+| Blinded A/B listening package | `docs/AB_BLIND_EVAL.md` + `INFERENCE/prepare_ab_eval.py --help` | script flags beat prose; skill `ab-blind-eval`; hands a package to a different person |
+| Listening evaluation / rating (score rendered variants) | `docs/LISTENING_EVAL.md` | external app `github.com/akbargherbal/ai_music_rating_app`; supersedes the in-repo `INFERENCE/rating_app/`; skill `listening-eval` |
 | Why a decision was made | `DECISIONS.md` | read-only; cite, don't rewrite |
 | Milestones (outcomes) | `PROGRESS.md` | read-only; outcomes, not narrative |
 | Full history | git | `git log`; pre-rewrite narrative `git show 39d1bbd:PROGRESS.md` |

@@ -152,7 +152,33 @@ Single maqam/seed (staged prompts), for a one-off:
 INFERENCE/run_one.sh <Maqam> <seed> [cap|auto]     # Maqam ∈ Ajam Hijaz Kurd Nahawand
 ```
 
-## 6. Backup now / verify / restore
+## 6. Listening evaluation — rate the renders (on your own PC)
+
+Score rendered variants in the external rating app. Full runbook: `docs/LISTENING_EVAL.md`.
+The app is **not** in this repo; it **supersedes** the in-repo `INFERENCE/rating_app/`.
+
+```bash
+# once, on your machine
+git clone https://github.com/akbargherbal/ai_music_rating_app.git
+cd ai_music_rating_app && py -m pip install -r requirements.txt
+```
+
+Pull the rendered audio from GCS, then launch with scorecard + label (**one command**;
+add `--blind` for the unbiased pass):
+
+```powershell
+gsutil -m rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/out/<run> .\<run>\
+
+# copy the scorecard into scorecards/ OR pass its path, then:
+python app.py --audio "C:\path\to\<run>" --label <run_id> --scorecard "<card.json | name>"
+# report: open /report.md   (also /report.csv, /report.json)
+```
+
+The startup line `rating_app: ready for '<run_id>' [scorecard: …]` confirms the card was
+picked up (a bare `[scorecard: default]` means it was **not**). Change scorecards with a
+**new `--label`** — an existing run's scorecard is frozen.
+
+## 7. Backup now / verify / restore
 
 ```bash
 # one forced pass (don't wait for the 5-min daemon)
@@ -172,7 +198,7 @@ mkdir -p $OUT
 gsutil -m rsync -r $GCS_BASE/akbar_arabic_rock_lora/output $OUT
 ```
 
-## 7. Pause for the night / resume next session
+## 8. Pause for the night / resume next session
 
 ```bash
 # PAUSE
@@ -186,7 +212,7 @@ setsid nohup python backup_to_gcp.py --run-name akbar_arabic_rock_lora \
 python train_ctl.py start        # same run name + config → auto-resumes from newest ckpt
 ```
 
-## 8. Finish a run + push
+## 9. Finish a run + push
 
 ```bash
 gsutil -m rsync -r $OUT $GCS_BASE/akbar_arabic_rock_lora/output
@@ -203,7 +229,7 @@ git status --short
 pkill -f 'backup_to_gcp.py|gpu_logger.py'
 ```
 
-## 9. Gotchas that bite
+## 10. Gotchas that bite
 
 - **`ai-toolkit` auto-resumes** from the newest checkpoint in the output folder.
   Same run name + same config = resume. To genuinely start over, **archive first**

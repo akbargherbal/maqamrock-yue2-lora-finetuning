@@ -1,5 +1,10 @@
 # rating_app
 
+> **SUPERSEDED (2026-10-07).** New listening evaluations use the external app
+> `https://github.com/akbargherbal/ai_music_rating_app.git` — see
+> [`docs/LISTENING_EVAL.md`](../../docs/LISTENING_EVAL.md). This single-file copy is kept
+> for history (it produced the M13 report); do not use it for new evaluations.
+
 A **general** listening rating app (single-file Flask). Point it at any folder of
 rendered audio variants — the sub-folders are the arms/variants — rate each track
 on a scorecard you can change without touching the code, and export a Markdown

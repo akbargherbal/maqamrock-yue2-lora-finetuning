@@ -58,6 +58,10 @@ DEFAULT_EXCLUDES = (
     # every old run's "flagged tokens" re-surface as fresh findings. History, not
     # a live doc (2026-09-28).
     "RECONCILIATION_LOG.md",
+    # The superseded single-file rating app (history; superseded 2026-10-07 by the
+    # external ai_music_rating_app — see docs/LISTENING_EVAL.md). Its README quotes
+    # the old app's runtime files and plan.md is a target layout realized elsewhere.
+    "INFERENCE/rating_app",
 )
 
 CODE_SUFFIXES = (".py", ".sh")

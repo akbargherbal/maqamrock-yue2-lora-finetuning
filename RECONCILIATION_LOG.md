@@ -420,3 +420,34 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   the `run.py`-alive guard exercised. No config or hyperparameter touched.
 - Authority: user directive (2026-10-06: "fix those issues … before we do another
   inference") + the two gotchas' own "Durable fix belongs in …" notes.
+
+## 2026-10-07 — listening/rating evaluation documented on the external app
+
+- New `docs/LISTENING_EVAL.md`: the **scoring** runbook — external app
+  `github.com/akbargherbal/ai_music_rating_app`, the one-line launch command
+  (`--audio` / `--label` / `--scorecard` / `--blind`), scorecard resolution (an explicit path
+  or the app's own `scorecards/`), the frozen per-run snapshot, and report export. Also
+  documents resume: every save writes `runs/<run_id>/results.json` atomically, so stopping the
+  server is safe and the same `--label` + audio resumes the same run (same blind order). New
+  skill `skills/listening-eval/`. Indexed in `docs/README.md`; `SOURCE_OF_TRUTH.md` row added
+  (authority for score-rendered-variants).
+- `DECISIONS.md`: new **"Listening evaluation (rating app)"** section — dated append, no
+  existing claim rewritten. `PROGRESS.md`: new **M14** (tooling switch) + an Open item for the
+  D-test render (in progress).
+- `INFERENCE/rating_app/README.md` + the `README.md` tree line: banner/note that the in-repo
+  single-file app is **superseded** (history only; it produced M13's report).
+- `docs/AB_BLIND_EVAL.md`: note that scoring is a separate step — `prepare_ab_eval.py`
+  packages (hand to a different person) and the app's `--blind` (rate your own renders)
+  **coexist**.
+- `user_cheatsheet.md`: new section 6 with the copy-paste commands; later sections renumbered
+  7–10.
+- Reconciler (Steps 1–2) after the change: 2391 claims / 58 live docs, 1483 checkable,
+  **11 flagged (0.7%)** — **0** in any touched file. Curated the external app's files/flags
+  doc-scoped in `references/unverifiable.txt`, and added `INFERENCE/rating_app` to
+  `claims_common.py` `DEFAULT_EXCLUDES` (superseded history, like `graphify-out`). The 11
+  remaining are **pre-existing and unrelated** (history citations to the pre-rename
+  `quran_ahh_r8`, plus example/runtime tokens in `results/*`) — left for a dedicated pass.
+- Authority: user directive ("document the way we do evaluation … from now on we'll be using
+  [the external app]; mention the one line command"). No run config or hyperparameter changed;
+  no frozen claim rewritten (append-only).
+

@@ -129,7 +129,23 @@ narrative lives in git — pre-rewrite history at `git show 39d1bbd:PROGRESS.md`
 - **Bottleneck is mood/energy** ("chill / not rising to the occasion"), not intelligibility —
   recurring across the scale arms including the top take.
 
+## M14 — Evaluation tooling moved to the external rating app · 2026-10-07
+
+- Listening/rating now runs in **`github.com/akbargherbal/ai_music_rating_app`** (Flask;
+  scorecard library, per-run frozen scorecard, `--blind`, multi-metric report). The in-repo
+  single-file `INFERENCE/rating_app/` (which produced M13's report) is **superseded** — kept
+  for history. Runbook + the one-line launch command: [`docs/LISTENING_EVAL.md`](docs/LISTENING_EVAL.md)
+  (skill `listening-eval`).
+- First evaluation under it: the **D-test** (`INFERENCE/songs.dtest.json`; 5 arms × 4 seeds =
+  20 takes, seeds `20261021`–`20261024`, cap 8000) rendered on a T4 via
+  `INFERENCE/jarir_lever_probe.sh`, scorecard `INFERENCE/scorecards/dtest_diction.json`.
+  **Listening verdict pending.**
+
 ## Open items
+
+- **D-test render + listening (in progress, 2026-10-07).** 20 takes (v2 vs `qahh_a0p1` on an
+  AR/NAR scale grid) rendered via `INFERENCE/jarir_lever_probe.sh` + `INFERENCE/songs.dtest.json`;
+  score with [`docs/LISTENING_EVAL.md`](docs/LISTENING_EVAL.md). Verdict pending.
 
 - **Donor value in the production merge is unproven (M13).** The α0.1 Quran donor showed no
   demonstrated diction benefit (and a tajweed-bleed hint of harm) while v2-only topped the probe.

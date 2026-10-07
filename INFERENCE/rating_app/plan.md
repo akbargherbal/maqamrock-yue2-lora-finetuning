@@ -1,5 +1,10 @@
 # Plan: making `rating_app` adaptable for future evaluation tests
 
+> **SUPERSEDED (2026-10-07).** This plan was realized in the **external** app
+> `https://github.com/akbargherbal/ai_music_rating_app.git` (package layout, scorecard
+> library, run folders, blind mode). Kept for history — see
+> [`docs/LISTENING_EVAL.md`](../../docs/LISTENING_EVAL.md).
+
 ## 1. What's in the way today
 
 | Area | Current behaviour | Why it limits you |
