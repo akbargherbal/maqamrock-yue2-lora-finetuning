@@ -218,3 +218,8 @@ TRAINING_ANALYSIS/quran_ahh_r8_rank8_aronly/ANALYSIS.md :: config/quran_ahh_r8.y
 TRAINING_ANALYSIS/quran_ahh_r8_rank8_aronly/ANALYSIS.md :: TRAINING_ANALYSIS/quran_ahh_r8
 docs/QURAN_AHH_RESUME_PLAN.md :: TRAINING_ANALYSIS/quran_ahh_r8_rank32/
 
+# 2026-10-09 — external rating app's `--audio` flag (the in-repo app that anchored it is gone)
+docs/LISTENING_EVAL.md :: --audio
+skills/listening-eval/SKILL.md :: --audio
+user_cheatsheet.md :: --audio
+

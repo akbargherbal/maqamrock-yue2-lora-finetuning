@@ -109,8 +109,7 @@ narrative lives in git — pre-rewrite history at `git show 39d1bbd:PROGRESS.md`
 - **Decision (2026-10-09): shelved for arabmaqamrock** (v2 already sits near the model's makhraj
   ceiling on the high-quality, vocal-forward data) — reserved for a future **dialect** project:
   *take the song's melody, the Quran's diction.* Evaluation moved to the external rating app
-  (`github.com/akbargherbal/ai_music_rating_app`; `docs/LISTENING_EVAL.md`); the in-repo
-  `INFERENCE/rating_app/` is superseded.
+  (`github.com/akbargherbal/ai_music_rating_app`; `docs/LISTENING_EVAL.md`).
 
 ## Open items
 

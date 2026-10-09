@@ -21,8 +21,8 @@ Flask app, one rater, a package layout. Three concepts:
 | **Run** | one evaluation: audio folder + frozen scorecard + results | `runs/<run_id>/` |
 | Settings | how the app behaves (port, blind, dirs, …) | CLI / env / `--config` |
 
-It **supersedes the in-repo `INFERENCE/rating_app/`** single-file app (kept for history;
-that one produced the M13 report). Do not use the in-repo copy for new evaluations.
+It **supersedes** the earlier in-repo single-file listening app (retired; that one
+produced the M13 report). Do not use an in-repo copy for new evaluations.
 
 ## The one command
 

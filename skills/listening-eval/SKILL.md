@@ -7,8 +7,8 @@ description: Score rendered audio variants with the external listening/rating ap
 
 Score rendered variants. Authority: [`docs/LISTENING_EVAL.md`](../../docs/LISTENING_EVAL.md).
 The tool is **not in this repo** — it is the external
-`https://github.com/akbargherbal/ai_music_rating_app.git` and it **supersedes** the in-repo
-`INFERENCE/rating_app/` single-file app (history only).
+`https://github.com/akbargherbal/ai_music_rating_app.git`; it **supersedes** the earlier
+in-repo single-file listening app (retired).
 
 ## The one command
 

@@ -155,7 +155,7 @@ INFERENCE/run_one.sh <Maqam> <seed> [cap|auto]     # Maqam ∈ Ajam Hijaz Kurd N
 ## 6. Listening evaluation — rate the renders (on your own PC)
 
 Score rendered variants in the external rating app. Full runbook: `docs/LISTENING_EVAL.md`.
-The app is **not** in this repo; it **supersedes** the in-repo `INFERENCE/rating_app/`.
+The app is **not** in this repo; it replaces the earlier in-repo single-file listening app.
 
 ```bash
 # once, on your machine

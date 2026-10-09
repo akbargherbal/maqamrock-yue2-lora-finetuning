@@ -93,7 +93,7 @@ Where a claim says "verified against source," the actual `ostris/ai-toolkit` `.p
 
 ## Listening evaluation (rating app)
 
-- **Rating runs in the external app, not the in-repo one.** `github.com/akbargherbal/ai_music_rating_app` (Flask, package layout, single rater). It supersedes the single-file `INFERENCE/rating_app/` — which produced M13's report and is kept for history only. Runbook: `docs/LISTENING_EVAL.md`.
+- **Rating runs in the external app, not the in-repo one.** `github.com/akbargherbal/ai_music_rating_app` (Flask, package layout, single rater). It supersedes the earlier in-repo single-file listening app (retired; it produced M13's report). Runbook: `docs/LISTENING_EVAL.md`.
 - **One command, no UI setup.** `python app.py --audio "<dir>" --label <run_id> --scorecard "<name|path>" [--blind]` — the scorecard is resolved and the run created **at startup**; the printed `rating_app: ready for '<run_id>' [scorecard: …]` is the confirmation. `--blind` hides arm names and shuffles order (seed in `run.json`); use it for the unbiased pass.
 - **The scorecard is found in only two places** — an explicit `--scorecard <path>` to a file, or `<name>.json` in the app's own `scorecards/` dir. It never scans the audio folder or this repo; our cards live in `INFERENCE/scorecards/` (e.g. `dtest_diction.json`).
 - **A run's scorecard is frozen.** `runs/<run_id>/scorecard.snapshot.json` is written once at run creation and never rewritten, so changing the card later does **not** affect an existing run (the settings page shows *Drift Detected*). Change cards with a **new `--label`**, not the same run. Same label + different audio folder = a new run (ids don't mix).

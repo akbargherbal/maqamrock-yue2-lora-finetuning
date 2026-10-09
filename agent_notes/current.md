@@ -14,11 +14,12 @@ external **rating app**.
   `build_pron_only_fused.py`, `prepare_ahh_quran_dataset.py`, `train_ctl.py`, `backup_to_gcp.py`;
   `INFERENCE/` tooling + `scorecards/` + `songs.*.json`; `bootstrap/{rename_run,restore_run,setup}.sh`;
   `skills/`; `opencode.json` (dev config, tracked for fresh VMs).
-- **Small referenced records kept:** `INFERENCE/{rating_app,eval_app}`,
-  `results/{jarir_qahh,quran_ahh_epochs,dtest_diction}`, `TRAINING_ANALYSIS/quran_ahh_*/ANALYSIS.md`.
+- **Small referenced records kept:** `results/{jarir_qahh,quran_ahh_epochs,dtest_diction}`,
+  `TRAINING_ANALYSIS/quran_ahh_*/ANALYSIS.md`.
 
 ## Stayed on the branch (not on `main`)
-- `quran_text/` (3 MB dataset text), `TRAINING_ANALYSIS/quran_ahh_*/0*.png` (generated plots).
+- `quran_text/` (3 MB dataset text), `TRAINING_ANALYSIS/quran_ahh_*/0*.png` (generated plots),
+  `INFERENCE/{rating_app,eval_app}` (superseded eval apps).
 
 ## Health
 - Reconciler Steps 1–2 after merge+trim: **0 flagged / 1483 checkable**.

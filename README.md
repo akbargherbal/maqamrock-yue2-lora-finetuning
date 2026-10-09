@@ -82,8 +82,6 @@ INFERENCE/generate.py               # JSON-driven batch generation (bring your o
 INFERENCE/yue2_eval_heldout/        # held-out eval set: 4 prompts, 0 shared lines with training
 INFERENCE/duration_cap.py           # canonical text->duration cap (docs/text_to_duration_formula.md)
 INFERENCE/prepare_ab_eval.py        # generic blinded A/B(/N) listening package (EVAL.txt / KEYS.txt)
-INFERENCE/rating_app/                # SUPERSEDED listening app (history); use the external ai_music_rating_app — docs/LISTENING_EVAL.md
-INFERENCE/eval_app/                  # Quran 2:255 word-grid eval app (specific, unchanged)
 INFERENCE/{pron_alpha_sweep,pron_fine_sweep,pron_knob_probe,qfinal_suno_sweep}.sh   # sweep drivers (qfinal_suno_sweep: RETIRED)
 INFERENCE/{suno_to_songs,pron_ckpt_sweep,maqam_lyric_swap}.py                       # sweep/convert tooling
 manifests/workspace_manifest.json   # legacy Suno manifest; input to INFERENCE/suno_to_songs.py
