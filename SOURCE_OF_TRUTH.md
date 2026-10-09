@@ -21,7 +21,7 @@ History files are authoritative for what happened, never for what is true now.
 | Quran-pron objective / criteria / next-run plan | `docs/QURAN_PRON_REVIEW.md` | post-verdict audit; acceptance criteria proposal (pending user) |
 | AHH Quran LoRA run (`quran_ahh_r32`) — hub / config audit / GPU checklist | `docs/QURAN_AHH_RUN.md` | gated by Phase 1 base-model ceiling probe |
 | High-quality Quran recitation dataset (AHH filtered) | `github.com/akbargherbal/quran_recitation_training_dataset` + GCS `AHH_Quran_Long_Aya_Filtered_DATASET.zip` | 3 reciters; 9,492/13,501 kept; audio-only (pair with Tanzil text) |
-| LoRA library (what exists, how many, where) | `docs/LORA_INVENTORY.md` | canonical `<base>/loras/`: **style** + `source/`; current pron donor `quran_ahh_r32` (merges `qahh_a0*` under `<base>/quran_ahh_r32/maqamrock_merge/`); superseded donors under `<base>/archive/` |
+| LoRA library (what exists, how many, where) | `docs/LORA_INVENTORY.md` | canonical `<base>/loras/`: **style** + `source/`; pron donor `quran_ahh_r32` — **shelved, not adopted for arabmaqamrock** (`PROGRESS.md` M12); merges `qahh_a0*` under `<base>/quran_ahh_r32/maqamrock_merge/`; superseded donors under `<base>/archive/` |
 | Alpha sweep / listening review | `docs/PRON_LORA_SWEEP.md` | procedure + Rounds 1–5; numbers in `results/{pron_sweep,pron_fine_sweep,pron_ckpt_sweep,maqam_lyric_swap,pron_knob_probe}/` |
 | Blinded listening packages (audio) | GCS `<base>/listening/` | generated mp3 packages; **not repo content** (`.gitignore` `*_INPUT/`) |
 | Blinded A/B listening package | `docs/AB_BLIND_EVAL.md` + `INFERENCE/prepare_ab_eval.py --help` | script flags beat prose; skill `ab-blind-eval`; hands a package to a different person |

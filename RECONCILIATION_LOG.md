@@ -451,3 +451,25 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   [the external app]; mention the one line command"). No run config or hyperparameter changed;
   no frozen claim rewritten (append-only).
 
+## 2026-10-09 — Quran donor shelved; evaluation app surfaced for `main`
+
+- **Decision recorded:** the Quran pronunciation donor (`quran_ahh_r32` + `qahh_a0*` merges) is
+  **shelved for arabmaqamrock** — no demonstrated diction advantage over v2 across M13 + the
+  D-test (the rubric saturated at 5); reserved for a future dialect project.
+  - `PROGRESS.md`: M12–M15 collapsed into one lean **M12** block (108 → 127 lines).
+  - `DECISIONS.md`: shelving appended to the `quran_ahh_r32` bullet, plus a new lesson *"Score
+    the axis you care about"* in the listening-eval section (88 → 103 lines).
+  - `results/jarir_qahh/OPEN_DECISIONS.md`: matching **Resolved** block (branch record).
+- **Evaluation app surfaced for `main`:** `README.md` now names the external rating app
+  (`gh repo clone akbargherbal/ai_music_rating_app`) as the **way forward** for evaluation;
+  `docs/LISTENING_EVAL.md` setup uses that clone form. `README.md` donor section + status line,
+  and `SOURCE_OF_TRUTH.md` LoRA row, updated to "shelved".
+- **Reconciler (Steps 1–2):** 2404 claims / 59 live docs; 1483 checkable; **11 flagged (0.7%)**
+  — all pre-existing run-record + pre-rename tokens (the set the 2026-10-07 note deferred).
+  Curated into `references/unverifiable.txt` (doc-scoped, commented) → **0 flagged**.
+- **Tracked:** `opencode.json` added to the index (agent/dev config, so a fresh VM is set up).
+- Authority: user directive ("shelf the Quran LoRA for future projects"; "mention the rating app
+  `gh repo clone akbargherbal/ai_music_rating_app` … should be mentioned in main branch") + the
+  D-test/M13 evidence. No config or hyperparameter touched; frozen docs not rewritten (M12 and
+  the DECISIONS bullet are dated appends).
+

@@ -96,67 +96,31 @@ narrative lives in git — pre-rewrite history at `git show 39d1bbd:PROGRESS.md`
   Tag **`v0.9.0-beta`** marks the repo's state: v2 style LoRA + long-aya Quran pronunciation
   merges (unselected candidates) + the audio.cpp inference pipeline.
 
-## M12 — Quran pron LoRA **alone** (α=1) on the base model · 2026-10-04
+## M12 — Quran pronunciation donor: probed, unproven, shelved · 2026-10-04 → 10-09
 
-- **First "pron-only" arm rendered** (branch `experimental-quran-pron`): the first song of
-  `manifests/batch_36_songs.json` with its style replaced by the unaccompanied-recitation
-  caption, Quran adapter alone (AR 1.0, NAR off), seed `20261004`. **exit 0**, 52.2 s WAV.
-- **Finding: it self-terminates after ~one aya** (1304 semantic tokens; cap 7500,
-  `truncated 0`). The adapter is AR-only and its training clips were single long-ayat
-  recitations (~23 s avg), so it recites one passage and emits EOS. See
-  `docs/QURAN_ONLY_EXPERIMENT.md`.
-- **Consequence for tooling:** the audio.cpp converter needs both branches (AR-only input
-  fails), and the raw pron file *is* α=1 (trained alpha==rank), so this arm needs no merge —
-  `build_pron_only_fused.py` + the converter (see `DECISIONS.md`).
-
-## M13 — `jarir_lever_probe` rendered + rated; donor merge unproven · 2026-10-07
-
-- Rendered **17 WAVs** (9 scale arms + 8 prompt-tier tracks) on one fixed song, seed `20261011`,
-  via `INFERENCE/jarir_lever_probe.sh` + `songs.jarir_lever_probe.json`; all exit 0, none
-  truncated, mirrored to GCS. Adapter under test: `qahh_a0p1` (α0.1 `quran_ahh_r32` rank32 merge
-  into v2); the v2-only arm is the **no-donor ceiling reference**.
-- Labeled listening (single rater, `rating_app`) →
-  `INFERENCE/rating_app/my_evaluations/rating_20261007-1100.md`.
-- **Outcome:** the leading hypothesis — cut merged-AR to 0.5, keep NAR — is **refuted**. Cutting
-  AR hurts (`qa_0.5_1.0` 3, `qa_0.0_1.0` 2/broken); cutting NAR doesn't (`qa_1.0_0.5` 4) → the
-  merged-AR expert is the load-bearing one. Best arm is **v2-only (5, no Quran donor)**; every
-  sampler knob (`rp1.4`/`t0.8`/`g1.0`/`notrigger`) ≤ 3. Prompt keepers: `p1_verbatim_v2`,
-  `p2_articulation_qahh` (4, keep). n=1 track/arm → qualitative.
-- **Diction:** the donor shows **no demonstrated benefit** and a hint of harm — diction saturated
-  at 5 on nearly all arms, and "tajweed bleed" (أعددت→الشعياء, شربك→شلبك) appears specifically on
-  the donor (`qahh`) arms; the paired `p1_verbatim_qahh` vs `p1_verbatim_v2` came out cleaner on
-  v2. The donor's actual job (hard phonemes: ع/ش/emphatics) was **not isolated** by this rubric.
-- **Bottleneck is mood/energy** ("chill / not rising to the occasion"), not intelligibility —
-  recurring across the scale arms including the top take.
-
-## M14 — Evaluation tooling moved to the external rating app · 2026-10-07
-
-- Listening/rating now runs in **`github.com/akbargherbal/ai_music_rating_app`** (Flask;
-  scorecard library, per-run frozen scorecard, `--blind`, multi-metric report). The in-repo
-  single-file `INFERENCE/rating_app/` (which produced M13's report) is **superseded** — kept
-  for history. Runbook + the one-line launch command: [`docs/LISTENING_EVAL.md`](docs/LISTENING_EVAL.md)
-  (skill `listening-eval`).
-- First evaluation under it: the **D-test** (`INFERENCE/songs.dtest.json`; 5 arms × 4 seeds =
-  20 takes, seeds `20261021`–`20261024`, cap 8000) rendered on a T4 via
-  `INFERENCE/jarir_lever_probe.sh`, scorecard `INFERENCE/scorecards/dtest_diction.json`.
-  **Listening verdict pending.**
+- Built the rank-32 AR+NAR Quran adapter **`quran_ahh_r32`** (AHH-filtered 3 reciters, 9,489
+  pairs) + α-merges **`qahh_a0*`**; rendered a Quran-only (α=1) arm and two labeled listens
+  (a 17-take lever probe; the 20-take **D-test**, 5 arms × 4 seeds) via `jarir_lever_probe.sh`.
+  Quran-only self-terminates at ~one aya (AR-only ⇒ length = training-clip length).
+- **No demonstrated diction advantage over v2-only:** the diction rubric **saturated at 5** on
+  nearly all arms (incl. v2); the real recurring complaint was throat-letter **fidelity**
+  (ع/ح/ر "present but lightened"), which the rubric didn't measure. Prompt finding: the
+  **training caption is the prompt** — trimming/inventing wording hurts; Suno verbatim tags fine.
+- **Decision (2026-10-09): shelved for arabmaqamrock** (v2 already sits near the model's makhraj
+  ceiling on the high-quality, vocal-forward data) — reserved for a future **dialect** project:
+  *take the song's melody, the Quran's diction.* Evaluation moved to the external rating app
+  (`github.com/akbargherbal/ai_music_rating_app`; `docs/LISTENING_EVAL.md`); the in-repo
+  `INFERENCE/rating_app/` is superseded.
 
 ## Open items
 
-- **D-test render + listening (in progress, 2026-10-07).** 20 takes (v2 vs `qahh_a0p1` on an
-  AR/NAR scale grid) rendered via `INFERENCE/jarir_lever_probe.sh` + `INFERENCE/songs.dtest.json`;
-  score with [`docs/LISTENING_EVAL.md`](docs/LISTENING_EVAL.md). Verdict pending.
-
-- **Donor value in the production merge is unproven (M13).** The α0.1 Quran donor showed no
-  demonstrated diction benefit (and a tajweed-bleed hint of harm) while v2-only topped the probe.
-  Decide: run a powered donor-vs-no-donor diction test, or drop the donor.
-
-- **Quran-only (α=1) listening + comparison arms.** The first sample is rendered; listen, then
-  run base / quran-AR+v2-NAR at the same seed for a blind A/B (`docs/QURAN_ONLY_EXPERIMENT.md`).
-
-- **Pick α for the current donor** `quran_ahh_r32`. Blinded listening over `qahh_a0` / `a0p1` /
-  `a0p2` / `a0p3`. User's call. (The long-aya `qfinal_a*` and its checkpoints are moot — that
-  donor was retired 2026-10-07 → `docs/LORA_INVENTORY.md`.)
+- **New arabmaqamrock round — ~400–450 songs (planned).** `config/A100_akbar_arabic_rock_lora.yml`
+  is the current 267 recipe (v2); branch a new run config (dataset path, step count, name) and
+  sanity-check against `DECISIONS.md` before launch.
+- **Dialect project (long-term).** Lyric-free (melody-only) style LoRA + a separate diction
+  adapter, to supply the Quran's diction over the song's melody. Core assumption — *a diction
+  adapter compensates for lyric-free style training* — is **untested**; v1's lyric-free run is
+  the counter-evidence. Keep the banked `quran_ahh_r32` (+ merges) for this.
 - **Clean-VM proof** of `bootstrap/setup.sh --inference` + cold timing (warm-VM only so far).
 - **Per-arch binary auto-selection** (bootstrap stages only the flat sm_75 object).
 - **vm-continuity** Milestone 1 — idle-time only, never GPU-paid.

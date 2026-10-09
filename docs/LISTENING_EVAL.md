@@ -48,8 +48,12 @@ python app.py `
 
 ## One-time setup (per machine)
 
+This is the **way forward for evaluation** — clone the app, don't build one here.
+
 ```powershell
-git clone https://github.com/akbargherbal/ai_music_rating_app.git
+gh repo clone akbargherbal/ai_music_rating_app
+# or, without gh:
+# git clone https://github.com/akbargherbal/ai_music_rating_app.git
 cd ai_music_rating_app
 py -m pip install -r requirements.txt
 ```

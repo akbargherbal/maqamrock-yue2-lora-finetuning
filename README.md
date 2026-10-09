@@ -12,7 +12,7 @@ word `arabmaqamrock`. Training runs on a rented single GPU in Google Colab, driv
 CLI (not the Web UI) and monitored through an agent-readable SQLite metrics db; Colab is
 ephemeral, so all expensive artifacts are mirrored to GCS.
 
-## Status — BETA (~9/10), candidates unselected
+## Status — BETA (~9/10)
 
 **Both training milestones are complete and the inference pipeline is built and exercised.**
 Nothing is training right now.
@@ -21,22 +21,28 @@ Nothing is training right now.
   A100-SXM4-80GB. Style/timbre/arrangement match the target strongly; pronunciation improved
   over v1 to **~9/10** (a few letters still soften: ح→خ/ه, ع→أ). Dataset: 267
   lyric-conditioned pairs (`./yue2_dataset`; GCS `dataset/`).
-- **Pronunciation donor** — **`quran_ahh_r32`** (rank 32, AR+NAR; AHH-filtered **3 reciters**
-  — Husary, Hudhaify, Abdul Basit — 9,489 pairs, 28,467 steps). Merged into v2 with
-  `merge_quran_lora.py` at **α0.1** → the `qahh_a0*` candidates. The earlier
-  `pron_lora_ar_only_r8` family and the 9-reciter long-aya donor (`quran_long_aya_r8_s10` +
-  `qfinal_a*`) are **retired/archived**.
-- **Current candidates (unselected):** the `qahh_a0*` α sweep (α 0 / 0.1 / 0.2 / 0.3) — v2
-  style merged with `quran_ahh_r32` via `merge_quran_lora.py`. **No α is selected**; the choice
-  follows the listening review. See [`docs/LORA_INVENTORY.md`](docs/LORA_INVENTORY.md).
+- **Pronunciation donor — parked, not adopted for arabmaqamrock (2026-10-09).** **`quran_ahh_r32`**
+  (rank 32, AR+NAR; AHH-filtered **3 reciters** — Husary, Hudhaify, Abdul Basit — 9,489 pairs)
+  merged into v2 with `merge_quran_lora.py` at **α0.1** → the `qahh_a0*` candidates. Across two
+  listening rounds it showed **no demonstrated diction advantage** over v2 (the rubric saturated),
+  so it is **shelved** — kept for a future **dialect** project — and v2-only stays the production
+  style. See `PROGRESS.md` M12. (The earlier `pron_lora_ar_only_r8` family and the 9-reciter
+  long-aya donor `quran_long_aya_r8_s10` + `qfinal_a*` are retired/archived.)
+- **Banked merges (not adopted):** the `qahh_a0*` α sweep (α 0 / 0.1 / 0.2 / 0.3) — v2 style
+  merged with `quran_ahh_r32` via `merge_quran_lora.py`. Kept for the dialect project; **no α
+  selected**. See [`docs/LORA_INVENTORY.md`](docs/LORA_INVENTORY.md).
 - **Inference** — the style LoRA and the merges run against held-out lyrics on audio.cpp
   (GGUF + converted unfused LoRA), driven by [`INFERENCE/run_one.sh`](INFERENCE/run_one.sh)
   and the JSON batch driver [`INFERENCE/generate.py`](INFERENCE/generate.py); GPU-free tests
   in `tests/`.
 
 **Why BETA:** the artifacts and runbooks are exercised end-to-end and reproducible; what is
-not settled is the audio verdict (which α/checkpoint wins the blind listen) and the
-pronunciation donor's final form. Open items: [`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md).
+not settled is the next style round (more data) and the production audio verdict. The
+pronunciation donor is **decided** (not adopted; parked for a future dialect project).
+Listening evaluations run in the external **rating app**
+(`gh repo clone akbargherbal/ai_music_rating_app`; runbook
+[`docs/LISTENING_EVAL.md`](docs/LISTENING_EVAL.md)). Open items:
+[`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md).
 
 ### Superseded / retired
 

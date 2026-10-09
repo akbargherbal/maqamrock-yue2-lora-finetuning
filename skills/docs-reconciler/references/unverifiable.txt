@@ -200,3 +200,21 @@ user_cheatsheet.md :: --scorecard
 user_cheatsheet.md :: --blind
 docs/AB_BLIND_EVAL.md :: --blind
 
+# 2026-10-09 — run-record + pre-rename tokens (dedicated pass the 2026-10-07 note deferred).
+# Files live under results/ (round records) or are historical snapshots; the paths they cite
+# are runtime/GCS artifacts or pre-rename names, not repo files.
+results/jarir_qahh/README.md :: EVAL.txt
+results/jarir_qahh/README.md :: KEYS.txt
+results/quran_ahh_epochs/README.md :: adapter_manifest.json
+results/quran_ahh_epochs/README.md :: EVAL.txt
+results/quran_ahh_epochs/README.md :: KEYS.txt
+results/jarir_qahh/OPEN_DECISIONS.md :: jarir_songs.json
+docs/COMMAND_HANDOVER_GOTCHAS.md :: _sweep.sh
+# runtime adapter manifest under the old rank-8 run's convert/ dir
+TRAINING_ANALYSIS/quran_ahh_r8_rank8_aronly/ANALYSIS.md :: convert/adapter_manifest.json
+# pre-rename citations: this snapshot predates the quran_ahh_r8 -> quran_ahh_r32 rename
+# (config + output + GCS renamed; see DECISIONS.md), so it cites the old names on purpose
+TRAINING_ANALYSIS/quran_ahh_r8_rank8_aronly/ANALYSIS.md :: config/quran_ahh_r8.yml
+TRAINING_ANALYSIS/quran_ahh_r8_rank8_aronly/ANALYSIS.md :: TRAINING_ANALYSIS/quran_ahh_r8
+docs/QURAN_AHH_RESUME_PLAN.md :: TRAINING_ANALYSIS/quran_ahh_r8_rank32/
+
