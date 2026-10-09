@@ -1,0 +1,62 @@
+{
+  "generated": "2026-10-06 05:41:19Z",
+  "seed": 20261006,
+  "shuffle_per": "category",
+  "variants": [
+    "c9000",
+    "c19500",
+    "final"
+  ],
+  "audio_format": "mp3",
+  "pairs": [
+    {
+      "category": "-",
+      "blind_file": "002255_simple_A.mp3",
+      "label": "A",
+      "variant": "final",
+      "source_path": "final/002255_simple.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "002255_simple_B.mp3",
+      "label": "B",
+      "variant": "c9000",
+      "source_path": "c9000/002255_simple.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "002255_simple_C.mp3",
+      "label": "C",
+      "variant": "c19500",
+      "source_path": "c19500/002255_simple.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "002255_uthmani_A.mp3",
+      "label": "A",
+      "variant": "final",
+      "source_path": "final/002255_uthmani.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "002255_uthmani_B.mp3",
+      "label": "B",
+      "variant": "c9000",
+      "source_path": "c9000/002255_uthmani.wav"
+    },
+    {
+      "category": "-",
+      "blind_file": "002255_uthmani_C.mp3",
+      "label": "C",
+      "variant": "c19500",
+      "source_path": "c19500/002255_uthmani.wav"
+    }
+  ],
+  "labels": {
+    "": {
+      "final": "A",
+      "c9000": "B",
+      "c19500": "C"
+    }
+  }
+}

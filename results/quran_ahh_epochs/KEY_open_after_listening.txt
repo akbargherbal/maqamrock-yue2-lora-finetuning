@@ -1,0 +1,23 @@
+=======================================================================
+                         QURAN_AHH_EPOCHS_INPUT                        
+             SECRET DECODER KEY — open only AFTER listening            
+                    Generated: 2026-10-06 05:41:19Z                    
+=======================================================================
+seed=20261006  shuffle_per=category  variants=c9000, c19500, final
+-----------------------------------------------------------------------
+Blind Filename       | Category | Variant | Note                       
+-----------------------------------------------------------------------
+002255_simple_A.mp3  | -        | final   | epoch 3 exact (step 28467) 
+002255_simple_B.mp3  | -        | c9000   | approx epoch 1 (step 9000) 
+002255_simple_C.mp3  | -        | c19500  | approx epoch 2 (step 19500)
+002255_uthmani_A.mp3 | -        | final   | epoch 3 exact (step 28467) 
+002255_uthmani_B.mp3 | -        | c9000   | approx epoch 1 (step 9000) 
+002255_uthmani_C.mp3 | -        | c19500  | approx epoch 2 (step 19500)
+=======================================================================
+
+DECODE: match the label the evaluator preferred for a track against the
+'Variant' column above.
+VARIANT LEGEND
+  c9000 = approx epoch 1 (step 9000)
+  c19500 = approx epoch 2 (step 19500)
+  final = epoch 3 exact (step 28467)
