@@ -17,12 +17,17 @@ operating contract is `../AGENTS.md`.
 | Build `audiocpp_cli` for a target GPU on a CPU-only runtime | [audiocpp_gpu_arch_builds.md](audiocpp_gpu_arch_builds.md) |
 | Run inference (YuE2 GGUF + LoRA) on a fresh VM | [INFERENCE.md](INFERENCE.md) |
 | Train the AR-only pronunciation LoRA | [PRON_LORA.md](PRON_LORA.md) |
-| **Run / resume the long-aya Quran LoRA (`quran_long_aya_r8_s10`) — canonical hub** | [PRON_LORA_LONG.md](PRON_LORA_LONG.md) |
+| **Run / resume the long-aya Quran LoRA (`quran_long_aya_r8_s10`) — RETIRED 2026-10-07** | [PRON_LORA_LONG.md](PRON_LORA_LONG.md) |
 | Verify / offline-eval the pronunciation LoRA (source + AR-loss replay) | [PRON_LORA_VERIFICATION.md](PRON_LORA_VERIFICATION.md) |
 | Merge v2 + pron at a chosen alpha | [PRON_LORA_MERGE.md](PRON_LORA_MERGE.md) |
+| Quran pron LoRA alone (α=1) on the base model | [QURAN_ONLY_EXPERIMENT.md](QURAN_ONLY_EXPERIMENT.md) |
+| Probe training-format vs caption on the Quran adapter (GPU test) | [QURAN_FORMAT_PROBE.md](QURAN_FORMAT_PROBE.md) |
+| Review the Quran-pron objective, criteria & next-run plan | [QURAN_PRON_REVIEW.md](QURAN_PRON_REVIEW.md) |
+| Run the AHH Quran LoRA (`quran_ahh_r32`) — hub, config audit & GPU checklist | [QURAN_AHH_RUN.md](QURAN_AHH_RUN.md) |
 | Alpha sweep + blinded listening review | [PRON_LORA_SWEEP.md](PRON_LORA_SWEEP.md) |
 | LoRA inventory: what exists, how many, where | [LORA_INVENTORY.md](LORA_INVENTORY.md) |
 | Prepare a blinded A/B(/N) audio listening package | [AB_BLIND_EVAL.md](AB_BLIND_EVAL.md) |
+| Score rendered variants (listening evaluation / rating app) | [LISTENING_EVAL.md](LISTENING_EVAL.md) |
 | Hand the user a command to run (terminal reality check) | [COMMAND_HANDOVER_GOTCHAS.md](COMMAND_HANDOVER_GOTCHAS.md) |
 | Review how it felt to work with the agent (experience, trust, friction) | [EXPERIENCE_CHECKLIST.md](EXPERIENCE_CHECKLIST.md) |
 | How the text→duration cap is derived | [text_to_duration_formula.md](text_to_duration_formula.md) |
@@ -58,9 +63,11 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 | Converted LoRA | `/content/converter/out/akbar_arabic_rock_lora_{ar,nar}.safetensors` |
 | Handoff notes | `agent_notes/current.md` (tracked in git; also GCS-mirrored) |
 
-**Long-aya Quran run (`quran_long_aya_r8_s10`) has different names/paths** — see the
-Snapshot in [PRON_LORA_LONG.md](PRON_LORA_LONG.md): dataset `/content/quran_long_aya_dataset_s10`
+**The long-aya Quran run (`quran_long_aya_r8_s10`) is RETIRED** (2026-10-07; superseded by
+`quran_ahh_r32`) — its historical names/paths are in the Snapshot in
+[PRON_LORA_LONG.md](PRON_LORA_LONG.md): dataset `/content/quran_long_aya_dataset_s10`
 (restored from a GCS tar), latent cache banked as a tar, output `…/quran_long_aya_r8_s10/`.
+The current run is `quran_ahh_r32` (see [QURAN_AHH_RUN.md](QURAN_AHH_RUN.md)).
 
 Env vars are staged by the launching notebook before any terminal command; a
 terminal that can't see them means the notebook cell hasn't run yet.

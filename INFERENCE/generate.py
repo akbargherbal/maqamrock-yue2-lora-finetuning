@@ -11,7 +11,7 @@ Schema (strict: unknown keys are an error)
     {
       "loras": {                            # optional alias registry, per-song adapters
         "v2":          { "dir": "/content/converter/out" },
-        "qfinal_a0.3": { "dir": "/content/converter/out/qfinal_a0.3" },
+        "qahh_a0p1":   { "dir": "/content/converter/out/qahh_a0p1" },
         "custom":      { "ar": "my_ar.safetensors", "nar": "my_nar.safetensors" }
       },                                    # "dir" -> <dir>/akbar_arabic_rock_lora_{ar,nar}.safetensors,
                                             # or explicit "ar"+"nar"; relative paths resolve here
@@ -28,7 +28,7 @@ Schema (strict: unknown keys are an error)
           "style_file": "prompts/Hijaz_style.txt",
           "lyrics":  "[Verse 1]\n...",     # inline  xor lyrics_file
           "lyrics_file": "my_lyrics.txt",
-          "lora":    "qfinal_a0.5",        # optional alias; else defaults.lora, else the CLI pair
+          "lora":    "qahh_a0p1",         # optional alias; else defaults.lora, else the CLI pair
           "repeat":  3,                    # -> 3 fresh random seeds
           "seeds":   [1, 2, 3],            # or explicit, all < 2^32
           "seed":    42,                   # or exactly one render

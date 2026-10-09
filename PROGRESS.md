@@ -96,12 +96,31 @@ narrative lives in git — pre-rewrite history at `git show 39d1bbd:PROGRESS.md`
   Tag **`v0.9.0-beta`** marks the repo's state: v2 style LoRA + long-aya Quran pronunciation
   merges (unselected candidates) + the audio.cpp inference pipeline.
 
+## M12 — Quran pronunciation donor: probed, unproven, shelved · 2026-10-04 → 10-09
+
+- Built the rank-32 AR+NAR Quran adapter **`quran_ahh_r32`** (AHH-filtered 3 reciters, 9,489
+  pairs) + α-merges **`qahh_a0*`**; rendered a Quran-only (α=1) arm and two labeled listens
+  (a 17-take lever probe; the 20-take **D-test**, 5 arms × 4 seeds) via `jarir_lever_probe.sh`.
+  Quran-only self-terminates at ~one aya (AR-only ⇒ length = training-clip length).
+- **No demonstrated diction advantage over v2-only:** the diction rubric **saturated at 5** on
+  nearly all arms (incl. v2); the real recurring complaint was throat-letter **fidelity**
+  (ع/ح/ر "present but lightened"), which the rubric didn't measure. Prompt finding: the
+  **training caption is the prompt** — trimming/inventing wording hurts; Suno verbatim tags fine.
+- **Decision (2026-10-09): shelved for arabmaqamrock** (v2 already sits near the model's makhraj
+  ceiling on the high-quality, vocal-forward data) — reserved for a future **dialect** project:
+  *take the song's melody, the Quran's diction.* Evaluation moved to the external rating app
+  (`github.com/akbargherbal/ai_music_rating_app`; `docs/LISTENING_EVAL.md`); the in-repo
+  `INFERENCE/rating_app/` is superseded.
+
 ## Open items
 
-- **Pick α/checkpoint** for the production adapter by blinded listening (`qfinal_a0.3` vs
-  `qfinal_a0.5`; also the long-aya checkpoints). User's call.
-- **Long-aya checkpoints:** evaluate the 6 on a T4 (merge/convert/generate), then decide extend
-  vs conclude (`docs/PRON_LORA_LONG.md`).
+- **New arabmaqamrock round — ~400–450 songs (planned).** `config/A100_akbar_arabic_rock_lora.yml`
+  is the current 267 recipe (v2); branch a new run config (dataset path, step count, name) and
+  sanity-check against `DECISIONS.md` before launch.
+- **Dialect project (long-term).** Lyric-free (melody-only) style LoRA + a separate diction
+  adapter, to supply the Quran's diction over the song's melody. Core assumption — *a diction
+  adapter compensates for lyric-free style training* — is **untested**; v1's lyric-free run is
+  the counter-evidence. Keep the banked `quran_ahh_r32` (+ merges) for this.
 - **Clean-VM proof** of `bootstrap/setup.sh --inference` + cold timing (warm-VM only so far).
 - **Per-arch binary auto-selection** (bootstrap stages only the flat sm_75 object).
 - **vm-continuity** Milestone 1 — idle-time only, never GPU-paid.

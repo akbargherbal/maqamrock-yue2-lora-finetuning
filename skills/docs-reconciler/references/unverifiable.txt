@@ -143,3 +143,78 @@ docs/EXPERIENCE_CHECKLIST.md :: config/data/course
 # pron-dataset build artifacts + ai-toolkit internals (live in /content, not the repo)
 docs/PRON_LORA_LONG_PLAN.md :: selection_report.json
 docs/PRON_LORA_LONG_PLAN.md :: dataloader_mixins.py
+
+# 2026-10-06 reconcile: external/example/placeholder tokens
+# ai-toolkit internals cited by bare name (the clone, not this repo)
+BaseSDTrainProcess.py
+# external pip flag quoted in one gotcha
+docs/COMMAND_HANDOVER_GOTCHAS.md :: --force-reinstall
+# placeholder db names in the loss_log.db repair recipe (illustrative, not repo files)
+docs/COMMAND_HANDOVER_GOTCHAS.md :: bad.db
+docs/COMMAND_HANDOVER_GOTCHAS.md :: clean.db
+# runtime/example files in the eval_app (not committed)
+INFERENCE/eval_app/README.md :: evaluations.json
+INFERENCE/eval_app/README.md :: _knob.json
+INFERENCE/eval_app/README.md :: //127.0.0.1
+# external dataset files cited in one research doc
+docs/QURAN_PRON_REVIEW.md :: FILTERED_DATASET_README.md
+docs/QURAN_PRON_REVIEW.md :: MANIFEST.csv
+# runtime adapter manifest under a run's convert/ dir
+TRAINING_ANALYSIS/quran_ahh_r32/ANALYSIS.md :: convert/adapter_manifest.json
+
+# 2026-10-06 reconcile (2nd batch): external / other-branch / false-positive tokens
+# user-supplied legacy Suno manifest (input to INFERENCE/suno_to_songs.py; not bundled)
+workspace_manifest.json
+manifests/workspace_manifest.json
+# lives on another branch (pron-lora-knobs-investigation), cited in one doc
+docs/QURAN_PRON_REVIEW.md :: docs/investigation_generation_knobs.md
+# prose phrase ("config/hyperparameters."), not a path
+docs/QURAN_AHH_RESUME_PLAN.md :: config/hyperparameters.
+# runtime/example artifact in eval_app
+INFERENCE/eval_app/README.md :: agent_notes/T4_listening_checklist.md
+
+# 2026-10-07 — external listening/rating app (github.com/akbargherbal/ai_music_rating_app):
+# its files, flags and run artifacts live in the external repo, not this one. Doc-scoped to
+# the docs that describe it (the superseded in-repo INFERENCE/rating_app/ is excluded wholesale).
+docs/LISTENING_EVAL.md :: app.py
+docs/LISTENING_EVAL.md :: card.json
+docs/LISTENING_EVAL.md :: run.json
+docs/LISTENING_EVAL.md :: requirements.txt
+docs/LISTENING_EVAL.md :: scorecards/dtest_diction.json
+docs/LISTENING_EVAL.md :: results.json
+docs/LISTENING_EVAL.md :: scorecard.snapshot.json
+docs/LISTENING_EVAL.md :: EVAL.txt
+docs/LISTENING_EVAL.md :: KEYS.txt
+docs/LISTENING_EVAL.md :: rating_app/report.py
+docs/LISTENING_EVAL.md :: --scorecard
+docs/LISTENING_EVAL.md :: --blind
+skills/listening-eval/SKILL.md :: app.py
+skills/listening-eval/SKILL.md :: card.json
+skills/listening-eval/SKILL.md :: run.json
+skills/listening-eval/SKILL.md :: --scorecard
+skills/listening-eval/SKILL.md :: --blind
+user_cheatsheet.md :: app.py
+user_cheatsheet.md :: card.json
+user_cheatsheet.md :: requirements.txt
+user_cheatsheet.md :: --scorecard
+user_cheatsheet.md :: --blind
+docs/AB_BLIND_EVAL.md :: --blind
+
+# 2026-10-09 — run-record + pre-rename tokens (dedicated pass the 2026-10-07 note deferred).
+# Files live under results/ (round records) or are historical snapshots; the paths they cite
+# are runtime/GCS artifacts or pre-rename names, not repo files.
+results/jarir_qahh/README.md :: EVAL.txt
+results/jarir_qahh/README.md :: KEYS.txt
+results/quran_ahh_epochs/README.md :: adapter_manifest.json
+results/quran_ahh_epochs/README.md :: EVAL.txt
+results/quran_ahh_epochs/README.md :: KEYS.txt
+results/jarir_qahh/OPEN_DECISIONS.md :: jarir_songs.json
+docs/COMMAND_HANDOVER_GOTCHAS.md :: _sweep.sh
+# runtime adapter manifest under the old rank-8 run's convert/ dir
+TRAINING_ANALYSIS/quran_ahh_r8_rank8_aronly/ANALYSIS.md :: convert/adapter_manifest.json
+# pre-rename citations: this snapshot predates the quran_ahh_r8 -> quran_ahh_r32 rename
+# (config + output + GCS renamed; see DECISIONS.md), so it cites the old names on purpose
+TRAINING_ANALYSIS/quran_ahh_r8_rank8_aronly/ANALYSIS.md :: config/quran_ahh_r8.yml
+TRAINING_ANALYSIS/quran_ahh_r8_rank8_aronly/ANALYSIS.md :: TRAINING_ANALYSIS/quran_ahh_r8
+docs/QURAN_AHH_RESUME_PLAN.md :: TRAINING_ANALYSIS/quran_ahh_r8_rank32/
+

@@ -1,8 +1,10 @@
 # agent_notes is session state, but current.md is the handover the GPU-phase
 # prompt expects to find after a fresh clone (GPU_OPENING_PROMPT.md), so it is
-# tracked while the rest of the folder stays ignored.
+# tracked while the rest of the folder stays ignored. next_session_prompt.md is
+# likewise a copy surface the user reads/pastes on a fresh VM.
 agent_notes/*
 !agent_notes/current.md
+!agent_notes/next_session_prompt.md
 arabic_user.txt
 *.pyc
 __pycache__/
@@ -23,3 +25,6 @@ graphify-out/20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
 # <base>/listening/, not in the repo. Written by INFERENCE/prepare_ab_eval.py.
 *_INPUT/
 /ab_eval/
+
+# Stray ad-hoc screenshots (not part of the project).
+scrap_screenshot/

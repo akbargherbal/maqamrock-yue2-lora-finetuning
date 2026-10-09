@@ -12,7 +12,7 @@ word `arabmaqamrock`. Training runs on a rented single GPU in Google Colab, driv
 CLI (not the Web UI) and monitored through an agent-readable SQLite metrics db; Colab is
 ephemeral, so all expensive artifacts are mirrored to GCS.
 
-## Status — BETA (~9/10), candidates unselected
+## Status — BETA (~9/10)
 
 **Both training milestones are complete and the inference pipeline is built and exercised.**
 Nothing is training right now.
@@ -21,21 +21,28 @@ Nothing is training right now.
   A100-SXM4-80GB. Style/timbre/arrangement match the target strongly; pronunciation improved
   over v1 to **~9/10** (a few letters still soften: ح→خ/ه, ع→أ). Dataset: 267
   lyric-conditioned pairs (`./yue2_dataset`; GCS `dataset/`).
-- **Pronunciation donor** — the AR-only `pron_lora_ar_only_r8` (6100/6100) was **superseded**
-  by the long-aya Quran run **`quran_long_aya_r8_s10`** (8,100 pairs, 8100/8100 on an L4,
-  ~2.8 h). The old family is archived (`<base>/archive/pron_lora_ar_only_legacy/`).
-- **Current candidates (unselected):** `qfinal_a0.3` / `qfinal_a0.5` — v2 style merged with
-  the long-aya Quran donor at α 0.3 / 0.5 via `merge_pron_lora.py`. **No α/checkpoint is
-  selected**; the choice follows a blinded listening review. See
-  [`docs/LORA_INVENTORY.md`](docs/LORA_INVENTORY.md).
+- **Pronunciation donor — parked, not adopted for arabmaqamrock (2026-10-09).** **`quran_ahh_r32`**
+  (rank 32, AR+NAR; AHH-filtered **3 reciters** — Husary, Hudhaify, Abdul Basit — 9,489 pairs)
+  merged into v2 with `merge_quran_lora.py` at **α0.1** → the `qahh_a0*` candidates. Across two
+  listening rounds it showed **no demonstrated diction advantage** over v2 (the rubric saturated),
+  so it is **shelved** — kept for a future **dialect** project — and v2-only stays the production
+  style. See `PROGRESS.md` M12. (The earlier `pron_lora_ar_only_r8` family and the 9-reciter
+  long-aya donor `quran_long_aya_r8_s10` + `qfinal_a*` are retired/archived.)
+- **Banked merges (not adopted):** the `qahh_a0*` α sweep (α 0 / 0.1 / 0.2 / 0.3) — v2 style
+  merged with `quran_ahh_r32` via `merge_quran_lora.py`. Kept for the dialect project; **no α
+  selected**. See [`docs/LORA_INVENTORY.md`](docs/LORA_INVENTORY.md).
 - **Inference** — the style LoRA and the merges run against held-out lyrics on audio.cpp
   (GGUF + converted unfused LoRA), driven by [`INFERENCE/run_one.sh`](INFERENCE/run_one.sh)
   and the JSON batch driver [`INFERENCE/generate.py`](INFERENCE/generate.py); GPU-free tests
   in `tests/`.
 
 **Why BETA:** the artifacts and runbooks are exercised end-to-end and reproducible; what is
-not settled is the audio verdict (which α/checkpoint wins the blind listen) and the
-pronunciation donor's final form. Open items: [`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md).
+not settled is the next style round (more data) and the production audio verdict. The
+pronunciation donor is **decided** (not adopted; parked for a future dialect project).
+Listening evaluations run in the external **rating app**
+(`gh repo clone akbargherbal/ai_music_rating_app`; runbook
+[`docs/LISTENING_EVAL.md`](docs/LISTENING_EVAL.md)). Open items:
+[`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md).
 
 ### Superseded / retired
 
@@ -46,13 +53,17 @@ pronunciation donor's final form. Open items: [`docs/IMPROVEMENTS.md`](docs/IMPR
 - **`pron_lora_ar_only_r8`** and its 15 `c3050/c4575/cfinal_a0.*` merges — archived under
   `<base>/archive/pron_lora_ar_only_legacy/` (md5-verified); the run prefix was renamed
   `<base>/pron_lora_ar_only_r8_obsolete/`.
+- **Long-aya Quran donor** (`quran_long_aya_r8_s10`, 9 reciters, 8,100 pairs) and its
+  `qfinal_a0.3` / `qfinal_a0.5` merges — **retired 2026-10-07**, archived under
+  `<base>/archive/quran_long_aya_legacy/`. Superseded by `quran_ahh_r32`.
 
 ## Repo layout
 
 ```
-config/akbar_arabic_rock_lora.yml   # the style-LoRA training config (rank 32, EMA, cot: off, whole-song)
-config/quran_long_aya_r8_s10.yml    # active long-aya Quran pron run (AR-only rank 8, 8,100 pairs)
-config/quran_long_aya_r8.yml        # full-set ident, reserved for high-end hardware
+config/L4_akbar_arabic_rock_lora.yml + config/A100_akbar_arabic_rock_lora.yml   # style-LoRA training config, per-GPU variants (rank 32, EMA, cot: off, whole-song)
+config/LEGACY_akbar_arabic_rock_lora.yml   # v1/v2 predecessor (ar_kl 0.2, in-training sampling)
+config/quran_long_aya_r8_s10.yml    # RETIRED long-aya Quran pron run (AR-only rank 8, 8,100 pairs)
+config/quran_long_aya_r8.yml        # RETIRED full-set ident (never trained)
 config/pron_lora_ar_only.yml + config/pron_lora_ar_only_smoke.yml   # superseded pron donor (historical)
 prepare_yue2_dataset.py             # v1 build: style-only captions (obsolete dataset)
 prepare_pron_dataset.py             # pron dataset build (Task 13)
@@ -71,7 +82,9 @@ INFERENCE/generate.py               # JSON-driven batch generation (bring your o
 INFERENCE/yue2_eval_heldout/        # held-out eval set: 4 prompts, 0 shared lines with training
 INFERENCE/duration_cap.py           # canonical text->duration cap (docs/text_to_duration_formula.md)
 INFERENCE/prepare_ab_eval.py        # generic blinded A/B(/N) listening package (EVAL.txt / KEYS.txt)
-INFERENCE/{pron_alpha_sweep,pron_fine_sweep,pron_knob_probe,qfinal_suno_sweep}.sh   # sweep drivers
+INFERENCE/rating_app/                # SUPERSEDED listening app (history); use the external ai_music_rating_app — docs/LISTENING_EVAL.md
+INFERENCE/eval_app/                  # Quran 2:255 word-grid eval app (specific, unchanged)
+INFERENCE/{pron_alpha_sweep,pron_fine_sweep,pron_knob_probe,qfinal_suno_sweep}.sh   # sweep drivers (qfinal_suno_sweep: RETIRED)
 INFERENCE/{suno_to_songs,pron_ckpt_sweep,maqam_lyric_swap}.py                       # sweep/convert tooling
 manifests/workspace_manifest.json   # legacy Suno manifest; input to INFERENCE/suno_to_songs.py
 TRAINING_ANALYSIS/                  # per-run loss curves + final analysis (v1 archived under it)
@@ -105,7 +118,7 @@ is reserved and does not fit an L4 session — see `DECISIONS.md`).
 
 ## Training configs
 
-- `config/akbar_arabic_rock_lora.yml` — `process[].type: diffusion_trainer`, `arch: yue2`, on
+- `config/L4_akbar_arabic_rock_lora.yml` / `config/A100_akbar_arabic_rock_lora.yml` — `process[].type: diffusion_trainer`, `arch: yue2`, on
   `Comfy-Org/YuE2/checkpoints/yue2_3b_int8_convrot.safetensors` (`quantize: true`,
   `qtype: convrot8`). Central choices: rank 32, `ema_config.use_ema: true` (`ema_decay:
   0.999`), `model_kwargs.cot: "off"` (captions carry no melodic information, so SheetSage2 is

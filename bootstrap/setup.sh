@@ -113,10 +113,10 @@ AUDIOCPP_BIN_LOCAL="$AUDIOCPP_INFERENCE/bin/audiocpp_cli"
 AUDIOCPP_PROMPTS_LOCAL="$AUDIOCPP_INFERENCE/prompts"
 AUDIOCPP_SCRIPTS_LOCAL="$AUDIOCPP_INFERENCE/scripts"
 if [ "$MODE" = "inference" ]; then
-  # Canonical LoRA library (docs/LORA_INVENTORY.md): the current style adapter.
-  # Current pron merges (qfinal_a*) live under loras/audio_cpp/pron/<cfg>/ and are
-  # staged per-sweep, not by the bootstrap. The pron_lora_ar_only_r8 family is
-  # superseded/archived (archive/pron_lora_ar_only_legacy/).
+  # Canonical LoRA library (docs/LORA_INVENTORY.md): the style adapter only.
+  # Current pron merges (qahh_a0*) live under <base>/quran_ahh_r32/maqamrock_merge/
+  # and are staged per-sweep, not by the bootstrap. Superseded donors are archived:
+  # pron_lora_ar_only_r8 -> archive/pron_lora_ar_only_legacy/; long-aya -> archive/quran_long_aya_legacy/.
   LORA_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/loras/audio_cpp/style"
   CONVERTER_GCS="${GCP_BACKUP_BASE:?GCP_BACKUP_BASE must be set (the launching notebook exports it)}/audiocpp_inference/converter"
   AUDIOCPP_BIN_GCS="$GCP_BACKUP_BASE/audiocpp_inference/build/audiocpp_cli"
@@ -296,6 +296,28 @@ job_quran_long_dataset() {
   touch "$marker"
 }
 
+# AHH quality-filtered Quran pronunciation dataset -- the quran_ahh_r32 run's set
+# (docs/QURAN_AHH_RUN.md). Banked as a single ZIP (not a directory prefix), so it
+# is a `cp` + `unzip` rather than an rsync. Same opt-in shape/marker as the others;
+# runs only when GCP_AHH_DATASET_ZIP is exported. Marker lives at the dataset ROOT
+# (not inside train/) so a re-run on the same VM skips the re-pull.
+job_ahh_dataset() {
+  if [ -z "${GCP_AHH_DATASET_ZIP:-}" ]; then
+    echo "GCP_AHH_DATASET_ZIP unset; skipping AHH dataset (opt-in)"
+    return 0
+  fi
+  local local_dir="/content/quran_ahh_dataset"
+  local zip="/content/quran_ahh_dataset.zip"
+  local marker="${local_dir}/.bootstrap_complete"
+  if [ -f "$marker" ]; then
+    echo "AHH dataset already restored (marker $marker); skipping"
+    return 0
+  fi
+  gcloud storage cp "$GCP_AHH_DATASET_ZIP" "$zip"
+  unzip -q -o "$zip" -d /content/
+  touch "$marker"
+}
+
 # --- HF cache pre-warm: no custom directory tree, just make these a cache
 # hit instead of a stall the first time training actually asks for them. ---
 job_hf_yue2_backbone() {
@@ -412,6 +434,10 @@ if [ "$MODE" = "training" ]; then
   if [ -n "${GCP_QURAN_LONG_DATASET_PATH:-}" ]; then
     start_job quran_long_dataset job_quran_long_dataset
   fi
+  # opt-in: the AHH quran_ahh_r32 dataset (single zip)
+  if [ -n "${GCP_AHH_DATASET_ZIP:-}" ]; then
+    start_job ahh_dataset job_ahh_dataset
+  fi
   start_job hf_yue2_backbone job_hf_yue2_backbone
   start_job hf_mert job_hf_mert
   start_job hf_tokenizer_head job_hf_tokenizer_head
@@ -509,6 +535,17 @@ if [ "$MODE" = "training" ]; then
     fi
   fi
 
+  # AHH quran_ahh_r32 dataset (opt-in). Count train PAIRS (.txt), expect 9,489.
+  if [ -n "${GCP_AHH_DATASET_ZIP:-}" ]; then
+    ahh_pairs=$(find /content/quran_ahh_dataset/train -maxdepth 1 -name "*.txt" 2>/dev/null | wc -l)
+    if [ "$ahh_pairs" -ne 9489 ]; then
+      echo "[FAIL] AHH dataset: $ahh_pairs train pairs (expect 9489) — check /content/logs/ahh_dataset.log"
+      fail=1
+    else
+      echo "[ok]   AHH dataset: $ahh_pairs train pairs"
+    fi
+  fi
+
   if [ -f "$AI_TOOLKIT/run.py" ]; then
     echo "[ok]   ai-toolkit at $(git -C "$AI_TOOLKIT" rev-parse --short HEAD 2>/dev/null || echo '??') (tracking main, not pinned)"
   else
@@ -565,6 +602,32 @@ else
     fail=1
   fi
 
+  # The prebuilt binary links CUDA-12 libs (libcublas.so.12/libcudart.so.12). A
+  # CUDA-13 image only exposes them via the pip nvidia-*-cu12 wheels, so put
+  # them on the loader path — and fail loudly if still missing, so this verify
+  # block can never report all-[ok] on a binary that will die at load (exit=127).
+  # See INFERENCE/cuda_loader_path.sh and docs/COMMAND_HANDOVER_GOTCHAS.md (2026-10-04).
+  . "$REPO_ROOT/INFERENCE/cuda_loader_path.sh"
+  if ! cuda_loader_check "$AUDIOCPP_BIN_LOCAL"; then
+    echo "[warn] audiocpp_cli CUDA-12 libs missing; installing nvidia-cu12 runtime wheels"
+    pip install -q --no-input nvidia-cublas-cu12 nvidia-cuda-runtime-cu12 || true
+    . "$REPO_ROOT/INFERENCE/cuda_loader_path.sh"
+  fi
+  if cuda_loader_check "$AUDIOCPP_BIN_LOCAL"; then
+    echo "[ok]   audiocpp_cli loads (CUDA-12 libs on LD_LIBRARY_PATH)"
+    # Persist for interactive shells so ad-hoc ldd / direct CLI use also works.
+    if ! grep -qF 'maqamrock: CUDA-12 loader path' "$HOME/.bashrc" 2>/dev/null; then
+      {
+        echo ''
+        echo '# maqamrock: CUDA-12 loader path for the prebuilt audiocpp_cli'
+        echo "[ -f \"$REPO_ROOT/INFERENCE/cuda_loader_path.sh\" ] && . \"$REPO_ROOT/INFERENCE/cuda_loader_path.sh\""
+      } >> "$HOME/.bashrc"
+    fi
+  else
+    echo "[FAIL] audiocpp_cli cannot load (missing CUDA libs) — see COMMAND_HANDOVER_GOTCHAS.md 2026-10-04"
+    fail=1
+  fi
+
   for d in "$AUDIOCPP_PROMPTS_LOCAL" "$AUDIOCPP_SCRIPTS_LOCAL"; do
     if [ -d "$d" ] && [ -n "$(ls -A "$d" 2>/dev/null)" ]; then
       echo "[ok]   $d ($(find "$d" -type f | wc -l) files)"
@@ -608,7 +671,7 @@ Next (in a terminal):
   # 1. start the backup daemon + GPU logger (see AGENTS.md for the exact commands)
   # 2. launch training:
   cd $AI_TOOLKIT
-  python run.py $REPO_ROOT/config/akbar_arabic_rock_lora.yml -l /content/logs/train.log
+  python run.py $REPO_ROOT/config/A100_akbar_arabic_rock_lora.yml -l /content/logs/train.log
 EOF
 else
   cat <<EOF

@@ -92,7 +92,7 @@ missing file.
 
 ## 6. Guardrails (still binding — from `AGENTS.md`)
 
-- Do **not** edit `config/akbar_arabic_rock_lora.yml` or
+- Do **not** edit `config/A100_akbar_arabic_rock_lora.yml` or
   `config/pron_lora_ar_only.yml` (or any run config) on your own initiative;
   config/hyperparameter decisions are the user's. Measure, report, recommend.
 - Do **not** touch `/content/yue2_dataset` or `/content/pron_dataset` builds.

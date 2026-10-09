@@ -236,3 +236,240 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   `run_one.sh` writes a per-track `<name>_<seed>_gpu.csv` at 1 Hz. Reconciler:
   1837 claims / 45 docs, 1130 checkable, **6 flagged** (same pre-existing
   fixture) — 0 new drift.
+
+## 2026-10-04 — `run_one.sh`: per-expert adapter scales are env-overridable
+
+- `INFERENCE/run_one.sh` now reads `LORA_AR_SCALE` / `LORA_NAR_SCALE` (default
+  `1.0`), forwarded as `yue2.ar_lora_scale` / `yue2.nar_lora_scale`. Unset behavior
+  is byte-identical to before (both were the hardcoded literal `1.0`). This enables
+  the "Quran pron LoRA alone / base model" arms from `agent_notes/current.md`:
+  audio.cpp treats a scale of `0` as adapter-off (base weights), verified in
+  `docs/yue2-gguf-lora-findings.md:2.3` / PR #586.
+- `docs/INFERENCE.md` "Fixed session options" bullet updated to state the scales
+  default to 1.0 and are overridable by those env vars; no other doc claimed a
+  hardcoded scale for `run_one.sh`.
+- Tests: `tests/test_generate.py` + `tests/test_merge_pron_lora.py` pass
+  (73 passed, 1 skipped — the end-to-end converter invariant, artifacts not
+  staged). `tests/test_suno_to_songs.py` failures are the pre-existing missing
+  `manifests/workspace_manifest.json` fixture, unrelated.
+- Reconciler after the change: 1838 claims / 45 docs, 1131 checkable, **6 flagged**;
+  all 6 are that same pre-existing fixture — **0 new drift**.
+- Authority: user-directed experiment prep; no run config or hyperparameter
+  changed; no frozen doc rewritten.
+
+## 2026-10-04 — gotcha: CUDA-13 image needs CUDA-12 libs on `LD_LIBRARY_PATH`
+
+- Added a `docs/COMMAND_HANDOVER_GOTCHAS.md` entry: the prebuilt sm_75
+  `audiocpp_cli` links CUDA 12 (`libcublas.so.12`, `libcudart.so.12`); on this
+  CUDA-13 Colab image those ship only in the pip `nvidia-*-cu12` packages, so the
+  binary dies with `exit=127` unless every `nvidia/*/lib` dir is on
+  `LD_LIBRARY_PATH`. The `.so.12` files are present (verified with `ldd`); this is
+  a loader-path fix, not a missing toolkit. Prevented a second wasted launch.
+- Reconciler after the change: 1845 → 1845 claims / 45 docs, 1131 checkable,
+  **6 flagged** — all 6 the pre-existing missing `manifests/workspace_manifest.json`
+  fixture — **0 new drift**.
+- Authority: user-directed (generation failed; fix the env, report it); no run
+  config or hyperparameter changed; no frozen doc rewritten.
+
+## 2026-10-04 — Quran-only (α=1) experiment recorded; `build_pron_only_fused.py`
+
+- Added `docs/QURAN_ONLY_EXPERIMENT.md` (the AR-only→fused workaround, the first-sample
+  result, and the early-self-termination finding) + repo-root `build_pron_only_fused.py`.
+  Indexed in `docs/README.md` and `SOURCE_OF_TRUTH.md` (row: Quran pron alone on base).
+- Reconciler after the change: **1885 claims / 46 docs, 1155 checkable, 6 flagged** — all 6
+  the pre-existing missing `manifests/workspace_manifest.json` fixture — **0 new drift**.
+- Authority: user request ("document everything"); no run config or hyperparameter changed;
+  no frozen doc rewritten.
+
+## 2026-10-04 — session recorded in the durable trail (`PROGRESS.md`, `DECISIONS.md`)
+
+- Added **`PROGRESS.md` M12** (Quran pron alone, α=1 — first sample rendered; self-terminates
+  at ~one aya) + an Open-item for the comparison arms.
+- Added **`DECISIONS.md`** bullets (LoRA-merge section): a pron adapter "alone" is not a merge
+  and the raw file already is α=1; the converter requires both branches →
+  `build_pron_only_fused.py`; an AR-only adapter also governs sequence length (cap can't
+  extend it).
+- Reconciler: 1885 claims / 46 docs, 1155 checkable, **6 flagged** (pre-existing
+  `workspace_manifest.json` fixture) — **0 new drift** (`PROGRESS.md`/`DECISIONS.md` are
+  excluded from the scan).
+- Authority: user request ("so the next session knows exactly what we did"); no run config or
+  hyperparameter changed.
+
+## 2026-10-04 — Quran format/caption probe documented (GPU test, pending)
+
+- Added `docs/QURAN_FORMAT_PROBE.md` (background + 6-arm design for the
+  `INFERENCE/songs.quran_format_probe.json` manifest) and indexed it in `docs/README.md`;
+  added a `SOURCE_OF_TRUTH.md` row (Quran adapter format/caption probe).
+- Reconciler after the change: **1917 claims / 47 docs, 1178 checkable, 6 flagged (0.5%)** —
+  all 6 the pre-existing `manifests/workspace_manifest.json` fixture — **0 new drift**.
+- Authority: user request ("write background about the test we're doing on the GPU VM"); no
+  run config or hyperparameter changed; no frozen doc rewritten.
+
+## 2026-10-04 — Quran format/caption probe run recorded (6/6)
+
+- `docs/QURAN_FORMAT_PROBE.md`: status "prepared, not yet run" → "run 2026-10-04, 6/6
+  rendered; listening verdict pending"; added a "Run result" section (per-arm durations +
+  `truncated=no`, objective duration reads only — no quality verdict).
+- `agent_notes/current.md`: rewritten with the live run status + result table.
+- Reconciler: **not run this pass** — deliberately deferred to the CPU VM to avoid
+  GPU-paid time; the edit is additive (a result section + a status flip), no claim inverted.
+- Authority: user request ("push to gh; discuss findings on cpu vm"); no run config or
+  hyperparameter changed.
+
+## 2026-10-04 — Quran format/caption probe listening verdict recorded
+
+- `docs/QURAN_FORMAT_PROBE.md`: status "listening verdict pending" → "received"; added a
+  "Listening verdict (user)" section: prosody (madd/waqf) present in all arms, but
+  pronunciation unusable in all six (~1 makhraj error every 2–3 words, incl. in-domain T6);
+  caption-sensitive looping on a specific half-line (T1/QURAN ×3, T2 ×2, T3/NASHEED ×7,
+  T4/KHALIJI ×3, T5/QASIDA ×4, T6 none); T6 stops cleanly. Added a per-track
+  `semantic.tokens` table, and a "Bearing on the ceiling risk" note tying the makhārij
+  failure to the MERT-token representational limit (`FUTURE_PRONUNCIATION_LORA.md:143-148`).
+- `agent_notes/current.md`: rewritten with the verdict + open items.
+- Reconciler: not run this pass (still pending from the GPU commit, which deferred it to
+  the CPU VM). The edit is additive — a listening result + tokens, no claim inverted.
+- Authority: user's listening report (2026-10-04); no run config or hyperparameter changed.
+
+## 2026-10-04 — Quran-pron objective/criteria/next-run review
+
+- Added `docs/QURAN_PRON_REVIEW.md` (post-verdict audit: the reframed objective;
+  acceptance-criteria proposal; the teacher-forced-eval criteria error; the AHH
+  filtered dataset; config/ceiling/sampler hypotheses; an ordered cheap-first plan).
+  Indexed in `docs/README.md`; two `SOURCE_OF_TRUTH.md` rows added (the review, and
+  the AHH dataset repo/zip); the stale probe row note ("prepared not yet run") fixed.
+- Second revision (same day, after user clarification): added the corrected symptom
+  framing (prosody gained, words degraded), a "catastrophic-forgetting hypothesis"
+  subsection (§2.7, marked unverified), and an "assumptions & hypotheses — re-opened"
+  table. User's explicit direction: success ≠ "hear ح/ع"; the training method must be
+  re-examined.
+- Findings verified from artifacts: eval used `ar_ce`/`ar_kl` only (teacher-forced)
+  and `disable_sampling: true`; AHH = 13,501 mp3 / 4,650 ayat / 3 reciters.
+- Correction (same day, per user): the old dataset's 67,505 pairs vs the 81,006
+  planned is **by design** — the three AHH reciters (Abdul_Basit, Hudhaify, Husary)
+  were carved out, leaving them `_uthmani`-only (verified per reciter in GCS). The
+  trained set was the **8,100-pair `s10` subsample**, not 81k/67.5k.
+- Reconciler: not run this pass (still outstanding from the GPU commit). Changes are
+  additive (new review doc + index rows); no claim inverted; no config or
+  hyperparameter edited.
+- Authority: user request ("comprehensive review … stop repeating training without
+  benefit") + the clarifications on dataset quality/reciters and Tanzil text.
+
+## 2026-10-06 — config rename fallout + drift reconciliation (live docs/code), 36 → 0
+
+- Renamed `config/akbar_arabic_rock_lora.yml` → `config/LEGACY_akbar_arabic_rock_lora.yml`
+  and added per-GPU `config/L4_…` / `config/A100_…` variants (session config split).
+  Reconciler then re-pointed every live reference to the old path:
+  - `SOURCE_OF_TRUTH.md:8` + `skills/docs-reconciler/references/source_of_truth_template.md:8`
+    (authority row) → both new configs (+ LEGACY = v1/v2).
+  - `README.md:53` (tree) / `:108` (prose) → both variants + LEGACY.
+  - `skills/crash-diagnose-and-resume/SKILL.md:44`, `docs/L4_HANDOFF_TASK14C.md:95` → `config/A100_…`.
+  - `docs/COMMAND_HANDOVER_GOTCHAS.md:104` → new `train_ctl.py` default (`LEGACY_…`).
+  - `train_ctl.py:40` `DEFAULT_CONFIG` → `config/LEGACY_…` (behavior-preserving);
+    `skills/docs-reconciler/scripts/verify_claims.py:250` default likewise.
+  - `bootstrap/setup.sh:648` echoed launch hint → `config/A100_…`.
+- Historical records (`TRAINING_ANALYSIS/ANALYSIS.md:28`,
+  `INFERENCE/yue2_eval_heldout/heldout_eval_report.md:6,253`) → `LEGACY_…` (same artifact, renamed).
+- Fixed a pre-existing self-reference: `docs/QURAN_AHH_RESUME_PLAN.md:4` cited
+  `agent_notes/RESUME_PLAN.md` → `docs/QURAN_AHH_RESUME_PLAN.md`.
+- Curated `unverifiable.txt`: this session's placeholders/externals (`bad.db`, `clean.db`,
+  `BaseSDTrainProcess.py`, `--force-reinstall`) plus `workspace_manifest.json` (user-supplied
+  legacy input), `docs/investigation_generation_knobs.md` (other branch), `config/hyperparameters.`
+  (prose), `agent_notes/T4_listening_checklist.md` and the eval_app/`convert/` runtime files.
+- Reconciler after: 2237 claims, 1384 checkable, **0 flagged** (was 36 / 2.6%).
+- Deliberately untouched (frozen): `PROGRESS.md:11`,
+  `TRAINING_ANALYSIS/v1_nolyrics_archived/ANALYSIS.md:34` (still name the old path as history),
+  `graphify-out/GRAPH_REPORT.md` (generated snapshot).
+- Authority: `skills/docs-reconciler/SKILL.md`; user-approved scope ("scope agreed").
+  Config values unchanged except the pre-agreed split; no hyperparameter edited.
+
+## 2026-10-06 — encode the CUDA-12 loader path (recurring `audiocpp_cli` `exit=127`), code + docs
+
+- Fix: the prebuilt sm_75/sm89 `audiocpp_cli` links CUDA 12
+  (`libcublas.so.12`/`libcudart.so.12`); a CUDA-13 image exposes those only via the pip
+  `nvidia-*-cu12` wheels, and **nothing set the loader path** — so every fresh VM redied
+  `exit=127` and the requirement lived only as prose (gotcha 2026-10-04). Added
+  `INFERENCE/cuda_loader_path.sh` (self-healing resolver), sourced it in
+  `INFERENCE/run_one.sh` — the choke point for `generate.py` / `pron_*_sweep.sh` /
+  `maqam_lyric_swap.py` — and made `bootstrap/setup.sh --inference` resolve + `pip install`
+  the `-cu12` wheels and **fail the verify** if `ldd` still shows `not found`; it also
+  persists the path in `~/.bashrc` for interactive shells.
+- Docs: `docs/COMMAND_HANDOVER_GOTCHAS.md` (2026-10-04 entry marked "Encoded 2026-10-06");
+  `docs/INFERENCE.md` (setup section notes the automatic loader path).
+- Verified: bare shell (`env -u LD_LIBRARY_PATH`) resolves the binary; `--check` exits 0;
+  sourcing twice is idempotent; an interactive shell resolves via `~/.bashrc`; `bash -n`
+  clean on both scripts. No config or hyperparameter touched.
+- Authority: user directive ("fix things once and for all … while the root cause exists")
+  + the 2026-10-04 gotcha's own "Correct pattern".
+
+## 2026-10-06 — encode the other two "documented but not enforced" gotchas (ctime restore, WAL checkpoint)
+
+- `bootstrap/restore_run.py` (new): rsyncs `<base>/<run-name>/output` → the local output
+  root, re-stamps checkpoint ctime in ascending step order, verifies the resume pick, and
+  refuses while `run.py` is alive. Replaces the bare-rsync + hand-`chmod` restore in
+  `docs/PAUSE_RESUME.md` and `docs/BACKUP_RESTORE.md` (both updated).
+- `backup_to_gcp.py`: `checkpoint_sqlite_dbs()` runs `PRAGMA wal_checkpoint(TRUNCATE)` on
+  every `*.db` under each synced folder (called in the pass loop before `sync`), so the main
+  `loss_log.db` alone is a consistent snapshot.
+- Corrected a wrong gotcha claim: `touch` **does** bump ctime on this filesystem (verified
+  2026-10-06: `…014` → `…015`); the earlier "chmod updates ctime; `touch` does not" was
+  wrong. The ctime gotcha's pattern now reads "re-stamp in ascending step order".
+- Both gotcha entries marked **Encoded 2026-10-06**.
+- Verified: WAL test (61832 → 0 bytes, `PRAGMA integrity_check=ok`, rows intact); a
+  simulated collapsed restore reproduced the original failure (arbitrary pick
+  `_000009000`) and the helper corrected it (picks `quran_ahh_r32.safetensors`); dry-run and
+  the `run.py`-alive guard exercised. No config or hyperparameter touched.
+- Authority: user directive (2026-10-06: "fix those issues … before we do another
+  inference") + the two gotchas' own "Durable fix belongs in …" notes.
+
+## 2026-10-07 — listening/rating evaluation documented on the external app
+
+- New `docs/LISTENING_EVAL.md`: the **scoring** runbook — external app
+  `github.com/akbargherbal/ai_music_rating_app`, the one-line launch command
+  (`--audio` / `--label` / `--scorecard` / `--blind`), scorecard resolution (an explicit path
+  or the app's own `scorecards/`), the frozen per-run snapshot, and report export. Also
+  documents resume: every save writes `runs/<run_id>/results.json` atomically, so stopping the
+  server is safe and the same `--label` + audio resumes the same run (same blind order). New
+  skill `skills/listening-eval/`. Indexed in `docs/README.md`; `SOURCE_OF_TRUTH.md` row added
+  (authority for score-rendered-variants).
+- `DECISIONS.md`: new **"Listening evaluation (rating app)"** section — dated append, no
+  existing claim rewritten. `PROGRESS.md`: new **M14** (tooling switch) + an Open item for the
+  D-test render (in progress).
+- `INFERENCE/rating_app/README.md` + the `README.md` tree line: banner/note that the in-repo
+  single-file app is **superseded** (history only; it produced M13's report).
+- `docs/AB_BLIND_EVAL.md`: note that scoring is a separate step — `prepare_ab_eval.py`
+  packages (hand to a different person) and the app's `--blind` (rate your own renders)
+  **coexist**.
+- `user_cheatsheet.md`: new section 6 with the copy-paste commands; later sections renumbered
+  7–10.
+- Reconciler (Steps 1–2) after the change: 2391 claims / 58 live docs, 1483 checkable,
+  **11 flagged (0.7%)** — **0** in any touched file. Curated the external app's files/flags
+  doc-scoped in `references/unverifiable.txt`, and added `INFERENCE/rating_app` to
+  `claims_common.py` `DEFAULT_EXCLUDES` (superseded history, like `graphify-out`). The 11
+  remaining are **pre-existing and unrelated** (history citations to the pre-rename
+  `quran_ahh_r8`, plus example/runtime tokens in `results/*`) — left for a dedicated pass.
+- Authority: user directive ("document the way we do evaluation … from now on we'll be using
+  [the external app]; mention the one line command"). No run config or hyperparameter changed;
+  no frozen claim rewritten (append-only).
+
+## 2026-10-09 — Quran donor shelved; evaluation app surfaced for `main`
+
+- **Decision recorded:** the Quran pronunciation donor (`quran_ahh_r32` + `qahh_a0*` merges) is
+  **shelved for arabmaqamrock** — no demonstrated diction advantage over v2 across M13 + the
+  D-test (the rubric saturated at 5); reserved for a future dialect project.
+  - `PROGRESS.md`: M12–M15 collapsed into one lean **M12** block (108 → 127 lines).
+  - `DECISIONS.md`: shelving appended to the `quran_ahh_r32` bullet, plus a new lesson *"Score
+    the axis you care about"* in the listening-eval section (88 → 103 lines).
+  - `results/jarir_qahh/OPEN_DECISIONS.md`: matching **Resolved** block (branch record).
+- **Evaluation app surfaced for `main`:** `README.md` now names the external rating app
+  (`gh repo clone akbargherbal/ai_music_rating_app`) as the **way forward** for evaluation;
+  `docs/LISTENING_EVAL.md` setup uses that clone form. `README.md` donor section + status line,
+  and `SOURCE_OF_TRUTH.md` LoRA row, updated to "shelved".
+- **Reconciler (Steps 1–2):** 2404 claims / 59 live docs; 1483 checkable; **11 flagged (0.7%)**
+  — all pre-existing run-record + pre-rename tokens (the set the 2026-10-07 note deferred).
+  Curated into `references/unverifiable.txt` (doc-scoped, commented) → **0 flagged**.
+- **Tracked:** `opencode.json` added to the index (agent/dev config, so a fresh VM is set up).
+- Authority: user directive ("shelf the Quran LoRA for future projects"; "mention the rating app
+  `gh repo clone akbargherbal/ai_music_rating_app` … should be mentioned in main branch") + the
+  D-test/M13 evidence. No config or hyperparameter touched; frozen docs not rewritten (M12 and
+  the DECISIONS bullet are dated appends).
+

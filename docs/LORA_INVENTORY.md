@@ -15,9 +15,11 @@ is out of scope and archived (see the end of this file).
 <GCP_BACKUP_BASE>/loras/          # GCP_BACKUP_BASE = gs://…/OSTRIS_Arabic_Suno_Finetuning
   audio_cpp/
     style/                         # v2 style adapter, audio.cpp-loadable (rank 32)
-    pron/
-      qfinal_a0.3/ qfinal_a0.5/    # quran_long_aya_r8_s10 final x alpha 0.3/0.5
+    pron/                          # EMPTY since 2026-10-07 (qfinal_a0.* retired)
   source/                          # fused ai-toolkit finals the merges are built from
+
+# Current pron donor + merges (NOT in loras/):
+<GCP_BACKUP_BASE>/quran_ahh_r32/maqamrock_merge/{merged,convert/qahh_a0*}/   # v2 x quran_ahh_r32 (rank 32, AR+NAR)
 ```
 
 Sweep/prototype adapters are **not** here — they stay under their round's prefix and
@@ -25,43 +27,44 @@ are clearly non-canonical (`audiocpp_inference/…_sweep/`, `pron_*_sweep/`, etc
 Local paths under `/content/` are ephemeral and re-staged by `bootstrap/setup.sh`
 each VM.
 
-**2026-09-27 — the `pron_lora_ar_only_r8` donor family was superseded.** The current
-pronunciation donor is the long-aya Quran run (`quran_long_aya_r8_s10`); its 15 merged
-`c3050/c4575/cfinal_a0.*` adapters plus the 3 `pron_lora_ar_only_r8` source pins were
-**archived out of the library** to `<base>/archive/pron_lora_ar_only_legacy/` (original
-paths preserved), and the run prefix was renamed `<base>/pron_lora_ar_only_r8_obsolete/`.
-See "Superseded" below. Only the two `qfinal_a*` merges remain current.
+**2026-10-07 — the long-aya Quran donor was retired.** The 9-reciter `quran_long_aya_r8_s10`
+run and its two `qfinal_a0.3`/`qfinal_a0.5` merges (the prior "current candidates") were
+moved to **`<base>/archive/quran_long_aya_legacy/`** and removed from the live paths. The
+current pronunciation donor is **`quran_ahh_r32`** (rank 32, AR+NAR; AHH-filtered 3 reciters,
+9,489 pairs) → merges `qahh_a0*` under `<base>/quran_ahh_r32/maqamrock_merge/`.
+(Earlier, 2026-09-27: the `pron_lora_ar_only_r8` family was archived to
+`<base>/archive/pron_lora_ar_only_legacy/`.)
 
 ## Counts
 
 | Class | Count | Notes |
 |---|---|---|
-| Current library adapters (AR+NAR pairs) | **3** | style + 2 qfinal merges; qfinal unlistened |
+| Current library adapters (AR+NAR pairs) | **1** | style only; `qfinal_a0.*` removed 2026-10-07 |
 | Fused source adapter pinned in `loras/source/` | **1** | v2 style only |
+| Current pron merges (NOT in `loras/`) | **4** | `qahh_a0/a0p1/a0p2/a0p3` under `<base>/quran_ahh_r32/maqamrock_merge/`; unlistened |
 | Superseded — `pron_lora_ar_only_r8` family (archived) | **15 merges + 3 source pins** | `archive/pron_lora_ar_only_legacy/` |
+| Superseded — long-aya donor + `qfinal_a*` (archived) | **2 runs + 2 merges** | `archive/quran_long_aya_legacy/` |
 | Experimental adapters (in scope, α≤0.5) | **1** | `c1525_a0.5` |
 | Archived (α>0.5) | **4 configs** | `c3050_a0.55`, `c3050_a0.65`, `c3050_a1.0`, `cfinal_a1.0` |
-| Objects in `loras/` | **7** | style 2 + qfinal 4 + source 1 |
+| Objects in `loras/` | **3** | style 2 + source 1 |
 
 ## Current library adapters (`loras/`, audio.cpp-loadable)
 
-Loadable by `audiocpp_cli` via `yue2.ar_lora` / `yue2.nar_lora`, scale 1.0. The
-**converted AR sha256 is the stable identity** (see caveats). Every AR-only merge
-shares the same NAR — `7d9324bfabdfa806c600b12dfa1537501368f25a00d6f4aaf7252449414377c6`
-(copied from v2, independent of α); the style adapter's NAR is `ad2c8d86…`.
+Only the **style** adapter is in the library now; `audio_cpp/pron/` is **empty** (its
+`qfinal_a0.*` were retired 2026-10-07). Loadable by `audiocpp_cli` via `yue2.ar_lora` /
+`yue2.nar_lora`, scale 1.0. The **converted AR sha256 is the stable identity** (see caveats).
 
 | Config | Status | pron donor | α | AR rank | converted AR sha256 | Path in `loras/` |
-|---|---|---|---:|---:|---:|---|---|
+|---|---|---:|---:|---:|---|---|
 | style (`a0`) | base style | — | 0 | 32 | `747d5cfe2224b1bae6e582ccf5f2ee2a57e3f030c53d54e134f34a85960426fa` | `audio_cpp/style/` |
-| `qfinal_a0.3` | candidate (unlistened) | quran s10 final 8100 | 0.3 | 40 | `0169e5a0ef7d47349bc707c10b3fbf5d937f941e3d28896e9970f0dc3894bdf6` | `audio_cpp/pron/qfinal_a0.3/` |
-| `qfinal_a0.5` | candidate (unlistened) | quran s10 final 8100 | 0.5 | 40 | `3a06265f33854825309f1cb10ab4ca5c36acf8692491186321b58c867eca90d2` | `audio_cpp/pron/qfinal_a0.5/` |
 
-The two `qfinal_a*` merges were built 2026-09-27 from `quran_long_aya_r8_s10` (the
-long-aya Quran pron run's final checkpoint, step 8100). Source sha256
-`f8c842e48b93d142bc3cfee6e98f54809020813ae272485a4afb849320b1e2e8`; merged with the same
-v2 style (`b1d09098…`) at α 0.3/0.5, rank 40, NAR zero-padded to the shared `7d9324bf…`.
-Built by `merge_pron_lora.py --pron <quran_long_aya_r8_s10.safetensors> --alpha <a>` +
-the converter, for the Suno/trigger inference sweep (`INFERENCE/qfinal_suno_sweep.sh`).
+## Current pron merges (`<base>/quran_ahh_r32/maqamrock_merge/`, NOT in `loras/`)
+
+The live candidates are the `qahh_a0*` merges of v2 + **`quran_ahh_r32`** (rank 32, AR+NAR)
+at α 0 / 0.1 / 0.2 / 0.3 — see `INFERENCE/jarir_lever_probe.sh`, `results/jarir_qahh/README.md`.
+Converted AR/NAR live under
+`<base>/quran_ahh_r32/maqamrock_merge/convert/qahh_a0{,,p1,p2,p3}/`. **Unlistened** — no
+adapter is "best" before the listen.
 
 ## Superseded — `pron_lora_ar_only_r8` donor family
 
@@ -102,6 +105,17 @@ with `merge_pron_lora.py` + the converter; independent reproductions matched the
 records exactly where they overlapped (`c3050_a0.2` `c68217ab…`, `c4575_a0.5` `ebd22026…`,
 `cfinal_a0.5` `525d3af2…`). `c3050_a0.4`'s Task-19 sidecar/record is in an unpushed bundle;
 its hash above is from the GCS object.
+
+## Superseded — long-aya Quran donor (`quran_long_aya_r8_s10`) + `qfinal_a*`
+
+Retired **2026-10-07**; archived (copy-verified, originals removed) to
+`<base>/archive/quran_long_aya_legacy/{quran_long_aya_r8_s10,quran_long_aya_r8,loras/audio_cpp/pron/qfinal_a0.3,qfinal_a0.5}/`.
+The 9-reciter donor is superseded by `quran_ahh_r32`. Identity (stable, for the record):
+
+| Config | pron donor (ckpt) | α | converted AR sha256 |
+|---|---|---:|---|
+| `qfinal_a0.3` | `quran_long_aya_r8_s10` final (8100) | 0.3 | `0169e5a0ef7d47349bc707c10b3fbf5d937f941e3d28896e9970f0dc3894bdf6` |
+| `qfinal_a0.5` | `quran_long_aya_r8_s10` final (8100) | 0.5 | `3a06265f33854825309f1cb10ab4ca5c36acf8692491186321b58c867eca90d2` |
 
 ## Fused source adapters (`loras/source/`)
 
@@ -150,10 +164,10 @@ values remain in the historical records (`results/pron_fine_sweep/`,
 
 ```bash
 # style (the bootstrap default): loras/audio_cpp/style/ -> /content/converter/out/
-# a current candidate, e.g. qfinal_a0.5:
-gsutil -m cp -r "$GCP_BACKUP_BASE/loras/audio_cpp/pron/qfinal_a0.5" /content/converter/out/
+# a current candidate, e.g. qahh_a0p1 (v2 x quran_ahh_r32, α0.1):
+gcloud storage rsync -r "$GCP_BACKUP_BASE/quran_ahh_r32/maqamrock_merge/convert/qahh_a0p1" /content/converter/out/qahh_a0p1
 # then run with explicit overrides (or let run_one.sh's defaults use the style pair):
-LORA_AR=/content/converter/out/qfinal_a0.5/akbar_arabic_rock_lora_ar.safetensors \
-LORA_NAR=/content/converter/out/qfinal_a0.5/akbar_arabic_rock_lora_nar.safetensors \
+LORA_AR=/content/converter/out/qahh_a0p1/akbar_arabic_rock_lora_ar.safetensors \
+LORA_NAR=/content/converter/out/qahh_a0p1/akbar_arabic_rock_lora_nar.safetensors \
   bash INFERENCE/run_one.sh Hijaz <seed>
 ```

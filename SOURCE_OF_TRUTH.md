@@ -5,21 +5,27 @@ History files are authoritative for what happened, never for what is true now.
 
 | Topic | Authority | Notes |
 |---|---|---|
-| Run config / hyperparameters | `config/akbar_arabic_rock_lora.yml` | `DECISIONS.md` explains why; agents never edit either |
+| Run config / hyperparameters | `config/L4_akbar_arabic_rock_lora.yml` · `config/A100_akbar_arabic_rock_lora.yml` (LEGACY = v1/v2) | `DECISIONS.md` explains why; agents never edit either |
 | Start / pause / resume training | `docs/START.md`, `docs/PAUSE_RESUME.md` | |
 | Run metrics & liveness | `loss_log.db` via `monitor_loss.py` | files, not prose |
 | Backup layout / restore | `docs/BACKUP_RESTORE.md` + `backup_to_gcp.py --help` | script flags beat prose |
 | Inference procedure / provenance | `docs/INFERENCE.md` | repo `INFERENCE/` scripts are canonical |
 | Pron LoRA training | `docs/PRON_LORA.md` | runbook; opt-in via `GCP_PRON_DATASET_PATH` |
-| Long-aya Quran LoRA (run / resume) | `docs/PRON_LORA_LONG.md` | canonical hub; active run `quran_long_aya_r8_s10`, full set reserved |
-| Long-aya run configs | `config/quran_long_aya_r8_s10.yml` (active) · `config/quran_long_aya_r8.yml` (full set, reserved) | never edit; dataset `_s10` = 8,100 pairs |
-| Long-aya dataset + banked artifacts | GCS `<base>/quran_long_aya_dataset_s10.tar`, `<base>/…_s10/_latent_cache.tar`, `<base>/quran_long_aya_r8_s10/output/` | dataset tar · banked cache · checkpoints+optimizer |
+| Long-aya Quran LoRA (run / resume) — **RETIRED 2026-10-07** | `docs/PRON_LORA_LONG.md` | the 9-reciter `quran_long_aya_r8_s10` is retired → `<base>/archive/quran_long_aya_legacy/`; superseded by `quran_ahh_r32` |
+| Long-aya run configs — **RETIRED** | `config/quran_long_aya_r8_s10.yml` · `config/quran_long_aya_r8.yml` | never edit (kept for the record); both runs retired |
+| Long-aya dataset + banked artifacts | GCS `<base>/quran_long_aya_dataset_s10.tar`, `<base>/…_s10/_latent_cache.tar` | dataset tars kept; the `quran_long_aya_r8_s10` **run** is retired (archived) |
 | Pron LoRA source verification / offline eval | `docs/PRON_LORA_VERIFICATION.md` | A0–A7 + smoke + A100 run + AR-loss replay |
 | v2 + pron merge (scaling, ranks) | `docs/PRON_LORA_MERGE.md` + `merge_pron_lora.py --help` | alpha convention is source-verified there |
-| LoRA library (what exists, how many, where) | `docs/LORA_INVENTORY.md` | canonical: `<base>/loras/` (current: style + qfinal; superseded pron_lora_ar_only_r8 under `<base>/archive/pron_lora_ar_only_legacy/`) |
+| Quran pron **alone** (α=1) on base model | `docs/QURAN_ONLY_EXPERIMENT.md` + `build_pron_only_fused.py` | the AR-only→fused workaround and the first-sample result |
+| Quran adapter format/caption probe | `docs/QURAN_FORMAT_PROBE.md` + `INFERENCE/songs.quran_format_probe.json` | 6-arm GPU test; run 2026-10-04, listening verdict recorded |
+| Quran-pron objective / criteria / next-run plan | `docs/QURAN_PRON_REVIEW.md` | post-verdict audit; acceptance criteria proposal (pending user) |
+| AHH Quran LoRA run (`quran_ahh_r32`) — hub / config audit / GPU checklist | `docs/QURAN_AHH_RUN.md` | gated by Phase 1 base-model ceiling probe |
+| High-quality Quran recitation dataset (AHH filtered) | `github.com/akbargherbal/quran_recitation_training_dataset` + GCS `AHH_Quran_Long_Aya_Filtered_DATASET.zip` | 3 reciters; 9,492/13,501 kept; audio-only (pair with Tanzil text) |
+| LoRA library (what exists, how many, where) | `docs/LORA_INVENTORY.md` | canonical `<base>/loras/`: **style** + `source/`; pron donor `quran_ahh_r32` — **shelved, not adopted for arabmaqamrock** (`PROGRESS.md` M12); merges `qahh_a0*` under `<base>/quran_ahh_r32/maqamrock_merge/`; superseded donors under `<base>/archive/` |
 | Alpha sweep / listening review | `docs/PRON_LORA_SWEEP.md` | procedure + Rounds 1–5; numbers in `results/{pron_sweep,pron_fine_sweep,pron_ckpt_sweep,maqam_lyric_swap,pron_knob_probe}/` |
 | Blinded listening packages (audio) | GCS `<base>/listening/` | generated mp3 packages; **not repo content** (`.gitignore` `*_INPUT/`) |
-| Blinded A/B listening package | `docs/AB_BLIND_EVAL.md` + `INFERENCE/prepare_ab_eval.py --help` | script flags beat prose; skill `ab-blind-eval` |
+| Blinded A/B listening package | `docs/AB_BLIND_EVAL.md` + `INFERENCE/prepare_ab_eval.py --help` | script flags beat prose; skill `ab-blind-eval`; hands a package to a different person |
+| Listening evaluation / rating (score rendered variants) | `docs/LISTENING_EVAL.md` | external app `github.com/akbargherbal/ai_music_rating_app`; supersedes the in-repo `INFERENCE/rating_app/`; skill `listening-eval` |
 | Why a decision was made | `DECISIONS.md` | read-only; cite, don't rewrite |
 | Milestones (outcomes) | `PROGRESS.md` | read-only; outcomes, not narrative |
 | Full history | git | `git log`; pre-rewrite narrative `git show 39d1bbd:PROGRESS.md` |

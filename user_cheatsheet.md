@@ -23,7 +23,7 @@ OUT=/content/ai-toolkit/output/$RUN
 | Train log / GPU csv | `/content/logs/train.log`, `/content/logs/gpu_usage.csv` |
 | Secrets/env | `/root/.secrets.env` (`HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_BACKUP_BASE`) — staged by the notebook |
 | Inference workspace | `/content/audiocpp_inference/` (out/, prompts/, bin/, models/) |
-| Converted LoRAs | `/content/converter/out/` (style) + `qfinal_a0.3/`, `qfinal_a0.5/` |
+| Converted LoRAs | `/content/converter/out/` (style) + `qahh_a0p1/`, `qahh_a0p3/` |
 
 ## 0. Ground truth — always start here
 
@@ -114,14 +114,14 @@ nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu,
 ## 5. Inference: stage LoRAs, then generate
 
 Stage the adapter pairs a batch references (v2 is files directly in
-`/content/converter/out/`; qfinal are subdirs). Idempotent — re-run to resume.
+`/content/converter/out/`; qahh are subdirs). Idempotent — re-run to resume.
 
 ```bash
 export GCP_BACKUP_BASE=$GCS_BASE
 mkdir -p /content/converter/out
 gsutil -m rsync -r "$GCS_BASE/loras/audio_cpp/style" /content/converter/out
-gsutil -m cp -r "$GCS_BASE/loras/audio_cpp/pron/qfinal_a0.3" /content/converter/out/
-gsutil -m cp -r "$GCS_BASE/loras/audio_cpp/pron/qfinal_a0.5" /content/converter/out/
+gcloud storage rsync -r "$GCS_BASE/quran_ahh_r32/maqamrock_merge/convert/qahh_a0p1" /content/converter/out/qahh_a0p1
+gcloud storage rsync -r "$GCS_BASE/quran_ahh_r32/maqamrock_merge/convert/qahh_a0p3" /content/converter/out/qahh_a0p3
 ```
 
 Validate a JSON batch (no GPU, writes nothing), then run it detached:
@@ -152,7 +152,33 @@ Single maqam/seed (staged prompts), for a one-off:
 INFERENCE/run_one.sh <Maqam> <seed> [cap|auto]     # Maqam ∈ Ajam Hijaz Kurd Nahawand
 ```
 
-## 6. Backup now / verify / restore
+## 6. Listening evaluation — rate the renders (on your own PC)
+
+Score rendered variants in the external rating app. Full runbook: `docs/LISTENING_EVAL.md`.
+The app is **not** in this repo; it **supersedes** the in-repo `INFERENCE/rating_app/`.
+
+```bash
+# once, on your machine
+git clone https://github.com/akbargherbal/ai_music_rating_app.git
+cd ai_music_rating_app && py -m pip install -r requirements.txt
+```
+
+Pull the rendered audio from GCS, then launch with scorecard + label (**one command**;
+add `--blind` for the unbiased pass):
+
+```powershell
+gsutil -m rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/out/<run> .\<run>\
+
+# copy the scorecard into scorecards/ OR pass its path, then:
+python app.py --audio "C:\path\to\<run>" --label <run_id> --scorecard "<card.json | name>"
+# report: open /report.md   (also /report.csv, /report.json)
+```
+
+The startup line `rating_app: ready for '<run_id>' [scorecard: …]` confirms the card was
+picked up (a bare `[scorecard: default]` means it was **not**). Change scorecards with a
+**new `--label`** — an existing run's scorecard is frozen.
+
+## 7. Backup now / verify / restore
 
 ```bash
 # one forced pass (don't wait for the 5-min daemon)
@@ -172,7 +198,7 @@ mkdir -p $OUT
 gsutil -m rsync -r $GCS_BASE/akbar_arabic_rock_lora/output $OUT
 ```
 
-## 7. Pause for the night / resume next session
+## 8. Pause for the night / resume next session
 
 ```bash
 # PAUSE
@@ -186,7 +212,7 @@ setsid nohup python backup_to_gcp.py --run-name akbar_arabic_rock_lora \
 python train_ctl.py start        # same run name + config → auto-resumes from newest ckpt
 ```
 
-## 8. Finish a run + push
+## 9. Finish a run + push
 
 ```bash
 gsutil -m rsync -r $OUT $GCS_BASE/akbar_arabic_rock_lora/output
@@ -203,7 +229,7 @@ git status --short
 pkill -f 'backup_to_gcp.py|gpu_logger.py'
 ```
 
-## 9. Gotchas that bite
+## 10. Gotchas that bite
 
 - **`ai-toolkit` auto-resumes** from the newest checkpoint in the output folder.
   Same run name + same config = resume. To genuinely start over, **archive first**

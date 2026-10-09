@@ -1,9 +1,9 @@
 # Pronunciation LoRA — alpha sweep & listening review (Task 17)
 
-> **Historical (2026-09-27).** These sweeps used the `pron_lora_ar_only_r8` donor, now
-> superseded by the long-aya Quran run; the merged `c3050/c4575/cfinal_a0.*` adapters are
-> archived (`archive/pron_lora_ar_only_legacy/`). The procedure still applies to the current
-> `qfinal_a*` candidates — see `docs/LORA_INVENTORY.md`.
+> **Historical.** These sweeps used the `pron_lora_ar_only_r8` donor, and the later
+> `qfinal_a*` merges used the long-aya donor — **both retired** (archived under
+> `archive/pron_lora_ar_only_legacy/` and `archive/quran_long_aya_legacy/`). The procedure
+> still applies to the current `qahh_a0*` candidates — see `docs/LORA_INVENTORY.md`.
 
 How to render the **alpha sweep**: the frozen v2 style LoRA merged with the AR-only
 pronunciation LoRA at several `alpha` values, so the user can pick the checkpoint +

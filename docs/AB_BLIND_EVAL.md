@@ -6,6 +6,11 @@ decoder. The agent-facing procedure is the
 [`INFERENCE/prepare_ab_eval.py`](../INFERENCE/prepare_ab_eval.py); tests are
 `tests/test_prepare_ab_eval.py`.
 
+> **Scoring is a different step.** Actually rating the tracks happens in the external
+> listening/rating app — see [`LISTENING_EVAL.md`](LISTENING_EVAL.md). This doc is for
+> building a self-contained package to hand to a **different** person; the app's own
+> `--blind` is for rating your own renders. The two coexist.
+
 ## What it produces
 
 ```

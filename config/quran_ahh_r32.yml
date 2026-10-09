@@ -1,0 +1,142 @@
+# =============================================================================
+# quran_ahh_r32 -- Quran pronunciation LoRA on the quality-filtered AHH set.
+#
+#   REVISED 2026-10-05 (user): train AR + NAR jointly at rank 32 with no KL
+#   anchor, over multiple epochs. The prior AR-only, rank-8 run could only move
+#   recitation prosody (madd/waqf): in YuE2 the AR picks the discrete semantic
+#   codes, but the NAR flow + VAE render the actual articulation, so freezing the
+#   NAR at the music base leaves the makhraj unadapted (and pushes the frozen
+#   NAR's input off-distribution). Adapt both experts.
+#
+#   Changes vs the previous quran_ahh_r8 (rank-8, AR-only):
+#     * network.linear / linear_alpha: 8 -> 32           (capacity)
+#     * network_kwargs.ignore_if_contains: ["transformer.nar"] -> []
+#                                                        (AR + NAR, like v2)
+#     * model_kwargs.ar_kl_weight: 0.2 -> 0.0            (stop anchoring to base)
+#     * train.steps: 9489 -> 28467                        (3 epochs)
+#   lr / optimizer / batching / EMA / cot / train_window_frames are unchanged.
+#
+#   Source data: AHH_Quran_Long_Aya_Filtered_DATASET (9,492 clips, 3 reciters),
+#   paired with Tanzil Uthmani/Simple text. Built by prepare_ahh_quran_dataset.py:
+#     train 9,489 (SINGLE caption per clip, 50/50 simple/uthmani stratified per
+#     reciter) + val 6 (held-out 2:255 x3 reciters x both scripts).
+#   Banked: gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/quran_ahh_dataset.zip
+#   (sha256 8c68d684...e9ff9).
+#
+#   Evaluation is an OFFLINE per-checkpoint free-run sweep on held-out 2:255 (not
+#   in-training sampling): disable_sampling stays true.
+# =============================================================================
+---
+job: "extension"
+config:
+  name: "quran_ahh_r32"
+  process:
+    - type: "diffusion_trainer"
+      training_folder: "/content/ai-toolkit/output"
+      sqlite_db_path: "/content/ai-toolkit/aitk_db.db"   # made absolute -- easier to target in the backup script below
+      device: "cuda"
+      trigger_word: ""   # blank -> nothing prepended (toolkit/prompt_utils.py:736-742). The pron captions have no trigger word by design.
+      performance_log_every: 10
+      network:
+        type: "lora"
+        linear: 32
+        linear_alpha: 32
+        conv: 16
+        conv_alpha: 16
+        lokr_full_rank: true
+        lokr_factor: -1
+        network_kwargs:
+          ignore_if_contains: []   # AR + NAR (was ["transformer.nar"] = AR-only)
+      log_dir: "output/quran_ahh_r32/tensorboard"
+      # log_dir is real (jobs/process/BaseTrainProcess.py) but writes into a
+      # TIMESTAMPED SUBFOLDER under this path: output/quran_ahh_r32/tensorboard/quran_ahh_r32_<YYYYMMDD-HHMMSS>/
+      log_config:
+        log_every: 1   # dead key (toolkit/config_modules.py LoggingConfig) -- kept so nobody re-adds it
+      save:
+        dtype: "bf16"
+        save_every: 1500
+        max_step_saves_to_keep: 24
+        save_format: "diffusers"
+        push_to_hub: false
+      datasets:
+        - folder_path: "/content/quran_ahh_dataset/train"  # 9,489 single-script pairs; restore from gs://.../quran_ahh_dataset.zip
+          mask_path: null
+          mask_min_value: 0.1
+          default_caption: ""
+          caption_ext: "txt"
+          caption_dropout_rate: 0
+          cache_latents_to_disk: true   # mandatory for YuE2; ~2.4 h for 9,489 files at the measured ~1.1 files/s on an L4
+          is_reg: false
+          network_weight: 1
+          resolution:
+            - 512
+          controls: []
+          shrink_video_to_frames: true
+          num_frames: 1
+          flip_x: false
+          flip_y: false
+          num_repeats: 1
+      train:
+        batch_size: 1
+        bypass_guidance_embedding: false
+        steps: 28467   # 3 epochs: 9,489 pairs x 3 / (batch_size 1 x gradient_accumulation 1)
+        gradient_accumulation: 1
+        train_unet: true
+        train_text_encoder: false
+        gradient_checkpointing: true
+        noise_scheduler: "flowmatch"
+        optimizer: "adamw8bit"
+        timestep_type: "sigmoid"
+        content_or_style: "balanced"
+        optimizer_params:
+          weight_decay: 0.0001
+        unload_text_encoder: false
+        cache_text_embeddings: false   # embedding-table lookup, ~free to recompute
+        lr: 0.0001
+        ema_config:
+          use_ema: true
+          ema_decay: 0.999
+        skip_first_sample: false
+        force_first_sample: false
+        disable_sampling: true
+        dtype: "bf16"
+        diff_output_preservation: false
+        diff_output_preservation_multiplier: 1
+        diff_output_preservation_class: "person"
+        switch_boundary_every: 1
+        loss_type: "mse"
+      logging:
+        log_every: 1
+        use_ui_logger: true
+      model:
+        name_or_path: "Comfy-Org/YuE2/checkpoints/yue2_3b_int8_convrot.safetensors"
+        quantize: true
+        qtype: "convrot8"
+        quantize_te: false
+        qtype_te: "qfloat8"
+        arch: "yue2"
+        low_vram: false
+        model_kwargs:
+          cot: "off"
+          abc_dropout: 0.5
+          sample_ar_repetition_penalty: 1.2
+          ar_kl_weight: 0.0   # was 0.2; the base AR is the thing that's wrong -- don't anchor to it
+          train_window_frames: 0   # whole-clip; max_words=60 bounds the outliers
+        compile: false
+      sample:
+        sampler: "flowmatch"
+        sample_every: 250
+        sample_start_step: 0
+        width: 1024
+        height: 1024
+        neg: ""
+        seed: 42
+        walk_seed: true
+        guidance_scale: 1
+        sample_steps: 32
+        num_frames: 1
+        fps: 1
+        duration: 360
+meta:
+  name: "[name]"
+  version: "1.0"

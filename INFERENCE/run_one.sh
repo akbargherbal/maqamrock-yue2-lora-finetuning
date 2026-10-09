@@ -13,6 +13,10 @@
 #   LORA_AR     AR adapter file (default: /content/converter/out/akbar_arabic_rock_lora_ar.safetensors)
 #   LORA_NAR    NAR adapter file (default: /content/converter/out/akbar_arabic_rock_lora_nar.safetensors)
 #               (override both to sweep offline-merged adapters; defaults = live v2)
+#   LORA_AR_SCALE / LORA_NAR_SCALE  per-expert adapter strength, default 1.0.
+#               audio.cpp treats a scale of 0 as "adapter off" (base weights), so
+#               this is how the pron-only / base-model arms are run (see
+#               agent_notes/current.md). Unset = 1.0 = previous behavior.
 # Writes everything under $OUT so it can be monitored from another terminal.
 # $OUT defaults to $ROOT/out; a batch driver sets OUT_DIR to a per-run folder
 # (e.g. out/20260922-1537_random16/) so each run's tracks stay self-contained.
@@ -28,6 +32,12 @@ M="${1:?usage: run_one.sh <Maqam> <seed> [cap|auto]}"
 S="${2:?usage: run_one.sh <Maqam> <seed> [cap|auto]}"
 CAP_ARG="${3:-auto}"
 BIN="$ROOT/bin/audiocpp_cli"
+
+# The prebuilt binary links CUDA 12 (libcublas.so.12/libcudart.so.12); on a
+# CUDA-13 image those live only in the pip nvidia-*-cu12 wheels. Put them on
+# the loader path so the binary loads on any host (no-op when already OK).
+# shellcheck source=INFERENCE/cuda_loader_path.sh
+. "$SCRIPT_DIR/cuda_loader_path.sh"
 MODEL="$ROOT/models/Yue2-3B-GGUF"
 OUT="${OUT_DIR:-$ROOT/out}"
 mkdir -p "$OUT"
@@ -38,6 +48,9 @@ lyrics="${LYRICS_FILE:-$ROOT/prompts/${M}_lyrics.txt}"
 # converted v2 pair, so an unset invocation is byte-for-byte the previous behavior.
 LORA_AR="${LORA_AR:-/content/converter/out/akbar_arabic_rock_lora_ar.safetensors}"
 LORA_NAR="${LORA_NAR:-/content/converter/out/akbar_arabic_rock_lora_nar.safetensors}"
+# Per-expert scales; 0 switches that expert's adapter off (base weights).
+LORA_AR_SCALE="${LORA_AR_SCALE:-1.0}"
+LORA_NAR_SCALE="${LORA_NAR_SCALE:-1.0}"
 wav="$OUT/${M}_${S}.wav"
 log="$OUT/${M}_${S}.log"
 tfile="$OUT/${M}_${S}_time.txt"
@@ -70,9 +83,9 @@ echo "$line"; echo "$line" >> "$status"
   --session-option yue2.model_gguf=yue2-3b-bf16.gguf \
   --session-option yue2.vae_gguf=yue2-vae-f16.gguf \
   --session-option yue2.ar_lora="$LORA_AR" \
-  --session-option yue2.ar_lora_scale=1.0 \
+  --session-option yue2.ar_lora_scale="$LORA_AR_SCALE" \
   --session-option yue2.nar_lora="$LORA_NAR" \
-  --session-option yue2.nar_lora_scale=1.0 \
+  --session-option yue2.nar_lora_scale="$LORA_NAR_SCALE" \
   --session-option yue2.attention=flash \
   --lyrics "$(cat "$lyrics")" \
   --request-option style="$(cat "$style")" \

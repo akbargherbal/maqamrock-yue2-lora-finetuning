@@ -25,7 +25,7 @@ INFERENCE/run_one.sh Hijaz 1                                          # cap defa
 | `audio.cpp` **source** | GitHub `0xShug0/audio.cpp` (clone only, never built by bootstrap) | `/content/audio.cpp` | No |
 | Prebuilt `audiocpp_cli` (sm_75 / T4) | GCS `audiocpp_inference/build/audiocpp_cli` | `/content/audiocpp_inference/bin/audiocpp_cli` | **Yes** |
 | Converted step-3000 LoRA, unfused (`akbar_arabic_rock_lora_{ar,nar}.safetensors`) | GCS `loras/audio_cpp/style/` (canonical library; see `docs/LORA_INVENTORY.md`) | `/content/converter/out/` | **Yes** |
-| Current pron merges (`qfinal_a0.3/0.5`) | GCS `loras/audio_cpp/pron/<cfg>/` | staged per-sweep to `/content/converter/out/<cfg>/` | **Yes** |
+| Current pron merges (`qahh_a0*`) | GCS `quran_ahh_r32/maqamrock_merge/convert/<cfg>/` | staged per-sweep to `/content/converter/out/<cfg>/` | **Yes** |
 | Prompts (one `*_style.txt` + `*_lyrics.txt` per maqam) | GCS `audiocpp_inference/prompts/` | `/content/audiocpp_inference/prompts/` | **Yes** |
 | Runner + cap script (`run_one.sh`, `duration_cap.py`) | **Repo `INFERENCE/`** (canonical; the GCS `audiocpp_inference/scripts/` copy is a legacy mirror) | `/content/maqamrock-yue2-lora-finetuning/INFERENCE/` | `scripts/` still mirrored, but the repo copy is what runs |
 
@@ -62,6 +62,13 @@ grep -n "\[FAIL\]" /content/logs/setup.log || echo "no failures"
 cat /content/logs/timing.txt
 ```
 
+The prebuilt binary is a **CUDA-12** build (`libcublas.so.12`/`libcudart.so.12`); on a
+CUDA-13 image those live only in the pip `nvidia-*-cu12` wheels. `setup.sh --inference`
+now puts them on `LD_LIBRARY_PATH` (installing the wheels if absent) and fails the verify
+if the binary's deps still don't resolve; `INFERENCE/run_one.sh` sources the same resolver
+(`INFERENCE/cuda_loader_path.sh`) before **every** invocation. So a bare run no longer
+dies `exit=127` at load — see `COMMAND_HANDOVER_GOTCHAS.md` ("CUDA-13 image").
+
 The verify block checks the model dir + all four sidecars + both LoRA files, and
 (added with `job_audiocpp_binary`) that the binary is executable and
 `prompts/`/`scripts/` are non-empty.
@@ -86,8 +93,11 @@ INFERENCE/run_one.sh <Maqam> <seed> [cap|auto]
   to override (`semantic_max_tokens`).
 - Fixed session options inside `run_one.sh`: `--family yue2`,
   `yue2.model_gguf=yue2-3b-bf16.gguf`, `yue2.vae_gguf=yue2-vae-f16.gguf`,
-  `yue2.ar_lora`/`yue2.nar_lora` (both scale 1.0, from `/content/converter/out`),
-  `yue2.attention=flash`, `cot=off`.
+  `yue2.ar_lora`/`yue2.nar_lora` (from `/content/converter/out`),
+  `yue2.attention=flash`, `cot=off`. The AR/NAR adapter **scales** default to
+  `1.0` and are overridable by the `LORA_AR_SCALE` / `LORA_NAR_SCALE` env vars;
+  audio.cpp treats a scale of `0` as "adapter off" (base weights), which is how
+  the pron-only / base-model arms are run (see `agent_notes/current.md`).
 - `run_one.sh` wraps the call in `/usr/bin/time -v` — **GNU `time` must be
   installed** (the bootstrap does). Colab's builtin `time` alone gives
   `exit 127: /usr/bin/time: No such file or directory`.
@@ -130,8 +140,8 @@ python INFERENCE/generate.py my_songs.json                            # real run
 {
   "loras": {
     "v2":          { "dir": "/content/converter/out" },
-    "qfinal_a0.3": { "dir": "/content/converter/out/qfinal_a0.3" },
-    "qfinal_a0.5": { "dir": "/content/converter/out/qfinal_a0.5" }
+    "qahh_a0p1": { "dir": "/content/converter/out/qahh_a0p1" },
+    "qahh_a0p3": { "dir": "/content/converter/out/qahh_a0p3" }
   },
   "defaults": { "style": "arabmaqamrock ...", "repeat": 2, "quantile": 0.95, "lora": "v2" },
   "songs": [
@@ -140,7 +150,7 @@ python INFERENCE/generate.py my_songs.json                            # real run
       "style_file": "/content/audiocpp_inference/prompts/Kurd_style.txt",
       "lyrics_file": "../my_lyrics/kurd_night.txt",
       "seeds": [101, 202, 303],
-      "lora": "qfinal_a0.5" },
+      "lora": "qahh_a0p1" },
     { "name": "quick_smoke", "style": "...", "lyrics": "...", "seed": 7, "cap": 750 }
   ]
 }

@@ -41,7 +41,7 @@ signals a deliberate stop — no `Job stopped` at the end of `train.log`, no
 deliberate stop, **ask the user**; otherwise give them the exact command in §5
 and stop.
 
-Never edit `config/akbar_arabic_rock_lora.yml` to "fix" a crash. A changed
+Never edit a run config (e.g. `config/A100_akbar_arabic_rock_lora.yml`) to "fix" a crash. A changed
 config/hyperparameter is not a resume — archive and start fresh
 (`docs/BACKUP_RESTORE.md`).
 

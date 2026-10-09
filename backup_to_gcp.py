@@ -71,6 +71,7 @@ import logging
 import os
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 import time
@@ -330,6 +331,36 @@ def wait_for_settle(folder: Path, seconds: float, logger: logging.Logger) -> Non
         time.sleep(wait)
 
 
+def checkpoint_sqlite_dbs(folder: Path, logger: logging.Logger) -> None:
+    """Fold WAL sidecars into any ``*.db`` under ``folder`` before it is synced.
+
+    ``loss_log.db`` runs in WAL mode; this daemon rsyncs the main db and its
+    ``-wal``/``-shm`` as three independent objects at slightly different times, so
+    a captured main db can be mid-checkpoint and restore as ``database disk image
+    is malformed`` -- which kills the run in ``logging_aitk._prune_future_steps``.
+    A TRUNCATE checkpoint folds the WAL into the main db first, so the main db
+    alone is a consistent snapshot. Best-effort: a busy db is logged and left for
+    the next pass; never fatal.
+    """
+    for db in sorted(folder.rglob("*.db")):
+        try:
+            con = sqlite3.connect(str(db), timeout=10.0)
+            try:
+                con.execute("PRAGMA busy_timeout=10000")
+                mode = con.execute("PRAGMA journal_mode").fetchone()
+                row = con.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
+            finally:
+                con.close()
+            logger.info(
+                "sqlite checkpoint %s (mode=%s, busy=%s)",
+                db.name,
+                mode[0] if mode else "?",
+                row[0] if row else "?",
+            )
+        except sqlite3.Error as exc:
+            logger.warning("could not checkpoint %s: %s", db.name, exc)
+
+
 def sync(src: Path, dst: str, args: argparse.Namespace, logger: logging.Logger) -> bool:
     # gsutil honours only the last -x flag, so combine every pattern into one alternation.
     patterns = DEFAULT_EXCLUDES + args.exclude
@@ -527,6 +558,7 @@ def main() -> int:
                     continue
                 if settle:
                     wait_for_settle(src, args.settle_seconds, logger)
+                checkpoint_sqlite_dbs(src, logger)
                 if sync(src, f"{prefix}/{sub}", args, logger):
                     synced += 1
             logger.info(

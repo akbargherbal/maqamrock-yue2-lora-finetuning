@@ -37,7 +37,7 @@ import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
-DEFAULT_CONFIG = REPO_ROOT / "config" / "akbar_arabic_rock_lora.yml"
+DEFAULT_CONFIG = REPO_ROOT / "config" / "LEGACY_akbar_arabic_rock_lora.yml"  # v1/v2 rock config (renamed 2026-10-06); pass --config for a specific run
 DEFAULT_AI_TOOLKIT = Path("/content/ai-toolkit")
 DEFAULT_LOGS = Path("/content/logs")
 DEFAULT_LOG_NAME = "train"

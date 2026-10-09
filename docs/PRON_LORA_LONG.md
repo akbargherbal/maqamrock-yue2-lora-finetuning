@@ -1,5 +1,10 @@
 # Long-aya Quran pronunciation LoRA — runbook (canonical)
 
+> **RETIRED 2026-10-07 — historical runbook; do not run.** The 9-reciter long-aya donor
+> (`quran_long_aya_r8_s10`) and its `qfinal_a*` merges were retired and archived to
+> `<base>/archive/quran_long_aya_legacy/`. The current pronunciation donor is **`quran_ahh_r32`**
+> (see [`QURAN_AHH_RUN.md`](QURAN_AHH_RUN.md)). Kept for the record.
+
 Single entry point for the **multi-day, multi-VM long-aya pronunciation LoRA**:
 what the run is, where it stands, the commands that matter, and the exact prompts
 to paste. The *design/why* lives in [`PRON_LORA_LONG_PLAN.md`](PRON_LORA_LONG_PLAN.md);

@@ -152,9 +152,9 @@ and **0** `diffusion_model.*`.
 > **Superseded.** The `pron_lora_ar_only_r8` donor was taken over by the long-aya Quran
 > run (`quran_long_aya_r8_s10`): the 15 `c3050/c4575/cfinal_a0.*` merges and the source
 > pins were **archived** to GCS `archive/pron_lora_ar_only_legacy/`, and the run prefix
-> renamed `pron_lora_ar_only_r8_obsolete/`. The current (unlistened) candidates are the
-> two `qfinal_a*` merges — see `docs/LORA_INVENTORY.md`. The paragraph below is kept as
-> history.
+> renamed `pron_lora_ar_only_r8_obsolete/`. (Its successor, the long-aya `qfinal_a*` merges,
+> was itself retired 2026-10-07 → `archive/quran_long_aya_legacy/`; the current donor is
+> `quran_ahh_r32`.) The paragraph below is kept as history.
 
 Candidate merges of v2 + pron **checkpoint 3050** — `alpha` **0.5**, **0.4**, **0.3** built
 2026-09-25, plus **0.1**/**0.2** added 2026-09-26. **No α is selected**: none has been
