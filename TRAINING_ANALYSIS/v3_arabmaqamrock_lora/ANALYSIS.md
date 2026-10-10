@@ -32,7 +32,7 @@ python TRAINING_ANALYSIS/generate_plots.py \
 | Step time | ~**2.4 s/step** (avg 0.4161 steps/s, last-100 0.4182) |
 | Wall span (logged) | 3.34 h |
 | Sampling | **none** (`disable_sampling: true`, L93) — offline later |
-| Checkpoints | every 250 (`save_every: 250`, L46); **all 20** (250→4750) + final adapter in GCS |
+| Checkpoints | every 250 (`save_every: 250`, L46); **all 19** numbered (250→4750) + final adapter in GCS |
 | Health | no tracebacks; loss descending cleanly; **VRAM flat near cap — see callout** |
 
 ## Charts

@@ -5,7 +5,7 @@ exit — log shows `5000/5000`, `Saved checkpoint to …/v3_arabmaqamrock_lora.s
 `Saved optimizer to …/optimizer.pt`. **Nothing is running now.**
 
 ## Disconnect-safety status (verified from artifacts, not memory)
-- **GCS backup — current.** `…/v3_arabmaqamrock_lora/output/` holds **all 20** numbered
+- **GCS backup — current.** `…/v3_arabmaqamrock_lora/output/` holds **all 19** numbered
   checkpoints (250→4750) + the final **`v3_arabmaqamrock_lora.safetensors`** + `optimizer.pt`
   + `loss_log.db` + `tensorboard/`. Final adapter/optimizer uploaded **13:35:14Z** (local mtime
   13:34:04Z); daemon pass `13:36:50 — 3/3 folders synced`.
