@@ -1,81 +1,56 @@
-# current.md — v3 launch: verified fresh, ready to start (2026-10-10)
+# current.md — v3 run COMPLETE + safe to disconnect (2026-10-10)
 
-**State verified from artifacts this turn.** Setup **done**. Sidecars **UP** (started 10:05).
-Training **LAUNCHED 2026-10-10 10:06** — pid 27341, run `v3_arabmaqamrock_lora`.
-Now in the mandatory latent-cache build (before step 1).
+**Run `v3_arabmaqamrock_lora` finished: 5000 / 5000 at ~13:34 UTC (~16:34 Bahrain).** Clean
+exit — log shows `5000/5000`, `Saved checkpoint to …/v3_arabmaqamrock_lora.safetensors`,
+`Saved optimizer to …/optimizer.pt`. **Nothing is running now.**
 
-## Verified live (artifacts, not memory)
-- `python status.py` / `train_ctl.py status`: `running — pid 27341, run
-  'v3_arabmaqamrock_lora', started 2026-10-10T10:06:00`; sidecars
-  `backup_to_gcp.py=24944 · gpu_logger.py=24945 · vm-continuity=healthy`; `ALERTS: none`.
-- `/content/logs/train.log`: `Caching latents to disk:   0%|          | 0/438` — the ~7 min
-  cache build. `nvidia-smi`: `40 %, 3852 MiB / 81920 MiB`. `loss_log.db` not yet written
-  (0 steps until the cache + model load finish — normal).
-- `nvidia-smi`: **A100-SXM4-80GB**, `0%` util, `0MiB / 81920MiB`, `No running processes`
-  → GPU is free; no overlap.
-- `git log -1 --oneline`: `2b32197 main: A100 launch prep — notebook -> v3, handoff + session prompt`.
-- **Fresh start confirmed**: `/content/ai-toolkit/output/v3_arabmaqamrock_lora/` does **not
-  exist** (`output/` holds only `.gitkeep`); GCS prefix `.../v3_arabmaqamrock_lora/` **does
-  not exist**; no `_latent_cache/`.
-- **Setup complete** — `/content/logs/setup.log`:
-  - L25 `[ok]   dataset: 438 tracks in /content/yue2_dataset`
-  - L27 `[ok]   Comfy-Org/YuE2 checkpoints/yue2_3b_int8_convrot.safetensors present in HF cache`
-  - L28 `[ok]   torch/torchaudio cu130 + decode + cuDNN conv`
-  - L29 `=== setup.sh done (training) — total 197s ===`
-  - Dataset on disk: `438` mp3 + `438` txt (`.bootstrap_complete` present).
-- Config authority `config/v3_arabmaqamrock_lora.yml`: `steps: 5000` (L71),
-  `cache_latents_to_disk: true` (L57), `disable_sampling: true` (L93),
-  `train_window_frames: 0` (L129), `save_every: 250` (L46).
-- `train_ctl.py` default config is already `config/v3_arabmaqamrock_lora.yml` (L40) — the
-  explicit `--config` below is the same thing.
+## Disconnect-safety status (verified from artifacts, not memory)
+- **GCS backup — current.** `…/v3_arabmaqamrock_lora/output/` holds **all 20** numbered
+  checkpoints (250→4750) + the final **`v3_arabmaqamrock_lora.safetensors`** + `optimizer.pt`
+  + `loss_log.db` + `tensorboard/`. Final adapter/optimizer uploaded **13:35:14Z** (local mtime
+  13:34:04Z); daemon pass `13:36:50 — 3/3 folders synced`.
+- **GitHub — pushed** (final analysis + tooling; see commit log).
+- **Processes:** `run.py`, `train_watchdog.py`, `agent_watch.py` are **all stopped**. The
+  watchdog exited cleanly (`13:34:38 … step 5000/5000 reached -> complete; exiting`). Sidecars
+  `backup_to_gcp.py` (24944) + `gpu_logger.py` (24945) are still up and harmless.
+- **Latent cache** is local-only (not backed up) — only matters if you resume/extend.
 
-## 1. Start the two sidecars — **DONE** (running, pids 24944 / 24945)
-(kept below for reference / re-run after a VM reset) — terminal: **detached**
-Survives Ctrl+C / closing the tab. Confirm nothing already running first.
-Logs: `/content/logs/gcp_backup_stdout.log`, `/content/logs/gpu_logger_stdout.log`
-(backup pass log: `/content/logs/gcp_backup.log`).
-Stop: `pkill -f 'backup_to_gcp.py --run-name v3_arabmaqamrock_lora'` and
-`pkill -f 'gpu_logger.py --out /content/logs/gpu_usage.csv'`. Resume: rerun the block.
-
-```bash
-cd /content/maqamrock-yue2-lora-finetuning
-pgrep -af 'backup_to_gcp.py|gpu_logger.py'   # expect no real daemons yet
-setsid nohup python backup_to_gcp.py --run-name v3_arabmaqamrock_lora > /content/logs/gcp_backup_stdout.log 2>&1 & disown
-setsid nohup python gpu_logger.py --out /content/logs/gpu_usage.csv > /content/logs/gpu_logger_stdout.log 2>&1 & disown
-pgrep -af 'backup_to_gcp.py|gpu_logger.py'   # now 2 pids
+## GCS layout
+```
+gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora/
+  output/   checkpoints (250..4750) · v3_arabmaqamrock_lora.safetensors (final) · optimizer.pt · loss_log.db · tensorboard/
+  logs/     train.log · gpu_usage.csv · watchdog/agent logs
+  agent_notes/
 ```
 
-## 2. Launch training (you type this) — terminal: **detached via train_ctl.py**
-Own session; a stray Ctrl+C cannot kill it.
-Logs: `/content/logs/train.log` (+ `/content/logs/train_stdout.log`); pid `train.pid`.
-Stop: `python train_ctl.py stop` (SIGINT, checkpoint-safe — **never** bare kill/kill -9).
-Resume: rerun this same start command (auto-resumes newest checkpoint).
-
+## Safe to disconnect — you can do it any time now
+Training is done and GCS is current, so **no action is strictly required** — disconnecting the
+Colab runtime now loses nothing. For a tidy shutdown (optional):
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
-python train_ctl.py start --config config/v3_arabmaqamrock_lora.yml
+# belt-and-braces: force one more backup pass and confirm the newest objects
+python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --once
+gcloud storage ls -l gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora/output/ | tail
+
+# stop the now-idle sidecars
+pkill -f 'backup_to_gcp.py --run-name v3_arabmaqamrock_lora'
+pkill -f 'gpu_logger.py --out /content/logs/gpu_usage.csv'
+
+# then disconnect the Colab runtime (Runtime -> Disconnect)
 ```
+> `backup_to_gcp.py --once` can run a few minutes (it re-checks every object); it is
+> idempotent. If it's slow, the 5-min daemon pass already covered everything — just disconnect.
 
-**Expect before step 1 (normal, not a stall):** mandatory GPU latent-cache build for the 438
-(~7 min on A100) + model load (~1–3 min). `loss_log.db` stays at 0 steps for several minutes.
+## If you return on a FRESH VM
+1. `bash bootstrap/setup.sh --training` (rebuilds torch/HF stack + unzips the dataset)
+2. Restore the finished run: `python bootstrap/restore_run.py --run-name v3_arabmaqamrock_lora --apply`
+3. The artifact to convert / listen to / eval: `.../output/v3_arabmaqamrock_lora.safetensors`
 
-## 3. Monitor (read-only)
-```bash
-cd /content/maqamrock-yue2-lora-finetuning
-python train_ctl.py status
-python monitor_loss.py /content/ai-toolkit/output/v3_arabmaqamrock_lora/loss_log.db --total-steps 5000
-tail -f /content/logs/train.log
-tail -n 10 /content/logs/gpu_usage.csv
-```
-(~5000 steps ≈ 4.75 h on A100 at ~3.42 s/step. `disable_sampling: true` → no inference on
-the A100.)
-
-## Open items (unchanged)
-- Held-out/eval prompts are **STALE vs the 438** (3/4 contaminated) — regenerate before **any**
-  evaluation.
-- `sample.samples` in the config are stale and **inert** (`disable_sampling: true`).
-- Graph stale (built `2f35c76`, HEAD `2b32197`) — orientation only, not a blocker.
-- Working tree has a modified `opencode.json` (harness config; not training-related).
-- `setup.sh`'s trailing "Next" hint cites the legacy `config/A100_akbar_arabic_rock_lora.yml`
-  (setup.log L35) — that is `setup.sh` message drift; launch via `train_ctl.py` with the v3
-  config above.
+## Follow-ups (not blocking)
+- Held-out/eval prompts are **stale vs the 438** — regenerate before **any** evaluation.
+- **Do NOT extend this run in place** — the end-of-run save overwrote the un-suffixed
+  `v3_arabmaqamrock_lora.safetensors`; extending rewrites it (`DECISIONS.md:49`). Use a new
+  run name if continuing.
+- New this session (committed): `train_watchdog.py`, `agent_watch.py`; a `docs-reconciler`
+  pass + `docs/README.md` index update is still pending.
+- Knowledge graph stale (built `2f35c76`).

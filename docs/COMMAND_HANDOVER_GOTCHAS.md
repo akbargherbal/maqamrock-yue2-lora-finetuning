@@ -278,3 +278,20 @@ human and invisible to the agent — so they get written down here.
   every other string in the command; after launching a detached job, confirm it started from an
   independent signal (a fresh log line, rising `nvidia-smi` memory), not from a "not running" guard.
 
+## 2026-10-10 — `pkill -f <pattern>` kills the *invoking* shell when the pattern text is in that shell's own command line
+
+- **Fact:** the kill-side twin of the gotcha above. Running `pkill -f train_watchdog.py` from a shell
+  whose command line *also* contains `train_watchdog.py` (e.g. an agent's `bash -c '… pkill -f
+  train_watchdog.py; setsid nohup python train_watchdog.py …'`) sends SIGTERM to that bash itself.
+  `pkill` excludes only **its own** PID, not its parent shell. Everything after the `pkill` in the
+  same invocation never runs.
+- **Failure prevented:** a "stop the old watchdog then start the new one" one-liner died at the
+  `pkill`, so the replacement watchdog was never launched — leaving *no* watcher, silently, exactly
+  when unattended coverage was the goal.
+- **Correct pattern:** split it — kill in one invocation that contains no other reference to the
+  pattern (or `kill "$(cat /path/pid)"`), then launch in a separate invocation. The `[x]` bracket
+  trick does not help here because the unbracketed word appears in the launch half of the same
+  command line. Verify the new watcher started from an independent signal (`pgrep -af '[t]rain_watchdog.py'`).
+  Note: an **interactive** user typing `pkill -f X` is unaffected (the interactive shell's cmdline is
+  just `-bash`); this bites the **agent's long `bash -c` one-liners**.
+
