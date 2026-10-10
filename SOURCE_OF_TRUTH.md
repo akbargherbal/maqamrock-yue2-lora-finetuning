@@ -11,6 +11,7 @@ History files are authoritative for what happened, never for what is true now.
 | Run metrics & liveness | `loss_log.db` via `monitor_loss.py` | files, not prose |
 | Backup layout / restore | `docs/BACKUP_RESTORE.md` + `backup_to_gcp.py --help` | script flags beat prose |
 | Inference procedure / provenance | `docs/INFERENCE.md` | repo `INFERENCE/` scripts are canonical |
+| v3 output-quality "spice" sweep (sampler / scale / checkpoint) | `docs/V3_SPICE_SWEEP.md` | Pass-1 arm table + rollout; implement on Colab |
 | Pron LoRA training | `docs/PRON_LORA.md` | runbook; opt-in via `GCP_PRON_DATASET_PATH` |
 | Long-aya Quran LoRA (run / resume) — **RETIRED 2026-10-07** | `docs/PRON_LORA_LONG.md` | the 9-reciter `quran_long_aya_r8_s10` is retired → `<base>/archive/quran_long_aya_legacy/`; superseded by `quran_ahh_r32` |
 | Long-aya run configs — **RETIRED** | `config/quran_long_aya_r8_s10.yml` · `config/quran_long_aya_r8.yml` | never edit (kept for the record); both runs retired |

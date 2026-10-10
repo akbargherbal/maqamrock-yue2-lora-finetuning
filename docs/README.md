@@ -16,6 +16,7 @@ operating contract is `../AGENTS.md`.
 | Finish a run: final backup + push checklist | [FINAL_BACKUP.md](FINAL_BACKUP.md) |
 | Build `audiocpp_cli` for a target GPU on a CPU-only runtime | [audiocpp_gpu_arch_builds.md](audiocpp_gpu_arch_builds.md) |
 | Run inference (YuE2 GGUF + LoRA) on a fresh VM | [INFERENCE.md](INFERENCE.md) |
+| Tune v3 output quality — "spice" sweep (sampler / scale / checkpoint), 4/5 → 5/5 | [V3_SPICE_SWEEP.md](V3_SPICE_SWEEP.md) |
 | Train the AR-only pronunciation LoRA | [PRON_LORA.md](PRON_LORA.md) |
 | **Run / resume the long-aya Quran LoRA (`quran_long_aya_r8_s10`) — RETIRED 2026-10-07** | [PRON_LORA_LONG.md](PRON_LORA_LONG.md) |
 | Verify / offline-eval the pronunciation LoRA (source + AR-loss replay) | [PRON_LORA_VERIFICATION.md](PRON_LORA_VERIFICATION.md) |
