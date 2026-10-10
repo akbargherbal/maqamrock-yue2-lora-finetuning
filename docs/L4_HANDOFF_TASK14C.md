@@ -77,7 +77,7 @@ missing file.
 - Clone this repo and `git checkout pron-lora-ar-only` — the pron configs/docs
   live on this branch, not `main`.
 - Training-mode `setup.sh` **always** downloads the v2 dataset and needs
-  `GCP_DATASET_PATH=.../dataset`; the pron set is opt-in via
+  `GCP_DATASET_PATH=.../v2_arabmaqamrock_dataset`; the pron set is opt-in via
   `GCP_PRON_DATASET_PATH=.../pron_dataset`. The launching notebook must export
   **both** (a past smoke VM set only `GCP_DATASET_PATH` to the pron path and
   broke — see `PRON_LORA_VERIFICATION.md` A7). `GCP_BACKUP_BASE` too.

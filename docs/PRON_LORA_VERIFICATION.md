@@ -223,6 +223,13 @@ same file cannot silently reuse a stale cache. No action needed.
 
 ## A7 — training-mode `setup.sh` always downloads the v2 dataset too
 
+> **Update 2026-10-10 — no longer true as stated.** `setup.sh` no longer
+> hard-requires `GCP_DATASET_PATH` and is no longer unconditional: it now also
+> accepts a **zip** (`GCP_DATASET_ZIP`, the v3 dataset) and runs `job_dataset`
+> only when a folder prefix is set. The finding below is the **pre-2026-10-10**
+> behaviour (and its line numbers); it still explains why the launching notebook
+> must export the right variables for the pron flow.
+
 - `bootstrap/setup.sh:93` hard-requires `GCP_DATASET_PATH` in training mode
   (`DATASET_GCS="${GCP_DATASET_PATH:?…}"`), and `start_job dataset job_dataset`
   (`:302`) runs unconditionally in training mode. So a VM used only for the pron
@@ -232,10 +239,10 @@ same file cannot silently reuse a stale cache. No action needed.
   adapter reads only `/content/pron_dataset/*`, and the two GCS prefixes are
   siblings (`dataset/` vs `pron_dataset/`), so `job_dataset`'s recursive rsync
   can never pull pron files into `/content/yue2_dataset` (or vice versa) —
-  provided `GCP_DATASET_PATH` actually points at `.../dataset`.
+  provided `GCP_DATASET_PATH` actually points at `.../v2_arabmaqamrock_dataset`.
 - **Not modified on purpose.** Making `job_dataset`/line 93 conditional was
   deliberately avoided; the fix belongs in the launching notebook, which must
-  export `GCP_DATASET_PATH=.../dataset` **and** `GCP_PRON_DATASET_PATH=.../pron_dataset`
+  export `GCP_DATASET_PATH=.../v2_arabmaqamrock_dataset` **and** `GCP_PRON_DATASET_PATH=.../pron_dataset`
   (see `docs/PRON_LORA.md`).
 - Failure mode actually observed on the 2026-09-24 L4 smoke VM: the notebook set
   `GCP_DATASET_PATH=.../pron_dataset` and omitted `GCP_PRON_DATASET_PATH`. Then

@@ -37,7 +37,7 @@ export GCP_PRON_DATASET_PATH=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_
 ```
 
 `GCP_DATASET_PATH` must point at the **v2** dataset
-(`.../OSTRIS_Arabic_Suno_Finetuning/dataset`), **not** at `.../pron_dataset`.
+(`.../OSTRIS_Arabic_Suno_Finetuning/v2_arabmaqamrock_dataset`), **not** at `.../pron_dataset`.
 Training-mode `setup.sh` hard-requires it (`bootstrap/setup.sh:93`) and always
 runs `job_dataset`, which otherwise downloads the pron set into
 `/content/yue2_dataset` while `job_pron_dataset()` is silently skipped — see

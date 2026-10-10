@@ -4,6 +4,9 @@ How many seconds of audio a lyric of `N` Arabic letters needs, as an **upper
 cap**: the length at which a generated song is very likely to have finished
 singing. Fitted on the 267 `yue2_dataset/` `.txt` / `.mp3` pairs.
 
+> **Note (2026-10-10):** fitted on the v2 267-track corpus. The v3 438-track set reuses
+> this fit (its 14 above-the-line tracks are unchanged); re-fit if a future set diverges.
+
 For lyrics-to-song generation the model may always stop early, but a truncated
 song is a failure. Under-shooting costs a broken output; over-shooting costs
 only a little wasted compute. The loss is **asymmetric**, so the correct target

@@ -1,32 +1,37 @@
-# current — 2026-10-09 (merged: `pron-lora-long-aya` → `main`)
+# current.md — v3 dataset built + repo reconciled (2026-10-10)
 
-## State
-`main` now carries the **curated** merge of this branch — tooling + docs + the lean lessons;
-the heavy run data did not come across. The Quran donor is **shelved**; evaluation runs in the
-external **rating app**.
+**Done this session (no GPU used).**
 
-## What landed on `main`
-- **Docs:** `PROGRESS.md` (M12–M15 → one lean **M12** block), `DECISIONS.md` (shelving decision
-  + "score the axis you care about"), `README.md` + `SOURCE_OF_TRUTH.md` (donor shelved; rating
-  app = the way forward), `docs/LISTENING_EVAL.md` (`gh repo clone akbargherbal/ai_music_rating_app`),
-  new `docs/QURAN_*.md`, runbooks/tests updated.
-- **Tooling/config:** `config/{A100,L4,LEGACY}_*.yml` + `config/quran_ahh_r32.yml`; `merge_quran_lora.py`,
-  `build_pron_only_fused.py`, `prepare_ahh_quran_dataset.py`, `train_ctl.py`, `backup_to_gcp.py`;
-  `INFERENCE/` tooling + `scorecards/` + `songs.*.json`; `bootstrap/{rename_run,restore_run,setup}.sh`;
-  `skills/`; `opencode.json` (dev config, tracked for fresh VMs).
-- **Small referenced records kept:** `results/{jarir_qahh,quran_ahh_epochs,dtest_diction}`,
-  `TRAINING_ANALYSIS/quran_ahh_*/ANALYSIS.md`.
+## Dataset
+- Built **v3 = 438 tracks** (Ajam 118 · Hijaz 107 · Kurd 101 · Nahawand 112), verbatim lyric
+  tags, Suno header stripped, 3 surgical `vocals` overrides. Strict superset of v2 (267+171).
+- Local: `ostris_prepare_dataset/v3_arabmaqamrock_dataset/` + `.zip`.
+  sha256 `5b5624ee4bc03dcb9d89450a9e2a81871343ddd59558f9a24e98f4ca49e7830f`.
+- GCS: renamed **`dataset/` → `v2_arabmaqamrock_dataset/`** (534 objects, CRC-verified);
+  uploaded **`v3_arabmaqamrock_dataset.zip`** (+ `.sha256`, `manifest.json`, `report.md`).
+  Upload verified: size 2530501579 + CRC32C `beq20A==` match.
 
-## Stayed on the branch (not on `main`)
-- `quran_text/` (3 MB dataset text), `TRAINING_ANALYSIS/quran_ahh_*/0*.png` (generated plots),
-  `INFERENCE/{rating_app,eval_app}` (superseded eval apps).
+## Naming (decided)
+- Runs: **`v3_arabmaqamrock_lora`** (A100) · **`v3_arabmaqamrock_lora_l4`** (L4).
+- Configs: `config/v3_arabmaqamrock_lora.yml` · `..._l4.yml` (staged from the A100/L4 variants;
+  `steps: 5000`, `name`/`log_dir` updated).
+- Local dataset path unchanged: `/content/yue2_dataset`.
 
-## Health
-- Reconciler Steps 1–2 after merge+trim: **0 flagged / 1483 checkable**.
-- Merge conflict resolved in `docs/COMMAND_HANDOVER_GOTCHAS.md` (took the branch's version — a
-  superset that keeps origin/main's cuDNN entry plus the `LEGACY_` config rename).
-- `.reconcile/` is a local scratch dir (untracked; safe to ignore).
+## Code/doc changes (staged → applied)
+- `bootstrap/setup.sh`: new **`GCP_DATASET_ZIP`** path (`cp`+unzip) vs `GCP_DATASET_PATH`
+  (folder); dataset count check = 438 only in zip mode.
+- Notebook: `GCP_DATASET_PATH` → v2 prefix; added `GCP_DATASET_ZIP`.
+- `backup_to_gcp.py`, `README.md`, `SOURCE_OF_TRUTH.md`, `docs/README.md`, `docs/START.md`,
+  `docs/PRON_LORA*.md`, `text_to_duration_formula.md`, `INFERENCE.md`, held-out report,
+  `DECISIONS.md` (dated entry).
+- Added `prepare_yue2_dataset_v3.py` + `datasets/v3_arabmaqamrock/{README,manifest,build_report,v3_overrides}`.
 
-## Next (when resumed)
-- New arabmaqamrock round (~400–450 songs) — `config/A100_akbar_arabic_rock_lora.yml` is the template.
-- Dialect project (long-term): lyric-free style + separate diction adapter.
+## Next: launch training (fresh VM, you type it)
+1. Notebook exports `GCP_DATASET_ZIP` (already set) → `bash bootstrap/setup.sh --training`.
+2. Sidecars: `backup_to_gcp.py --run-name v3_arabmaqamrock_lora` + `gpu_logger.py`.
+3. `python train_ctl.py start --config config/v3_arabmaqamrock_lora.yml`.
+   (~5000 steps ≈ 4.75 h on A100; latent cache rebuilds ~20 min.)
+
+## Open
+- Held-out eval set is **stale vs v3** (3/4 contaminated) — regenerate before any eval.
+- `sample.samples` in the configs are stale and inert (`disable_sampling: true`).

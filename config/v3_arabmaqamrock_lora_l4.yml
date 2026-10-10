@@ -1,17 +1,19 @@
 ---
 job: "extension"
 config:
+  # v3 (2026-10-10): trained on the 438-track verbatim-lyric dataset
+  #   (GCS v3_arabmaqamrock_dataset.zip); steps 3000 -> 5000/438 ≈ v2 exposure.
   # L4 variant (24 GB). Split from LEGACY_akbar_arabic_rock_lora.yml (2026-10-06) with:
   #   disable_sampling: true   -- sampling runs offline on a separate T4 vs GCP checkpoints
   #   ar_kl_weight: 0.2 -> 0.0  -- user decision; the anchor never plateaued ar_kl
   #   gradient_checkpointing stays true -- needed for the 24 GB L4
-  name: "L4_akbar_arabic_rock_lora"
+  name: "v3_arabmaqamrock_lora_l4"
   process:
     - type: "diffusion_trainer"
       training_folder: "/content/ai-toolkit/output"
       sqlite_db_path: "/content/ai-toolkit/aitk_db.db"   # made absolute -- easier to target in the backup script below
       device: "cuda"
-      trigger_word: "arabmaqamrock"   # v2 captions now bake this in directly ("arabmaqamrock " prefix); AI Toolkit's injector only prepends when the trigger appears zero times in the caption (toolkit/prompt_utils.py), so this is a no-op, not a double-prepend -- keep it set
+      trigger_word: "arabmaqamrock"   # v3 captions bake this in directly ("arabmaqamrock " prefix); AI Toolkit's injector only prepends when the trigger appears zero times in the caption (toolkit/prompt_utils.py), so this is a no-op, not a double-prepend -- keep it set
       performance_log_every: 10
       network:
         type: "lora"
@@ -28,7 +30,7 @@ config:
       # needing to know aitk_db.db's internal schema. Seen in other users' exported
       # configs, not primary docs -- confirm it's honored for diffusion_trainer/yue2
       # before relying on it.
-      log_dir: "output/L4_akbar_arabic_rock_lora/tensorboard"
+      log_dir: "output/v3_arabmaqamrock_lora_l4/tensorboard"
       # NOTE (verified against ai-toolkit source, see DECISIONS.md): log_dir is real
       # and generic (jobs/process/BaseTrainProcess.py), but it writes into a
       # TIMESTAMPED SUBFOLDER under this path, not this path directly --
@@ -66,7 +68,7 @@ config:
       train:
         batch_size: 1
         bypass_guidance_embedding: false
-        steps: 3000   # deliberate leave-alone for v2: one-variable discipline -- v2's only intended change vs. v1 is caption content (lyrics), so step count stays fixed to keep the comparison clean.
+        steps: 5000   # v3: 5000/438 ≈ 11.42 epochs, matching v2's per-track exposure (3000/267 ≈ 11.24).
         # Wall-clock cost: don't reuse the killed run's ~7.8s/step (that was measured under the
         # 60s train_window_frames, not whole-song). Measured whole-song A100 step-time instead:
         # see docs/GPU_L4_VS_A100.md (~3.10 s/step A100 vs ~13.4 s/step L4, ~4.3x).

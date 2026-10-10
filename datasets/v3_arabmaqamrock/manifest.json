@@ -1,0 +1,3509 @@
+{
+ "count": 438,
+ "tracks": [
+  {
+   "out_name": "ajam_Lamiyat_Alshanfara_16082026_004_bb17d099",
+   "maqam": "Ajam",
+   "ws": "Lamiyat_Alshanfara_16082026",
+   "source": "05-الطريد-وهموم-ملازمة-العزة-والزهد_SONG_B.mp3",
+   "clip_id": "bb17d099-457c-412f-a05e-fee7b3297a6d",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_Lamiyat_Alshanfara_16082026_005_5fcfcead",
+   "maqam": "Ajam",
+   "ws": "Lamiyat_Alshanfara_16082026",
+   "source": "05-الطريد-وهموم-ملازمة-العزة-والزهد_SONG_A.mp3",
+   "clip_id": "5fcfcead-127f-4b5b-89ff-c7bc5e3145a1",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_Lamiyat_Alshanfara_16082026_012_5bdcf882",
+   "maqam": "Ajam",
+   "ws": "Lamiyat_Alshanfara_16082026",
+   "source": "01-الوداع-والالتحاق-بالرفاق-الحقيقيين_SONG_B.mp3",
+   "clip_id": "5bdcf882-61cb-4c61-a2d6-b6ea48c2351b",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_Lamiyat_Alshanfara_16082026_013_80ce6d4c",
+   "maqam": "Ajam",
+   "ws": "Lamiyat_Alshanfara_16082026",
+   "source": "01-الوداع-والالتحاق-بالرفاق-الحقيقيين_SONG_A.mp3",
+   "clip_id": "80ce6d4c-0867-47da-b6c4-d1bc8cb27a55",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_New_Abu_Tammam_16082026_000_2628d61f",
+   "maqam": "Ajam",
+   "ws": "New_Abu_Tammam_16082026",
+   "source": "07-يوم-بدر-الثاني-وتتويج-نصر-العرب_SONG_B.mp3",
+   "clip_id": "2628d61f-363d-4f43-967b-746478e2dba7",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_New_Abu_Tammam_16082026_001_6fce90eb",
+   "maqam": "Ajam",
+   "ws": "New_Abu_Tammam_16082026",
+   "source": "07-يوم-بدر-الثاني-وتتويج-نصر-العرب_SONG_A.mp3",
+   "clip_id": "6fce90eb-5e78-42cc-a418-a2e00d347d03",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_New_Abu_Tammam_16082026_012_c7b1334b",
+   "maqam": "Ajam",
+   "ws": "New_Abu_Tammam_16082026",
+   "source": "01-صرخة-اليقين-ودحض-خرافات-المنجمين_SONG_B.mp3",
+   "clip_id": "c7b1334b-fdde-4632-9daa-85a45a13a2d7",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_aasha_23072026_000_3c464466",
+   "maqam": "Ajam",
+   "ws": "aasha_23072026",
+   "source": "08-خيول-الحنو-وملحمة-النصر_SONG_B.mp3",
+   "clip_id": "3c464466-9857-4bce-922d-b1516591fce0",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_aasha_23072026_001_51a73d83",
+   "maqam": "Ajam",
+   "ws": "aasha_23072026",
+   "source": "08-خيول-الحنو-وملحمة-النصر_SONG_A.mp3",
+   "clip_id": "51a73d83-bc22-421c-aad0-72b8fd4a2e6d",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_aasha_ariqtu_21082026_004_276ad247",
+   "maqam": "Ajam",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "05-نار-القرى-ومدحة-المحلق-وجفان-الجود-والإقدام_SONG_B.mp3",
+   "clip_id": "276ad247-ff02-4ec7-aae8-645b316d42a6",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_abu-tammam_16082026_004_e42095b4",
+   "maqam": "Ajam",
+   "ws": "abu-tammam_16082026",
+   "source": "07-يوم-بدر-الثاني-وتتويج-نصر-العرب_SONG_B.mp3",
+   "clip_id": "e42095b4-fe57-4816-90a8-b74d029b4d1d",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_abu-tammam_16082026_005_a1ed9109",
+   "maqam": "Ajam",
+   "ws": "abu-tammam_16082026",
+   "source": "07-يوم-بدر-الثاني-وتتويج-نصر-العرب_SONG_A.mp3",
+   "clip_id": "a1ed9109-1017-417d-be36-74002f09ff3e",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_alharith_bin_heliza_22082026_002_808d9879",
+   "maqam": "Ajam",
+   "ws": "alharith_bin_heliza_22082026",
+   "source": "07-مدح-الملك-ويوم-الشقيقة_SONG_B.mp3",
+   "clip_id": "808d9879-b48e-4639-8d0c-0652e3a597d3",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_almutanabi_kafa_bika_21082026_002_01821d42",
+   "maqam": "Ajam",
+   "ws": "almutanabi_kafa_bika_21082026",
+   "source": "04-صليل-السيوف-وذروة-المجد_SONG_B.mp3",
+   "clip_id": "01821d42-8748-461e-bbf5-5abb2b82fb74",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_almutanabi_kafa_bika_21082026_003_55162a90",
+   "maqam": "Ajam",
+   "ws": "almutanabi_kafa_bika_21082026",
+   "source": "04-صليل-السيوف-وذروة-المجد_SONG_A.mp3",
+   "clip_id": "55162a90-a478-425a-aafa-7b3bc0532782",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amin_almanoon_17082026_000_53706e1a",
+   "maqam": "Ajam",
+   "ws": "amin_almanoon_17082026",
+   "source": "06-مثل-الدهر-الثالث-ملحمة-الفارسين-والمصير-المحتوم_SONG_D.mp3",
+   "clip_id": "53706e1a-771c-40c5-906f-b764f07bdb02",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amin_almanoon_17082026_001_eaede878",
+   "maqam": "Ajam",
+   "ws": "amin_almanoon_17082026",
+   "source": "06-مثل-الدهر-الثالث-ملحمة-الفارسين-والمصير-المحتوم_SONG_C.mp3",
+   "clip_id": "eaede878-45fe-4876-b715-72e28dc0febb",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amin_almanoon_19082026_004_541050d9",
+   "maqam": "Ajam",
+   "ws": "amin_almanoon_19082026",
+   "source": "06-الفارس-المدجج-وخروج-القرين_SONG_B.mp3",
+   "clip_id": "541050d9-0dde-4f90-a650-2352ab8a0b19",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amin_almanoon_19082026_005_991c52a8",
+   "maqam": "Ajam",
+   "ws": "amin_almanoon_19082026",
+   "source": "06-الفارس-المدجج-وخروج-القرين_SONG_A.mp3",
+   "clip_id": "991c52a8-ee99-4074-a307-b0190348674d",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_20082026_006_24093af6",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "10-السيادة-التغلبية-المطلقة-وسجود-الجبابرة_SONG_B.mp3",
+   "clip_id": "24093af6-dcf1-47f8-9e52-d0013f4813c8",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_20082026_007_5ee592b5",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "10-السيادة-التغلبية-المطلقة-وسجود-الجبابرة_SONG_A.mp3",
+   "clip_id": "5ee592b5-2984-47f2-bb96-d153fd2dbd69",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_20082026_010_24a67d76",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "07-أيام-النصر-الكبرى-خزازى-وأسر-الملوك_SONG_B.mp3",
+   "clip_id": "24a67d76-fc25-441b-9566-5483156eaa21",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_20082026_011_a9ae9827",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "07-أيام-النصر-الكبرى-خزازى-وأسر-الملوك_SONG_A.mp3",
+   "clip_id": "a9ae9827-5204-45bb-bea4-9c1535333ae4",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_20082026_018_badd41d1",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "03-إنذار-أبا-هند-وقرى-الحروب-والرايات-الحمر_SONG_B.mp3",
+   "clip_id": "badd41d1-c13a-479a-bdab-46aae01157c3",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_20082026_019_5a30fe55",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "03-إنذار-أبا-هند-وقرى-الحروب-والرايات-الحمر_SONG_A.mp3",
+   "clip_id": "5a30fe55-88d8-4939-86c0-b8ebfaa07f75",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_23072026_001_76a5acca",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "04-ملحمة-الجلاد-وكرامة-الموت_RETAKE_SONG_I.mp3",
+   "clip_id": "76a5acca-558c-4ba8-a339-02fd81efc60f",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_23072026_002_9fa58db4",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "04-ملحمة-الجلاد-وكرامة-الموت_RETAKE_SONG_H.mp3",
+   "clip_id": "9fa58db4-44ab-4b69-b5ba-8c0ad5e321e8",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_23072026_003_6af36661",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "04-ملحمة-الجلاد-وكرامة-الموت_RETAKE_SONG_G.mp3",
+   "clip_id": "6af36661-7770-4125-bd11-65bf96ed141b",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_23072026_007_5229f59d",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "04-ملحمة-الجلاد-وكرامة-الموت_RETAKE_SONG_C.mp3",
+   "clip_id": "5229f59d-058d-43a5-85f4-fd2bd3d05897",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_23072026_008_ed9db55c",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "04-ملحمة-الجلاد-وكرامة-الموت_RETAKE_SONG_B.mp3",
+   "clip_id": "ed9db55c-7db8-4ad0-8d0b-add2680f0de4",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_23072026_018_fb22ed16",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "09-الفخر-المطلق-والهيمنة-الشاملة_SONG_B.mp3",
+   "clip_id": "fb22ed16-506f-460f-9eba-365a43394120",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_23072026_019_43e967f3",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "09-الفخر-المطلق-والهيمنة-الشاملة_SONG_A.mp3",
+   "clip_id": "43e967f3-3fd9-42c7-a776-036b84555c8b",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_23072026_024_e1b1d293",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "06-مفاخر-الأجداد-والسيادة-التاريخية_SONG_B.mp3",
+   "clip_id": "e1b1d293-f7c3-456f-8bbf-58103dabec58",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_23072026_025_237b976e",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "06-مفاخر-الأجداد-والسيادة-التاريخية_SONG_A.mp3",
+   "clip_id": "237b976e-2118-4e18-acd6-e4d3d5d30c0b",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_23072026_028_3ba505d0",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "04-ملحمة-الجلاد-وكرامة-الموت_SONG_B.mp3",
+   "clip_id": "3ba505d0-9602-43e0-9edd-0540c462b274",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_23072026_029_11689dd0",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "04-ملحمة-الجلاد-وكرامة-الموت_SONG_A.mp3",
+   "clip_id": "11689dd0-7dd9-4beb-a127-b9f14bf60076",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_24072026_000_134a63f7",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "09-الفخر-المطلق-والهيمنة-الشاملة_SONG_B.mp3",
+   "clip_id": "134a63f7-3872-4356-a2d5-bbe052f844c4",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_24072026_001_f2cae6e5",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "09-الفخر-المطلق-والهيمنة-الشاملة_SONG_A.mp3",
+   "clip_id": "f2cae6e5-d7fd-432c-b170-39b5c0ffbff3",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_24072026_006_3547bddc",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "06-مفاخر-الأجداد-والسيادة-التاريخية_SONG_B.mp3",
+   "clip_id": "3547bddc-28c2-4ead-b51c-98d98d654362",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_24072026_007_e3f837bc",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "06-مفاخر-الأجداد-والسيادة-التاريخية_SONG_A.mp3",
+   "clip_id": "e3f837bc-99cc-4187-8adc-fa624abde685",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_24072026_010_4142abaf",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "04-ملحمة-الجلاد-وكرامة-الموت_SONG_B.mp3",
+   "clip_id": "4142abaf-63c4-4c01-b8df-15ed597679d2",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amro_bin_kalthoum_24072026_011_7606c99f",
+   "maqam": "Ajam",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "04-ملحمة-الجلاد-وكرامة-الموت_SONG_A.mp3",
+   "clip_id": "7606c99f-c577-425c-b4ab-393f927ac946",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amrro_bin_kalthoum_11082026_001_5b41e6e5",
+   "maqam": "Ajam",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "09-الفخر-المطلق-والهيمنة-الشاملة_SONG_A.mp3",
+   "clip_id": "5b41e6e5-07f7-41dc-a9f4-322e4e4cb89c",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amrro_bin_kalthoum_11082026_006_29081953",
+   "maqam": "Ajam",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "06-مفاخر-الأجداد-والسيادة-التاريخية_SONG_B.mp3",
+   "clip_id": "29081953-90b4-42df-af5e-67ea9852c402",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amrro_bin_kalthoum_11082026_007_6e529935",
+   "maqam": "Ajam",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "06-مفاخر-الأجداد-والسيادة-التاريخية_SONG_A.mp3",
+   "clip_id": "6e529935-adc6-4b14-99f7-8655b72c6034",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_amrro_bin_kalthoum_11082026_010_3154af74",
+   "maqam": "Ajam",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "04-ملحمة-الجلاد-وكرامة-الموت_SONG_B.mp3",
+   "clip_id": "3154af74-34f9-4962-a20d-d801e524dbe5",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_antara_13082026_002_cb456914",
+   "maqam": "Ajam",
+   "ws": "antara_13082026",
+   "source": "09-شفى-نفسي-صيحات-الفوارس-والانتصار-على-الأعداء_SONG_B.mp3",
+   "clip_id": "cb456914-7b93-4265-af76-824ad11eeb6e",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_antara_13082026_003_726d1cf7",
+   "maqam": "Ajam",
+   "ws": "antara_13082026",
+   "source": "09-شفى-نفسي-صيحات-الفوارس-والانتصار-على-الأعداء_SONG_A.mp3",
+   "clip_id": "726d1cf7-d38d-4b0f-9c5e-789367e52efc",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_antara_mullaq_21072026_004_6939ec66",
+   "maqam": "Ajam",
+   "ws": "antara_mullaq_21072026",
+   "source": "09-شفى-نفسي-صيحات-الفوارس-والانتصار-على-الأعداء_SONG_B.mp3",
+   "clip_id": "6939ec66-69cc-456c-91fc-b11b8bc76fab",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_antara_mullaq_21072026_005_d1dc51bc",
+   "maqam": "Ajam",
+   "ws": "antara_mullaq_21072026",
+   "source": "09-شفى-نفسي-صيحات-الفوارس-والانتصار-على-الأعداء_SONG_A.mp3",
+   "clip_id": "d1dc51bc-eb80-4927-95dd-73873939965c",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_antara_mullaq_21072026_012_2c60d2c6",
+   "maqam": "Ajam",
+   "ws": "antara_mullaq_21072026",
+   "source": "05-الفخر-بالشمائل-والكرم-والفروسية_SONG_B.mp3",
+   "clip_id": "2c60d2c6-39da-4bb1-a400-1ce7d4e8327b",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_antara_mullaq_21072026_013_240c0a6f",
+   "maqam": "Ajam",
+   "ws": "antara_mullaq_21072026",
+   "source": "05-الفخر-بالشمائل-والكرم-والفروسية_SONG_A.mp3",
+   "clip_id": "240c0a6f-fb17-4715-b787-5994f2ff1f7b",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_ara_alanqaa_18082026_002_eb7d58d0",
+   "maqam": "Ajam",
+   "ws": "ara_alanqaa_18082026",
+   "source": "05-فرسان-البادية-والفتى-الصنديد_SONG_B.mp3",
+   "clip_id": "eb7d58d0-e2a5-4894-a34a-c97c6b13ed58",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_ara_alanqaa_18082026_006_657ca6e5",
+   "maqam": "Ajam",
+   "ws": "ara_alanqaa_18082026",
+   "source": "03-شرف-الثريا-ومقارعة-النوازل_SONG_B.mp3",
+   "clip_id": "657ca6e5-7e77-4d52-a9dd-006521a751d5",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_ara_alanqaa_18082026_007_19fbef59",
+   "maqam": "Ajam",
+   "ws": "ara_alanqaa_18082026",
+   "source": "03-شرف-الثريا-ومقارعة-النوازل_SONG_A.mp3",
+   "clip_id": "19fbef59-9674-4750-a996-b211b75e8d8f",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_ghayra_mujdin_19082026_006_13c8f78f",
+   "maqam": "Ajam",
+   "ws": "ghayra_mujdin_19082026",
+   "source": "03-مناقب-الفقيه-الزاهد-وطقوس-الوداع_SONG_B.mp3",
+   "clip_id": "13c8f78f-5622-4cd1-bc0f-638eaa8d2dc2",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_im_qais_20082026_005_f8293491",
+   "maqam": "Ajam",
+   "ws": "im_qais_20082026",
+   "source": "06-الفرس-الأسطوري-وانطلاق-الصيد_SONG_A.mp3",
+   "clip_id": "f8293491-f125-48cd-b82e-77cd0460a0cb",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_jarir_24072026_003_8427e2e9",
+   "maqam": "Ajam",
+   "ws": "jarir_24072026",
+   "source": "04-فخر-تميم-وقضاء-مضر-وربيعة_SONG_A.mp3",
+   "clip_id": "8427e2e9-48d0-44a0-8041-0118f8ab18c4",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_lamiyat_alshanfara_14082026_000_11cbae01",
+   "maqam": "Ajam",
+   "ws": "lamiyat_alshanfara_14082026",
+   "source": "07-الحر-الشديد-وقطع-القفر-والوعول_SONG_B.mp3",
+   "clip_id": "11cbae01-1268-4877-9dd4-77a4095a07ef",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_lamiyat_alshanfara_14082026_001_10cd73b5",
+   "maqam": "Ajam",
+   "ws": "lamiyat_alshanfara_14082026",
+   "source": "07-الحر-الشديد-وقطع-القفر-والوعول_SONG_A.mp3",
+   "clip_id": "10cd73b5-3084-4ee4-8df8-c21ab7aa9ee5",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_lamiyat_alshanfara_14082026_004_046fa27f",
+   "maqam": "Ajam",
+   "ws": "lamiyat_alshanfara_14082026",
+   "source": "05-الطريد-وهموم-ملازمة-العزة-والزهد_SONG_B.mp3",
+   "clip_id": "046fa27f-5614-47c9-a3a6-634fc99bdde4",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_lamiyat_alshanfara_14082026_005_c01848bd",
+   "maqam": "Ajam",
+   "ws": "lamiyat_alshanfara_14082026",
+   "source": "05-الطريد-وهموم-ملازمة-العزة-والزهد_SONG_A.mp3",
+   "clip_id": "c01848bd-00ed-4660-af6d-e2bc741cabb5",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_lamiyat_alshanfara_14082026_012_33075ff2",
+   "maqam": "Ajam",
+   "ws": "lamiyat_alshanfara_14082026",
+   "source": "01-الوداع-والالتحاق-بالرفاق-الحقيقيين_SONG_B.mp3",
+   "clip_id": "33075ff2-41ea-44a0-a3b9-9dbd981665fb",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_majnoon_layla_18082026_008_99dd0dab",
+   "maqam": "Ajam",
+   "ws": "majnoon_layla_18082026",
+   "source": "03-سلطان-الهوى-والتحدي-بالقوافي_SONG_B.mp3",
+   "clip_id": "99dd0dab-38a5-48cf-b97b-c5d4d9e06f8a",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_majnoon_layla_18082026_009_728de210",
+   "maqam": "Ajam",
+   "ws": "majnoon_layla_18082026",
+   "source": "03-سلطان-الهوى-والتحدي-بالقوافي_SONG_A.mp3",
+   "clip_id": "728de210-eb85-44c2-a1d7-b4111d790c5a",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_majnoon_layla_19082026_008_85895ab9",
+   "maqam": "Ajam",
+   "ws": "majnoon_layla_19082026",
+   "source": "03-سلطان-الهوى-والتحدي-بالقوافي_SONG_B.mp3",
+   "clip_id": "85895ab9-de6a-45f6-88a1-8431d0e99c25",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_majnoon_layla_19082026_009_f16c195b",
+   "maqam": "Ajam",
+   "ws": "majnoon_layla_19082026",
+   "source": "03-سلطان-الهوى-والتحدي-بالقوافي_SONG_A.mp3",
+   "clip_id": "f16c195b-0eae-4945-a7b0-3b6bca1cf41c",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_majnoon_layla_22082026_008_68932011",
+   "maqam": "Ajam",
+   "ws": "majnoon_layla_22082026",
+   "source": "03-سلطان-الهوى-والتحدي-بالقوافي_SONG_B.mp3",
+   "clip_id": "68932011-244e-419f-a2f8-3c0dcffbe15d",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_malik_ibn_rayb_17082026_014_5173beaa",
+   "maqam": "Ajam",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "04-وصية-الأسنة-ومفاخر-الفارس_SONG_B.mp3",
+   "clip_id": "5173beaa-8c1f-45cb-aae3-d29d5bbabf1b",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_malik_ibn_rayb_17082026_015_3a7863a7",
+   "maqam": "Ajam",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "04-وصية-الأسنة-ومفاخر-الفارس_SONG_A.mp3",
+   "clip_id": "3a7863a7-7c22-463c-b3ca-63409b94e15b",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_muallaqat_aassha_21082026_005_619080a6",
+   "maqam": "Ajam",
+   "ws": "muallaqat_aassha_21082026",
+   "source": "07-ملحمة-القتال-وبسالة-الفوارس-يوم-الحنو_SONG_A.mp3",
+   "clip_id": "619080a6-0903-4877-8a0f-a4d3cc93ddfc",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_muallaqat_aassha_21082026_010_60d31c7c",
+   "maqam": "Ajam",
+   "ws": "muallaqat_aassha_21082026",
+   "source": "03-فتوة-الصبا-ومجالس-الخمر-ورجع-القيان_SONG_B.mp3",
+   "clip_id": "60d31c7c-4383-454b-bd7c-0d057c40eec5",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_muallaqt_antra_21082026_004_06f9aeab",
+   "maqam": "Ajam",
+   "ws": "muallaqt_antra_21082026",
+   "source": "10-وعيد-ابني-ضمضم-ووثبة-الضرغام_SONG_B.mp3",
+   "clip_id": "06f9aeab-fed0-4bc9-b528-23a675d9875c",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_muallaqt_antra_21082026_006_504d6b9f",
+   "maqam": "Ajam",
+   "ws": "muallaqt_antra_21082026",
+   "source": "09-وفاء-الجواد-الأدهم-وصيحة-الإقدام_SONG_B.mp3",
+   "clip_id": "504d6b9f-7a4a-4da8-999f-da5bfe65240f",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_muallaqt_antra_21082026_013_d079c3a4",
+   "maqam": "Ajam",
+   "ws": "muallaqt_antra_21082026",
+   "source": "05-الفخر-بعزة-النفس-والشمائل-وسؤال-الخيل_SONG_A.mp3",
+   "clip_id": "d079c3a4-3ef2-4080-bcf9-bf236149c857",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigah_19072026_004_e1f451d0",
+   "maqam": "Ajam",
+   "ws": "nabigah_19072026",
+   "source": "القسم 4 قصة الحمام مقام عجم_SONG_B.mp3",
+   "clip_id": "e1f451d0-ac79-4f3e-a03f-59818f08c6ae",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigah_19072026_005_22bc8925",
+   "maqam": "Ajam",
+   "ws": "nabigah_19072026",
+   "source": "القسم 4 قصة الحمام مقام عجم_SONG_A.mp3",
+   "clip_id": "22bc8925-f43c-4cc1-a34d-e65933bdfc24",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigah_19072026_007_6fe41680",
+   "maqam": "Ajam",
+   "ws": "nabigah_19072026",
+   "source": "القسم 3 المديح وتشبيه سليمان مقام عجم_SONG_A.mp3",
+   "clip_id": "6fe41680-954c-4315-aa7a-143df0eb54a8",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigha_17072026_A_003_02902f9b",
+   "maqam": "Ajam",
+   "ws": "nabigha_17072026_A",
+   "source": "القسم 6 ختام تشبيه الفرات والثناء مقام عجم_SONG_B.mp3",
+   "clip_id": "02902f9b-f034-4813-9229-072dc8506591",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigha_17072026_A_004_c9be7209",
+   "maqam": "Ajam",
+   "ws": "nabigha_17072026_A",
+   "source": "القسم 6 ختام تشبيه الفرات والثناء مقام عجم_SONG_A.mp3",
+   "clip_id": "c9be7209-bdc4-4b69-953e-14e4cc28a762",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigha_17072026_A_007_75bd7cf9",
+   "maqam": "Ajam",
+   "ws": "nabigha_17072026_A",
+   "source": "القسم 3 المديح وتشبيه سليمان مقام عجم_SONG_B.mp3",
+   "clip_id": "75bd7cf9-bff4-429c-8f24-7f9c386c4735",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigha_17072026_A_008_b5305789",
+   "maqam": "Ajam",
+   "ws": "nabigha_17072026_A",
+   "source": "القسم 3 المديح وتشبيه سليمان مقام عجم_SONG_A.mp3",
+   "clip_id": "b5305789-17dd-4e41-bf0d-f513a7e8a801",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigha_jaadi_21082026_006_ed598a6a",
+   "maqam": "Ajam",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "07-أيام-الوقائع-الكبرى-وبلوغ-السماء-مجدا_SONG_B.mp3",
+   "clip_id": "ed598a6a-2d65-45f9-b8dc-5d31a5d9d73c",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigha_jaadi_21082026_007_463bbae8",
+   "maqam": "Ajam",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "07-أيام-الوقائع-الكبرى-وبلوغ-السماء-مجدا_SONG_A.mp3",
+   "clip_id": "463bbae8-45fe-4514-bfaf-cf2f633f9970",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigha_jaadi_21082026_008_9c95b1cf",
+   "maqam": "Ajam",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "06-مآثر-العشيرة-وإجارة-العاني-وإخضاع-القبائل_SONG_B.mp3",
+   "clip_id": "9c95b1cf-691c-40ee-a11a-6ceb0f9b1f95",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigha_jaadi_21082026_009_c387054b",
+   "maqam": "Ajam",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "06-مآثر-العشيرة-وإجارة-العاني-وإخضاع-القبائل_SONG_A.mp3",
+   "clip_id": "c387054b-a32c-4235-9968-bc2169e148ef",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigha_jaadi_21082026_012_6f712976",
+   "maqam": "Ajam",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "04-وصف-الجواد-الأغر-والاستعداد-للكريهة_SONG_B.mp3",
+   "clip_id": "6f712976-9538-4cbb-a591-ffac5154dac3",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_nabigha_jaadi_21082026_013_7d424322",
+   "maqam": "Ajam",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "04-وصف-الجواد-الأغر-والاستعداد-للكريهة_SONG_A.mp3",
+   "clip_id": "7d424322-d343-4631-b218-14bdd4319684",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_qais_24072026_003_5c9ffe42",
+   "maqam": "Ajam",
+   "ws": "qais_24072026",
+   "source": "07-مشهد-الصيد-والوليمة_SONG_A.mp3",
+   "clip_id": "5c9ffe42-b52e-4263-8ec7-97ea08dff8cc",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_qais_24072026_004_bbd58afc",
+   "maqam": "Ajam",
+   "ws": "qais_24072026",
+   "source": "06-وصف-الفرس-وسرعته_SONG_B.mp3",
+   "clip_id": "bbd58afc-5086-4e54-9e5b-5506382f4033",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_qais_24072026_005_211d9c20",
+   "maqam": "Ajam",
+   "ws": "qais_24072026",
+   "source": "06-وصف-الفرس-وسرعته_SONG_A.mp3",
+   "clip_id": "211d9c20-d751-4604-b285-dfbb4c3d87c7",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_sabeel_almajd_20082026_006_61dcd1e3",
+   "maqam": "Ajam",
+   "ws": "sabeel_almajd_20082026",
+   "source": "01-سبيل-المجد-وتفرد-الهمة-والسبق_SONG_D.mp3",
+   "clip_id": "61dcd1e3-f922-4cc7-a2f7-5e01d6783449",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_sabeel_almajd_20082026_007_462cddd0",
+   "maqam": "Ajam",
+   "ws": "sabeel_almajd_20082026",
+   "source": "01-سبيل-المجد-وتفرد-الهمة-والسبق_SONG_C.mp3",
+   "clip_id": "462cddd0-3f77-4643-a3ef-f4b45d160616",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_sabeel_almajd_20082026_010_94c34aed",
+   "maqam": "Ajam",
+   "ws": "sabeel_almajd_20082026",
+   "source": "Retake_01-سبيل-المجد-وتفرد-الهمة-والسبق_SONG_D.mp3",
+   "clip_id": "94c34aed-c0c0-4635-9668-8e87b5129859",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_sabeel_almajd_20082026_011_84764704",
+   "maqam": "Ajam",
+   "ws": "sabeel_almajd_20082026",
+   "source": "Retake_01-سبيل-المجد-وتفرد-الهمة-والسبق_SONG_C.mp3",
+   "clip_id": "84764704-e8d6-4638-9647-17bc7d695fc4",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_sabeel_almajd_20082026_013_1e664b1c",
+   "maqam": "Ajam",
+   "ws": "sabeel_almajd_20082026",
+   "source": "Retake_01-سبيل-المجد-وتفرد-الهمة-والسبق_SONG_A.mp3",
+   "clip_id": "1e664b1c-c529-4e77-bf75-65395fade9b2",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_sabeel_almajd_20082026_020_5496c583",
+   "maqam": "Ajam",
+   "ws": "sabeel_almajd_20082026",
+   "source": "01-سبيل-المجد-وتفرد-الهمة-والسبق_SONG_B.mp3",
+   "clip_id": "5496c583-0afd-4e14-aa9d-7b8002c1e644",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_sabeel_almajd_20082026_021_64e07a2f",
+   "maqam": "Ajam",
+   "ws": "sabeel_almajd_20082026",
+   "source": "01-سبيل-المجد-وتفرد-الهمة-والسبق_SONG_A.mp3",
+   "clip_id": "64e07a2f-1226-4044-b786-1b7ebc1d44e2",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_sama_laka_shwqun_19082026_004_a02f74af",
+   "maqam": "Ajam",
+   "ws": "sama_laka_shwqun_19082026",
+   "source": "03-تسلية-الهم-بالجسرة-وعزم-الفتى-ومنزل-الأحلاف_SONG_B.mp3",
+   "clip_id": "a02f74af-42d5-4c49-b161-bc4ec7884f8d",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_sama_laka_shwqun_19082026_005_ae172c10",
+   "maqam": "Ajam",
+   "ws": "sama_laka_shwqun_19082026",
+   "source": "03-تسلية-الهم-بالجسرة-وعزم-الفتى-ومنزل-الأحلاف_SONG_A.mp3",
+   "clip_id": "ae172c10-d824-4ac5-b686-c9b5d2802b5d",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_002_c2023b32",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "صبر في مجال الموت_SONG_D.mp3",
+   "clip_id": "c2023b32-60ae-42be-ad4c-1be97db83920",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_003_f5863798",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "صبر في مجال الموت_SONG_C.mp3",
+   "clip_id": "f5863798-0143-485e-8f8d-c4b00acb226b",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_004_11818b2e",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "ليس-الجمال-بمئزر_SONG_B.mp3",
+   "clip_id": "11818b2e-2393-4e16-8f22-cc2491e1abf6",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_005_813a781a",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "ليس-الجمال-بمئزر_SONG_A.mp3",
+   "clip_id": "813a781a-f45b-48cc-b55a-83a322dd9812",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_012_f554aecc",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "ليس-الجمال-بمئزر.mp3",
+   "clip_id": "f554aecc-71f0-4e64-87fe-7f5cd8c925e0",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_013_f9cb7bf5",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "وبدت-لميس-كأنها-بدر-السماء.mp3",
+   "clip_id": "f9cb7bf5-2b9e-4f2f-a9ed-11f6932851e9",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_014_cc16975f",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "01-عزة-الفارس-ومناقب-المجد_SONG_H.mp3",
+   "clip_id": "cc16975f-01f2-4df3-8c5e-b8e697303f19",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_015_05cbbdf7",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "01-عزة-الفارس-ومناقب-المجد_SONG_G.mp3",
+   "clip_id": "05cbbdf7-eecf-429a-ba21-2cc85322e4bc",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_016_ffa45548",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "01-عزة-الفارس-ومناقب-المجد_SONG_F.mp3",
+   "clip_id": "ffa45548-f98c-4eb4-948e-2bac6c301f54",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_017_5fe1fc12",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "01-عزة-الفارس-ومناقب-المجد_SONG_E.mp3",
+   "clip_id": "5fe1fc12-9d4c-4d47-b477-088eaec0a60f",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_018_c35b1038",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "01-عزة-الفارس-ومناقب-المجد_SONG_D.mp3",
+   "clip_id": "c35b1038-50c1-448e-80c0-7db40b0b8a8b",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_019_c39fb0d8",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "01-عزة-الفارس-ومناقب-المجد_SONG_C.mp3",
+   "clip_id": "c39fb0d8-99f1-457f-975d-a67df9e5db28",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_020_5c95182f",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "01-عزة-الفارس-ومناقب-المجد_SONG_B.mp3",
+   "clip_id": "5c95182f-3f75-4314-a4e4-a493ac775861",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_022_a6059095",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "صبر في مجال الموت_SONG_B.mp3",
+   "clip_id": "a6059095-ca51-4d34-964a-d64fafdd367e",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_short-poems_16082026_023_aaba7884",
+   "maqam": "Ajam",
+   "ws": "short-poems_16082026",
+   "source": "صبر في مجال الموت_SONG_A.mp3",
+   "clip_id": "aaba7884-c88e-4e5b-bd07-ed824935e68f",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_tarafa_23072026_006_28157161",
+   "maqam": "Ajam",
+   "ws": "tarafa_23072026",
+   "source": "08-الفخر-بالشجاعة-والسيف-وعقر-الجلالة_SONG_B.mp3",
+   "clip_id": "28157161-3a00-4fbf-8735-cc0d300b73b8",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_tarafa_23072026_007_85f2174c",
+   "maqam": "Ajam",
+   "ws": "tarafa_23072026",
+   "source": "08-الفخر-بالشجاعة-والسيف-وعقر-الجلالة_SONG_A.mp3",
+   "clip_id": "85f2174c-79f7-492f-9c69-afad59c9dda7",
+   "skipped": false
+  },
+  {
+   "out_name": "ajam_ws_011_997d739d",
+   "maqam": "Ajam",
+   "ws": "منوعات",
+   "source": "جساس بن مرة - تعدت تغلب - مقام عجم_SONG_A.mp3",
+   "clip_id": "997d739d-88c6-4302-9da2-6e68da6678ac",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_Lamiyat_Alshanfara_16082026_008_b7dc5b33",
+   "maqam": "Hijaz",
+   "ws": "Lamiyat_Alshanfara_16082026",
+   "source": "03-مشهد-الذئاب_SONG_B.mp3",
+   "clip_id": "b7dc5b33-4852-4a74-ae15-ee342f6c6620",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_Lamiyat_Alshanfara_16082026_009_b0798698",
+   "maqam": "Hijaz",
+   "ws": "Lamiyat_Alshanfara_16082026",
+   "source": "03-مشهد-الذئاب_SONG_A.mp3",
+   "clip_id": "b0798698-55e9-421f-8e47-0c3b6711deb3",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_New_Abu_Tammam_16082026_004_ed74fc2e",
+   "maqam": "Hijaz",
+   "ws": "New_Abu_Tammam_16082026",
+   "source": "05-استجابة-النداء-وامعتصماه-وكرامة-الفرسان_SONG_B.mp3",
+   "clip_id": "ed74fc2e-0bba-4288-93c3-52bc4580f7e3",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_aasha_23072026_010_e075432a",
+   "maqam": "Hijaz",
+   "ws": "aasha_23072026",
+   "source": "03-شرك-الحب-وجبروت-الشيب_SONG_B.mp3",
+   "clip_id": "e075432a-6f9f-4841-9f28-79a5075d9b45",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_aasha_23072026_011_d87814ad",
+   "maqam": "Hijaz",
+   "ws": "aasha_23072026",
+   "source": "03-شرك-الحب-وجبروت-الشيب_SONG_A.mp3",
+   "clip_id": "d87814ad-7e6a-49e5-b4a6-6c07af3eab63",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_aasha_23072026_015_100eb2ec",
+   "maqam": "Hijaz",
+   "ws": "aasha_23072026",
+   "source": "01-الوداع-والخطوات-الوادعة_SONG_A.mp3",
+   "clip_id": "100eb2ec-8574-43b7-9067-4bc816d28f50",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_aasha_ariqtu_21082026_000_99155ec0",
+   "maqam": "Hijaz",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "04-عتاب-بني-مسمع-وتسيير-الثناء-ومكابدة-الفيافي_SONG_D.mp3",
+   "clip_id": "99155ec0-642c-4b58-930c-bd0cdaf837cb",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_aasha_ariqtu_21082026_001_f6784753",
+   "maqam": "Hijaz",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "04-عتاب-بني-مسمع-وتسيير-الثناء-ومكابدة-الفيافي_SONG_C.mp3",
+   "clip_id": "f6784753-d127-45ec-9c1e-f0c59c4ae9e9",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_aasha_ariqtu_21082026_006_451d95f5",
+   "maqam": "Hijaz",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "04-عتاب-بني-مسمع-وتسيير-الثناء-ومكابدة-الفيافي_SONG_B.mp3",
+   "clip_id": "451d95f5-3bdf-457c-a26d-18a81aefc927",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_aasha_ariqtu_21082026_007_ec4b360e",
+   "maqam": "Hijaz",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "04-عتاب-بني-مسمع-وتسيير-الثناء-ومكابدة-الفيافي_SONG_A.mp3",
+   "clip_id": "ec4b360e-ccdd-45b3-a6d5-19d66b04167c",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_abu-tammam_16082026_008_c54d343c",
+   "maqam": "Hijaz",
+   "ws": "abu-tammam_16082026",
+   "source": "05-استجابة-النداء-وامعتصماه-وكرامة-الفرسان_SONG_B.mp3",
+   "clip_id": "c54d343c-2884-4fd3-947a-cb3dbda1fec8",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_abu-tammam_16082026_009_c1a5afd5",
+   "maqam": "Hijaz",
+   "ws": "abu-tammam_16082026",
+   "source": "05-استجابة-النداء-وامعتصماه-وكرامة-الفرسان_SONG_A.mp3",
+   "clip_id": "c1a5afd5-a43a-4540-a5a1-0fc1f912cd2e",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_alharith_bin_heliza_22082026_014_987f591a",
+   "maqam": "Hijaz",
+   "ws": "alharith_bin_heliza_22082026",
+   "source": "01-النسيب-وذكر-الديار-ونار-هند_SONG_B.mp3",
+   "clip_id": "987f591a-10e7-442d-9de1-3ee6038aedfd",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_almutanabi_kafa_bika_21082026_001_3a163ce4",
+   "maqam": "Hijaz",
+   "ws": "almutanabi_kafa_bika_21082026",
+   "source": "01-ألم-الوجود-وعزة-النفس_SONG_C.mp3",
+   "clip_id": "3a163ce4-ece2-421f-b4b5-c6b3211e3e53",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_almutanabi_kafa_bika_21082026_008_130f8fa7",
+   "maqam": "Hijaz",
+   "ws": "almutanabi_kafa_bika_21082026",
+   "source": "01-ألم-الوجود-وعزة-النفس_SONG_B.mp3",
+   "clip_id": "130f8fa7-12b3-4c50-8707-b438d3a6a293",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amin_almanoon_17082026_010_20fe3e3c",
+   "maqam": "Hijaz",
+   "ws": "amin_almanoon_17082026",
+   "source": "01-الفجيعة-في-البنين-ومواجهة-ريب-المنون_SONG_B.mp3",
+   "clip_id": "20fe3e3c-87f1-4fa6-893d-a480e0e0f4c4",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amin_almanoon_17082026_011_635c3341",
+   "maqam": "Hijaz",
+   "ws": "amin_almanoon_17082026",
+   "source": "01-الفجيعة-في-البنين-ومواجهة-ريب-المنون_SONG_A.mp3",
+   "clip_id": "635c3341-3f6c-4899-a601-5640c4c361fb",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amin_almanoon_19082026_000_cb250fb6",
+   "maqam": "Hijaz",
+   "ws": "amin_almanoon_19082026",
+   "source": "01-فجيعة-الفقد-وغصة-الوداع_SONG_D.mp3",
+   "clip_id": "cb250fb6-8382-4918-a6d6-9dfcfe87127c",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amin_almanoon_19082026_001_f44c781f",
+   "maqam": "Hijaz",
+   "ws": "amin_almanoon_19082026",
+   "source": "01-فجيعة-الفقد-وغصة-الوداع_SONG_C.mp3",
+   "clip_id": "f44c781f-c84e-43c1-8e54-f5d2b7cf81f3",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amin_almanoon_19082026_002_7795f555",
+   "maqam": "Hijaz",
+   "ws": "amin_almanoon_19082026",
+   "source": "07-المبارزة-الكبرى-ومصرع-الأبطال_SONG_B.mp3",
+   "clip_id": "7795f555-33d9-4b3a-a83c-70c5c6da84a9",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amin_almanoon_19082026_003_679e4cc1",
+   "maqam": "Hijaz",
+   "ws": "amin_almanoon_19082026",
+   "source": "07-المبارزة-الكبرى-ومصرع-الأبطال_SONG_A.mp3",
+   "clip_id": "679e4cc1-1987-49db-8be0-c8e151fea9b9",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amin_almanoon_19082026_014_f81c9bc0",
+   "maqam": "Hijaz",
+   "ws": "amin_almanoon_19082026",
+   "source": "01-فجيعة-الفقد-وغصة-الوداع_SONG_B.mp3",
+   "clip_id": "f81c9bc0-60d0-4d01-8bb4-e5dfc7aec42a",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amin_almanoon_19082026_015_75505f24",
+   "maqam": "Hijaz",
+   "ws": "amin_almanoon_19082026",
+   "source": "01-فجيعة-الفقد-وغصة-الوداع_SONG_A.mp3",
+   "clip_id": "75505f24-e992-46db-bc3f-2fbd44e85197",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amro_bin_kalthoum_20082026_020_4a130201",
+   "maqam": "Hijaz",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "02-استيقاف-الظعينة-ومفاتن-ليلى-ولوعة-الفراق_SONG_B.mp3",
+   "clip_id": "4a130201-183f-41b4-9a7d-a55f6df182b6",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amro_bin_kalthoum_20082026_021_0807f241",
+   "maqam": "Hijaz",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "02-استيقاف-الظعينة-ومفاتن-ليلى-ولوعة-الفراق_SONG_A.mp3",
+   "clip_id": "0807f241-04ac-46de-a824-c22c1d8d332a",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amro_bin_kalthoum_23072026_016_e93b45c9",
+   "maqam": "Hijaz",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "01-خمرية-الأندرين-وحسرة-الفناء_RETAKE_SONG_B.mp3",
+   "clip_id": "e93b45c9-c796-4a82-bc3a-2510fcb01c99",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amro_bin_kalthoum_23072026_017_48c5cb64",
+   "maqam": "Hijaz",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "01-خمرية-الأندرين-وحسرة-الفناء_RETAKE_SONG_A.mp3",
+   "clip_id": "48c5cb64-d03d-4d6c-87be-6088687b5b2e",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amro_bin_kalthoum_23072026_020_28df4f0d",
+   "maqam": "Hijaz",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "08-نجدة-الظعائن-وعواصف-القتال_SONG_B.mp3",
+   "clip_id": "28df4f0d-1d66-45b1-8766-d457cc45da48",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amro_bin_kalthoum_23072026_021_95bab71b",
+   "maqam": "Hijaz",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "08-نجدة-الظعائن-وعواصف-القتال_SONG_A.mp3",
+   "clip_id": "95bab71b-4239-410e-b942-9bad23d18483",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amro_bin_kalthoum_23072026_034_23bc9900",
+   "maqam": "Hijaz",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "01-خمرية-الأندرين-وحسرة-الفناء_SONG_B.mp3",
+   "clip_id": "23bc9900-0c4c-4ff3-bdc6-34fbab55c534",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amro_bin_kalthoum_24072026_016_101c3b2f",
+   "maqam": "Hijaz",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "01-خمرية-الأندرين-وحسرة-الفناء_SONG_B.mp3",
+   "clip_id": "101c3b2f-e27c-43ad-9a39-a32554ee6bce",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amro_bin_kalthoum_24072026_017_4aaf699e",
+   "maqam": "Hijaz",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "01-خمرية-الأندرين-وحسرة-الفناء_SONG_A.mp3",
+   "clip_id": "4aaf699e-6788-41e2-a462-f34469c75ae7",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amrro_bin_kalthoum_11082026_002_767f475f",
+   "maqam": "Hijaz",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "08-نجدة-الظعائن-وعواصف-القتال_SONG_B.mp3",
+   "clip_id": "767f475f-1b0f-4933-9978-a6418124efac",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_amrro_bin_kalthoum_11082026_003_a993d1d7",
+   "maqam": "Hijaz",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "08-نجدة-الظعائن-وعواصف-القتال_SONG_A.mp3",
+   "clip_id": "a993d1d7-7ee7-4bdd-98d1-15828f8cf154",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_antara_13082026_006_5184e33a",
+   "maqam": "Hijaz",
+   "ws": "antara_13082026",
+   "source": "07-تذكر-عبلة-تحت-ظلال-السيوف-وحومة-الموت_SONG_B.mp3",
+   "clip_id": "5184e33a-2f3b-4672-b578-8c2685e3deb8",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_antara_13082026_007_833153ed",
+   "maqam": "Hijaz",
+   "ws": "antara_13082026",
+   "source": "07-تذكر-عبلة-تحت-ظلال-السيوف-وحومة-الموت_SONG_A.mp3",
+   "clip_id": "833153ed-2211-44ac-bb99-ab0fe658c64e",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_antara_13082026_019_57d701a2",
+   "maqam": "Hijaz",
+   "ws": "antara_13082026",
+   "source": "01-أطلال-الجواء-وحب-عبلة-المستحيل_SONG_A.mp3",
+   "clip_id": "57d701a2-ae75-4134-8c12-3260f099dceb",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_antara_mullaq_21072026_000_576c8a9b",
+   "maqam": "Hijaz",
+   "ws": "antara_mullaq_21072026",
+   "source": "01-أطلال-الجواء-وحب-عبلة-المستحيل_SONG_D.mp3",
+   "clip_id": "576c8a9b-8e82-4b78-81a8-36702569804a",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_antara_mullaq_21072026_001_0d7261f9",
+   "maqam": "Hijaz",
+   "ws": "antara_mullaq_21072026",
+   "source": "01-أطلال-الجواء-وحب-عبلة-المستحيل_SONG_C.mp3",
+   "clip_id": "0d7261f9-ef35-4896-a62b-06c2420b69cc",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_antara_mullaq_21072026_008_412feea4",
+   "maqam": "Hijaz",
+   "ws": "antara_mullaq_21072026",
+   "source": "07-تذكر-عبلة-تحت-ظلال-السيوف-وحومة-الموت_SONG_B.mp3",
+   "clip_id": "412feea4-cca2-4ce8-b91c-06437fab0c1b",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_antara_mullaq_21072026_020_3ef2546e",
+   "maqam": "Hijaz",
+   "ws": "antara_mullaq_21072026",
+   "source": "01-أطلال-الجواء-وحب-عبلة-المستحيل_SONG_B.mp3",
+   "clip_id": "3ef2546e-6dd4-451a-a975-8790e8327851",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_antara_mullaq_21072026_021_c8d7c51c",
+   "maqam": "Hijaz",
+   "ws": "antara_mullaq_21072026",
+   "source": "01-أطلال-الجواء-وحب-عبلة-المستحيل_SONG_A.mp3",
+   "clip_id": "c8d7c51c-07b5-41b7-824e-b040a563efbe",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ara_alanqaa_18082026_008_6d90f661",
+   "maqam": "Hijaz",
+   "ws": "ara_alanqaa_18082026",
+   "source": "02-لسان-الدهر-وغربة-الروح_SONG_B.mp3",
+   "clip_id": "6d90f661-0903-4e0c-a4d1-cbd2e8bf183a",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ara_alanqaa_18082026_009_2ebb3150",
+   "maqam": "Hijaz",
+   "ws": "ara_alanqaa_18082026",
+   "source": "02-لسان-الدهر-وغربة-الروح_SONG_A.mp3",
+   "clip_id": "2ebb3150-2bc6-42c3-9982-c6e50f4ca91d",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ghayra_mujdin_19082026_002_1a4000af",
+   "maqam": "Hijaz",
+   "ws": "ghayra_mujdin_19082026",
+   "source": "05-رثاء-خل-الصبا-ودموع-المراثي_SONG_B.mp3",
+   "clip_id": "1a4000af-94f8-4418-8c54-141449893607",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ghayra_mujdin_19082026_003_2969ddc8",
+   "maqam": "Hijaz",
+   "ws": "ghayra_mujdin_19082026",
+   "source": "05-رثاء-خل-الصبا-ودموع-المراثي_SONG_A.mp3",
+   "clip_id": "2969ddc8-0a0f-45a8-b84b-f272dd593c8a",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ibn_zaydoon_adha_21082026_001_31a3bd1e",
+   "maqam": "Hijaz",
+   "ws": "ibn_zaydoon_adha_21082026",
+   "source": "05-ثبات-العهد-الأبدي-والسلام-الخالد_SONG_A.mp3",
+   "clip_id": "31a3bd1e-29d7-4548-8d97-78dc1f5d5aa6",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ibn_zuraiq_20082026_004_ba64287a",
+   "maqam": "Hijaz",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "02-قمر-بغداد-ولوعة-الفراق-وتضييع-الملك_SONG_B.mp3",
+   "clip_id": "ba64287a-ccc3-48ee-a5e7-6ee30b2d41d5",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ibn_zuraiq_20082026_005_5c4aa237",
+   "maqam": "Hijaz",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "02-قمر-بغداد-ولوعة-الفراق-وتضييع-الملك_SONG_A.mp3",
+   "clip_id": "5c4aa237-2d92-42a6-9bae-3d83957498e0",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ibn_zuraiq_20082026_012_101835bb",
+   "maqam": "Hijaz",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "02-استيداع-قمر-بغداد-ولوعة-الوداع_SONG_B.mp3",
+   "clip_id": "101835bb-8918-4592-b542-2b13d5d86c2d",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ibn_zuraiq_20082026_013_449afa78",
+   "maqam": "Hijaz",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "02-استيداع-قمر-بغداد-ولوعة-الوداع_SONG_A.mp3",
+   "clip_id": "449afa78-590e-4dd9-bd2f-2b309be01282",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_im_qais_20082026_010_68a2693c",
+   "maqam": "Hijaz",
+   "ws": "im_qais_20082026",
+   "source": "03-عتاب-فاطمة-والتسلل-إلى-بيضة-الخدر_SONG_B.mp3",
+   "clip_id": "68a2693c-1ea8-4d54-b51e-15312bb3694d",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_im_qais_20082026_011_cee229df",
+   "maqam": "Hijaz",
+   "ws": "im_qais_20082026",
+   "source": "03-عتاب-فاطمة-والتسلل-إلى-بيضة-الخدر_SONG_A.mp3",
+   "clip_id": "cee229df-80af-4f0e-aa79-24d22033469f",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_im_qais_20082026_014_7eb506a8",
+   "maqam": "Hijaz",
+   "ws": "im_qais_20082026",
+   "source": "01-الأطلال-واسترجاع-عهد-الحبيبات_SONG_B.mp3",
+   "clip_id": "7eb506a8-d550-449b-abd8-e873b7db3058",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_lamiyat_alshanfara_14082026_008_a327523a",
+   "maqam": "Hijaz",
+   "ws": "lamiyat_alshanfara_14082026",
+   "source": "03-مشهد-الذئاب_SONG_B.mp3",
+   "clip_id": "a327523a-0669-4737-afb5-bd9084a86ea7",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_lamiyat_alshanfara_14082026_009_1bfc9d7a",
+   "maqam": "Hijaz",
+   "ws": "lamiyat_alshanfara_14082026",
+   "source": "03-مشهد-الذئاب_SONG_A.mp3",
+   "clip_id": "1bfc9d7a-cbd5-47f2-835c-dea015b8f302",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_majnoon_layla_18082026_006_ef081dc1",
+   "maqam": "Hijaz",
+   "ws": "majnoon_layla_18082026",
+   "source": "04-ذروة-الوجد-ومناجاة-حمامة-العقيق_SONG_B.mp3",
+   "clip_id": "ef081dc1-f417-4e22-9cef-cb2afd64318d",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_majnoon_layla_18082026_007_2247f3e4",
+   "maqam": "Hijaz",
+   "ws": "majnoon_layla_18082026",
+   "source": "04-ذروة-الوجد-ومناجاة-حمامة-العقيق_SONG_A.mp3",
+   "clip_id": "2247f3e4-df13-4323-b752-cb6fcb49288b",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_majnoon_layla_19082026_002_91e8fc02",
+   "maqam": "Hijaz",
+   "ws": "majnoon_layla_19082026",
+   "source": "07-طلب-الأكفان-والوداع-التراجيدي-الأخير_SONG_B.mp3",
+   "clip_id": "91e8fc02-7a16-4ead-be0a-96f40ed46287",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_majnoon_layla_19082026_003_fd5375b9",
+   "maqam": "Hijaz",
+   "ws": "majnoon_layla_19082026",
+   "source": "07-طلب-الأكفان-والوداع-التراجيدي-الأخير_SONG_A.mp3",
+   "clip_id": "fd5375b9-fab0-4cbb-830f-208125411bdc",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_majnoon_layla_19082026_006_5d6df40d",
+   "maqam": "Hijaz",
+   "ws": "majnoon_layla_19082026",
+   "source": "04-ذروة-الوجد-ومناجاة-حمامة-العقيق_SONG_B.mp3",
+   "clip_id": "5d6df40d-fb96-4c68-a534-6970195ec2f7",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_majnoon_layla_19082026_007_f59546b6",
+   "maqam": "Hijaz",
+   "ws": "majnoon_layla_19082026",
+   "source": "04-ذروة-الوجد-ومناجاة-حمامة-العقيق_SONG_A.mp3",
+   "clip_id": "f59546b6-afa8-4139-a1b2-a3f9a6160f23",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_majnoon_layla_22082026_002_a006b38f",
+   "maqam": "Hijaz",
+   "ws": "majnoon_layla_22082026",
+   "source": "07-طلب-الأكفان-والوداع-التراجيدي-الأخير_SONG_B.mp3",
+   "clip_id": "a006b38f-782b-4ae7-8687-e8ebf6a07ff5",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_majnoon_layla_22082026_003_eb3a4734",
+   "maqam": "Hijaz",
+   "ws": "majnoon_layla_22082026",
+   "source": "07-طلب-الأكفان-والوداع-التراجيدي-الأخير_SONG_A.mp3",
+   "clip_id": "eb3a4734-d517-478a-a3ed-ec8db172a6c9",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_majnoon_layla_22082026_006_b92ae293",
+   "maqam": "Hijaz",
+   "ws": "majnoon_layla_22082026",
+   "source": "04-ذروة-الوجد-ومناجاة-حمامة-العقيق_SONG_B.mp3",
+   "clip_id": "b92ae293-2bb4-48f5-80e5-93ffc9808e17",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_majnoon_layla_22082026_007_4e5ac5f6",
+   "maqam": "Hijaz",
+   "ws": "majnoon_layla_22082026",
+   "source": "04-ذروة-الوجد-ومناجاة-حمامة-العقيق_SONG_A.mp3",
+   "clip_id": "4e5ac5f6-be5e-4d7e-967e-c3099b42335e",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_malik_ibn_rayb_17082026_001_fb45843d",
+   "maqam": "Hijaz",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "07-وصايا-الركبان-والوداع-الأخير.mp3",
+   "clip_id": "fb45843d-59fb-4e2e-9221-6874c8baf85c",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_malik_ibn_rayb_17082026_002_91cd9b63",
+   "maqam": "Hijaz",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "03-نسوة-السمينة-ومطلع-سهيل_SONG_D.mp3",
+   "clip_id": "91cd9b63-43cd-4232-a288-ba9a005ef93d",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_malik_ibn_rayb_17082026_003_f76b97d8",
+   "maqam": "Hijaz",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "03-نسوة-السمينة-ومطلع-سهيل_SONG_C.mp3",
+   "clip_id": "f76b97d8-8ce9-40e4-aa00-3fa781d597d1",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_malik_ibn_rayb_17082026_006_852d1761",
+   "maqam": "Hijaz",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "RETAKE_01-ألا-ليت-شعري-وذكرى-الغضى_SONG_B.mp3",
+   "clip_id": "852d1761-03df-4025-a056-8ad28afbbed0",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_malik_ibn_rayb_17082026_007_05ded404",
+   "maqam": "Hijaz",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "RETAKE_01-ألا-ليت-شعري-وذكرى-الغضى_SONG_A.mp3",
+   "clip_id": "05ded404-a6b0-4380-9147-2c256ed32a31",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_malik_ibn_rayb_17082026_020_ee572380",
+   "maqam": "Hijaz",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "01-ألا-ليت-شعري-وذكرى-الغضى_SONG_B.mp3",
+   "clip_id": "ee572380-e54e-4b1d-8cea-9d9e747d11e9",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_malik_ibn_rayb_17082026_021_0c5f5113",
+   "maqam": "Hijaz",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "01-ألا-ليت-شعري-وذكرى-الغضى_SONG_A.mp3",
+   "clip_id": "0c5f5113-e7f0-4692-9e45-bb41eb7a739e",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_muallaqat_aassha_21082026_013_fd6480e2",
+   "maqam": "Hijaz",
+   "ws": "muallaqat_aassha_21082026",
+   "source": "02-تشابك-خيوط-الهوى-ولائمة-الشيب-والعشا_SONG_A.mp3",
+   "clip_id": "fd6480e2-6afe-4cdc-9bfb-e5edaf6862a7",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_muallaqt_antra_21082026_000_d6cddb24",
+   "maqam": "Hijaz",
+   "ws": "muallaqt_antra_21082026",
+   "source": "07-نزال-الكمي-ولمعان-السيوف-ببارق-الثغر_SONG_B.mp3",
+   "clip_id": "d6cddb24-2c81-42ca-af8d-4937f1f85a64",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_muallaqt_antra_21082026_019_202212be",
+   "maqam": "Hijaz",
+   "ws": "muallaqt_antra_21082026",
+   "source": "01-وقفة-الطلل-ومناجاة-دار-عبلة-بالجواء_SONG_A.mp3",
+   "clip_id": "202212be-263a-435e-9385-b63c561b5243",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_nabigha_17072026_A_010_bf08727a",
+   "maqam": "Hijaz",
+   "ws": "nabigha_17072026_A",
+   "source": "القسم 2 مطاردة الثور الوحشي مقام حجاز_SONG_A.mp3",
+   "clip_id": "bf08727a-0be7-44af-8c66-07ff3e7e7bc3",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_nabigha_jaadi_21082026_000_602452a5",
+   "maqam": "Hijaz",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "CREMASTER_02-فلاة-التيه-وفاجعة-الظبية-وجؤذرها_SONG_B.mp3",
+   "clip_id": "602452a5-a8cf-4b93-97f5-8ece887f69cd",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_nabigha_jaadi_21082026_001_bfee36f8",
+   "maqam": "Hijaz",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "CREMASTER_02-فلاة-التيه-وفاجعة-الظبية-وجؤذرها_SONG_A.mp3",
+   "clip_id": "bfee36f8-0838-4d12-853e-81f6d8426a5e",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_nabigha_jaadi_21082026_016_5dbd23ba",
+   "maqam": "Hijaz",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "02-فلاة-التيه-وفاجعة-الظبية-وجؤذرها_SONG_B.mp3",
+   "clip_id": "5dbd23ba-8e4e-4f32-8ab1-dc22683795ff",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_nabigha_jaadi_21082026_017_2d92522f",
+   "maqam": "Hijaz",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "02-فلاة-التيه-وفاجعة-الظبية-وجؤذرها_SONG_A.mp3",
+   "clip_id": "2d92522f-22d9-482a-907e-cdec44ff9f7f",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_qais_24072026_014_738670e4",
+   "maqam": "Hijaz",
+   "ws": "qais_24072026",
+   "source": "01-الوقوف-على-الأطلال-والذكرى_SONG_B.mp3",
+   "clip_id": "738670e4-9af8-46a4-b625-0fbbf0abb0c6",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_qais_24072026_015_dd04e5a4",
+   "maqam": "Hijaz",
+   "ws": "qais_24072026",
+   "source": "01-الوقوف-على-الأطلال-والذكرى_SONG_A.mp3",
+   "clip_id": "dd04e5a4-76f4-40a9-b2d5-73256db038b0",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_sabeel_almajd_20082026_004_8ae24241",
+   "maqam": "Hijaz",
+   "ws": "sabeel_almajd_20082026",
+   "source": "02-غربة-الفاضل-ومرارة-الزمان-والجلد_SONG_D.mp3",
+   "clip_id": "8ae24241-4047-4bee-b166-419ae581908d",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_sabeel_almajd_20082026_018_0c86776f",
+   "maqam": "Hijaz",
+   "ws": "sabeel_almajd_20082026",
+   "source": "02-غربة-الفاضل-ومرارة-الزمان-والجلد_SONG_B.mp3",
+   "clip_id": "0c86776f-c33c-429e-b7c3-61416cebb693",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_sabeel_almajd_20082026_019_57012957",
+   "maqam": "Hijaz",
+   "ws": "sabeel_almajd_20082026",
+   "source": "02-غربة-الفاضل-ومرارة-الزمان-والجلد_SONG_A.mp3",
+   "clip_id": "57012957-7e5f-4d68-9a74-965b8f811e43",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_sama_laka_shwqun_19082026_008_6d35a1fb",
+   "maqam": "Hijaz",
+   "ws": "sama_laka_shwqun_19082026",
+   "source": "01-نسيب-وظعن-الحي-ونخيل-يامن-وعرائس-النعمة_SONG_B.mp3",
+   "clip_id": "6d35a1fb-eb94-44d8-9fa6-aa479eef4746",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_sama_laka_shwqun_19082026_009_d721b7ae",
+   "maqam": "Hijaz",
+   "ws": "sama_laka_shwqun_19082026",
+   "source": "01-نسيب-وظعن-الحي-ونخيل-يامن-وعرائس-النعمة_SONG_A.mp3",
+   "clip_id": "d721b7ae-ea51-4e75-b384-d3daa7686005",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_short-poems_16082026_000_272ac238",
+   "maqam": "Hijaz",
+   "ws": "short-poems_16082026",
+   "source": "إني_ذكرتك_بالزهراء_ابن_زيدون_SONG_H.mp3",
+   "clip_id": "272ac238-23d6-4d57-a35c-f0b53049e9d9",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_short-poems_16082026_001_35c5661a",
+   "maqam": "Hijaz",
+   "ws": "short-poems_16082026",
+   "source": "إني_ذكرتك_بالزهراء_ابن_زيدون_SONG_G.mp3",
+   "clip_id": "35c5661a-aa5f-4524-8a66-0f646d614f87",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_short-poems_16082026_006_3a73cc7c",
+   "maqam": "Hijaz",
+   "ws": "short-poems_16082026",
+   "source": "01-إعلان-الحرب-ومصير-البغي_SONG_B.mp3",
+   "clip_id": "3a73cc7c-b896-431e-9c02-dea19cfa501b",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_short-poems_16082026_007_45396650",
+   "maqam": "Hijaz",
+   "ws": "short-poems_16082026",
+   "source": "01-إعلان-الحرب-ومصير-البغي_SONG_A.mp3",
+   "clip_id": "45396650-1cbf-4680-a41d-202f84f9cbf7",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_short-poems_16082026_024_03bbdca0",
+   "maqam": "Hijaz",
+   "ws": "short-poems_16082026",
+   "source": "إني_ذكرتك_بالزهراء_ابن_زيدون_SONG_F.mp3",
+   "clip_id": "03bbdca0-6ea4-4901-b447-3664c58004ab",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_short-poems_16082026_025_b9e9154b",
+   "maqam": "Hijaz",
+   "ws": "short-poems_16082026",
+   "source": "إني_ذكرتك_بالزهراء_ابن_زيدون_SONG_E.mp3",
+   "clip_id": "b9e9154b-eb38-4708-b72f-b5788b16b0aa",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_short-poems_16082026_026_7a6a0452",
+   "maqam": "Hijaz",
+   "ws": "short-poems_16082026",
+   "source": "إني_ذكرتك_بالزهراء_ابن_زيدون_SONG_D.mp3",
+   "clip_id": "7a6a0452-70e1-43fc-a130-34a72b5ad92a",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_short-poems_16082026_027_8ba1425f",
+   "maqam": "Hijaz",
+   "ws": "short-poems_16082026",
+   "source": "إني_ذكرتك_بالزهراء_ابن_زيدون_SONG_C.mp3",
+   "clip_id": "8ba1425f-1d31-4c00-9253-aeb78d20035d",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_short-poems_16082026_028_7a38d7b6",
+   "maqam": "Hijaz",
+   "ws": "short-poems_16082026",
+   "source": "إني_ذكرتك_بالزهراء_ابن_زيدون_SONG_B.mp3",
+   "clip_id": "7a38d7b6-72ce-4363-a79d-ab30da93bd06",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_short-poems_16082026_029_ee67f951",
+   "maqam": "Hijaz",
+   "ws": "short-poems_16082026",
+   "source": "إني_ذكرتك_بالزهراء_ابن_زيدون_SONG_A.mp3",
+   "clip_id": "ee67f951-0c58-4479-9bbc-1adb1484912e",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_tarafa_23072026_001_053f9170",
+   "maqam": "Hijaz",
+   "ws": "tarafa_23072026",
+   "source": "01-الأطلال-وظعائن-خولة_SONG_C.mp3",
+   "clip_id": "053f9170-ae50-42d1-ba88-f6fede4ba01a",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_tarafa_23072026_008_4cd0acdc",
+   "maqam": "Hijaz",
+   "ws": "tarafa_23072026",
+   "source": "07-عتاب-ابن-العم-مالك-وظلم-ذوي-القربى_SONG_B.mp3",
+   "clip_id": "4cd0acdc-7fcf-44c4-a88c-43de5712ad28",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_tarafa_23072026_009_f9b8404a",
+   "maqam": "Hijaz",
+   "ws": "tarafa_23072026",
+   "source": "07-عتاب-ابن-العم-مالك-وظلم-ذوي-القربى_SONG_A.mp3",
+   "clip_id": "f9b8404a-a5df-4986-afbe-0fa88811fa59",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_tarafa_23072026_016_811f23ae",
+   "maqam": "Hijaz",
+   "ws": "tarafa_23072026",
+   "source": "01-الأطلال-وظعائن-خولة_SONG_B.mp3",
+   "clip_id": "811f23ae-64c1-49c3-8cd3-6b8eb701cad3",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_tarafa_23072026_017_6b27e5ec",
+   "maqam": "Hijaz",
+   "ws": "tarafa_23072026",
+   "source": "01-الأطلال-وظعائن-خولة_SONG_A.mp3",
+   "clip_id": "6b27e5ec-7177-484f-84bd-9317e160b846",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ws_008_81469263",
+   "maqam": "Hijaz",
+   "ws": "منوعات",
+   "source": "جساس بن مرة - تعدت تغلب - مقام عجم_SONG_D.mp3",
+   "clip_id": "81469263-1a6c-4e65-8bf2-bda88b218407",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ws_009_0236acdb",
+   "maqam": "Hijaz",
+   "ws": "منوعات",
+   "source": "جساس بن مرة - تعدت تغلب - مقام عجم_SONG_C.mp3",
+   "clip_id": "0236acdb-57e5-4452-8aaa-fa43659d8b5e",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ws_013_269b010c",
+   "maqam": "Hijaz",
+   "ws": "منوعات",
+   "source": "جساس بن مرة - تعدت تغلب - مقام حجاز_SONG_A.mp3",
+   "clip_id": "269b010c-59bb-4426-996c-8ce3da3e53f2",
+   "skipped": false
+  },
+  {
+   "out_name": "hijaz_ws_014_67eea3e0",
+   "maqam": "Hijaz",
+   "ws": "منوعات",
+   "source": "جساس بن مرة - تعدت تغلب - مقام الحجاز.mp3",
+   "clip_id": "67eea3e0-92fc-4211-a716-a555f9201340",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_Lamiyat_Alshanfara_16082026_002_016ff6c5",
+   "maqam": "Kurd",
+   "ws": "Lamiyat_Alshanfara_16082026",
+   "source": "06-ليلة-الرعب_SONG_B.mp3",
+   "clip_id": "016ff6c5-d575-4c39-88a9-c6052fabc68c",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_Lamiyat_Alshanfara_16082026_003_1b956cd0",
+   "maqam": "Kurd",
+   "ws": "Lamiyat_Alshanfara_16082026",
+   "source": "06-ليلة-الرعب_SONG_A.mp3",
+   "clip_id": "1b956cd0-8f9e-4b5c-a00c-9f859e0b7bbc",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_New_Abu_Tammam_16082026_002_80fd7cab",
+   "maqam": "Kurd",
+   "ws": "New_Abu_Tammam_16082026",
+   "source": "06-فرار-الإمبراطور-ومأزق-الجيش-المهزوم_SONG_B.mp3",
+   "clip_id": "80fd7cab-4e7a-4b84-85fb-9957d63c9af1",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_New_Abu_Tammam_16082026_003_d6f872d2",
+   "maqam": "Kurd",
+   "ws": "New_Abu_Tammam_16082026",
+   "source": "06-فرار-الإمبراطور-ومأزق-الجيش-المهزوم_SONG_A.mp3",
+   "clip_id": "d6f872d2-9e78-402b-bd4d-1250e9e54633",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_New_Abu_Tammam_16082026_008_24c3c03f",
+   "maqam": "Kurd",
+   "ws": "New_Abu_Tammam_16082026",
+   "source": "03-جحيم-النيران-وجمال-الأطلال-المحترقة_SONG_B.mp3",
+   "clip_id": "24c3c03f-3e11-4c18-8b44-21ad9e1ec01c",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_New_Abu_Tammam_16082026_009_063bfab6",
+   "maqam": "Kurd",
+   "ws": "New_Abu_Tammam_16082026",
+   "source": "03-جحيم-النيران-وجمال-الأطلال-المحترقة_SONG_A.mp3",
+   "clip_id": "063bfab6-2791-4c80-b8ed-e65bcd6cac88",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_aasha_23072026_004_ef549714",
+   "maqam": "Kurd",
+   "ws": "aasha_23072026",
+   "source": "06-إنذار-يزيد-بني-شيبان_SONG_B.mp3",
+   "clip_id": "ef549714-e7ac-4d02-9cdc-2070b96ed861",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_aasha_23072026_005_cd3dd7eb",
+   "maqam": "Kurd",
+   "ws": "aasha_23072026",
+   "source": "06-إنذار-يزيد-بني-شيبان_SONG_A.mp3",
+   "clip_id": "cd3dd7eb-233f-4c99-86b9-4453cc1d1d1a",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_aasha_23072026_006_a5ef80bd",
+   "maqam": "Kurd",
+   "ws": "aasha_23072026",
+   "source": "05-جوب-الفيافي-والبرق-الهطل_SONG_B.mp3",
+   "clip_id": "a5ef80bd-c453-4e19-8f40-b960da341296",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_aasha_23072026_007_79ade426",
+   "maqam": "Kurd",
+   "ws": "aasha_23072026",
+   "source": "05-جوب-الفيافي-والبرق-الهطل_SONG_A.mp3",
+   "clip_id": "79ade426-9157-4604-8b71-484351ccbf88",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_aasha_ariqtu_21082026_002_3094fe2a",
+   "maqam": "Kurd",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "RETAKE_01-الأرق-ورهبة-الفناء-ومصير-الملوك-وحصن-تيماء_SONG_B.mp3",
+   "clip_id": "3094fe2a-3dbc-44e1-b8e7-58f7f48312ad",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_aasha_ariqtu_21082026_003_e56f384a",
+   "maqam": "Kurd",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "RETAKE_01-الأرق-ورهبة-الفناء-ومصير-الملوك-وحصن-تيماء_SONG_A.mp3",
+   "clip_id": "e56f384a-7ee3-43cc-a0e3-a6939726d708",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_aasha_ariqtu_21082026_008_8a4067d8",
+   "maqam": "Kurd",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "03-مكابدة-السرى-وقرين-الشعر-مسحل-وحكمة-الرشد_SONG_B.mp3",
+   "clip_id": "8a4067d8-f886-416d-ac29-cfcce38c6614",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_aasha_ariqtu_21082026_009_0121e3f0",
+   "maqam": "Kurd",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "03-مكابدة-السرى-وقرين-الشعر-مسحل-وحكمة-الرشد_SONG_A.mp3",
+   "clip_id": "0121e3f0-c48c-4fbf-bf09-c4167ed71457",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_aasha_ariqtu_21082026_012_fdf325d4",
+   "maqam": "Kurd",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "01-الأرق-ورهبة-الفناء-ومصير-الملوك-وحصن-تيماء_SONG_B.mp3",
+   "clip_id": "fdf325d4-675d-4d7e-9669-c5587d3edb93",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_aasha_ariqtu_21082026_013_05b2c11d",
+   "maqam": "Kurd",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "01-الأرق-ورهبة-الفناء-ومصير-الملوك-وحصن-تيماء_SONG_A.mp3",
+   "clip_id": "05b2c11d-e7bb-4c54-acc8-5d57695d57d7",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_abu-tammam_16082026_003_c886a89f",
+   "maqam": "Kurd",
+   "ws": "abu-tammam_16082026",
+   "source": "03-جحيم-النيران-وجمال-الأطلال-المحترقة_RETAKE_B.mp3",
+   "clip_id": "c886a89f-accb-47fc-88c5-0faa85bef40e",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_abu-tammam_16082026_007_e8b11df7",
+   "maqam": "Kurd",
+   "ws": "abu-tammam_16082026",
+   "source": "06-فرار-الإمبراطور-ومأزق-الجيش-المهزوم_SONG_A.mp3",
+   "clip_id": "e8b11df7-4e5f-403d-811c-304def7281a1",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_abu-tammam_16082026_012_735e2ee5",
+   "maqam": "Kurd",
+   "ws": "abu-tammam_16082026",
+   "source": "03-جحيم-النيران-وجمال-الأطلال-المحترقة_SONG_B.mp3",
+   "clip_id": "735e2ee5-14e6-4a87-8cc5-417d252946c3",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_abu-tammam_16082026_013_5de46458",
+   "maqam": "Kurd",
+   "ws": "abu-tammam_16082026",
+   "source": "03-جحيم-النيران-وجمال-الأطلال-المحترقة_SONG_A.mp3",
+   "clip_id": "5de46458-1ff4-4c74-9b65-08c4f6549692",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_alharith_bin_heliza_22082026_006_40979815",
+   "maqam": "Kurd",
+   "ws": "alharith_bin_heliza_22082026",
+   "source": "05-دحض-المظالم-والتبرؤ-من-جرائر-القبائل_SONG_B.mp3",
+   "clip_id": "40979815-384a-4863-b832-ebb368b093f1",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_alharith_bin_heliza_22082026_012_9eac1c4a",
+   "maqam": "Kurd",
+   "ws": "alharith_bin_heliza_22082026",
+   "source": "02-الرحلة-بالناقة-وترقب-كيد-الأراقم_SONG_B.mp3",
+   "clip_id": "9eac1c4a-ecd0-4889-805c-68c1d7c36a39",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_almutanabi_kafa_bika_21082026_006_b2a1a8d0",
+   "maqam": "Kurd",
+   "ws": "almutanabi_kafa_bika_21082026",
+   "source": "02-سرى-الخيل-وقصد-البحر_SONG_B.mp3",
+   "clip_id": "b2a1a8d0-8b72-486d-8fb4-89c700486092",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_almutanabi_kafa_bika_21082026_007_d170eca3",
+   "maqam": "Kurd",
+   "ws": "almutanabi_kafa_bika_21082026",
+   "source": "02-سرى-الخيل-وقصد-البحر_SONG_A.mp3",
+   "clip_id": "d170eca3-4643-4077-95a3-97cc28ab5409",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amin_almanoon_17082026_004_4994c6ef",
+   "maqam": "Kurd",
+   "ws": "amin_almanoon_17082026",
+   "source": "04-مثل-الدهر-الأول-2-مكمن-القانص-ومصرع-الأتن_SONG_B.mp3",
+   "clip_id": "4994c6ef-c710-4d0f-bf49-29f87fabc5b8",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amin_almanoon_19082026_007_339d9699",
+   "maqam": "Kurd",
+   "ws": "amin_almanoon_19082026",
+   "source": "05-ملحمة-الثور-الوحشي-والضواري_SONG_A.mp3",
+   "clip_id": "339d9699-09dd-48c3-ab1d-8cb8dc462c28",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amin_almanoon_19082026_008_05e56384",
+   "maqam": "Kurd",
+   "ws": "amin_almanoon_19082026",
+   "source": "04-مكمن-القانص-وغدر-الحتوف_SONG_B.mp3",
+   "clip_id": "05e56384-ebf7-4eb3-80de-b8b7802f8744",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amin_almanoon_19082026_009_0a0aeb36",
+   "maqam": "Kurd",
+   "ws": "amin_almanoon_19082026",
+   "source": "04-مكمن-القانص-وغدر-الحتوف_SONG_A.mp3",
+   "clip_id": "0a0aeb36-24ab-46d9-bdf0-bf579784e650",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_20082026_000_39b3c659",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "RETAKE_09-نخوة-الفرسان-للحرائر-وهيبة-النزول-والمطاعنة_SONG_B.mp3",
+   "clip_id": "39b3c659-c55d-43a0-90ab-136aafef5e00",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_20082026_001_7ddc4dcc",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "RETAKE_09-نخوة-الفرسان-للحرائر-وهيبة-النزول-والمطاعنة_SONG_A.mp3",
+   "clip_id": "7ddc4dcc-b345-415c-8d6c-98a700ea6029",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_20082026_008_f37bd77f",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "09-نخوة-الفرسان-للحرائر-وهيبة-النزول-والمطاعنة_SONG_B.mp3",
+   "clip_id": "f37bd77f-cfc8-41f3-8a1a-723c26a28a94",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_20082026_009_67131a20",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "09-نخوة-الفرسان-للحرائر-وهيبة-النزول-والمطاعنة_SONG_A.mp3",
+   "clip_id": "67131a20-ba2e-42fa-a71b-cceb22a5989a",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_20082026_014_fea8e724",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "05-حفظ-الذمار-وتحدي-عمرو-بن-هند_SONG_B.mp3",
+   "clip_id": "fea8e724-2768-4fd6-9029-b7d939b9ce8d",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_20082026_015_5bed67c1",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "05-حفظ-الذمار-وتحدي-عمرو-بن-هند_SONG_A.mp3",
+   "clip_id": "5bed67c1-b8ab-4c74-9505-5c400de6bf4e",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_20082026_016_72283fe1",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "04-شدة-المطاعنة-واصطباغ-السيوف-بالدماء_SONG_B.mp3",
+   "clip_id": "72283fe1-2b5f-4268-bd72-5442484204e1",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_20082026_017_04ca950a",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "04-شدة-المطاعنة-واصطباغ-السيوف-بالدماء_SONG_A.mp3",
+   "clip_id": "04ca950a-256b-4cf5-8c01-3c3d221d3a29",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_23072026_010_71528061",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "05-التحدي-الشامخ-ورفض-الضيم_SONG_F.mp3",
+   "clip_id": "71528061-ed24-458d-b048-1f4098e30665",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_23072026_011_4ca355d9",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "05-التحدي-الشامخ-ورفض-الضيم_SONG_E.mp3",
+   "clip_id": "4ca355d9-2a0b-4e29-956f-43f80550788f",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_23072026_013_e3d2cf32",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "05-التحدي-الشامخ-ورفض-الضيم_SONG_C.mp3",
+   "clip_id": "e3d2cf32-7a25-47a0-9a2f-885bce3beac5",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_23072026_030_0ccb3506",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "03-شواخص-اليمامة-والإنذار-لأبي-هند_SONG_B.mp3",
+   "clip_id": "0ccb3506-8375-4098-8c1a-91f4588db9be",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_23072026_031_bd420bf1",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "03-شواخص-اليمامة-والإنذار-لأبي-هند_SONG_A.mp3",
+   "clip_id": "bd420bf1-bb27-4192-86f8-9dd5f9fd49db",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_24072026_008_a6c669fd",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "05-التحدي-الشامخ-ورفض-الضيم_SONG_B.mp3",
+   "clip_id": "a6c669fd-131f-4374-88e9-e9976b17e7f2",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amro_bin_kalthoum_24072026_012_73a8ecd4",
+   "maqam": "Kurd",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "03-شواخص-اليمامة-والإنذار-لأبي-هند_SONG_B.mp3",
+   "clip_id": "73a8ecd4-938c-4aa7-a25e-7feaf2652e60",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amrro_bin_kalthoum_11082026_008_51337af4",
+   "maqam": "Kurd",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "05-التحدي-الشامخ-ورفض-الضيم_SONG_B.mp3",
+   "clip_id": "51337af4-dffd-4351-a869-f9742a30f5f7",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_amrro_bin_kalthoum_11082026_009_a7687476",
+   "maqam": "Kurd",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "05-التحدي-الشامخ-ورفض-الضيم_SONG_A.mp3",
+   "clip_id": "a7687476-8a48-4f00-b8dd-cf8c1f588efa",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_antara_13082026_004_c3a9c327",
+   "maqam": "Kurd",
+   "ws": "antara_13082026",
+   "source": "08-اقتحام-الحرب-وشكوى-وبكاء-الجواد-الأدهم_SONG_B.mp3",
+   "clip_id": "c3a9c327-38f6-4f22-8841-39443c1a8c19",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_antara_13082026_005_1c04c6a7",
+   "maqam": "Kurd",
+   "ws": "antara_13082026",
+   "source": "08-اقتحام-الحرب-وشكوى-وبكاء-الجواد-الأدهم_SONG_A.mp3",
+   "clip_id": "1c04c6a7-8936-41c8-908e-6fe05b9a01b8",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_antara_13082026_008_58ed2547",
+   "maqam": "Kurd",
+   "ws": "antara_13082026",
+   "source": "06-نزال-الفارس-المدجج-والعفة-عن-المغنم_SONG_B.mp3",
+   "clip_id": "58ed2547-3538-4c39-a796-9e2db9a9e64d",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_antara_13082026_009_c514afde",
+   "maqam": "Kurd",
+   "ws": "antara_13082026",
+   "source": "06-نزال-الفارس-المدجج-والعفة-عن-المغنم_SONG_A.mp3",
+   "clip_id": "c514afde-c461-4b18-9f76-5b29b8f6330d",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_antara_13082026_013_e1bcb5c3",
+   "maqam": "Kurd",
+   "ws": "antara_13082026",
+   "source": "04-وعورة-الصحراء-ووصف-الناقة-الجسرة_SONG_A.mp3",
+   "clip_id": "e1bcb5c3-4b4c-4ffc-a83a-e863b97fe9aa",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_antara_mullaq_21072026_006_cbd1a391",
+   "maqam": "Kurd",
+   "ws": "antara_mullaq_21072026",
+   "source": "08-اقتحام-الحرب-وشكوى-وبكاء-الجواد-الأدهم_SONG_B.mp3",
+   "clip_id": "cbd1a391-6976-4b32-8252-fbb7a1fd26e4",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_antara_mullaq_21072026_007_982e3dca",
+   "maqam": "Kurd",
+   "ws": "antara_mullaq_21072026",
+   "source": "08-اقتحام-الحرب-وشكوى-وبكاء-الجواد-الأدهم_SONG_A.mp3",
+   "clip_id": "982e3dca-3146-43b6-9c73-e2a810c128a6",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_antara_mullaq_21072026_014_f378aa7c",
+   "maqam": "Kurd",
+   "ws": "antara_mullaq_21072026",
+   "source": "04-وعورة-الصحراء-ووصف-الناقة-الجسرة_SONG_B.mp3",
+   "clip_id": "f378aa7c-ffcb-4485-a807-8edaca07a9dd",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_ara_alanqaa_18082026_004_266c7bb6",
+   "maqam": "Kurd",
+   "ws": "ara_alanqaa_18082026",
+   "source": "04-مسير-الليل-ووحشة-الظلام_SONG_B.mp3",
+   "clip_id": "266c7bb6-cb93-4ce0-a026-d5bba27ed551",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_ghayra_mujdin_19082026_004_2bfebe59",
+   "maqam": "Kurd",
+   "ws": "ghayra_mujdin_19082026",
+   "source": "04-سلطان-القدر-وعجز-الأطباء_SONG_B.mp3",
+   "clip_id": "2bfebe59-30b5-40cd-a974-c59e7ec25cc2",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_ghayra_mujdin_19082026_005_678768d6",
+   "maqam": "Kurd",
+   "ws": "ghayra_mujdin_19082026",
+   "source": "04-سلطان-القدر-وعجز-الأطباء_SONG_A.mp3",
+   "clip_id": "678768d6-e4b7-4451-9041-964dc5501fae",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_ghayra_mujdin_19082026_008_f3a35304",
+   "maqam": "Kurd",
+   "ws": "ghayra_mujdin_19082026",
+   "source": "02-تعب-الحياة-ونواح-بنات-الهديل_SONG_B.mp3",
+   "clip_id": "f3a35304-754e-4796-8c25-798984d67651",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_ghayra_mujdin_19082026_009_d8a7a117",
+   "maqam": "Kurd",
+   "ws": "ghayra_mujdin_19082026",
+   "source": "02-تعب-الحياة-ونواح-بنات-الهديل_SONG_A.mp3",
+   "clip_id": "d8a7a117-e067-4030-9628-9088f255dfa7",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_ibn_zaydoon_adha_21082026_002_5479ea91",
+   "maqam": "Kurd",
+   "ws": "ibn_zaydoon_adha_21082026",
+   "source": "04-وحشة-الفقد-وغلبة-العوادي-القواهر_SONG_B.mp3",
+   "clip_id": "5479ea91-86db-4477-97a0-1ca3f3b712aa",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_ibn_zaydoon_adha_21082026_003_dac7a038",
+   "maqam": "Kurd",
+   "ws": "ibn_zaydoon_adha_21082026",
+   "source": "04-وحشة-الفقد-وغلبة-العوادي-القواهر_SONG_A.mp3",
+   "clip_id": "dac7a038-1eb3-43d2-83e3-030c40bea449",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_ibn_zuraiq_20082026_002_b0e7b4ce",
+   "maqam": "Kurd",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "03-مرارة-الندم-وأهوال-السهاد-وفجيعة-الدهر_SONG_B.mp3",
+   "clip_id": "b0e7b4ce-5a61-4562-b415-69187cde1a3d",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_ibn_zuraiq_20082026_003_86872e58",
+   "maqam": "Kurd",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "03-مرارة-الندم-وأهوال-السهاد-وفجيعة-الدهر_SONG_A.mp3",
+   "clip_id": "86872e58-967b-4ff7-bbea-fb857cae4a49",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_ibn_zuraiq_20082026_011_9199baa3",
+   "maqam": "Kurd",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "03-تجرع-مرارة-البين-ووخز-الندم_SONG_A.mp3",
+   "clip_id": "9199baa3-5b69-4b56-b0e4-2cecc222428a",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_im_qais_20082026_000_0674ea9c",
+   "maqam": "Kurd",
+   "ws": "im_qais_20082026",
+   "source": "08-ملحمة-البرق-والمطر-والسيول-الجارفة_SONG_B.mp3",
+   "clip_id": "0674ea9c-6a60-4d1e-bade-7e43933a6200",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_im_qais_20082026_006_7a875cea",
+   "maqam": "Kurd",
+   "ws": "im_qais_20082026",
+   "source": "05-أهوال-الليل-ومكابدة-الذئب-والقفار_SONG_B.mp3",
+   "clip_id": "7a875cea-3c22-4e66-8627-d2a7c4ff4595",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_im_qais_20082026_007_14f449b2",
+   "maqam": "Kurd",
+   "ws": "im_qais_20082026",
+   "source": "05-أهوال-الليل-ومكابدة-الذئب-والقفار_SONG_A.mp3",
+   "clip_id": "14f449b2-66c3-4200-af25-fc733ca20b55",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_jarir_24072026_006_d0fd493c",
+   "maqam": "Kurd",
+   "ws": "jarir_24072026",
+   "source": "02-سم-الشعراء-وكير-القيون_SONG_B.mp3",
+   "clip_id": "d0fd493c-cada-4dc7-84b3-674abc529db7",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_jarir_24072026_007_7abae477",
+   "maqam": "Kurd",
+   "ws": "jarir_24072026",
+   "source": "02-سم-الشعراء-وكير-القيون_SONG_A.mp3",
+   "clip_id": "7abae477-6a78-41f4-a907-ce2ee0c44c6a",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_lamiyat_alshanfara_14082026_002_00187455",
+   "maqam": "Kurd",
+   "ws": "lamiyat_alshanfara_14082026",
+   "source": "06-ليلة-الرعب_SONG_B.mp3",
+   "clip_id": "00187455-8b6e-46e0-a199-431815361a0e",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_majnoon_layla_18082026_004_f9fa236d",
+   "maqam": "Kurd",
+   "ws": "majnoon_layla_18082026",
+   "source": "05-داء-الهيام-ونحول-الجسد-ورثاء-الصحب_SONG_B.mp3",
+   "clip_id": "f9fa236d-6527-4424-9396-36ff27b1ac13",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_majnoon_layla_18082026_010_6c93c118",
+   "maqam": "Kurd",
+   "ws": "majnoon_layla_18082026",
+   "source": "02-عهد-الصبا-واعتراض-القدر-والوشاة_SONG_B.mp3",
+   "clip_id": "6c93c118-fd8d-430b-8fb9-7e0bc86ac50b",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_majnoon_layla_18082026_011_78563c96",
+   "maqam": "Kurd",
+   "ws": "majnoon_layla_18082026",
+   "source": "02-عهد-الصبا-واعتراض-القدر-والوشاة_SONG_A.mp3",
+   "clip_id": "78563c96-a675-4d9a-a33d-ca2b271eb24c",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_majnoon_layla_19082026_004_56ec90f9",
+   "maqam": "Kurd",
+   "ws": "majnoon_layla_19082026",
+   "source": "05-داء-الهيام-ونحول-الجسد-ورثاء-الصحب_SONG_B.mp3",
+   "clip_id": "56ec90f9-eedc-493d-aafd-eb5c2b76f9ef",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_majnoon_layla_19082026_005_6490a576",
+   "maqam": "Kurd",
+   "ws": "majnoon_layla_19082026",
+   "source": "05-داء-الهيام-ونحول-الجسد-ورثاء-الصحب_SONG_A.mp3",
+   "clip_id": "6490a576-553b-42a3-8fa5-33aa3e5d7653",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_majnoon_layla_19082026_010_c319b28c",
+   "maqam": "Kurd",
+   "ws": "majnoon_layla_19082026",
+   "source": "02-عهد-الصبا-واعتراض-القدر-والوشاة_SONG_B.mp3",
+   "clip_id": "c319b28c-1b8f-47fb-b290-c7441fe94a11",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_majnoon_layla_19082026_011_95e97d67",
+   "maqam": "Kurd",
+   "ws": "majnoon_layla_19082026",
+   "source": "02-عهد-الصبا-واعتراض-القدر-والوشاة_SONG_A.mp3",
+   "clip_id": "95e97d67-995b-4d84-a765-6cc38764e58a",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_majnoon_layla_22082026_001_24927176",
+   "maqam": "Kurd",
+   "ws": "majnoon_layla_22082026",
+   "source": "05-داء-الهيام-ونحول-الجسد-ورثاء-الصحب_SONG_A.mp3",
+   "clip_id": "24927176-bcd3-4489-ba73-50f3688c086d",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_majnoon_layla_22082026_010_cde01fd0",
+   "maqam": "Kurd",
+   "ws": "majnoon_layla_22082026",
+   "source": "02-عهد-الصبا-واعتراض-القدر-والوشاة_SONG_B.mp3",
+   "clip_id": "cde01fd0-a642-4166-94dd-2a55ebc39a22",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_majnoon_layla_22082026_011_f29aec22",
+   "maqam": "Kurd",
+   "ws": "majnoon_layla_22082026",
+   "source": "02-عهد-الصبا-واعتراض-القدر-والوشاة_SONG_A.mp3",
+   "clip_id": "f29aec22-0f5c-46b4-9b27-5e83602ad5c8",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_malik_ibn_rayb_17082026_012_36ffe2d8",
+   "maqam": "Kurd",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "05-وحشة-القفر-وفراق-الرفاق_SONG_B.mp3",
+   "clip_id": "36ffe2d8-bc7a-46e0-a982-0683cba48f7b",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_malik_ibn_rayb_17082026_013_6e9f9f4b",
+   "maqam": "Kurd",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "05-وحشة-القفر-وفراق-الرفاق_SONG_A.mp3",
+   "clip_id": "6e9f9f4b-8683-456c-abae-b3f87060c9f8",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_muallaqat_aassha_21082026_002_d0df045a",
+   "maqam": "Kurd",
+   "ws": "muallaqat_aassha_21082026",
+   "source": "05-الوعيد-الصارم-ليزيد-بن-شيبان-والتحذير-من-الفتنة_SONG_B.mp3",
+   "clip_id": "d0df045a-ec82-4a24-a8f7-e3a1b47a93f4",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_muallaqat_aassha_21082026_003_0b3d3b91",
+   "maqam": "Kurd",
+   "ws": "muallaqat_aassha_21082026",
+   "source": "05-الوعيد-الصارم-ليزيد-بن-شيبان-والتحذير-من-الفتنة_SONG_A.mp3",
+   "clip_id": "0b3d3b91-6e68-44f0-b4c8-e6b9b4291da9",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_muallaqat_aassha_21082026_008_a71bc352",
+   "maqam": "Kurd",
+   "ws": "muallaqat_aassha_21082026",
+   "source": "04-هول-الفلاة-واعتراض-السحاب-والبرق-العارم_SONG_B.mp3",
+   "clip_id": "a71bc352-8b1e-40eb-85ad-f61fea34ed16",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_muallaqt_antra_21082026_008_411e37bb",
+   "maqam": "Kurd",
+   "ws": "muallaqt_antra_21082026",
+   "source": "08-حومة-الموت-ونداء-الاستغاثة-بعنترة_SONG_B.mp3",
+   "clip_id": "411e37bb-6b86-445f-8550-21a227d4cb34",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_muallaqt_antra_21082026_010_8990b7bd",
+   "maqam": "Kurd",
+   "ws": "muallaqt_antra_21082026",
+   "source": "06-اقتحام-الوغى-وعفة-المغنم-ومصرع-المدجج_SONG_B.mp3",
+   "clip_id": "8990b7bd-3fa4-4dd5-bb96-f9564c261d2e",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_muallaqt_antra_21082026_011_09bab73d",
+   "maqam": "Kurd",
+   "ws": "muallaqt_antra_21082026",
+   "source": "06-اقتحام-الوغى-وعفة-المغنم-ومصرع-المدجج_SONG_A.mp3",
+   "clip_id": "09bab73d-a326-492b-8f98-7aa857ac3085",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_muallaqt_antra_21082026_014_71530287",
+   "maqam": "Kurd",
+   "ws": "muallaqt_antra_21082026",
+   "source": "04-هجير-الفلاة-وصبر-الناقة-والظليم_SONG_B.mp3",
+   "clip_id": "71530287-d8e5-4fdc-bd2b-91ad53921c20",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_muallaqt_antra_21082026_015_037bb7d8",
+   "maqam": "Kurd",
+   "ws": "muallaqt_antra_21082026",
+   "source": "04-هجير-الفلاة-وصبر-الناقة-والظليم_SONG_A.mp3",
+   "clip_id": "037bb7d8-dadf-42da-8da5-ca04aec35a6f",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_nabigha_jaadi_21082026_004_d68ac7d9",
+   "maqam": "Kurd",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "08-حكمة-الحلم-والجهل-والإنذار-والرد-الصارم_SONG_B.mp3",
+   "clip_id": "d68ac7d9-61b2-41cb-b532-b0c9f45df6b5",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_nabigha_jaadi_21082026_005_ac48e4cc",
+   "maqam": "Kurd",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "08-حكمة-الحلم-والجهل-والإنذار-والرد-الصارم_SONG_A.mp3",
+   "clip_id": "ac48e4cc-f357-4cb9-a1cf-e59a937d9d19",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_qais_24072026_010_e14a44bd",
+   "maqam": "Kurd",
+   "ws": "qais_24072026",
+   "source": "03-التسلل-ليلا-إلى-بيضة-الخدر_SONG_B.mp3",
+   "clip_id": "e14a44bd-7975-4ee7-b779-3571d3cf09fe",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_qais_24072026_011_7176eef3",
+   "maqam": "Kurd",
+   "ws": "qais_24072026",
+   "source": "03-التسلل-ليلا-إلى-بيضة-الخدر_SONG_A.mp3",
+   "clip_id": "7176eef3-0c17-4c89-9d4a-8829d4dc309c",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_sabeel_almajd_20082026_002_91d8da7f",
+   "maqam": "Kurd",
+   "ws": "sabeel_almajd_20082026",
+   "source": "03-أهوال-الليل-ومكابدة-السرى-والظلام_SONG_D.mp3",
+   "clip_id": "91d8da7f-5d9d-4ee2-8d79-0be4e52740bd",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_sabeel_almajd_20082026_003_7f801385",
+   "maqam": "Kurd",
+   "ws": "sabeel_almajd_20082026",
+   "source": "03-أهوال-الليل-ومكابدة-السرى-والظلام_SONG_C.mp3",
+   "clip_id": "7f801385-b859-45aa-8567-b534ce72aded",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_sabeel_almajd_20082026_016_2b572817",
+   "maqam": "Kurd",
+   "ws": "sabeel_almajd_20082026",
+   "source": "03-أهوال-الليل-ومكابدة-السرى-والظلام_SONG_B.mp3",
+   "clip_id": "2b572817-81bb-4f3b-b144-62d4f188d854",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_sabeel_almajd_20082026_017_39802023",
+   "maqam": "Kurd",
+   "ws": "sabeel_almajd_20082026",
+   "source": "03-أهوال-الليل-ومكابدة-السرى-والظلام_SONG_A.mp3",
+   "clip_id": "39802023-1c6f-4868-b319-767201996313",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_sama_laka_shwqun_19082026_002_e8d9bf7d",
+   "maqam": "Kurd",
+   "ws": "sama_laka_shwqun_19082026",
+   "source": "04-بكاء-الصاحب-عند-الدرب-وطلب-الملك-وسرى-الليل_SONG_B.mp3",
+   "clip_id": "e8d9bf7d-266e-4c40-8d2e-a953a79bf818",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_sama_laka_shwqun_19082026_003_83b06886",
+   "maqam": "Kurd",
+   "ws": "sama_laka_shwqun_19082026",
+   "source": "04-بكاء-الصاحب-عند-الدرب-وطلب-الملك-وسرى-الليل_SONG_A.mp3",
+   "clip_id": "83b06886-ddc6-4c02-a184-3abac266f40f",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_short-poems_16082026_008_c5453d54",
+   "maqam": "Kurd",
+   "ws": "short-poems_16082026",
+   "source": "01-نذير-الحرب-والتأهب-للكفاح_SONG_B.mp3",
+   "clip_id": "c5453d54-c0e9-45a9-b965-e2746f690a20",
+   "skipped": false
+  },
+  {
+   "out_name": "kurd_short-poems_16082026_009_e869fe9e",
+   "maqam": "Kurd",
+   "ws": "short-poems_16082026",
+   "source": "01-نذير-الحرب-والتأهب-للكفاح_SONG_A.mp3",
+   "clip_id": "e869fe9e-0477-4c9d-a02a-ab244179bd94",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_Lamiyat_Alshanfara_16082026_006_81718edc",
+   "maqam": "Nahawand",
+   "ws": "Lamiyat_Alshanfara_16082026",
+   "source": "04-القطا-ومضجع-العراء_SONG_B.mp3",
+   "clip_id": "81718edc-28a9-4f7f-a1f5-9cd80c6fe281",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_Lamiyat_Alshanfara_16082026_007_9f60b8e5",
+   "maqam": "Nahawand",
+   "ws": "Lamiyat_Alshanfara_16082026",
+   "source": "04-القطا-ومضجع-العراء_SONG_A.mp3",
+   "clip_id": "9f60b8e5-f917-466e-b0a0-f55a20045f9f",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_New_Abu_Tammam_16082026_006_c5907965",
+   "maqam": "Nahawand",
+   "ws": "New_Abu_Tammam_16082026",
+   "source": "04-حكمة-التدبير-واقتحام-الحصون-المنيعة_SONG_B.mp3",
+   "clip_id": "c5907965-83ff-4a54-b19e-66baff20202d",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_New_Abu_Tammam_16082026_007_bb558334",
+   "maqam": "Nahawand",
+   "ws": "New_Abu_Tammam_16082026",
+   "source": "04-حكمة-التدبير-واقتحام-الحصون-المنيعة_SONG_A.mp3",
+   "clip_id": "bb558334-42db-4d92-9ae3-e640979df49d",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_aasha_23072026_003_816236ac",
+   "maqam": "Nahawand",
+   "ws": "aasha_23072026",
+   "source": "07-قانون-الدم-والفخر-بالقبيلة_SONG_A.mp3",
+   "clip_id": "816236ac-1484-4fc8-b00f-4b3271f48af4",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_aasha_ariqtu_21082026_010_2bc51686",
+   "maqam": "Nahawand",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "02-زوال-ملك-النعمان-وعزاء-الفتوة-ومجالس-الندامى_SONG_B.mp3",
+   "clip_id": "2bc51686-6cd9-443e-812f-bf01f8e3c841",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_aasha_ariqtu_21082026_011_1dbad054",
+   "maqam": "Nahawand",
+   "ws": "aasha_ariqtu_21082026",
+   "source": "02-زوال-ملك-النعمان-وعزاء-الفتوة-ومجالس-الندامى_SONG_A.mp3",
+   "clip_id": "1dbad054-9de9-47e9-9e33-2fbfe0386475",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_abu-tammam_16082026_010_2701b683",
+   "maqam": "Nahawand",
+   "ws": "abu-tammam_16082026",
+   "source": "04-حكمة-التدبير-واقتحام-الحصون-المنيعة_SONG_B.mp3",
+   "clip_id": "2701b683-9a51-4512-aaf3-d269235d83de",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_abu-tammam_16082026_011_8fd0080d",
+   "maqam": "Nahawand",
+   "ws": "abu-tammam_16082026",
+   "source": "04-حكمة-التدبير-واقتحام-الحصون-المنيعة_SONG_A.mp3",
+   "clip_id": "8fd0080d-3a3a-4497-9974-d34098691912",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_abu-tammam_16082026_014_0f3c18de",
+   "maqam": "Nahawand",
+   "ws": "abu-tammam_16082026",
+   "source": "02-ملحمة-فتح-الفتوح-وعذراء-الحصون_SONG_B.mp3",
+   "clip_id": "0f3c18de-a817-4b6d-af7e-8dbd383348b9",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_abu-tammam_16082026_015_a3e77982",
+   "maqam": "Nahawand",
+   "ws": "abu-tammam_16082026",
+   "source": "02-ملحمة-فتح-الفتوح-وعذراء-الحصون_SONG_A.mp3",
+   "clip_id": "a3e77982-8bc5-4790-8e0a-747cccb7e51b",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_alharith_bin_heliza_22082026_008_6167bddc",
+   "maqam": "Nahawand",
+   "ws": "alharith_bin_heliza_22082026",
+   "source": "04-أيام-الغارات-وحلف-ذي-المجاز_SONG_B.mp3",
+   "clip_id": "6167bddc-6233-4b3a-939e-67a25e11e4c5",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_alharith_bin_heliza_22082026_009_cf386f8b",
+   "maqam": "Nahawand",
+   "ws": "alharith_bin_heliza_22082026",
+   "source": "04-أيام-الغارات-وحلف-ذي-المجاز_SONG_A.mp3",
+   "clip_id": "cf386f8b-ef6b-409e-95eb-1e85a585c418",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_almutanabi_kafa_bika_21082026_004_0d65f2cd",
+   "maqam": "Nahawand",
+   "ws": "almutanabi_kafa_bika_21082026",
+   "source": "03-لقاء-كافور-وفيض-الجود_SONG_B.mp3",
+   "clip_id": "0d65f2cd-b7f4-4a6c-bd14-930fccf5b996",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_almutanabi_kafa_bika_21082026_005_20f51999",
+   "maqam": "Nahawand",
+   "ws": "almutanabi_kafa_bika_21082026",
+   "source": "03-لقاء-كافور-وفيض-الجود_SONG_A.mp3",
+   "clip_id": "20f51999-185a-4ed0-8081-35523a40cc5c",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amin_almanoon_17082026_006_193a1a02",
+   "maqam": "Nahawand",
+   "ws": "amin_almanoon_17082026",
+   "source": "03-مثل-الدهر-الأول-1-حمار-الوحش-وإيراد-الأتن_SONG_B.mp3",
+   "clip_id": "193a1a02-4bc0-4141-9bb8-94cb9c7e036f",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amin_almanoon_17082026_007_a4c75146",
+   "maqam": "Nahawand",
+   "ws": "amin_almanoon_17082026",
+   "source": "03-مثل-الدهر-الأول-1-حمار-الوحش-وإيراد-الأتن_SONG_A.mp3",
+   "clip_id": "a4c75146-2727-4ff5-a399-ca8a2bb31bab",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amin_almanoon_17082026_008_eca159c2",
+   "maqam": "Nahawand",
+   "ws": "amin_almanoon_17082026",
+   "source": "02-حكمة-التجلد-وعزاء-الفناء-المشترك_SONG_B.mp3",
+   "clip_id": "eca159c2-d2e9-4037-a141-92fd3b8a3742",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amin_almanoon_17082026_009_761e93da",
+   "maqam": "Nahawand",
+   "ws": "amin_almanoon_17082026",
+   "source": "02-حكمة-التجلد-وعزاء-الفناء-المشترك_SONG_A.mp3",
+   "clip_id": "761e93da-af83-4b9c-847d-75f697071dc0",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amin_almanoon_19082026_012_a9382ab5",
+   "maqam": "Nahawand",
+   "ws": "amin_almanoon_19082026",
+   "source": "02-حكمة-التجلد-وحتمية-الردى_SONG_B.mp3",
+   "clip_id": "a9382ab5-feab-44bc-93a4-8c6cafacd7b1",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amin_almanoon_19082026_013_13fae855",
+   "maqam": "Nahawand",
+   "ws": "amin_almanoon_19082026",
+   "source": "02-حكمة-التجلد-وحتمية-الردى_SONG_A.mp3",
+   "clip_id": "13fae855-2a2d-4410-a272-6101a3b9653d",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amro_bin_kalthoum_20082026_004_66b3687d",
+   "maqam": "Nahawand",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "RETAKE_01-الخمرة-ومجالس-الندامى-وتأمل-المنايا_SONG_B.mp3",
+   "clip_id": "66b3687d-f8a5-4adb-a0e9-c277711e6357",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amro_bin_kalthoum_20082026_022_1f09f875",
+   "maqam": "Nahawand",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "01-الخمرة-ومجالس-الندامى-وتأمل-المنايا_SONG_B.mp3",
+   "clip_id": "1f09f875-a21b-4240-9b3d-bd8dcd29a0ba",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amro_bin_kalthoum_20082026_023_ff8033ff",
+   "maqam": "Nahawand",
+   "ws": "amro_bin_kalthoum_20082026",
+   "source": "01-الخمرة-ومجالس-الندامى-وتأمل-المنايا_SONG_A.mp3",
+   "clip_id": "ff8033ff-41c1-45c5-8d93-50765211f1b5",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amro_bin_kalthoum_23072026_022_65cc7839",
+   "maqam": "Nahawand",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "07-استبسال-الدروع-وحماية-الحرائر_SONG_B.mp3",
+   "clip_id": "65cc7839-1947-46c6-b6f8-98e76a679911",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amro_bin_kalthoum_23072026_023_11e71b5c",
+   "maqam": "Nahawand",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "07-استبسال-الدروع-وحماية-الحرائر_SONG_A.mp3",
+   "clip_id": "11e71b5c-301f-4013-b9f0-216c7fb30dfb",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amro_bin_kalthoum_23072026_032_0be82bf8",
+   "maqam": "Nahawand",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "02-الظعائن-ووصف-المحبوبة_SONG_B.mp3",
+   "clip_id": "0be82bf8-c5e1-4167-ac70-e031c9f8022c",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amro_bin_kalthoum_23072026_033_454a9971",
+   "maqam": "Nahawand",
+   "ws": "amro_bin_kalthoum_23072026",
+   "source": "02-الظعائن-ووصف-المحبوبة_SONG_A.mp3",
+   "clip_id": "454a9971-b8ff-4ba0-9cab-87d59c35d6be",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amro_bin_kalthoum_24072026_005_f37c157b",
+   "maqam": "Nahawand",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "07-استبسال-الدروع-وحماية-الحرائر_SONG_A.mp3",
+   "clip_id": "f37c157b-c4d2-44dd-af20-58d4e47e3d90",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amro_bin_kalthoum_24072026_015_8ea19939",
+   "maqam": "Nahawand",
+   "ws": "amro_bin_kalthoum_24072026",
+   "source": "02-الظعائن-ووصف-المحبوبة_SONG_A.mp3",
+   "clip_id": "8ea19939-73b9-49f7-a9c9-654837016d23",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amrro_bin_kalthoum_11082026_004_9b711463",
+   "maqam": "Nahawand",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "07-استبسال-الدروع-وحماية-الحرائر_SONG_B.mp3",
+   "clip_id": "9b711463-4d02-437e-b15e-accf82a2f32a",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amrro_bin_kalthoum_11082026_005_ac651b53",
+   "maqam": "Nahawand",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "07-استبسال-الدروع-وحماية-الحرائر_SONG_A.mp3",
+   "clip_id": "ac651b53-1765-4a7a-83b0-fc8987080bad",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amrro_bin_kalthoum_11082026_014_7c002625",
+   "maqam": "Nahawand",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "02-الظعائن-ووصف-المحبوبة_SONG_B.mp3",
+   "clip_id": "7c002625-d41f-432b-b0c9-b74fa3576d8b",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_amrro_bin_kalthoum_11082026_015_9ccadbaf",
+   "maqam": "Nahawand",
+   "ws": "amrro_bin_kalthoum_11082026",
+   "source": "02-الظعائن-ووصف-المحبوبة_SONG_A.mp3",
+   "clip_id": "9ccadbaf-052b-4683-9bf3-0ca2da5c9ddd",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_13082026_000_a39c6b12",
+   "maqam": "Nahawand",
+   "ws": "antara_13082026",
+   "source": "10-اعتذار-الرحيل-وخاتمة-المجد-واللذة-الشريفة_SONG_B.mp3",
+   "clip_id": "a39c6b12-8e41-4760-8706-2182f27c254d",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_13082026_001_a0ec5e91",
+   "maqam": "Nahawand",
+   "ws": "antara_13082026",
+   "source": "10-اعتذار-الرحيل-وخاتمة-المجد-واللذة-الشريفة_SONG_A.mp3",
+   "clip_id": "a0ec5e91-5af8-4752-be4f-75cadb7fd82d",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_13082026_014_b62d4d0a",
+   "maqam": "Nahawand",
+   "ws": "antara_13082026",
+   "source": "03-وصف-الروضة-المطيرة-ومقارنة-السرج-بالحشايا_SONG_B.mp3",
+   "clip_id": "b62d4d0a-83a0-451b-8ec6-86ac1952fe78",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_13082026_015_b3e720f5",
+   "maqam": "Nahawand",
+   "ws": "antara_13082026",
+   "source": "03-وصف-الروضة-المطيرة-ومقارنة-السرج-بالحشايا_SONG_A.mp3",
+   "clip_id": "b3e720f5-e079-4670-b046-9b7cebb00248",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_13082026_016_d64cf928",
+   "maqam": "Nahawand",
+   "ws": "antara_13082026",
+   "source": "02-رحيل-الظعائن-وثغر-المحبوبة-العذب_SONG_B.mp3",
+   "clip_id": "d64cf928-7125-4a03-9f6d-70573cbd6b6d",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_13082026_017_bd754a2e",
+   "maqam": "Nahawand",
+   "ws": "antara_13082026",
+   "source": "02-رحيل-الظعائن-وثغر-المحبوبة-العذب_SONG_A.mp3",
+   "clip_id": "bd754a2e-61ff-4bb9-a834-55891b58872b",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_mullaq_21072026_002_54547980",
+   "maqam": "Nahawand",
+   "ws": "antara_mullaq_21072026",
+   "source": "10-اعتذار-الرحيل-وخاتمة-المجد-واللذة-الشريفة_SONG_B.mp3",
+   "clip_id": "54547980-537c-46b7-ba43-90950ec21f4c",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_mullaq_21072026_003_119f56d2",
+   "maqam": "Nahawand",
+   "ws": "antara_mullaq_21072026",
+   "source": "10-اعتذار-الرحيل-وخاتمة-المجد-واللذة-الشريفة_SONG_A.mp3",
+   "clip_id": "119f56d2-ff83-43bd-ae62-5a01357e8f7e",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_mullaq_21072026_016_1dc18a60",
+   "maqam": "Nahawand",
+   "ws": "antara_mullaq_21072026",
+   "source": "03-وصف-الروضة-المطيرة-ومقارنة-السرج-بالحشايا_SONG_B.mp3",
+   "clip_id": "1dc18a60-064a-4949-9511-f6979aa2ed2c",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_mullaq_21072026_017_f059706d",
+   "maqam": "Nahawand",
+   "ws": "antara_mullaq_21072026",
+   "source": "03-وصف-الروضة-المطيرة-ومقارنة-السرج-بالحشايا_SONG_A.mp3",
+   "clip_id": "f059706d-0730-464e-8d81-52623208d06c",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_mullaq_21072026_018_7d916533",
+   "maqam": "Nahawand",
+   "ws": "antara_mullaq_21072026",
+   "source": "02-رحيل-الظعائن-وثغر-المحبوبة-العذب_SONG_B.mp3",
+   "clip_id": "7d916533-9ad0-4053-8120-7e0fe03eb29c",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_antara_mullaq_21072026_019_9fd6a329",
+   "maqam": "Nahawand",
+   "ws": "antara_mullaq_21072026",
+   "source": "02-رحيل-الظعائن-وثغر-المحبوبة-العذب_SONG_A.mp3",
+   "clip_id": "9fd6a329-1e06-4d15-b8f3-8ab9098508a6",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ara_alanqaa_18082026_000_25be20de",
+   "maqam": "Nahawand",
+   "ws": "ara_alanqaa_18082026",
+   "source": "06-قرى-الذئب-وذروة-عزة-النفس_SONG_B.mp3",
+   "clip_id": "25be20de-4d2b-4caa-ad21-da75fd422cc7",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ara_alanqaa_18082026_001_068cd378",
+   "maqam": "Nahawand",
+   "ws": "ara_alanqaa_18082026",
+   "source": "06-قرى-الذئب-وذروة-عزة-النفس_SONG_A.mp3",
+   "clip_id": "068cd378-7043-4bc7-b664-7a934456e881",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ara_alanqaa_18082026_010_92f84b18",
+   "maqam": "Nahawand",
+   "ws": "ara_alanqaa_18082026",
+   "source": "01-عناد-الزمان-واعتزال-الأنام_SONG_B.mp3",
+   "clip_id": "92f84b18-d5d0-4338-ab71-2a860d28a9a2",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ara_alanqaa_18082026_011_e42891f5",
+   "maqam": "Nahawand",
+   "ws": "ara_alanqaa_18082026",
+   "source": "01-عناد-الزمان-واعتزال-الأنام_SONG_A.mp3",
+   "clip_id": "e42891f5-d81b-4596-92c3-ccfc01408cf7",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ghayra_mujdin_19082026_000_2c83555f",
+   "maqam": "Nahawand",
+   "ws": "ghayra_mujdin_19082026",
+   "source": "06-فناء-الكواكب-وحكمة-الزهد-الكوني_SONG_B.mp3",
+   "clip_id": "2c83555f-ce67-4c51-ae3d-19421e3bf0e9",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ghayra_mujdin_19082026_001_8308a510",
+   "maqam": "Nahawand",
+   "ws": "ghayra_mujdin_19082026",
+   "source": "06-فناء-الكواكب-وحكمة-الزهد-الكوني_SONG_A.mp3",
+   "clip_id": "8308a510-f89c-477c-b5ff-628945946251",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ghayra_mujdin_19082026_010_7666435c",
+   "maqam": "Nahawand",
+   "ws": "ghayra_mujdin_19082026",
+   "source": "01-خفف-الوطء-وتأملات-الفناء_SONG_B.mp3",
+   "clip_id": "7666435c-5831-477a-b8fa-b5b9d463797d",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ghayra_mujdin_19082026_011_27ce96c9",
+   "maqam": "Nahawand",
+   "ws": "ghayra_mujdin_19082026",
+   "source": "01-خفف-الوطء-وتأملات-الفناء_SONG_A.mp3",
+   "clip_id": "27ce96c9-05fd-4fb1-85cc-75f48bf12754",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ibn_zaydoon_adha_21082026_006_31d59ad0",
+   "maqam": "Nahawand",
+   "ws": "ibn_zaydoon_adha_21082026",
+   "source": "02-استحضار-عهد-الوصل-ومخاطبة-الصبا-والبرق_SONG_B.mp3",
+   "clip_id": "31d59ad0-6a35-411c-bf00-664e937542c1",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ibn_zaydoon_adha_21082026_007_79966883",
+   "maqam": "Nahawand",
+   "ws": "ibn_zaydoon_adha_21082026",
+   "source": "02-استحضار-عهد-الوصل-ومخاطبة-الصبا-والبرق_SONG_A.mp3",
+   "clip_id": "79966883-d549-44e4-87a7-c3bd08a2f3a8",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ibn_zuraiq_20082026_001_c116f240",
+   "maqam": "Nahawand",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "04-مناجاة-الديار-وعهد-الوفاء-والرجاء-الأخير_SONG_A.mp3",
+   "clip_id": "c116f240-d228-41f7-815b-2251d37c4f04",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ibn_zuraiq_20082026_006_18bb8530",
+   "maqam": "Nahawand",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "01-العذل-ومكابدة-الاغتراب-وفلسفة-الرزق_SONG_B.mp3",
+   "clip_id": "18bb8530-6097-48c3-8d5b-14740e3fcbac",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ibn_zuraiq_20082026_007_6ab44190",
+   "maqam": "Nahawand",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "01-العذل-ومكابدة-الاغتراب-وفلسفة-الرزق_SONG_A.mp3",
+   "clip_id": "6ab44190-bb40-43ac-89b9-250947dad29f",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ibn_zuraiq_20082026_008_454821ac",
+   "maqam": "Nahawand",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "04-مناجاة-ديار-الأنس-ورجاء-التلاقي_SONG_B.mp3",
+   "clip_id": "454821ac-8656-4322-b31f-09094fee22b8",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ibn_zuraiq_20082026_009_6ec900ab",
+   "maqam": "Nahawand",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "04-مناجاة-ديار-الأنس-ورجاء-التلاقي_SONG_A.mp3",
+   "clip_id": "6ec900ab-a834-4f38-9c30-b527e99d43ab",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_ibn_zuraiq_20082026_014_59573288",
+   "maqam": "Nahawand",
+   "ws": "ibn_zuraiq_20082026",
+   "source": "01-العذل-والمطامع-وفلسفة-الرزق_SONG_B.mp3",
+   "clip_id": "59573288-fedb-40af-8fb2-2ef3d092b23b",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_im_qais_20082026_008_bcb684ae",
+   "maqam": "Nahawand",
+   "ws": "im_qais_20082026",
+   "source": "04-تأمل-محاسن-الحبيبة-والجمال-المترف_SONG_B.mp3",
+   "clip_id": "bcb684ae-719b-47a6-9c6b-1ebdfafe4417",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_im_qais_20082026_012_1ec7b0bf",
+   "maqam": "Nahawand",
+   "ws": "im_qais_20082026",
+   "source": "02-يوم-دارة-جلجل-ومغامرات-الشباب_SONG_B.mp3",
+   "clip_id": "1ec7b0bf-0ef3-41db-acbb-62df0437abce",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_im_qais_20082026_013_c6d2ebf9",
+   "maqam": "Nahawand",
+   "ws": "im_qais_20082026",
+   "source": "02-يوم-دارة-جلجل-ومغامرات-الشباب_SONG_A.mp3",
+   "clip_id": "c6d2ebf9-0588-4e42-9e7a-8164cc673668",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_lamiyat_alshanfara_14082026_006_f2cfa24d",
+   "maqam": "Nahawand",
+   "ws": "lamiyat_alshanfara_14082026",
+   "source": "04-القطا-ومضجع-العراء_SONG_B.mp3",
+   "clip_id": "f2cfa24d-d7db-407d-bd8a-e84d15d441f9",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_lamiyat_alshanfara_14082026_007_771ae55d",
+   "maqam": "Nahawand",
+   "ws": "lamiyat_alshanfara_14082026",
+   "source": "04-القطا-ومضجع-العراء_SONG_A.mp3",
+   "clip_id": "771ae55d-2167-489c-973f-e299ec3960a8",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_majnoon_layla_18082026_003_6cde6210",
+   "maqam": "Nahawand",
+   "ws": "majnoon_layla_18082026",
+   "source": "06-التيه-في-الفضاء-وركب-اليمانيين_SONG_A.mp3",
+   "clip_id": "6cde6210-f3cd-4718-81c8-3b83362b50a7",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_majnoon_layla_18082026_012_e4a4138a",
+   "maqam": "Nahawand",
+   "ws": "majnoon_layla_18082026",
+   "source": "01-نار-ليلى-في-ثمدين-واسترجاع-الخوالي_SONG_B.mp3",
+   "clip_id": "e4a4138a-ff90-4a1c-9103-18a8e41ca3f6",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_majnoon_layla_18082026_013_ac33993c",
+   "maqam": "Nahawand",
+   "ws": "majnoon_layla_18082026",
+   "source": "01-نار-ليلى-في-ثمدين-واسترجاع-الخوالي_SONG_A.mp3",
+   "clip_id": "ac33993c-981b-4ee3-a4bb-1f281f41f577",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_majnoon_layla_19082026_000_7d68c1d5",
+   "maqam": "Nahawand",
+   "ws": "majnoon_layla_19082026",
+   "source": "06-التيه-في-الفضاء-وركب-اليمانيين_SONG_B.mp3",
+   "clip_id": "7d68c1d5-2962-40ce-a32e-df3a56cce33c",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_majnoon_layla_19082026_001_b066d7af",
+   "maqam": "Nahawand",
+   "ws": "majnoon_layla_19082026",
+   "source": "06-التيه-في-الفضاء-وركب-اليمانيين_SONG_A.mp3",
+   "clip_id": "b066d7af-79d1-4987-b5c4-4073da7191af",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_majnoon_layla_19082026_012_d10340bb",
+   "maqam": "Nahawand",
+   "ws": "majnoon_layla_19082026",
+   "source": "01-نار-ليلى-في-ثمدين-واسترجاع-الخوالي_SONG_B.mp3",
+   "clip_id": "d10340bb-a902-4553-9dfe-0e89e13528df",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_majnoon_layla_19082026_013_6c470da0",
+   "maqam": "Nahawand",
+   "ws": "majnoon_layla_19082026",
+   "source": "01-نار-ليلى-في-ثمدين-واسترجاع-الخوالي_SONG_A.mp3",
+   "clip_id": "6c470da0-bdd7-453a-9e0e-3a615204baa5",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_majnoon_layla_22082026_004_301f74b4",
+   "maqam": "Nahawand",
+   "ws": "majnoon_layla_22082026",
+   "source": "06-التيه-في-الفضاء-وركب-اليمانيين_SONG_B.mp3",
+   "clip_id": "301f74b4-2c1d-407f-b3f5-ffdd99310acc",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_majnoon_layla_22082026_012_eaa68592",
+   "maqam": "Nahawand",
+   "ws": "majnoon_layla_22082026",
+   "source": "01-نار-ليلى-في-ثمدين-واسترجاع-الخوالي_SONG_B.mp3",
+   "clip_id": "eaa68592-9b1e-41d6-8f26-55dcdbf6d3f3",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_majnoon_layla_22082026_013_e67207bc",
+   "maqam": "Nahawand",
+   "ws": "majnoon_layla_22082026",
+   "source": "01-نار-ليلى-في-ثمدين-واسترجاع-الخوالي_SONG_A.mp3",
+   "clip_id": "e67207bc-e062-4483-992a-30aef2731097",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_malik_ibn_rayb_17082026_004_9409de46",
+   "maqam": "Nahawand",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "RETAKE_02-وحشة-الاغتراب-ووفاء-السلاح_SONG_B.mp3",
+   "clip_id": "9409de46-f80f-4165-a647-f24869e0f777",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_malik_ibn_rayb_17082026_005_be36db3d",
+   "maqam": "Nahawand",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "RETAKE_02-وحشة-الاغتراب-ووفاء-السلاح_SONG_A.mp3",
+   "clip_id": "be36db3d-97a4-4315-bdaf-a8896eabab08",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_malik_ibn_rayb_17082026_010_93ddf08a",
+   "maqam": "Nahawand",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "06-ديار-نجد-والقبر-القسطلاني_SONG_B.mp3",
+   "clip_id": "93ddf08a-4954-427b-9ae5-107e07782fd9",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_malik_ibn_rayb_17082026_018_aecb8f27",
+   "maqam": "Nahawand",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "02-وحشة-الاغتراب-ووفاء-السلاح_SONG_B.mp3",
+   "clip_id": "aecb8f27-35a7-4fac-9521-8ba87e944f91",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_malik_ibn_rayb_17082026_019_064772b5",
+   "maqam": "Nahawand",
+   "ws": "malik_ibn_rayb_17082026",
+   "source": "02-وحشة-الاغتراب-ووفاء-السلاح_SONG_A.mp3",
+   "clip_id": "064772b5-9214-45cf-a503-f79f192de3aa",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_muallaqat_aassha_21082026_001_417613c0",
+   "maqam": "Nahawand",
+   "ws": "muallaqat_aassha_21082026",
+   "source": "01-وداع-هريرة-وتفصيل-محاسنها-الفتانة_SONG_A.mp3",
+   "clip_id": "417613c0-cf0d-4339-91f2-74d80eff627f",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_muallaqat_aassha_21082026_006_fad7db5f",
+   "maqam": "Nahawand",
+   "ws": "muallaqat_aassha_21082026",
+   "source": "06-الاستشهاد-بالقبائل-وإعلان-البأس-والقصاص_SONG_B.mp3",
+   "clip_id": "fad7db5f-0ea9-4a14-8004-3ad058d53a57",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_muallaqat_aassha_21082026_007_2e69fbbf",
+   "maqam": "Nahawand",
+   "ws": "muallaqat_aassha_21082026",
+   "source": "06-الاستشهاد-بالقبائل-وإعلان-البأس-والقصاص_SONG_A.mp3",
+   "clip_id": "2e69fbbf-4d80-4536-afb4-1fb671ec6e38",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_muallaqt_antra_21082026_002_5753e743",
+   "maqam": "Nahawand",
+   "ws": "muallaqt_antra_21082026",
+   "source": "02-ذكرى-ليلة-الفراق-وطيب-عبلة-المعطار_SONG_B.mp3",
+   "clip_id": "5753e743-3813-4b5e-baf1-1ff0f2a5e654",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_muallaqt_antra_21082026_003_6cceed1c",
+   "maqam": "Nahawand",
+   "ws": "muallaqt_antra_21082026",
+   "source": "02-ذكرى-ليلة-الفراق-وطيب-عبلة-المعطار_SONG_A.mp3",
+   "clip_id": "6cceed1c-fe10-4f4b-a3e9-def5699b9419",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_muallaqt_antra_21082026_016_4680d5d5",
+   "maqam": "Nahawand",
+   "ws": "muallaqt_antra_21082026",
+   "source": "03-ربيع-الديار-ومفارقة-الدعة-إلى-السرى_SONG_B.mp3",
+   "clip_id": "4680d5d5-4398-45b2-b59d-33ec9a0c4e7b",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_muallaqt_antra_21082026_017_f0cc3253",
+   "maqam": "Nahawand",
+   "ws": "muallaqt_antra_21082026",
+   "source": "03-ربيع-الديار-ومفارقة-الدعة-إلى-السرى_SONG_A.mp3",
+   "clip_id": "f0cc3253-5e28-406c-83bf-5a758b2de3de",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigah_19072026_003_7fbb69d1",
+   "maqam": "Nahawand",
+   "ws": "nabigah_19072026",
+   "source": "القسم 5 القسم والاعتذار مقام نهاوند_SONG_A.mp3",
+   "clip_id": "7fbb69d1-013e-4a2f-9bb8-e11ebd520705",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigah_19072026_010_6c0179e9",
+   "maqam": "Nahawand",
+   "ws": "nabigah_19072026",
+   "source": "القسم 1 الأطلال والحنين مقام نهاوند_SONG_B.mp3",
+   "clip_id": "6c0179e9-c781-4ba6-a713-b37905a226ae",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigah_19072026_011_b9824a78",
+   "maqam": "Nahawand",
+   "ws": "nabigah_19072026",
+   "source": "القسم 1 الأطلال والحنين مقام نهاوند_SONG_A.mp3",
+   "clip_id": "b9824a78-a15e-4f0e-a9df-388d0d3b0bc6",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigha_17072026_A_001_cb2bb293",
+   "maqam": "Nahawand",
+   "ws": "nabigha_17072026_A",
+   "source": "القسم 1 الأطلال والحنين مقام نهاوند_SONG_D.mp3",
+   "clip_id": "cb2bb293-000c-4a19-9b6d-13c319b3aca2",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigha_17072026_A_002_82f1d0a7",
+   "maqam": "Nahawand",
+   "ws": "nabigha_17072026_A",
+   "source": "القسم 1 الأطلال والحنين مقام نهاوند_SONG_C.mp3",
+   "clip_id": "82f1d0a7-ba7d-437e-985f-ed19e0016b74",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigha_17072026_A_005_f999957f",
+   "maqam": "Nahawand",
+   "ws": "nabigha_17072026_A",
+   "source": "القسم 5 القسم والاعتذار مقام نهاوند_SONG_B.mp3",
+   "clip_id": "f999957f-6c18-4655-bda1-7f9bad82e6f6",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigha_17072026_A_006_e1e8c547",
+   "maqam": "Nahawand",
+   "ws": "nabigha_17072026_A",
+   "source": "القسم 5 القسم والاعتذار مقام نهاوند_SONG_A.mp3",
+   "clip_id": "e1e8c547-5123-462b-9934-ed0eac2ce77e",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigha_17072026_A_011_317ab59b",
+   "maqam": "Nahawand",
+   "ws": "nabigha_17072026_A",
+   "source": "القسم 1 الأطلال والحنين مقام نهاوند_SONG_B.mp3",
+   "clip_id": "317ab59b-2a41-4cc1-86b2-c126b8c3477e",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigha_jaadi_21082026_002_bdc1f0fa",
+   "maqam": "Nahawand",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "01-موعظة-الدهر-وذكرى-الملوك-والندامى_SONG_B.mp3",
+   "clip_id": "bdc1f0fa-e598-4ba0-8bbd-afbcc2b74556",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigha_jaadi_21082026_003_87373351",
+   "maqam": "Nahawand",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "01-موعظة-الدهر-وذكرى-الملوك-والندامى_SONG_A.mp3",
+   "clip_id": "87373351-6185-4587-a4e4-15d79b853e4c",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigha_jaadi_21082026_014_dd276693",
+   "maqam": "Nahawand",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "03-تجريد-الناقة-وجمال-المروج-وتوقد-الثور-الوحشي_SONG_B.mp3",
+   "clip_id": "dd276693-566b-48b6-a6bd-4bfb2272f634",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_nabigha_jaadi_21082026_015_8250e8b2",
+   "maqam": "Nahawand",
+   "ws": "nabigha_jaadi_21082026",
+   "source": "03-تجريد-الناقة-وجمال-المروج-وتوقد-الثور-الوحشي_SONG_A.mp3",
+   "clip_id": "8250e8b2-d5dc-4032-9232-e86a76484378",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_qais_24072026_012_d6fc7cff",
+   "maqam": "Nahawand",
+   "ws": "qais_24072026",
+   "source": "02-مغامرات-الصبا-وعتاب-فاطمة_SONG_B.mp3",
+   "clip_id": "d6fc7cff-c14e-4ac7-b75b-60d3d28e39d6",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_qais_24072026_013_40b39dd3",
+   "maqam": "Nahawand",
+   "ws": "qais_24072026",
+   "source": "02-مغامرات-الصبا-وعتاب-فاطمة_SONG_A.mp3",
+   "clip_id": "40b39dd3-75d3-48eb-94d7-43f60ec1f98f",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_sabeel_almajd_20082026_000_51aa3856",
+   "maqam": "Nahawand",
+   "ws": "sabeel_almajd_20082026",
+   "source": "04-حكمة-السعادة-وقانون-التوسط-والتمام_SONG_D.mp3",
+   "clip_id": "51aa3856-0b16-42cc-ac94-32f17b557eff",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_sabeel_almajd_20082026_001_af600383",
+   "maqam": "Nahawand",
+   "ws": "sabeel_almajd_20082026",
+   "source": "04-حكمة-السعادة-وقانون-التوسط-والتمام_SONG_C.mp3",
+   "clip_id": "af600383-5be2-46d9-ab18-3c5a42cfc339",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_sabeel_almajd_20082026_014_202d30b6",
+   "maqam": "Nahawand",
+   "ws": "sabeel_almajd_20082026",
+   "source": "04-حكمة-السعادة-وقانون-التوسط-والتمام_SONG_B.mp3",
+   "clip_id": "202d30b6-87b1-40ae-b664-b16eccc6f301",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_sama_laka_shwqun_19082026_006_26207ba2",
+   "maqam": "Nahawand",
+   "ws": "sama_laka_shwqun_19082026",
+   "source": "02-انبتات-حبل-الوصل-ووحشة-السرى-في-ديار-الشام_SONG_B.mp3",
+   "clip_id": "26207ba2-ccfe-49a3-9c53-6d369f9f03e2",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_sama_laka_shwqun_19082026_007_27703921",
+   "maqam": "Nahawand",
+   "ws": "sama_laka_shwqun_19082026",
+   "source": "02-انبتات-حبل-الوصل-ووحشة-السرى-في-ديار-الشام_SONG_A.mp3",
+   "clip_id": "27703921-7f52-4b04-9be3-6214f97f1088",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_tarafa_23072026_004_925bfe3d",
+   "maqam": "Nahawand",
+   "ws": "tarafa_23072026",
+   "source": "09-الوصية-لابنة-معبد-والحكمة-الخالدة_SONG_B.mp3",
+   "clip_id": "925bfe3d-c51c-482d-ad23-dcfdfc0ae094",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_tarafa_23072026_005_94dbb0c8",
+   "maqam": "Nahawand",
+   "ws": "tarafa_23072026",
+   "source": "09-الوصية-لابنة-معبد-والحكمة-الخالدة_SONG_A.mp3",
+   "clip_id": "94dbb0c8-5615-4e12-8a9e-2c244ad8b6b3",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_tarafa_23072026_010_de7ba1cf",
+   "maqam": "Nahawand",
+   "ws": "tarafa_23072026",
+   "source": "06-فلسفة-الحياة-والموت-واللذات-الثلاث_SONG_B.mp3",
+   "clip_id": "de7ba1cf-f1d2-40f6-8d8f-818003e5a1d7",
+   "skipped": false
+  },
+  {
+   "out_name": "nahawand_tarafa_23072026_011_80787057",
+   "maqam": "Nahawand",
+   "ws": "tarafa_23072026",
+   "source": "06-فلسفة-الحياة-والموت-واللذات-الثلاث_SONG_A.mp3",
+   "clip_id": "80787057-555e-43f4-a90c-f8fd0f4b6e66",
+   "skipped": false
+  }
+ ]
+}

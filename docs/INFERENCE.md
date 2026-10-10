@@ -87,7 +87,8 @@ INFERENCE/run_one.sh <Maqam> <seed> [cap|auto]
   [`text_to_duration_formula.md`](text_to_duration_formula.md). This is an
   **upper cap** (95th-percentile quantile regression, not a mean):
   `dur_cap = 111.1 + 0.3126·N_letters`, rounded to 10 s — covers 94.8% of the
-  267 corpus tracks. The old `92 + 0.28·N` line was the *centre* (only 54.7%
+  267-track v2 corpus (the v3 438-track set reuses the same cap). The old
+  `92 + 0.28·N` line was the *centre* (only 54.7%
   coverage) and under-provisioned the cap. For a more forgiving cap use the
   doc's 97.5th percentile, `122.9 + 0.3081·N` (97.8% coverage). Pass an integer
   to override (`semantic_max_tokens`).

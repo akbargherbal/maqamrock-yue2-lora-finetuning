@@ -20,7 +20,7 @@ cd /content/maqamrock-yue2-lora-finetuning
 
 Does everything slow in parallel: clones ai-toolkit, installs its deps (pinned
 torch 2.13 / cu130 — see `../DECISIONS.md`), pre-warms the HF cache, and pulls
-the 267-track dataset from GCS.
+the 438-track v3 dataset (a zip) from GCS.
 
 ```bash
 mkdir -p /content/logs
@@ -47,7 +47,7 @@ Backup daemon (needs `GCP_BACKUP_BASE`, from the notebook) and GPU logger:
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
-setsid nohup python backup_to_gcp.py --run-name akbar_arabic_rock_lora \
+setsid nohup python backup_to_gcp.py --run-name v3_arabmaqamrock_lora \
   > /content/logs/gcp_backup_stdout.log 2>&1 & disown
 setsid nohup python gpu_logger.py --out /content/logs/gpu_usage.csv \
   > /content/logs/gpu_logger_stdout.log 2>&1 & disown

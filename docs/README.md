@@ -45,13 +45,13 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 
 | | |
 |---|---|
-| Run name | `akbar_arabic_rock_lora` |
+| Run name | `v3_arabmaqamrock_lora` (A100) · `v3_arabmaqamrock_lora_l4` (L4) |
 | Repo | `/content/maqamrock-yue2-lora-finetuning` |
 | ai-toolkit | `/content/ai-toolkit` (cloned by bootstrap, tracks `main`) |
-| Dataset | `/content/yue2_dataset` |
-| Run output | `/content/ai-toolkit/output/akbar_arabic_rock_lora/` |
+| Dataset | `/content/yue2_dataset` (v3, 438 tracks, from `GCP_DATASET_ZIP`) |
+| Run output | `/content/ai-toolkit/output/v3_arabmaqamrock_lora/` |
 | Train log | `/content/logs/train.log` |
-| Metrics db | `/content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db` |
+| Metrics db | `/content/ai-toolkit/output/v3_arabmaqamrock_lora/loss_log.db` |
 | GPU csv | `/content/logs/gpu_usage.csv` |
 | GCS base | `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning` |
 | LoRA library | `<GCS base>/loras/` (see [LORA_INVENTORY.md](LORA_INVENTORY.md)) |

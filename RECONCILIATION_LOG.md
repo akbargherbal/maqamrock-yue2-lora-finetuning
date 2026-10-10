@@ -473,3 +473,31 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   D-test/M13 evidence. No config or hyperparameter touched; frozen docs not rewritten (M12 and
   the DECISIONS bullet are dated appends).
 
+
+## 2026-10-10 — v3 dataset (438, verbatim tags); GCS rename; configs/docs/code reconciled
+
+- **Driving change:** the 438-track dataset supersedes v2. GCS `dataset/` renamed to
+  `v2_arabmaqamrock_dataset/` (copy → CRC32C-verified → old deleted); v3 uploaded as
+  `v3_arabmaqamrock_dataset.zip` (+`.sha256`). Runs renamed `v3_arabmaqamrock_lora` (A100) /
+  `v3_arabmaqamrock_lora_l4` (L4).
+- **Reconciler (Steps 1–2):** 2454 claims / 59 live docs; 1516 checkable; **13 flagged (0.9%)** —
+  all false positives in the new `docs/DATASET_V3_PLAN.md` (cites bucket `README.txt`/`LAYOUT.json`,
+  `GCP_ORGANIZATION_PLAN.md` on `music-cover`, and parent-dir build scripts — outside the repo by
+  design). No structural warning; no real path drift.
+- **Semantic edits (authority: the GCS rename + the `setup.sh` change):**
+  - `bootstrap/setup.sh`: added `GCP_DATASET_ZIP` (cp+unzip) alongside `GCP_DATASET_PATH`;
+    `GCP_DATASET_PATH` no longer mandatory; `job_dataset` conditional; count check = 438 in zip mode.
+  - `config/A100_akbar_arabic_rock_lora.yml` → `config/v3_arabmaqamrock_lora.yml` and
+    `config/L4_…` → `config/v3_arabmaqamrock_lora_l4.yml` (`git mv`); `name`/`log_dir`;
+    `steps: 3000 → 5000`; comments.
+  - notebook: `GCP_DATASET_PATH` → v2 prefix; added `GCP_DATASET_ZIP`; secrets write.
+  - `README.md`, `SOURCE_OF_TRUTH.md`, `docs/README.md`, `docs/START.md`, `backup_to_gcp.py`,
+    `docs/PRON_LORA.md`, `docs/PRON_LORA_VERIFICATION.md` (+ dated A7 note),
+    `docs/L4_HANDOFF_TASK14C.md`, `docs/text_to_duration_formula.md`, `docs/INFERENCE.md`,
+    held-out report (+ STALE banner).
+- **Frozen:** `DECISIONS.md` — new **dated** entry only (naming change supersedes the
+  "no numeric versions" convention); no existing claim rewritten. `PROGRESS.md` untouched.
+- **Added:** `prepare_yue2_dataset_v3.py`,
+  `datasets/v3_arabmaqamrock/{README,manifest,build_report,v3_overrides}`.
+- **Left as history / open:** held-out set + `sample.samples` are stale vs v3 (regenerate before
+  eval); `docs/IMPROVEMENTS.md` frozen-leftovers unchanged.

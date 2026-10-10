@@ -6,8 +6,9 @@ small AR-only **pronunciation adapter** trained on Quran recitation to sharpen a
 Trained with [`ostris/ai-toolkit`](https://github.com/ostris/ai-toolkit); generated with
 [`0xShug0/audio.cpp`](https://github.com/0xShug0/audio.cpp) (GGUF + the converted LoRA).
 
-The style backbone is a single LoRA over **267 clips across four maqams** (Hijaz, Kurd,
-Nahawand, Ajam) sharing one fixed genre, production and instrumentation, with the trigger
+The style backbone is a single LoRA over the maqamrock dataset — **438 clips across four
+maqams** (Hijaz, Kurd, Nahawand, Ajam; the v2 adapter, the current one, trained on 267 of
+them) — sharing one fixed genre, production and instrumentation, with the trigger
 word `arabmaqamrock`. Training runs on a rented single GPU in Google Colab, driven over the
 CLI (not the Web UI) and monitored through an agent-readable SQLite metrics db; Colab is
 ephemeral, so all expensive artifacts are mirrored to GCS.
@@ -20,7 +21,10 @@ Nothing is training right now.
 - **v2 style LoRA** (`akbar_arabic_rock_lora`, rank 32) — ran **3000/3000** on an
   A100-SXM4-80GB. Style/timbre/arrangement match the target strongly; pronunciation improved
   over v1 to **~9/10** (a few letters still soften: ح→خ/ه, ع→أ). Dataset: 267
-  lyric-conditioned pairs (`./yue2_dataset`; GCS `dataset/`).
+  lyric-conditioned pairs (`./yue2_dataset`; GCS `v2_arabmaqamrock_dataset/`).
+- **v3 dataset built (2026-10-10); next run not started.** 438 lyric/caption pairs (v2's
+  267 + 171; verbatim Suno lyric tags, style header stripped), GCS
+  `v3_arabmaqamrock_dataset.zip`. Planned run `v3_arabmaqamrock_lora` (A100, 5000 steps).
 - **Pronunciation donor — parked, not adopted for arabmaqamrock (2026-10-09).** **`quran_ahh_r32`**
   (rank 32, AR+NAR; AHH-filtered **3 reciters** — Husary, Hudhaify, Abdul Basit — 9,489 pairs)
   merged into v2 with `merge_quran_lora.py` at **α0.1** → the `qahh_a0*` candidates. Across two
@@ -60,12 +64,13 @@ Listening evaluations run in the external **rating app**
 ## Repo layout
 
 ```
-config/L4_akbar_arabic_rock_lora.yml + config/A100_akbar_arabic_rock_lora.yml   # style-LoRA training config, per-GPU variants (rank 32, EMA, cot: off, whole-song)
+config/v3_arabmaqamrock_lora.yml + config/v3_arabmaqamrock_lora_l4.yml   # style-LoRA training config, per-GPU variants (v3 dataset, 5000 steps)
 config/LEGACY_akbar_arabic_rock_lora.yml   # v1/v2 predecessor (ar_kl 0.2, in-training sampling)
 config/quran_long_aya_r8_s10.yml    # RETIRED long-aya Quran pron run (AR-only rank 8, 8,100 pairs)
 config/quran_long_aya_r8.yml        # RETIRED full-set ident (never trained)
 config/pron_lora_ar_only.yml + config/pron_lora_ar_only_smoke.yml   # superseded pron donor (historical)
 prepare_yue2_dataset.py             # v1 build: style-only captions (obsolete dataset)
+prepare_yue2_dataset_v3.py          # v3 build: 438 tracks, verbatim lyric tags (+ datasets/v3_arabmaqamrock/)
 prepare_pron_dataset.py             # pron dataset build (Task 13)
 sample_pron_dataset.py              # seeded 10% subsample -> quran_long_aya_r8_s10
 append_ayah_symbol.py               # ayah-symbol post-pass on the long-aya captions
@@ -79,7 +84,7 @@ bootstrap/setup.sh                  # idempotent Colab bootstrap; --training (de
 bootstrap/github_auth.sh            # token-based git push auth, never exposed to the agent
 INFERENCE/run_one.sh                # one observed generation; generate.py's execution engine
 INFERENCE/generate.py               # JSON-driven batch generation (bring your own lyrics/style)
-INFERENCE/yue2_eval_heldout/        # held-out eval set: 4 prompts, 0 shared lines with training
+INFERENCE/yue2_eval_heldout/        # held-out eval set (v2): 4 prompts, now STALE vs v3 — regenerate before eval
 INFERENCE/duration_cap.py           # canonical text->duration cap (docs/text_to_duration_formula.md)
 INFERENCE/prepare_ab_eval.py        # generic blinded A/B(/N) listening package (EVAL.txt / KEYS.txt)
 INFERENCE/{pron_alpha_sweep,pron_fine_sweep,pron_knob_probe,qfinal_suno_sweep}.sh   # sweep drivers (qfinal_suno_sweep: RETIRED)
@@ -100,14 +105,22 @@ AGENTS.md                           # operating contract for the coding agent
 
 ## Datasets
 
-**`./yue2_dataset` holds the current (v2) lyric-conditioned captions** — 267 audio/caption
-pairs, all native `mp3, 48000 Hz, stereo`, exactly what YuE2's loader expects. Captions are
-a style text (genre, maqam, vocals, production, instrumentation, mood) plus a
-`\n[Lyrics]\n{cleaned_lyrics}` block, with the trigger `arabmaqamrock ` baked in. v1's
-style-only captions (built by `prepare_yue2_dataset.py`, still runnable) are obsolete; the
-build was a local-only script. Caption formatting rules (which section tags survive, how SFX
-asides are dropped) live in `DECISIONS.md` and bind any other tooling that builds prompts
-from the same manifests — including the held-out set at `INFERENCE/yue2_eval_heldout/`.
+**`./yue2_dataset` holds the v2 lyric-conditioned captions** — 267 audio/caption pairs, all
+native `mp3, 48000 Hz, stereo`, exactly what YuE2's loader expects. Captions are a style
+text (genre, maqam, vocals, production, instrumentation, mood) plus a
+`\n[Lyrics]\n{cleaned_lyrics}` block, with the trigger `arabmaqamrock ` baked in.
+
+**v3 (2026-10-10) is the dataset for the next run** — 438 pairs (a strict superset of v2:
++171), GCS `v3_arabmaqamrock_dataset.zip`. Differences from v2: the **lyric tags are kept
+verbatim** (v2 collapsed `[Section | asides]` → `[Section]` and dropped non-section tags like
+`[orchestral strings swell]`), and for three tracks a stray female phrase is joined into the
+`vocals` line (`v3_overrides.json`). Built by `prepare_yue2_dataset_v3.py`; provenance
+(`manifest.json`, `build_report.md`, `v3_overrides.json`) is in `datasets/v3_arabmaqamrock/`.
+The Suno style header (`[Is_MAX_MODE…]`/`[START_ON…]`) is still stripped. v1's style-only
+captions (`prepare_yue2_dataset.py`, still runnable) are obsolete; the v1/v2 builds were
+local-only scripts. Caption formatting rules live in `DECISIONS.md` and bind any other
+tooling that builds prompts from the same manifests — including the held-out set at
+`INFERENCE/yue2_eval_heldout/` (now stale vs v3; regenerate before eval).
 
 Two further datasets feed the **pronunciation** work, both exposed under `/content/` by
 `bootstrap/setup.sh` and stored in GCS: `pron_dataset` (Task 13) and
@@ -116,7 +129,7 @@ is reserved and does not fit an L4 session — see `DECISIONS.md`).
 
 ## Training configs
 
-- `config/L4_akbar_arabic_rock_lora.yml` / `config/A100_akbar_arabic_rock_lora.yml` — `process[].type: diffusion_trainer`, `arch: yue2`, on
+- `config/v3_arabmaqamrock_lora.yml` (A100) / `config/v3_arabmaqamrock_lora_l4.yml` (L4) — `process[].type: diffusion_trainer`, `arch: yue2`, on
   `Comfy-Org/YuE2/checkpoints/yue2_3b_int8_convrot.safetensors` (`quantize: true`,
   `qtype: convrot8`). Central choices: rank 32, `ema_config.use_ema: true` (`ema_decay:
   0.999`), `model_kwargs.cot: "off"` (captions carry no melodic information, so SheetSage2 is
@@ -124,7 +137,8 @@ is reserved and does not fit an L4 session — see `DECISIONS.md`).
   random 60 s window per step and starves the AR expert of multi-section gradient),
   `cache_latents_to_disk: true` (mandatory for YuE2), `noise_scheduler: flowmatch`, and
   `max_step_saves_to_keep: 12` so the GCS sync has a buffer before local rotation deletes old
-  checkpoints. `sample.samples` are the four held-out prompts at `sample.duration: 360`.
+  checkpoints. `sample.samples` are the four held-out prompts at `sample.duration: 360`
+  (stale vs v3 and unused while `disable_sampling: true` — see `DECISIONS.md`).
 - The long-aya Quran run uses `config/quran_long_aya_r8_s10.yml` — AR-only rank 8, `cot: off`,
   `train_window_frames: 0`. Runbook: [`docs/PRON_LORA_LONG.md`](docs/PRON_LORA_LONG.md).
 - `log_config` at the process root is a dead key, and `aitk_db.db` is not a metrics source —
@@ -149,21 +163,22 @@ GCS), plus `ccache` + GNU `time`. `0xShug0/audio.cpp` is cloned but **not built*
 per-arch binary is used). Full runbook: [`docs/INFERENCE.md`](docs/INFERENCE.md).
 
 The launching notebook must export `HF_TOKEN` (staged into `/root/.secrets.env`),
-`GCP_BACKUP_BASE`, and the dataset path vars; nothing bucket- or account-specific is
-hardcoded in the repo. `setup.sh` is idempotent (skips the dataset when its completion marker
-is present; skips any HF asset already cached).
+`GCP_BACKUP_BASE`, and the dataset var — `GCP_DATASET_ZIP` for the v3 zip (preferred) or
+`GCP_DATASET_PATH` for a v2 folder; nothing bucket- or account-specific is hardcoded in the
+repo. `setup.sh` is idempotent (skips the dataset when its completion marker is present;
+skips any HF asset already cached).
 
 Start the sidecars, then launch training through `train_ctl.py` (detached, so a stray Ctrl+C
 can't kill it; `stop` sends a checkpoint-safe SIGINT):
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
-setsid nohup python backup_to_gcp.py --run-name akbar_arabic_rock_lora > /content/logs/gcp_backup_stdout.log 2>&1 & disown
+setsid nohup python backup_to_gcp.py --run-name v3_arabmaqamrock_lora > /content/logs/gcp_backup_stdout.log 2>&1 & disown
 setsid nohup python gpu_logger.py --out /content/logs/gpu_usage.csv > /content/logs/gpu_logger_stdout.log 2>&1 & disown
 python train_ctl.py start
 ```
 
-Everything for the job lands under `/content/ai-toolkit/output/akbar_arabic_rock_lora/`:
+Everything for the job lands under `/content/ai-toolkit/output/v3_arabmaqamrock_lora/`:
 checkpoints, the auto-saved `config.yaml`, samples, `loss_log.db`, and the timestamped
 `tensorboard/` subfolder.
 
@@ -173,8 +188,8 @@ Three real surfaces, in priority order:
 
 1. **`loss_log.db`** — the per-step metrics source, written by `UILogger` because
    `logging.use_ui_logger: true`. Read it with
-   `python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db`
-   (`--key "loss/loss" --history 50`, or `--watch 30 --total-steps 3000` for a live ETA).
+   `python monitor_loss.py /content/ai-toolkit/output/v3_arabmaqamrock_lora/loss_log.db`
+   (`--key "loss/loss" --history 50`, or `--watch 30 --total-steps 5000` for a live ETA).
    WAL-mode, safe to read during training. Confirmed keys: `additional_model_loss`,
    `learning_rate`, `loss/ar_ce`, `loss/ar_kl`, `loss/loss` (there is no `nar_flow`).
 2. **`/content/logs/train.log`** — the `-l` stdout/stderr log; the tqdm line and any traceback.
@@ -187,7 +202,7 @@ the Web UI launched the run; a CLI run leaves it untouched. Do not point monitor
 ## Backup to GCS
 
 `backup_to_gcp.py` mirrors run artifacts to `gs://<base>/<run-name>/` every 5 minutes:
-`training_folder/akbar_arabic_rock_lora/` → `output/`, `/content/logs/` → `logs/`, and
+`training_folder/v3_arabmaqamrock_lora/` → `output/`, `/content/logs/` → `logs/`, and
 `agent_notes/` → `agent_notes/`. It uses `gsutil rsync` without `-d` (append/update only,
 never deletes remote), writes a `run_manifest.json` that refuses to mix two runs in one
 prefix, and gates each sync on the newest file being untouched — except `loss_log.db` and its

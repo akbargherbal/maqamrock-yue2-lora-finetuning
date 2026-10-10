@@ -26,7 +26,8 @@ Every run gets its own subfolder -- `<base>/<run-name>/` -- under one generic
 root, so a new run can never overwrite a previous one and the bucket root
 stays fixed. `--run-name` defaults per mode (see below) and a
 `run_manifest.json` is written at the run folder's root so it identifies
-itself. `dataset/` already lives under the root and is reserved.
+itself. The dataset prefix lives under the root (`v2_arabmaqamrock_dataset/`, renamed
+from `dataset/` 2026-10-10) and is not mirrored here.
 
 Two modes, mirroring bootstrap/setup.sh's own --training/--inference split:
 

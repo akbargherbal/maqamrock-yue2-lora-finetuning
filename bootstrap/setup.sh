@@ -94,9 +94,19 @@ VM_CONTINUITY_REPO="https://github.com/akbargherbal/vm-continuity.git"
 # The dataset's GCS location is supplied at runtime by the launching
 # notebook (exported into /root/.secrets.env); it is never hardcoded here.
 # Training-only: inference has nothing to download from GCS here.
+#
+# Two shapes are supported (2026-10-10):
+#   GCP_DATASET_PATH  a FOLDER prefix (v2 and earlier) -> gsutil rsync
+#   GCP_DATASET_ZIP   a single .zip (v3+)              -> gcloud cp + unzip
+# Exactly one is used per session; GCP_DATASET_ZIP wins if both are set.
 DATASET_LOCAL="/content/yue2_dataset"
+DATASET_ZIP_URL="${GCP_DATASET_ZIP:-}"
 if [ "$MODE" = "training" ]; then
-  DATASET_GCS="${GCP_DATASET_PATH:?GCP_DATASET_PATH must be set (the launching notebook exports it)}"
+  DATASET_GCS="${GCP_DATASET_PATH:-}"
+  if [ -z "$DATASET_GCS" ] && [ -z "$DATASET_ZIP_URL" ]; then
+    echo "[FAIL] set GCP_DATASET_PATH (folder prefix) or GCP_DATASET_ZIP (zip) — the launching notebook exports one"
+    exit 1
+  fi
 fi
 
 # Inference staging (--inference). yue2 needs a concrete on-disk model dir, not
@@ -246,9 +256,27 @@ job_dataset() {
     return 0
   fi
   # rsync (no -d) transfers only missing/changed objects, so a re-run after a
-  # partial download resumes cheaply instead of re-pulling all 267 tracks.
+  # partial download resumes cheaply instead of re-pulling everything.
   mkdir -p "$DATASET_LOCAL"
   gsutil -m rsync -r "$DATASET_GCS" "$DATASET_LOCAL"
+  touch "$marker"
+}
+
+# v3 dataset is banked as a single ZIP (not a folder prefix), so it is a
+# cp + unzip rather than an rsync. Opt-in via GCP_DATASET_ZIP; unzips FLAT
+# into /content/yue2_dataset, matching the config's folder_path. Same marker
+# at the dataset ROOT so a re-run on the same VM skips the re-pull.
+job_dataset_zip() {
+  local local_dir="$DATASET_LOCAL"
+  local zip="/content/yue2_dataset.zip"
+  local marker="${local_dir}/.bootstrap_complete"
+  if [ -f "$marker" ]; then
+    echo "dataset already restored (marker $marker); skipping"
+    return 0
+  fi
+  gcloud storage cp "$DATASET_ZIP_URL" "$zip"
+  mkdir -p "$local_dir"
+  unzip -q -o "$zip" -d "$local_dir"
   touch "$marker"
 }
 
@@ -425,7 +453,12 @@ start_job opencode job_opencode
 start_job vm_continuity_install job_vm_continuity
 if [ "$MODE" = "training" ]; then
   start_job ai_toolkit job_ai_toolkit
-  start_job dataset job_dataset
+  # dataset: a zip (v3+, GCP_DATASET_ZIP) or a folder prefix (GCP_DATASET_PATH)
+  if [ -n "$DATASET_ZIP_URL" ]; then
+    start_job dataset_zip job_dataset_zip
+  else
+    start_job dataset job_dataset
+  fi
   # opt-in: only when the launching notebook exported GCP_PRON_DATASET_PATH
   if [ -n "${GCP_PRON_DATASET_PATH:-}" ]; then
     start_job pron_dataset job_pron_dataset
@@ -517,8 +550,11 @@ confirm_hf() {
 
 if [ "$MODE" = "training" ]; then
   track_count=$(find "$DATASET_LOCAL" -maxdepth 1 -name "*.mp3" 2>/dev/null | wc -l)
-  if [ "$track_count" -eq 0 ]; then
-    echo "[FAIL] dataset looks empty — check /content/logs/dataset.log and the GCS path"
+  if [ -n "$DATASET_ZIP_URL" ] && [ "$track_count" -ne 438 ]; then
+    echo "[FAIL] dataset: $track_count tracks in $DATASET_LOCAL (expected 438 for the v3 zip) — check /content/logs/dataset_zip.log"
+    fail=1
+  elif [ "$track_count" -eq 0 ]; then
+    echo "[FAIL] dataset looks empty in $DATASET_LOCAL — check /content/logs/dataset*.log and the GCS path"
     fail=1
   else
     echo "[ok]   dataset: $track_count tracks in $DATASET_LOCAL"

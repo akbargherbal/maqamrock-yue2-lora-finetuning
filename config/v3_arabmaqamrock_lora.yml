@@ -1,17 +1,19 @@
 ---
 job: "extension"
 config:
+  # v3 (2026-10-10): trained on the 438-track verbatim-lyric dataset
+  #   (GCS v3_arabmaqamrock_dataset.zip); steps 3000 -> 5000/438 ≈ v2 exposure.
   # A100 variant (80 GB). Split from LEGACY_akbar_arabic_rock_lora.yml (2026-10-06) with:
   #   disable_sampling: true   -- sampling runs offline on a separate T4 vs GCP checkpoints
   #   ar_kl_weight: 0.2 -> 0.0  -- user decision; the anchor never plateaued ar_kl
   #   gradient_checkpointing: true -> false -- ~15-16 GB of 80 GB used; skip activation recompute
-  name: "A100_akbar_arabic_rock_lora"
+  name: "v3_arabmaqamrock_lora"
   process:
     - type: "diffusion_trainer"
       training_folder: "/content/ai-toolkit/output"
       sqlite_db_path: "/content/ai-toolkit/aitk_db.db"   # made absolute -- easier to target in the backup script below
       device: "cuda"
-      trigger_word: "arabmaqamrock"   # v2 captions now bake this in directly ("arabmaqamrock " prefix); AI Toolkit's injector only prepends when the trigger appears zero times in the caption (toolkit/prompt_utils.py), so this is a no-op, not a double-prepend -- keep it set
+      trigger_word: "arabmaqamrock"   # v3 captions bake this in directly ("arabmaqamrock " prefix); AI Toolkit's injector only prepends when the trigger appears zero times in the caption (toolkit/prompt_utils.py), so this is a no-op, not a double-prepend -- keep it set
       performance_log_every: 10
       network:
         type: "lora"
@@ -28,7 +30,7 @@ config:
       # needing to know aitk_db.db's internal schema. Seen in other users' exported
       # configs, not primary docs -- confirm it's honored for diffusion_trainer/yue2
       # before relying on it.
-      log_dir: "output/A100_akbar_arabic_rock_lora/tensorboard"
+      log_dir: "output/v3_arabmaqamrock_lora/tensorboard"
       # NOTE (verified against ai-toolkit source, see DECISIONS.md): log_dir is real
       # and generic (jobs/process/BaseTrainProcess.py), but it writes into a
       # TIMESTAMPED SUBFOLDER under this path, not this path directly --
@@ -46,7 +48,7 @@ config:
         save_format: "diffusers"
         push_to_hub: false
       datasets:
-        - folder_path: "/content/yue2_dataset"  # downloaded fresh into /content/ each Colab session via bootstrap/setup.sh's job_dataset(), backed up by backup_to_gcp.py
+        - folder_path: "/content/yue2_dataset"  # v3: fetched as a zip (GCP_DATASET_ZIP) and unzipped fresh into /content/ each Colab session via bootstrap/setup.sh's job_dataset_zip(); the 438 mp3+txt land flat here
           mask_path: null
           mask_min_value: 0.1
           default_caption: ""
@@ -66,7 +68,7 @@ config:
       train:
         batch_size: 1
         bypass_guidance_embedding: false
-        steps: 3000   # deliberate leave-alone for v2: one-variable discipline -- v2's only intended change vs. v1 is caption content (lyrics), so step count stays fixed to keep the comparison clean.
+        steps: 5000   # v3: 5000/438 ≈ 11.42 epochs, matching v2's per-track exposure (3000/267 ≈ 11.24).
         # Wall-clock cost: don't reuse the killed run's ~7.8s/step (that was measured under the
         # 60s train_window_frames, not whole-song). Measured whole-song A100 step-time instead:
         # see docs/GPU_L4_VS_A100.md (~3.10 s/step A100 vs ~13.4 s/step L4, ~4.3x).
@@ -133,10 +135,11 @@ config:
         width: 1024   # vestigial from the image template, harmless
         height: 1024
         samples:
-          # Four held-out lyric prompts (one per maqam, own maqam's own text), v2 caption format
-          # with a [Lyrics] block -- clean of the 267 training captions (see INFERENCE/yue2_eval_heldout/
-          # heldout_eval_report.md). Duration 360s so a sample can actually show pronunciation,
-          # not just style/timbre, at any checkpoint from sample_every:250 on.
+          # STALE / INERT (2026-10-10): disable_sampling is true, so these are NOT used
+          # during training. They are the v2 held-out prompts and are now contaminated
+          # vs the 438 (3 of 4 share lines with training). Regenerate fresh held-out
+          # prompts before any offline/inference sampling. Duration 360s kept so a
+          # sample can show pronunciation, not just style/timbre.
           - prompt: "arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Hijaz. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Hijaz with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: Poignant, Chivalric, Emotional.\n[Lyrics]\n[Intro]\nلَبَّيْتَ صَوْتًا زِبَطْرِيًّا هَرَقْتَ لَهُ\nكَأْسَ الْكَرَى وَرُضَابَ الْخُرَّدِ الْعُرُبِ...\n\n[Verse 1]\nلَبَّيْتَ صَوْتًا زِبَطْرِيًّا هَرَقْتَ لَهُ\nكَأْسَ الْكَرَى وَرُضَابَ الْخُرَّدِ الْعُرُبِ...\nعَدَاكَ حَرُّ الثُّغُورِ الْمُسْتَضَامَةِ عَنْ\nبَرْدِ الثُّغُورِ وَعَنْ سَلْسَالِهَا الْحَصِبِ...\n\n[Chorus]\nأَجَبْتَهُ مُعْلِنًا بِالسَّيْفِ مُنْصَلِتًا\nوَلَوْ أَجَبْتَ بِغَيْرِ السَّيْفِ لَمْ تُجِبِ...\nحَتَّى تَرَكْتَ عَمُودَ الشِّرْكِ مُنْعَفِرًا\nوَلَمْ تُعَرِّجْ عَلَى الْأَوْتَادِ وَالطُّنُبِ...\n\n[Verse 2]\nلَمَّا رَأَى الْحَرْبَ رَأْيَ الْعَيْنِ تُوفِلِسٌ\nوَالْحَرْبُ مُشْتَقَّةُ الْمَعْنَى مِنَ الْحَرَبِ...\nغَدَا يُصَرِّفُ بِالْأَمْوَالِ جِرْيَتَهَا\nفَعَزَّهُ الْبَحْرُ ذُو التَّيَّارِ وَالْحَدَبِ...\nهَيْهَاتَ زُعْزِعَتِ الْأَرْضُ الْوَقُورُ بِهِ\nعَنْ غَزْوِ مُحْتَسِبٍ لَا غَزْوِ مُكْتَسِبِ...\nلَمْ يُنْفِقِ الذَّهَبَ الْمُرْبِي بِكَثْرَتِهِ\nعَلَى الْحَصَى وَبِهِ فَقْرٌ إِلَى الذَّهَبِ...\nإِنَّ الْأُسُودَ أُسُودَ الْغَيْلِ هِمَّتُهَا\nيَوْمَ الْكَرِيهَةِ فِي الْمَسْلُوبِ لَا السَّلَبِ...\n\n[Chorus]\nأَجَبْتَهُ مُعْلِنًا بِالسَّيْفِ مُنْصَلِتًا\nوَلَوْ أَجَبْتَ بِغَيْرِ السَّيْفِ لَمْ تُجِبِ...\nحَتَّى تَرَكْتَ عَمُودَ الشِّرْكِ مُنْعَفِرًا\nوَلَمْ تُعَرِّجْ عَلَى الْأَوْتَادِ وَالطُّنُبِ...\n\n[Outro]\nإِنَّ الْأُسُودَ أُسُودَ الْغَيْلِ هِمَّتُهَا\nيَوْمَ الْكَرِيهَةِ فِي الْمَسْلُوبِ لَا السَّلَبِ..."
           - prompt: "arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Kurd. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Kurd with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: tense, ominous, lethal, dramatic.\n[Lyrics]\n[Intro]\nفَوَرَدْنَ وَالْعَيُّوقُ مَقْعَدَ رَابِئِ الضُّرَبَاءِ...\nفَوْقَ النَّظْمِ لَا يَتَتَلَّعُ...\n\n[Verse 1]\nفَوَرَدْنَ وَالْعَيُّوقُ مَقْعَدَ رَابِئِ الضُّرَبَاءِ...\nفَوْقَ النَّظْمِ لَا يَتَتَلَّعُ...\nفَشَرَعْنَ فِي حَجَرَاتِ عَذْبٍ بَارِدٍ\nحَصِبِ الْبِطَاحِ تَغِيبُ فِيهِ الْأَكْرُعُ...\nفَشَرِبْنَ ثُمَّ سَمِعْنَ حِسًّا دُونَهُ\nشَرَفُ الْحِجَابِ وَرَيْبَ قَرْعٍ يُقْرَعُ...\nوَنَمِيمَةً مِنْ قَانِصٍ مُتَلَبِّبٍ\nفِي كَفِّهِ جَشْءٌ أَجَشُّ وَأَقْطُعُ...\n\n[Chorus]\nفَنَكِرْنَهُ فَنَفَرْنَ وَامْتَرَسَتْ بِهِ\nسَطْعَاءُ هَادِيَةٌ وَهَادٍ جُرْشُعُ...\nفَرَمَى فَأَنْفَذَ مِنْ نَجُودٍ عَائِطٍ\nسَهْمًا فَخَرَّ وَرِيشُهُ مُتَصَمِّعُ...\n\n[Verse 2]\nفَبَدَا لَهُ أَقْرَابُ هَذَا رَائِغًا\nعَجِلًا فَعَيَّثَ فِي الْكِنَانَةِ يُرْجِعُ...\nفَرَمَى فَأَلْحَقَ صَاعِدِيًّا مِطْحَرًا\nبِالْكَشْحِ فَاشْتَمَلَتْ عَلَيْهِ الْأَضْلُعُ...\n\n[Verse 3]\nفَأَبَدَّهُنَّ حُتُوفَهُنَّ فَهَارِبٌ\nبِذَمَائِهِ أَوْ بَارِكٌ مُتَجَعْجِعُ...\nيَعْثُرْنَ فِي حَدِّ الظُّبَاتِ كَأَنَّمَا\nكُسِيَتْ بُرُودَ بَنِي يَزِيدَ الْأَذْرُعُ...\n\n[Outro]\nيَعْثُرْنَ فِي حَدِّ الظُّبَاتِ كَأَنَّمَا\nكُسِيَتْ بُرُودَ بَنِي يَزِيدَ الْأَذْرُعُ..."
           - prompt: "arabmaqamrock Symphonic cinematic orchestral ballad, hymn-like grand concert hall acoustics, heavy rock instrumentation, stately groove, 110 BPM. Maqam Nahawand. deep male vocals, mixed-voice chest-head resonance blend on sustained notes, breath-supported melismatic runs, controlled vibrato, full-voiced commanding presence, precise Arabic diction, melismatic phrasing in Maqam Nahawand with unhurried phrase-ending sustains. Audiophile recording, punchy centered mix, forward vocals pulling instrumentation down on sustained phrases then band re-enters between lines, bright presence, clean transients, large dynamic range, natural breath room between phrases. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: nostalgic, faithful, solemn hope.\n[Lyrics]\n[Intro]\nبِاللهِ يَا مَنْزِلَ الْعَيْشِ ٱلَّذِي دَرَسَتْ\nآثَارُهُ وَعَفَتْ مُذْ بِنْتُ أَرْبُعُهُ...\n\n[Verse 1]\nبِاللهِ يَا مَنْزِلَ الْعَيْشِ ٱلَّذِي دَرَسَتْ\nآثَارُهُ وَعَفَتْ مُذْ بِنْتُ أَرْبُعُهُ...\nهَلِ الزَّمَانُ مُعِيدٌ فِيكَ لَذَّتَنَا\nأَمِ ٱلَّيَالِي ٱلَّتِي أَمْضَتْهُ تُرْجِعُهُ...\nفِي ذِمَّةِ اللهِ مَنْ أَصْبَحْتَ مَنْزِلَهُ\nوَجَادَ غَيْثٌ عَلَى مَغْنَاكَ يُمَرِّعُهُ...\nمَنْ عِنْدَهُ لِيَ عَهْدٌ لَا يَضِيعُ كَمَا\nعِنْدِي لَهُ عَهْدُ صِدْقٍ لَا أُضَيِّعُهُ...\nوَمَنْ يُصَدِّعُ قَلْبِي ذِكْرُهُ وَإِذَا\nجَرَى عَلَى قَلْبِهِ ذِكْرِي يُصَدِّعُهُ...\nلَأَصْبِرَنَّ لِدَهْرٍ لَا يُمَتِّعُنِي\nبِهِ وَلَا بِيَ فِي حَالٍ يُمَتِّعُهُ...\n\n[Chorus]\nعِلْمًا بِأَنَّ اصْطِبَارِي مُعْقِبٌ فَرَجًا\nفَأَضْيَقُ الْأَمْرِ إِنْ فَكَّرْتَ أَوْسَعُهُ...\nعَسَى ٱلَّيَالِي ٱلَّتِي أَضْنَتْ بِفُرْقَتِنَا\nجِسْمِي سَتَجْمَعُنِي يَوْمًا وَتَجْمَعُهُ...\n\n[Verse 2]\nوَإِنْ تُغِلَّ أَحَدًا مِنَّا مَنِيَّتُهُ\nلَا بُدَّ فِي غَدِهِ الثَّانِي سَيَتْبَعُهُ...\n\n[Chorus]\nعِلْمًا بِأَنَّ اصْطِبَارِي مُعْقِبٌ فَرَجًا\nفَأَضْيَقُ الْأَمْرِ إِنْ فَكَّرْتَ أَوْسَعُهُ...\nعَسَى ٱلَّيَالِي ٱلَّتِي أَضْنَتْ بِفُرْقَتِنَا\nجِسْمِي سَتَجْمَعُنِي يَوْمًا وَتَجْمَعُهُ...\n\n[Outro]\nوَإِنْ تُغِلَّ أَحَدًا مِنَّا مَنِيَّتُهُ\nلَا بُدَّ فِي غَدِهِ الثَّانِي سَيَتْبَعُهُ..."
