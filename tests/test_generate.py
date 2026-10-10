@@ -567,7 +567,7 @@ def test_preflight_not_executable_binary(gen, tmp_path, monkeypatch):
 
 def test_preflight_refuses_active_training_and_gpu_check(gen, tmp_path, monkeypatch):
     _, ar, nar = _stub_assets(gen, tmp_path, monkeypatch)
-    monkeypatch.setattr(gen, "training_active", lambda: "python run.py akbar_arabic_rock_lora")
+    monkeypatch.setattr(gen, "training_active", lambda: "python run.py v3_arabmaqamrock_lora")
     with pytest.raises(gen.PlanError) as ei:
         gen.preflight(False, ar, nar)
     assert "training" in str(ei.value)

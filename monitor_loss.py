@@ -19,10 +19,10 @@ Schema (fixed, verified against toolkit/logging_aitk.py):
     metrics(step, key, value_real, value_text)
 
 Usage:
-    python monitor_loss.py output/akbar_arabic_rock_lora/loss_log.db
-    python monitor_loss.py output/akbar_arabic_rock_lora/loss_log.db --history 50
-    python monitor_loss.py output/akbar_arabic_rock_lora/loss_log.db --key nar_flow --history 200
-    python monitor_loss.py output/akbar_arabic_rock_lora/loss_log.db --watch 30
+    python monitor_loss.py output/v3_arabmaqamrock_lora/loss_log.db
+    python monitor_loss.py output/v3_arabmaqamrock_lora/loss_log.db --history 50
+    python monitor_loss.py output/v3_arabmaqamrock_lora/loss_log.db --key nar_flow --history 200
+    python monitor_loss.py output/v3_arabmaqamrock_lora/loss_log.db --watch 30
 """
 
 from __future__ import annotations

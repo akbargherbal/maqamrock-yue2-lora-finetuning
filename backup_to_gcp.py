@@ -32,7 +32,7 @@ from `dataset/` 2026-10-10) and is not mirrored here.
 Two modes, mirroring bootstrap/setup.sh's own --training/--inference split:
 
   training (default)  the run's training output + logs + agent_notes under
-                      <base>/<run-name>/ (default run-name akbar_arabic_rock_lora).
+                      <base>/<run-name>/ (default run-name v3_arabmaqamrock_lora).
   --inference         the audio.cpp inference workspace under
                       <base>/audiocpp_inference/ (out, prompts, scripts) + logs +
                       agent_notes. See INFERENCE_TARGETS. The LoRA library
@@ -48,10 +48,10 @@ set already is (the mode's defaults, or the `--watch` list). Its remote
 subfolder defaults to the folder's basename.
 
 Usage:
-    python backup_to_gcp.py --run-name akbar_arabic_rock_lora
-    python backup_to_gcp.py --run-name akbar_arabic_rock_lora --interval-minutes 5
-    python backup_to_gcp.py --run-name akbar_arabic_rock_lora --once
-    python backup_to_gcp.py --run-name akbar_arabic_rock_lora --dry-run
+    python backup_to_gcp.py --run-name v3_arabmaqamrock_lora
+    python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --interval-minutes 5
+    python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --once
+    python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --dry-run
     python backup_to_gcp.py --inference
     python backup_to_gcp.py --inference --once
 
@@ -60,7 +60,7 @@ Usage:
     python backup_to_gcp.py --watch /content/my_songs:wavs --watch /content/notes:misc
 
     # keep the default targets AND add one folder
-    python backup_to_gcp.py --run-name akbar_arabic_rock_lora --extra /content/my_songs
+    python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --extra /content/my_songs
 """
 
 from __future__ import annotations
@@ -90,13 +90,13 @@ DEFAULT_LOG = Path("/content/logs/gcp_backup.log")
 
 # Ostris AI Toolkit output layout (this project's config):
 #   training_folder = /content/ai-toolkit/output  (config: training_folder)
-#   everything for THIS job lives at training_folder/akbar_arabic_rock_lora/:
+#   everything for THIS job lives at training_folder/v3_arabmaqamrock_lora/:
 #     checkpoints (save.save_format/save_every), config.yaml (auto-saved),
 #     sample previews, loss_log.db (metrics -- see DECISIONS.md), and the
 #     tensorboard/<job>_<timestamp>/ subfolder if log_dir is set.
 # This is a real structural difference from FL-YuE2's three-way split; one
 # TARGET now covers what used to need LORA_ROOT + RUN_ROOT separately.
-JOB_NAME = "akbar_arabic_rock_lora"
+JOB_NAME = "v3_arabmaqamrock_lora"
 TRAINING_FOLDER = Path("/content/ai-toolkit/output")
 JOB_ROOT = TRAINING_FOLDER / JOB_NAME
 

@@ -512,7 +512,7 @@ def training_active() -> str | None:
             cmd = (entry / "cmdline").read_bytes().replace(b"\0", b" ").decode(errors="ignore")
         except OSError:
             continue
-        if "run.py" in cmd and "akbar_arabic_rock_lora" in cmd:
+        if "run.py" in cmd and "v3_arabmaqamrock_lora" in cmd:
             return cmd.strip()
     return None
 

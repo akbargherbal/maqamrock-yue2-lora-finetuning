@@ -6,13 +6,13 @@
 > checklist for any future run**; the "expected end time" and sidecar pids below
 > are v2-specific artifacts of when this was written and will differ next time.
 
-Run: `akbar_arabic_rock_lora` (v2, lyric-conditioned captions).
+Run: `v3_arabmaqamrock_lora` (v3, 438 tracks, verbatim lyric tags).
 Background/format: [BACKUP_RESTORE.md](BACKUP_RESTORE.md) and
 [PAUSE_RESUME.md](PAUSE_RESUME.md).
 
 `<base>` = `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning`
-`<run>`  = `akbar_arabic_rock_lora`
-`<out>`  = `/content/ai-toolkit/output/akbar_arabic_rock_lora`
+`<run>`  = `v3_arabmaqamrock_lora`
+`<out>`  = `/content/ai-toolkit/output/v3_arabmaqamrock_lora`
 
 v2 forecast (written at 11:53 UTC, step 2750): **~12:08 UTC** for the final step,
 then the step-3000 sample event and the final save. It actually finished
@@ -31,7 +31,7 @@ then the step-3000 sample event and the final save. It actually finished
 ## 1. Confirm the run ended cleanly
 
 ```bash
-pgrep -af 'run.py.*akbar_arabic_rock_lora'          # expect: nothing
+pgrep -af 'run.py.*v3_arabmaqamrock_lora'          # expect: nothing
 tail -n 40 /content/logs/train.log                   # expect no traceback
 grep -nE '^Traceback|^[A-Za-z_.]*Error|CUDA error|out of memory' \
   /content/logs/train.log | tail                   # expect: empty
@@ -48,7 +48,7 @@ v1's archive):
 | artifact | expected |
 |---|---|
 | numbered checkpoints | `_000000250` … `_000002750` (11 files, ~112 MB each) |
-| **final adapter** | `akbar_arabic_rock_lora.safetensors` |
+| **final adapter** | `v3_arabmaqamrock_lora.safetensors` |
 | optimizer state | `optimizer.pt` (~114 MB) |
 | metrics | `loss_log.db` (+ `-wal`/`-shm`) |
 | config | `config.yaml` (auto-saved, v2 hyperparams) |
@@ -85,7 +85,7 @@ gsutil ls -l <base>/<run>/output/optimizer.pt <base>/<run>/output/loss_log.db \
 gsutil -m rsync -r -n <out> <base>/<run>/output
 tail -n 20 /content/logs/gcp_backup.log
 ```
-- [ ] Checkpoint count ≥ 12 and the **final** `akbar_arabic_rock_lora.safetensors`
+- [ ] Checkpoint count ≥ 12 and the **final** `v3_arabmaqamrock_lora.safetensors`
       is present.
 - [ ] 52 samples remote.
 - [ ] Dry-run rsync prints **no** files to copy.

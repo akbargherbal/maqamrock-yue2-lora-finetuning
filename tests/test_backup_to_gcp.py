@@ -293,7 +293,7 @@ def test_main_training_once(bak, monkeypatch, tmp_path, capsys):
                   "--log-file", str(tmp_path / "m.log")])
     out = capsys.readouterr().out
     assert rc == 0
-    assert "backup run 'akbar_arabic_rock_lora' (training)" in out
+    assert "backup run 'v3_arabmaqamrock_lora' (training)" in out
     assert "skipping missing folder" in out
     assert "pass complete: 2/3 folders synced" in out
     # two rsync calls, no manifest collision (cat absent)
@@ -405,9 +405,9 @@ def test_main_extra_keeps_defaults_and_adds(bak, monkeypatch, tmp_path, capsys):
     assert rc == 0
     dsts = [c[0][-1].rstrip("/") for c in fake.calls if "rsync" in c[0]]
     # defaults are KEPT and the extra is ADDED (basename slugified)
-    assert "gs://b/p/akbar_arabic_rock_lora/out" in dsts
-    assert "gs://b/p/akbar_arabic_rock_lora/logs" in dsts
-    assert "gs://b/p/akbar_arabic_rock_lora/My-Songs" in dsts
+    assert "gs://b/p/v3_arabmaqamrock_lora/out" in dsts
+    assert "gs://b/p/v3_arabmaqamrock_lora/logs" in dsts
+    assert "gs://b/p/v3_arabmaqamrock_lora/My-Songs" in dsts
     assert len(dsts) == 3
 
 
@@ -422,7 +422,7 @@ def test_main_extra_with_explicit_sub(bak, monkeypatch, tmp_path, capsys):
                   "--log-file", str(tmp_path / "m.log")])
     assert rc == 0
     dsts = [c[0][-1].rstrip("/") for c in fake.calls if "rsync" in c[0]]
-    assert "gs://b/p/akbar_arabic_rock_lora/wavs" in dsts
+    assert "gs://b/p/v3_arabmaqamrock_lora/wavs" in dsts
 
 
 def test_main_extra_with_inference(bak, monkeypatch, tmp_path, capsys):
@@ -518,7 +518,7 @@ def test_main_sync_failure_is_counted_not_fatal(bak, monkeypatch, tmp_path, caps
 
 def test_main_manifest_failure_aborts(bak, monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(bak, "TRAINING_TARGETS", _dirs(tmp_path, ["out"]))
-    existing = json.dumps({"run_name": "other", "prefix": "gs://b/p/akbar_arabic_rock_lora"})
+    existing = json.dumps({"run_name": "other", "prefix": "gs://b/p/v3_arabmaqamrock_lora"})
     _patch(bak, monkeypatch, FakeGsutil(cat_rc=0, cat_out=existing))
     rc = _invoke(bak, monkeypatch,
                  ["--base", "gs://b/p", "--once", "--log-file", str(tmp_path / "m.log")])

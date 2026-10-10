@@ -10,13 +10,13 @@ reading it while training runs is safe. Use the script, not hand-written SQL:
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
-python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db \
+python monitor_loss.py /content/ai-toolkit/output/v3_arabmaqamrock_lora/loss_log.db \
   --total-steps 3000
 # live ETA:
-python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db \
+python monitor_loss.py /content/ai-toolkit/output/v3_arabmaqamrock_lora/loss_log.db \
   --watch 30 --total-steps 3000
 # history of one metric:
-python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db \
+python monitor_loss.py /content/ai-toolkit/output/v3_arabmaqamrock_lora/loss_log.db \
   --key "loss/loss" --history 50
 ```
 

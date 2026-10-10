@@ -5,7 +5,7 @@ description: Diagnose why an ai-toolkit LoRA training run stopped and decide whe
 
 # Crash: diagnose and resume
 
-Training only (`run.py` / `akbar_arabic_rock_lora`). For generation runs, use
+Training only (`run.py` / `v3_arabmaqamrock_lora`). For generation runs, use
 `inference-batch-run`.
 
 Sources of truth — read these, don't restate them:
@@ -18,7 +18,7 @@ Sources of truth — read these, don't restate them:
 ```bash
 pgrep -af run.py
 tail -n 60 /content/logs/train.log
-python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db
+python monitor_loss.py /content/ai-toolkit/output/v3_arabmaqamrock_lora/loss_log.db
 ```
 
 The DB gives the last step reached; the log tail carries the cause — a traceback,
@@ -41,7 +41,7 @@ signals a deliberate stop — no `Job stopped` at the end of `train.log`, no
 deliberate stop, **ask the user**; otherwise give them the exact command in §5
 and stop.
 
-Never edit a run config (e.g. `config/A100_akbar_arabic_rock_lora.yml`) to "fix" a crash. A changed
+Never edit a run config (e.g. `config/v3_arabmaqamrock_lora.yml`) to "fix" a crash. A changed
 config/hyperparameter is not a resume — archive and start fresh
 (`docs/BACKUP_RESTORE.md`).
 
@@ -52,10 +52,10 @@ If `/content/ai-toolkit` or the run output folder is gone, the VM was lost:
 ```bash
 mkdir -p /content/logs
 setsid nohup bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 & disown  # wait for [ok]
-mkdir -p /content/ai-toolkit/output/akbar_arabic_rock_lora
+mkdir -p /content/ai-toolkit/output/v3_arabmaqamrock_lora
 gsutil -m rsync -r \
-  gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/akbar_arabic_rock_lora/output \
-  /content/ai-toolkit/output/akbar_arabic_rock_lora
+  gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora/output \
+  /content/ai-toolkit/output/v3_arabmaqamrock_lora
 ```
 
 Then restart both sidecars (`docs/START.md` §4). A ~12 min latent-cache rebuild

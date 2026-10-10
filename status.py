@@ -30,7 +30,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent
 ON_COLAB = Path("/content").is_dir()
 
-RUN_NAME = "akbar_arabic_rock_lora"
+RUN_NAME = "v3_arabmaqamrock_lora"
 LOGS = Path("/content/logs")
 JOB_ROOT = Path("/content/ai-toolkit/output") / RUN_NAME
 LOSS_DB = JOB_ROOT / "loss_log.db"

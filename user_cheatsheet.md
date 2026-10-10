@@ -12,14 +12,14 @@ will **not** stop them; use the matching `stop`/`pkill`.
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
 GCS_BASE=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning
-RUN=akbar_arabic_rock_lora
+RUN=v3_arabmaqamrock_lora
 OUT=/content/ai-toolkit/output/$RUN
 ```
 
 | Thing | Path |
 |---|---|
 | Repo | `/content/maqamrock-yue2-lora-finetuning` |
-| Training output | `/content/ai-toolkit/output/akbar_arabic_rock_lora/` |
+| Training output | `/content/ai-toolkit/output/v3_arabmaqamrock_lora/` |
 | Train log / GPU csv | `/content/logs/train.log`, `/content/logs/gpu_usage.csv` |
 | Secrets/env | `/root/.secrets.env` (`HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_BACKUP_BASE`) — staged by the notebook |
 | Inference workspace | `/content/audiocpp_inference/` (out/, prompts/, bin/, models/) |
@@ -43,7 +43,7 @@ Terminal: detached. Logs under `/content/logs/`; stop with
 cd /content/maqamrock-yue2-lora-finetuning
 
 # backup daemon — training targets (every 5 min by default)
-setsid nohup python backup_to_gcp.py --run-name akbar_arabic_rock_lora \
+setsid nohup python backup_to_gcp.py --run-name v3_arabmaqamrock_lora \
   > /content/logs/gcp_backup_stdout.log 2>&1 & disown
 
 # backup daemon — inference workspace instead
@@ -97,9 +97,9 @@ python train_ctl.py stop      # SIGINT; waits for "Job stopped" (checkpoint-safe
 
 ```bash
 # metrics (smoothed trend, not single steps)
-python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db \
+python monitor_loss.py /content/ai-toolkit/output/v3_arabmaqamrock_lora/loss_log.db \
   --watch 30 --total-steps 3000
-python monitor_loss.py /content/ai-toolkit/output/akbar_arabic_rock_lora/loss_log.db \
+python monitor_loss.py /content/ai-toolkit/output/v3_arabmaqamrock_lora/loss_log.db \
   --key "loss/loss" --history 50
 
 # liveness / errors
@@ -182,20 +182,20 @@ picked up (a bare `[scorecard: default]` means it was **not**). Change scorecard
 
 ```bash
 # one forced pass (don't wait for the 5-min daemon)
-python backup_to_gcp.py --run-name akbar_arabic_rock_lora --once
+python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --once
 python backup_to_gcp.py --inference --once
 
 # verify remote vs local
-gsutil ls -l $GCS_BASE/akbar_arabic_rock_lora/output/ | tail
+gsutil ls -l $GCS_BASE/v3_arabmaqamrock_lora/output/ | tail
 ls -la $OUT/
 tail -n 20 /content/logs/gcp_backup.log
 
 # force a full sync of a finished run (training)
-gsutil -m rsync -r $OUT $GCS_BASE/akbar_arabic_rock_lora/output
+gsutil -m rsync -r $OUT $GCS_BASE/v3_arabmaqamrock_lora/output
 
 # restore a run folder (parent dir MUST exist first)
 mkdir -p $OUT
-gsutil -m rsync -r $GCS_BASE/akbar_arabic_rock_lora/output $OUT
+gsutil -m rsync -r $GCS_BASE/v3_arabmaqamrock_lora/output $OUT
 ```
 
 ## 8. Pause for the night / resume next session
@@ -203,11 +203,11 @@ gsutil -m rsync -r $GCS_BASE/akbar_arabic_rock_lora/output $OUT
 ```bash
 # PAUSE
 python train_ctl.py stop
-python backup_to_gcp.py --run-name akbar_arabic_rock_lora --once
-gsutil ls -l $GCS_BASE/akbar_arabic_rock_lora/output/ | tail   # newest ckpt + optimizer.pt
+python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --once
+gsutil ls -l $GCS_BASE/v3_arabmaqamrock_lora/output/ | tail   # newest ckpt + optimizer.pt
 
 # RESUME (fresh VM): setup (step 2) then restore (step 6) then:
-setsid nohup python backup_to_gcp.py --run-name akbar_arabic_rock_lora \
+setsid nohup python backup_to_gcp.py --run-name v3_arabmaqamrock_lora \
   > /content/logs/gcp_backup_stdout.log 2>&1 & disown
 python train_ctl.py start        # same run name + config → auto-resumes from newest ckpt
 ```
@@ -215,8 +215,8 @@ python train_ctl.py start        # same run name + config → auto-resumes from 
 ## 9. Finish a run + push
 
 ```bash
-gsutil -m rsync -r $OUT $GCS_BASE/akbar_arabic_rock_lora/output
-gsutil -m rsync -r -n $OUT $GCS_BASE/akbar_arabic_rock_lora/output   # expect no output
+gsutil -m rsync -r $OUT $GCS_BASE/v3_arabmaqamrock_lora/output
+gsutil -m rsync -r -n $OUT $GCS_BASE/v3_arabmaqamrock_lora/output   # expect no output
 python TRAINING_ANALYSIS/generate_plots.py
 
 git add -A

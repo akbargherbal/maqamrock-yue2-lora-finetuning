@@ -29,10 +29,10 @@ continues toward `steps: 3000`. (Verified in
 2. Force one backup pass and confirm the latest checkpoint is in GCS:
    ```bash
    cd /content/maqamrock-yue2-lora-finetuning
-   python backup_to_gcp.py --run-name akbar_arabic_rock_lora --once
-   gsutil ls -l gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/akbar_arabic_rock_lora/output/ | tail
+   python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --once
+   gsutil ls -l gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora/output/ | tail
    ```
-   You want to see the newest `akbar_arabic_rock_lora_0000NNNNNN.safetensors`
+   You want to see the newest `v3_arabmaqamrock_lora_0000NNNNNN.safetensors`
    **and** `optimizer.pt`, with sizes matching local.
 3. You can now let the VM go. You do not need to keep the tab open.
 
@@ -48,7 +48,7 @@ step that is a multiple of 250.
    rsync collapses to the restore instant), and creates the destination first:
    ```bash
    cd /content/maqamrock-yue2-lora-finetuning
-   python bootstrap/restore_run.py --run-name akbar_arabic_rock_lora --apply
+   python bootstrap/restore_run.py --run-name v3_arabmaqamrock_lora --apply
    ```
    A bare `gsutil -m rsync -r <base>/<run>/output <output-root>/<run>` also works but
    leaves the ctime order to chance (see `COMMAND_HANDOVER_GOTCHAS.md`, 2026-10-06).

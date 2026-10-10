@@ -17,7 +17,7 @@ is written there that refuses to let two different runs share a prefix.
 
 | Mode | Local | GCS (`<base>/<run-name>/`) |
 |---|---|---|
-| **training** (default) `--run-name akbar_arabic_rock_lora` | `/content/ai-toolkit/output/akbar_arabic_rock_lora/` | `output/` |
+| **training** (default) `--run-name v3_arabmaqamrock_lora` | `/content/ai-toolkit/output/v3_arabmaqamrock_lora/` | `output/` |
 | | `/content/logs/` | `logs/` |
 | | `agent_notes/` | `agent_notes/` |
 | **inference** `--inference` (`--run-name audiocpp_inference`) | `/content/audiocpp_inference/out/` | `out/` |
@@ -53,7 +53,7 @@ running after you close the tab (and Ctrl-C in the tab won't kill it):
 ```bash
 # training
 cd /content/maqamrock-yue2-lora-finetuning
-setsid nohup python backup_to_gcp.py --run-name akbar_arabic_rock_lora \
+setsid nohup python backup_to_gcp.py --run-name v3_arabmaqamrock_lora \
   > /content/logs/gcp_backup_stdout.log 2>&1 & disown
 
 # inference workspace
@@ -75,14 +75,14 @@ tail -f /content/logs/gcp_backup.log          # the daemon's own log
 One pass and exit (handy for cron or a one-off check) — no `& disown` needed:
 
 ```bash
-python backup_to_gcp.py --run-name akbar_arabic_rock_lora --once
+python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --once
 python backup_to_gcp.py --inference --once
 ```
 
 Preview what it would sync without uploading anything (still needs a base):
 
 ```bash
-python backup_to_gcp.py --run-name akbar_arabic_rock_lora --dry-run --once
+python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --dry-run --once
 ```
 
 ## Watching a specific folder (`--watch`)
@@ -118,8 +118,8 @@ mode's normal targets are still covered — the safe way to include one extra
 location:
 
 ```bash
-# training targets PLUS /content/my_songs -> <base>/akbar_arabic_rock_lora/my_songs/
-python backup_to_gcp.py --run-name akbar_arabic_rock_lora --extra /content/my_songs
+# training targets PLUS /content/my_songs -> <base>/v3_arabmaqamrock_lora/my_songs/
+python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --extra /content/my_songs
 
 # as a background sidecar
 setsid nohup python backup_to_gcp.py --inference --extra /content/my_songs \
@@ -134,7 +134,7 @@ land in the same remote subfolder are rejected (exit 3) rather than interleaved.
 
 | Flag | Meaning |
 |---|---|
-| `--run-name NAME` | This run's prefix under `<base>`. Defaults to `akbar_arabic_rock_lora` (training) / `audiocpp_inference` (`--inference`) / the first watched folder (`--watch`). `dataset` is reserved. |
+| `--run-name NAME` | This run's prefix under `<base>`. Defaults to `v3_arabmaqamrock_lora` (training) / `audiocpp_inference` (`--inference`) / the first watched folder (`--watch`). The dataset prefix (`v2_arabmaqamrock_dataset/`) is reserved. |
 | `--inference` | Use the inference target set instead of training. |
 | `--watch LOCAL[:SUB]` | Mirror these folders instead of the mode's targets (repeatable). |
 | `--extra LOCAL[:SUB]` | ADD these folders on top of the mode's targets (repeatable); SUB defaults to the folder's basename, `LOCAL:` = prefix root. |
@@ -152,8 +152,8 @@ land in the same remote subfolder are rejected (exit 3) rather than interleaved.
 Don't assume — compare what's remote against local:
 
 ```bash
-gsutil ls -l gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/akbar_arabic_rock_lora/output/ | tail
-ls -la /content/ai-toolkit/output/akbar_arabic_rock_lora/
+gsutil ls -l gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora/output/ | tail
+ls -la /content/ai-toolkit/output/v3_arabmaqamrock_lora/
 tail -n 20 /content/logs/gcp_backup.log
 ```
 
@@ -167,8 +167,8 @@ directory"* otherwise):
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
-python bootstrap/restore_run.py --run-name akbar_arabic_rock_lora            # dry-run
-python bootstrap/restore_run.py --run-name akbar_arabic_rock_lora --apply
+python bootstrap/restore_run.py --run-name v3_arabmaqamrock_lora            # dry-run
+python bootstrap/restore_run.py --run-name v3_arabmaqamrock_lora --apply
 ```
 
 A bare `gsutil -m rsync -r <base>/<run>/output <output-root>/<run>` also works but leaves
@@ -183,24 +183,24 @@ the old output under a new suffix, locally **and** in GCS:
 
 ```bash
 # local
-mv /content/ai-toolkit/output/akbar_arabic_rock_lora \
-   /content/ai-toolkit/output/akbar_arabic_rock_lora_<suffix>
+mv /content/ai-toolkit/output/v3_arabmaqamrock_lora \
+   /content/ai-toolkit/output/v3_arabmaqamrock_lora_<suffix>
 
 # GCS (gsutil mv renames the prefix)
 gsutil -m mv \
-  gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/akbar_arabic_rock_lora \
-  gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/akbar_arabic_rock_lora_<suffix>
+  gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora \
+  gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora_<suffix>
 ```
 
 Then restart the backup daemon so it writes a **fresh** `run_manifest.json` at
-the now-clean `akbar_arabic_rock_lora/` prefix:
+the now-clean `v3_arabmaqamrock_lora/` prefix:
 
 ```bash
 pkill -f 'backup_to_gcp.py' ; sleep 2
 cd /content/maqamrock-yue2-lora-finetuning
-setsid nohup python backup_to_gcp.py --run-name akbar_arabic_rock_lora \
+setsid nohup python backup_to_gcp.py --run-name v3_arabmaqamrock_lora \
   > /content/logs/gcp_backup_stdout.log 2>&1 & disown
 ```
 
 Precedent: the killed 60s-window run is archived as
-`akbar_arabic_rock_lora_crop60_killed`.
+`v3_arabmaqamrock_lora_crop60_killed`.
