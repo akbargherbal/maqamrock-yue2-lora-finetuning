@@ -57,6 +57,7 @@ Only the **style** adapter is in the library now; `audio_cpp/pron/` is **empty**
 | Config | Status | pron donor | α | AR rank | converted AR sha256 | Path in `loras/` |
 |---|---|---:|---:|---:|---|---|
 | style (`a0`) | base style | — | 0 | 32 | `747d5cfe2224b1bae6e582ccf5f2ee2a57e3f030c53d54e134f34a85960426fa` | `audio_cpp/style/` |
+| **v3 style** | v3 final (step 5000; 438-track, verbatim lyrics) | — | 0 | 32 | `3531bb9106d2292eefe58eabe11ec08bb7dddc69554f2b016dc9f13f711fab18` | `v3_arabmaqamrock_lora/convert/` (**not** promoted into `loras/`) |
 
 ## Current pron merges (`<base>/quran_ahh_r32/maqamrock_merge/`, NOT in `loras/`)
 

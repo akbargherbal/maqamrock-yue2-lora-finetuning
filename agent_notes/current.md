@@ -1,56 +1,33 @@
-# current.md — v3 run COMPLETE + safe to disconnect (2026-10-10)
+# current.md — v3 run done; T4 seed-probe prepped; GPU step pending (2026-10-10)
 
-**Run `v3_arabmaqamrock_lora` finished: 5000 / 5000 at ~13:34 UTC (~16:34 Bahrain).** Clean
-exit — log shows `5000/5000`, `Saved checkpoint to …/v3_arabmaqamrock_lora.safetensors`,
-`Saved optimizer to …/optimizer.pt`. **Nothing is running now.**
+## Done
+- **v3 training complete** — `v3_arabmaqamrock_lora` 5000/5000, all artifacts banked
+  (`TRAINING_ANALYSIS/ANALYSIS.md`; VRAM peaked 79.2/80 GB — see there).
+- **T4 seed-probe prep (CPU only, no GPU used):**
+  - Converted the v3 final adapter (converter is torch-free) and banked it:
+    `<base>/v3_arabmaqamrock_lora/convert/v3_arabmaqamrock_lora_{ar,nar}.safetensors`
+    (AR sha256 `3531bb9106d2292eefe58eabe11ec08bb7dddc69554f2b016dc9f13f711fab18`,
+    NAR `a7eabcadb22146048bcb5e65d04828ee9454559523ca161bd38c06060deb0cae`) + `MANIFEST.json`.
+  - Input JSON: `INFERENCE/songs.v3_jarir_seed.json` (1 song · `repeat: 5` · `quantile: 0.95`).
+  - Runner: `INFERENCE/run_v3_jarir_seed_probe.sh` (detached; GPU-guarded; banks to GCS).
+  - Plan: `docs/V3_JARIR_SEED_PROBE.md`. `docs/LORA_INVENTORY.md` updated (v3 style row).
 
-## Disconnect-safety status (verified from artifacts, not memory)
-- **GCS backup — current.** `…/v3_arabmaqamrock_lora/output/` holds **all 19** numbered
-  checkpoints (250→4750) + the final **`v3_arabmaqamrock_lora.safetensors`** + `optimizer.pt`
-  + `loss_log.db` + `tensorboard/`. Final adapter/optimizer uploaded **13:35:14Z** (local mtime
-  13:34:04Z); daemon pass `13:36:50 — 3/3 folders synced`.
-- **GitHub — pushed** (final analysis + tooling; see commit log).
-- **Processes:** `run.py`, `train_watchdog.py`, `agent_watch.py` are **all stopped**. The
-  watchdog exited cleanly (`13:34:38 … step 5000/5000 reached -> complete; exiting`). Sidecars
-  `backup_to_gcp.py` (24944) + `gpu_logger.py` (24945) are still up and harmless.
-- **Latent cache** is local-only (not backed up) — only matters if you resume/extend.
+## ⚠️ Blocker: no GPU in this agent's environment
+`nvidia-smi` is absent (Hyper-V vGPU only), there is no `/content`, and no GPU VM / tunnel is
+reachable. So the **5-take generation cannot be run from here** — it must run on the GPU box.
 
-## GCS layout
-```
-gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora/
-  output/   checkpoints (250..4750) · v3_arabmaqamrock_lora.safetensors (final) · optimizer.pt · loss_log.db · tensorboard/
-  logs/     train.log · gpu_usage.csv · watchdog/agent logs
-  agent_notes/
-```
-
-## Safe to disconnect — you can do it any time now
-Training is done and GCS is current, so **no action is strictly required** — disconnecting the
-Colab runtime now loses nothing. For a tidy shutdown (optional):
+## Run it on the T4 (one detached command, after `setup.sh --inference` is clean)
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
-# belt-and-braces: force one more backup pass and confirm the newest objects
-python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --once
-gcloud storage ls -l gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora/output/ | tail
-
-# stop the now-idle sidecars
-pkill -f 'backup_to_gcp.py --run-name v3_arabmaqamrock_lora'
-pkill -f 'gpu_logger.py --out /content/logs/gpu_usage.csv'
-
-# then disconnect the Colab runtime (Runtime -> Disconnect)
+setsid nohup bash INFERENCE/run_v3_jarir_seed_probe.sh \
+  > /content/logs/v3_jarir_probe.log 2>&1 < /dev/null & disown
+tail -f /content/logs/v3_jarir_probe.log          # watch
+# result: /content/audiocpp_inference/out/latest/ (5 × v3_jarir_<seed>.{wav,json,...} + batch_summary.txt)
+# banked: <base>/v3_arabmaqamrock_lora/listening/<run>/
 ```
-> `backup_to_gcp.py --once` can run a few minutes (it re-checks every object); it is
-> idempotent. If it's slow, the 5-min daemon pass already covered everything — just disconnect.
+~45–60 min (5 takes, sequential, T4). The probe is a **trained** song (2× in the 438) — it
+measures reproduction / seed-variance, not held-out generalisation.
 
-## If you return on a FRESH VM
-1. `bash bootstrap/setup.sh --training` (rebuilds torch/HF stack + unzips the dataset)
-2. Restore the finished run: `python bootstrap/restore_run.py --run-name v3_arabmaqamrock_lora --apply`
-3. The artifact to convert / listen to / eval: `.../output/v3_arabmaqamrock_lora.safetensors`
-
-## Follow-ups (not blocking)
-- Held-out/eval prompts are **stale vs the 438** — regenerate before **any** evaluation.
-- **Do NOT extend this run in place** — the end-of-run save overwrote the un-suffixed
-  `v3_arabmaqamrock_lora.safetensors`; extending rewrites it (`DECISIONS.md:49`). Use a new
-  run name if continuing.
-- New this session (committed): `train_watchdog.py`, `agent_watch.py`; a `docs-reconciler`
-  pass + `docs/README.md` index update is still pending.
-- Knowledge graph stale (built `2f35c76`).
+## Open
+- Held-out/eval prompts still **stale vs the 438** (regenerate before a real held-out eval).
+- `docs-reconciler` pass + `docs/README.md` index update pending; knowledge graph stale.
