@@ -1,33 +1,35 @@
-# current.md — v3 probe 4/5 good; "spice" sweep planned, to implement on Colab (2026-10-10)
+# current.md — 2026-10-11 · v3 "spice" sweep (Stage A done; Stage B on the T4)
 
-## State
-- Training done (v3, 5000/5000). Final adapter converted + banked (`<base>/v3_arabmaqamrock_lora/convert/`).
-- **T4 seed probe RAN** — `<base>/audiocpp_inference/out/20261010-142358_v3_jarir_seeds`.
-  5 takes, **all exit 0, none truncated**, 213–234 s each, ~9.4 min/track (T4), total 47:12.
-  Adapter = final/5000 (`3531bb91…` AR / `a7eabcad…` NAR), scale 1.0/1.0, `cot=off`, sampler
-  defaults (guidance 1.01, temp 1.0, rep-pen 1.2), cap 6500 (q0.95).
-  **User verdict: 4/5 good; the takes feel flat / "generic" — wants 5/5, asks about checkpoints.**
+Task (user, this session): "implement + run" the CPU-written plan — that is
+**`docs/V3_SPICE_SWEEP.md`** (the 10-arm paired "spice" screen: `ref · g1.5 · g2.5 · t1.2 ·
+t1.4 · rp1.4 · ar0.7 · ck4500 · ck3500 · ck2500`, pinned seed `2640605763`, cap 6500).
+Context: `docs/V3_JARIR_SEED_PROBE.md` was the *earlier* plan and already ran 2026-10-10
+(`…/out/20261010-142358_v3_jarir_seeds`, 4/5 good) — not re-run here.
 
-## Deliverable this session
-- **`docs/V3_SPICE_SWEEP.md`** — the plan (written; **not started**). Implement on Colab:
-  - §4 is a **Pass 1 paired single-knob screen** (10 arms, ~95 min on a T4): `ref`, `g1.5`, `g2.5`,
-    `t1.2`, `t1.4`, `rp1.4`, `ar0.7`, `ck4500`, `ck3500`, `ck2500`.
-  - §7 has the CPU-runtime conversion/staging commands + the input-JSON and driver-script spec
-    (driver logic syntax-checked).
-  - §5: Pass 2 = winning config × 8 seeds. §6: optional improvisation-cue prompt variant.
-- Index updated: `docs/README.md` + `SOURCE_OF_TRUTH.md`.
+## Stage A — DONE (CPU; committed this session)
+- Converted v3 checkpoints **2500/3500/4500** with the torch-free converter (byte-verified) and
+  banked `<base>/v3_arabmaqamrock_lora/convert/ck{000002500,000003500,000004500}/`.
+- `INFERENCE/songs.v3_spice.json` — style+lyrics byte-identical to the v3 training caption,
+  `seed 2640605763`, `cap 6500`, `defaults.repeat 1`.
+- `INFERENCE/v3_spice_probe.sh` — verbatim from §7; `bash -n` clean.
+- `DRY=1 bash INFERENCE/v3_spice_probe.sh` → **all 10 arms plan** (1 track each, cap 6500, q0.95). ✅
 
-## Key fact (shapes the whole plan)
-v3 trained with `cot: "off"` → the LoRA learned **style/timbre**, not melody. So a **checkpoint**
-re-tints *sound*; "spice / improvisation" is the **AR composer**, fixed by sampler + prompt +
-selection. Checkpoints exist: `…/output/v3_arabmaqamrock_lora_000000250 … _000004750` + final.
+## Stage B — T4
+1. `bash bootstrap/setup.sh --inference` → `/content/logs/setup.log` (in progress).
+2. `gcloud storage rsync -r <base>/v3_arabmaqamrock_lora/convert /content/converter/out` — **done**
+   (final + ck*/ pairs staged locally; dry-run confirmed).
+3. Detached run:
+```bash
+cd /content/maqamrock-yue2-lora-finetuning
+setsid nohup bash INFERENCE/v3_spice_probe.sh \
+  > /content/logs/v3_spice_probe.log 2>&1 < /dev/null & disown
+tail -f /content/logs/v3_spice_probe.log
+```
+Expected ~95 min (10 arms × ~9.5 min). Output `/content/audiocpp_inference/out/v3_spice_probe/<arm>/`,
+self-banked to `<base>/v3_arabmaqamrock_lora/spice_probe/`.
 
-## ⚠️ Provenance bug found (non-blocking)
-`batch_manifest.json` top-level `assets.lora_ar_sha256` = `747d5cfe…` = **v2**, `assets.checkpoint_step`
-= **3000** — built from the CLI-default pair (`INFERENCE/generate.py:552`), not the per-song alias.
-Per-track sidecars are correct. See plan §8.
-
-## Environment
-- Agent env: **no GPU**. GCS works via `CLOUDSDK_CONFIG=/mnt/c/Users/DELL/AppData/Roaming/gcloud`
-  (Windows gcloud; the WSL `~/.config/gcloud` refresh token is dead — `gcloud auth login` there if needed).
-- Next: move to Colab and implement `docs/V3_SPICE_SWEEP.md` (Stage A CPU → Stage B T4).
+## Notes
+- Doc nit (not touched): `V3_JARIR_SEED_PROBE.md` §5 line 80 says `cap: 8000`; §7 decision 2, §3, and
+  the JSON all say 6500.
+- One shared GPU (T4): `nvidia-smi` before the run; never overlap. Agent judges no audio — the user
+  listens.
