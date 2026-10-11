@@ -23,6 +23,26 @@ exit 0, none truncated**, banked to `<base>/v3_arabmaqamrock_lora/spice_probe/` 
 `sha256 1593f33888d76ebc9e8e2132b92d0f209fd0fbbacc467ee2db10c19a6254280e` == the banked
 `…/out/20261010-142358_v3_jarir_seeds/v3_jarir_2640605763.wav`.
 
+## Evaluation package (rating app) — READY
+- **Scorecard** (the "evaluation form"): `INFERENCE/scorecards/v3_spice.json` (commit `73884b7`;
+  7 ratings + `artifacts` + `vs_ref` + `keep` + `notes`; `summary_metric = spice`). Also banked at
+  `<base>/v3_arabmaqamrock_lora/spice_probe/v3_spice_scorecard.json`.
+- **Audio** (flat, one file per arm): `<base>/audiocpp_inference/out/v3_spice_eval/` — 10 ×
+  `<arm>.wav` + `<arm>.json` sidecars. Local `/content/audiocpp_inference/out/v3_spice_eval/`.
+- Validated through the app's own `load_scorecard` + `discover` (10 tracks; `--blind` ok).
+
+**User commands (Windows, in the `ai_music_rating_app` folder):**
+```powershell
+gh repo clone akbargherbal/ai_music_rating_app
+cd ai_music_rating_app; py -m pip install -r requirements.txt
+gsutil -m rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/out/v3_spice_eval .\v3_spice_eval\
+# scorecard: git pull this repo (INFERENCE/scorecards/v3_spice.json), or:
+# gsutil cp gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora/spice_probe/v3_spice_scorecard.json .\v3_spice.json
+py app.py --audio ".\v3_spice_eval" --label v3_spice_pass1 --scorecard ".\v3_spice.json"
+# unbiased pass (recommended): add --blind  → new label v3_spice_pass1_blind
+```
+Then export `/report.md` / `.csv` / `.json` and tell me the winner(s).
+
 ## Next
 - **User listens/ranks** the 10 arms (agent judges no audio) → keep best 1–2 configs.
 - **Pass 2:** winning config × 8 fresh seeds (cap 6500), §5 of the plan.
