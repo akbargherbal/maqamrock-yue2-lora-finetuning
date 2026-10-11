@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "name": "v3 spice sweep — Pass 1 (single-knob screen)",
+  "description": "10 arms of one Jarir take (seed 2640605763, cap 6500), each differing by exactly one knob from the v3 final adapter (final/5000, scale 1.0/1.0, cot=off): guidance_scale 1.5/2.5, semantic_temperature 1.2/1.4, semantic_repetition_penalty 1.4, AR scale 0.7, or checkpoint 4500/3500/2500. Question: does any knob lift the take from 'flat / generic' (the 4/5 baseline) toward 5/5 — more improvisation and character — WITHOUT costing diction. summary_metric = spice.",
+  "summary_metric": "spice",
+  "criteria": [
+    {
+      "key": "overall",
+      "label": "Overall quality",
+      "type": "rating",
+      "max": 5,
+      "required": true,
+      "scale_labels": {
+        "1": "poor / unlistenable",
+        "2": "weak",
+        "3": "listenable, flat",
+        "4": "good",
+        "5": "excellent — would release"
+      },
+      "help": "Your gut call on the whole take."
+    },
+    {
+      "key": "spice",
+      "label": "Improvisation / spice",
+      "type": "rating",
+      "max": 5,
+      "required": true,
+      "scale_labels": {
+        "1": "generic / on-rails",
+        "2": "mostly predictable",
+        "3": "some life",
+        "4": "noticeably inventive",
+        "5": "genuinely surprising / improvised"
+      },
+      "help": "PRIMARY metric. Does the composer take risks — improvised taqsim, mawwal-like phrasing, call-and-response, unexpected turns — or does it feel like a safe, generic render? This is exactly the 'flat / generic' problem the sweep targets."
+    },
+    {
+      "key": "melodic_interest",
+      "label": "Melodic interest / memorability",
+      "type": "rating",
+      "max": 5,
+      "required": true,
+      "scale_labels": {
+        "1": "wallpaper / forgettable",
+        "3": "ok melody",
+        "5": "compelling, memorable"
+      },
+      "help": "Is the melodic line compelling and memorable, or background music?"
+    },
+    {
+      "key": "vocal_performance",
+      "label": "Vocal presence / performance",
+      "type": "rating",
+      "max": 5,
+      "required": true,
+      "scale_labels": {
+        "1": "flat / autopilot",
+        "3": "competent",
+        "5": "committed, characterful"
+      },
+      "help": "Does the voice have character and commitment, or sound flat and on autopilot?"
+    },
+    {
+      "key": "arrangement",
+      "label": "Arrangement / dynamics",
+      "type": "rating",
+      "max": 5,
+      "required": true,
+      "help": "Instrumental variation, builds, dynamic contrast — or one texture throughout?"
+    },
+    {
+      "key": "coherence",
+      "label": "Structural coherence / lyrics held",
+      "type": "rating",
+      "max": 5,
+      "required": true,
+      "help": "Does the song hold together and deliver the lyrics, or wander / loop / lose the thread?"
+    },
+    {
+      "key": "diction",
+      "label": "Arabic diction (guardrail)",
+      "type": "rating",
+      "max": 5,
+      "required": true,
+      "help": "Pronunciation clarity. A 'spice' win must NOT cost diction — rate this even when it isn't your focus."
+    },
+    {
+      "key": "artifacts",
+      "label": "Artifacts",
+      "type": "choice",
+      "required": true,
+      "options": [
+        {"v": "none", "t": "None"},
+        {"v": "minor", "t": "Minor"},
+        {"v": "major", "t": "Major"},
+        {"v": "broken", "t": "Broken / unusable"}
+      ]
+    },
+    {
+      "key": "vs_ref",
+      "label": "Better than the ref take (the 4/5 baseline)?",
+      "type": "choice",
+      "required": true,
+      "options": [
+        {"v": "better", "t": "Clearly better"},
+        {"v": "slightly", "t": "Slightly better"},
+        {"v": "same", "t": "About the same"},
+        {"v": "worse", "t": "Worse"}
+      ],
+      "help": "ref = the v3 final adapter, default sampler — byte-identical to your original probe take 0. Judge each arm relative to it."
+    },
+    {
+      "key": "keep",
+      "label": "Keep this take?",
+      "type": "choice",
+      "required": true,
+      "options": [
+        {"v": "yes", "t": "Yes"},
+        {"v": "maybe", "t": "Maybe"},
+        {"v": "no", "t": "No"}
+      ]
+    },
+    {
+      "key": "notes",
+      "label": "Notes",
+      "type": "notes",
+      "required": false,
+      "help": "Timecodes for loops / artifacts, the exact word if diction breaks, and what stood out."
+    }
+  ]
+}
