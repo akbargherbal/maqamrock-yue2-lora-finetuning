@@ -1,67 +1,95 @@
-# Next-session prompt — run Probe S (prompt sensitivity × LoRA on/off) on Colab
+# Next-session prompt — run Probe Q (pruned style × guidance × rep-penalty) on Colab
 
-_Created 2026-10-12. Paste the block below into the Colab session. This file is a copy surface, not
-authority — authority is `agent_notes/current.md` ("Probe S") + `INFERENCE/v3_prompt_probe.sh`._
+_Created 2026-10-12. Paste the block below into the Colab session. Copy surface, not authority —
+authority is `agent_notes/current.md` ("Probe Q") + `INFERENCE/v3_probe_q.sh`._
 
 ```text
 Fresh Colab GPU runtime. Repo: akbargherbal/maqamrock-yue2-lora-finetuning, branch main
-(expect 3bd25e9 or newer — it adds the probe files below).
+(expect d7759bf or newer — it adds the Probe Q manifests).
 
-Your job: run "Probe S" end to end, then hand me a listening command. I am present, but do not wait
-on me for steps — only stop and ask if the GPU is busy, or if something looks wrong.
+Your job: run "Probe Q" end to end, then hand me ONE rating command for my Windows box. I am present,
+but do not wait on me for steps — stop and ask only if the GPU is busy, or if something looks wrong.
 
-Why (short): v3's sound is anchored but generic. Probe S measures whether the STYLE PROMPT actually
-moves the output, and how much the LoRA is carrying, by running ONE song + ONE seed with (a) four
-prompt tiers and (b) the adapter switched off (scale 0).
+Context in two lines: Probe S proved the style prompt is a live lever, and that the as-trained 95-word
+template is the WORST one (it inverts the mood — celebratory music on a grim poem, with the LoRA on AND
+off). Probe Q crosses the pruned ~41-word style with the sampler knobs that were never crossed:
+guidance_scale (Pass 1 measured it only against the bad template) and the repetition penalty.
 
-Read first, in order:
-  1. agent_notes/current.md — live state; the "Probe S" section is the spec (arm table, read-out,
-     prompt tiers T0-T3, the "110 BPM" measurement).
-  2. INFERENCE/v3_prompt_probe.sh — driver; its header lists the 6 arms.
-  3. INFERENCE/songs.v3_prompt_probe.json + INFERENCE/songs.v3_prompt_probe.base.json
-  4. docs/INFERENCE.md (runner + JSON schema), docs/V3_SPICE_SWEEP.md (background).
+READ FIRST, in order:
+  1. agent_notes/current.md      — live state; the "Probe Q" section is the spec (arm table, knobs,
+                                   artifact list, run + eval commands).
+  2. INFERENCE/v3_probe_q.sh     — driver; its header lists the 6 arms.
+  3. INFERENCE/songs.v3_probe_q.*.json + INFERENCE/probe_q_lyrics.txt
+  4. docs/INFERENCE.md (runner + JSON schema; lines ~98-112 for the sampler knobs / EXTRA_REQUEST_OPTS).
 
 GCS base: gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning
 
+HARD CONSTRAINTS — the user's, do not touch:
+  - LYRICS ARE FROZEN. No lyric edits, not even dropping a verse, not even "just one line".
+    INFERENCE/probe_q_lyrics.txt is byte-verbatim and shared by every arm.
+  - Do not edit the manifests, the pinned seed (2640605763), or the cap (7000).
+  - Do not edit the adapters. Do not retrain. Do not touch /content/yue2_dataset.
+  - You cannot hear audio. Do not judge the takes — the read-out is mine.
+
 Steps:
-1. Env check: /content exists. Run `nvidia-smi` — if ANY compute process is running, or you cannot
-   confirm the GPU is free, STOP and ask. One shared GPU; never overlap.
-2. cd /content/maqamrock-yue2-lora-finetuning (git pull, or clone main if absent).
-3. CPU validation, no GPU:  DRY=1 bash INFERENCE/v3_prompt_probe.sh
-   -> must plan 4 (lora_on) + 2 (lora_off) arms, all seed 2640605763, cap 7000.
+1. Env: /content exists. Run `nvidia-smi`. If ANY compute process is running, or you cannot confirm the
+   GPU is free, STOP and ask. One shared GPU; never overlap.
+2. cd /content/maqamrock-yue2-lora-finetuning && git pull   (or clone main if absent)
+3. CPU validation, no GPU:   DRY=1 bash INFERENCE/v3_probe_q.sh
+   -> must print 5 groups and plan 6 tracks, all seed 2640605763, cap 7000. If it does not match, stop
+      and report; do not "fix" it.
 4. Stage inference:  bash bootstrap/setup.sh --inference > /content/logs/setup.log 2>&1
    then grep the log for [FAIL] — there must be none.
 5. Stage the final adapter pair:
    gcloud storage rsync -r "$GCP_BACKUP_BASE/v3_arabmaqamrock_lora/convert" /content/converter/out
    -> require /content/converter/out/v3_arabmaqamrock_lora_{ar,nar}.safetensors
 6. Sidecars (AGENTS.md §10): pgrep -af 'backup_to_gcp.py|gpu_logger.py'; vm-continuity status.
-   If one is down, start it (or note it and continue rather than blocking the session).
+   Start what's missing — or note it and continue; do not block the session on it.
 7. Report GPU state + disk free, then launch DETACHED:
-   setsid nohup bash INFERENCE/v3_prompt_probe.sh > /content/logs/v3_prompt_probe.log 2>&1 < /dev/null & disown
-   tail -f /content/logs/v3_prompt_probe.log        # expect ~39 min (6 tracks x ~6.5 min)
-   Do not block or tight-poll: report progress from the log, e.g. pgrep -af 'v3_prompt_probe|generate.py'.
+   setsid nohup bash INFERENCE/v3_probe_q.sh > /content/logs/v3_probe_q.log 2>&1 < /dev/null & disown
+   tail -f /content/logs/v3_probe_q.log     # budget ~53 min (measured 8.8 min/track x 6; last time the
+                                            # dry-run's 6.5 min/track projection was 35% optimistic)
+   Do not block or tight-poll; report progress from the log.
 
-Verify from artifacts when it finishes — quote the lines, do not paraphrase:
-  - 6 WAVs, all exit 0, none truncated:
-      out/v3_prompt_probe/lora_on/v3pp_{S0_full,S1_core,S2_retarget,S4_prune}_2640605763.wav
-      out/v3_prompt_probe/lora_off/v3pp_{B1_base_full,B2_base_core}_2640605763.wav
-  - each .log ends "Exit status: 0"; durations sane; no OOM.
-  - the bank line: banked -> .../v3_arabmaqamrock_lora/prompt_probe
-  - flag anything anomalous (especially if the adapter-scale-0 arms fail).
+VERIFY from artifacts when it finishes — quote the lines, do not paraphrase:
+  - 6 WAVs, each .log ending "Exit status: 0", none truncated, 48 kHz stereo, durations sane:
+      out/v3_probe_q/q0/v3q_Q0_ctm_default_2640605763.wav
+      out/v3_probe_q/q1_q5/v3q_Q1_ctm_g15_2640605763.wav
+      out/v3_probe_q/q1_q5/v3q_Q5_retarget_g15_2640605763.wav
+      out/v3_probe_q/q2/v3q_Q2_ctm_g20_2640605763.wav
+      out/v3_probe_q/q3/v3q_Q3_ctm_rp135_2640605763.wav
+      out/v3_probe_q/q4/v3q_Q4_ctm_g15rp135_2640605763.wav
+  - EACH of the 5 run dirs' batch_manifest.json shows the intended EXTRA_REQUEST_OPTS for its group
+    (q0 = defaults). This is the only proof the knobs were actually applied — check it, don't assume it.
+  - the bank line: banked -> .../v3_arabmaqamrock_lora/probe_q
+  - flag anything anomalous: a group that silently fell back to defaults, an OOM, a truncated take.
 
-Do NOT: start a second copy; retrain; touch /content/yue2_dataset; edit the manifests, the pinned
-seed, or the cap; edit the adapters. You cannot hear the audio — do not judge the takes; the read-out
-is mine.
+THEN build the listening package — a flat folder of exactly 7 files, named by arm:
+  - Copy the 6 new takes out of the 5 run dirs into out/v3_probe_q/eval/ as
+      v3q_Q0_ctm_default.wav, v3q_Q1_ctm_g15.wav, v3q_Q2_ctm_g20.wav, v3q_Q3_ctm_rp135.wav,
+      v3q_Q4_ctm_g15rp135.wav, v3q_Q5_retarget_g15.wav
+  - 7th file = the FREE DRIFT ANCHOR, from the banked Probe S run. Generation is deterministic, so
+    re-rendering that arm would be byte-identical — do NOT spend a GPU track on it:
+      gcloud storage cp "$GCP_BACKUP_BASE/v3_arabmaqamrock_lora/prompt_probe/lora_on/v3pp_S1_core_2640605763.wav" \
+        out/v3_probe_q/eval/ANCHOR_s1_core.wav
+    If that exact object 404s, `gcloud storage ls -r "$GCP_BACKUP_BASE/v3_arabmaqamrock_lora/prompt_probe"`
+    to locate it, and say so rather than skipping the anchor. Confirm non-empty + 48 kHz stereo.
+  - Bank the package:  gcloud storage rsync -r out/v3_probe_q/eval "$GCP_BACKUP_BASE/v3_arabmaqamrock_lora/probe_q/eval"
 
-Then hand me the listening step:
-  - Build a flat eval folder of 6 files, one per arm, named by arm:
-      out/v3_prompt_probe/eval/{S0_full,S1_core,S2_retarget,S4_prune,B1_base_full,B2_base_core}.wav
-  - Scorecard: INFERENCE/scorecards/v3_spice.json (also banked at
-    <base>/v3_arabmaqamrock_lora/spice_probe/v3_spice_scorecard.json).
-  - Give me exactly one rating-app command to run on my Windows box:
-      py app.py --audio "<eval folder>" --label v3_prompt_probe --blind --scorecard "<v3_spice.json>"
-    (from the ai_music_rating_app folder; --blind hides the arm names and shuffles, the report reveals them.)
+Report back with: the log tail, the 6-file + anchor verification table, the batch_manifest knob check,
+GPU state at start and end, the bank confirmation, and the rating command below. State plainly what you
+verified vs what you assumed.
 
-Report back with: the log tail, the 6-file verification table, GPU state at start and end, the GCS
-bank confirmation, and the rating command. State plainly what you verified vs what you assumed.
+Rating command for my Windows box (7 files, blind, same scorecard as Probe S so the numbers stay
+comparable):
+  cd C:\Users\DELL\Jupyter_Notebooks\ai_music_rating_app
+  py app.py --audio "C:\Users\DELL\Downloads\v3_probe_q\eval" --label v3_probe_q --blind --scorecard "C:\Users\DELL\Downloads\v3_spice.json"
+
+What the arms test (for MY read-out — you do not judge):
+  Q0 vs Q1 vs Q2  -> does guidance_scale help on the PRUNED prompt, and where is the knee?
+                     (Pass 1 said 1.5 good, 2.5 breaks arrangement/coherence — but that was against the bad template.)
+  Q3 vs Q0        -> does the repetition penalty strip repeats the model ADDS on top of the written text?
+  Q4              -> guidance + penalty combined
+  Q5              -> the retarget wording (the only above-baseline arm in Probe S) at guidance 1.5
+  ANCHOR          -> literally the audio already rated 4; any score change in it is listener drift.
 ```
