@@ -45,16 +45,53 @@ blind, revealed) + the audio banked at `…/v3_arabmaqamrock_lora/prompt_probe`.
    rated 5 unblinded vs 3 blind). Treat the 2-vs-4 gap as real; treat the spice/tempo micro-deltas as
    hypotheses.
 
-## Next: Probe P — "hold the tempo, drop the padding" (proposed, not built)
+## Constraint (user, 2026-10-12): LYRICS FROZEN
 
-Cheapest path from `S1`'s 4 to 5, since `S1`'s *only* stated flaw is speed:
+No lyric edits — not even dropping a verse. The desired behaviour must come from **style/prompt +
+generation parameters** only. Consequence: the written 3× couplet stays. A repetition penalty can
+only remove repeats the model *adds* (B2 sang it 4×) — it can never drop a line the text asks for.
 
-- `P0` T2 core, re-run → within-session drift anchor
-- `P1` T2 + `stately groove, unhurried tempo`
-- `P2` T2 + `110 BPM` (the number, now isolated — falsification arm)
-- `P3` T2 + T1's full tempo set (`ballad, stately groove, unhurried phrase-ending sustains`)
-- `P4` T2 + de-padded lyrics (drop the 2nd `[Chorus]`; Outro re-sings a *different* couplet)
-- `P5` T3 + `stately groove` (the only above-baseline arm, plus tempo control)
+## Next: Probe Q — cross the two levers that were never crossed
 
-`P4` fights the standing padding design in `workflow.md` Phase 3 / Phase 5.8 — that one is the
-user's call, not the agent's. Nothing is built or run yet; no GPU touched.
+Pass 1 measured `guidance_scale` against the **full template** (a prompt Probe S now shows is the
+*worst* one). Probe S measured prompt tiers at the **default guidance 1.01**. Neither measured the
+interaction — so both are re-opened.
+
+Candidate style string — "core + tempo + mood", **~41 w** (the band that scored 4; not 95):
+
+```
+arabmaqamrock dark symphonic rock, slow stately groove, ~100 BPM. Maqam Kurd. deep male vocals,
+breath-supported melismatic runs, melismatic phrasing in Maqam Kurd, unhurried phrase-ending
+sustains. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight
+rhythm section. Mood: solemn, ominous, grave.
+```
+
+Drops `hymn-like grand concert hall acoustics`, the whole production paragraph, and `110 BPM`.
+Adds an explicit slow/groove clause and a solemn mood clause.
+
+| what you heard | knob | from → to |
+|---|---|---|
+| celebratory on a grim poem | style string (− grand/acoustics, − production paragraph) | 95 w → ~41 w |
+| celebratory, part 2 | `guidance_scale` | 1.01 → 1.5 |
+| "too fast" | style string: slow/groove clause | added |
+| repeats beyond the written text | `semantic_repetition_penalty` | 1.2 → 1.35 |
+| flat / generic | `guidance_scale` (the only knob that ever moved this) | 1.01 → 1.5 (2.5 breaks structure) |
+| flat / generic, axis 2 | seed selection (N = 1 today) | 1 → 8 |
+
+6 arms, pinned seed `2640605763`, cap 7000, one session (~55 min):
+
+- `Q0` core+tempo+mood, `guidance_scale=1.01` → control + within-session drift anchor
+- `Q1` core+tempo+mood, `guidance_scale=1.5`
+- `Q2` core+tempo+mood, `guidance_scale=2.0`
+- `Q3` core+tempo+mood, `semantic_repetition_penalty=1.35`
+- `Q4` core+tempo+mood, `guidance_scale=1.5` + `semantic_repetition_penalty=1.35`
+- `Q5` retarget wording + `guidance_scale=1.5` (the only above-baseline wording × guidance)
+
+Isolation arms if budget allows: core + `hymn-like grand concert hall acoustics` only; core +
+production paragraph only — that separates the three T0 suspects.
+
+Deprioritised (evidence weak in Pass 1): `LORA_AR_SCALE=0.7` (scored 20/30), `semantic_temperature`
+1.2/1.4 (indistinguishable from ref), checkpoint swaps. `cot` is off, so melody/improvisation is a
+sampler + prompt + selection question, not a checkpoint question.
+
+Nothing built or run yet; no GPU touched.
