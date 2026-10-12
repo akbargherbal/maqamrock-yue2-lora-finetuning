@@ -1,0 +1,21 @@
+{
+  "defaults": {
+    "repeat": 1
+  },
+  "songs": [
+    {
+      "name": "v3q_Q1_ctm_g15",
+      "style": "arabmaqamrock dark symphonic rock, slow stately groove, 100 BPM. Maqam Kurd. deep male vocals, breath-supported melismatic runs, melismatic phrasing in Maqam Kurd, unhurried phrase-ending sustains. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: solemn, ominous, grave.",
+      "lyrics_file": "probe_q_lyrics.txt",
+      "seed": 2640605763,
+      "cap": 7000
+    },
+    {
+      "name": "v3q_Q5_retarget_g15",
+      "style": "arabmaqamrock Symphonic rock, driving groove, heavier guitars. Maqam Kurd. deep male vocals, breath-supported melismatic runs, melismatic phrasing in Maqam Kurd. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section.",
+      "lyrics_file": "probe_q_lyrics.txt",
+      "seed": 2640605763,
+      "cap": 7000
+    }
+  ]
+}

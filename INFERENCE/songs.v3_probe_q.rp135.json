@@ -1,0 +1,14 @@
+{
+  "defaults": {
+    "repeat": 1
+  },
+  "songs": [
+    {
+      "name": "v3q_Q3_ctm_rp135",
+      "style": "arabmaqamrock dark symphonic rock, slow stately groove, 100 BPM. Maqam Kurd. deep male vocals, breath-supported melismatic runs, melismatic phrasing in Maqam Kurd, unhurried phrase-ending sustains. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: solemn, ominous, grave.",
+      "lyrics_file": "probe_q_lyrics.txt",
+      "seed": 2640605763,
+      "cap": 7000
+    }
+  ]
+}

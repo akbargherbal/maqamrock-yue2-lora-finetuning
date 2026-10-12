@@ -94,4 +94,39 @@ Deprioritised (evidence weak in Pass 1): `LORA_AR_SCALE=0.7` (scored 20/30), `se
 1.2/1.4 (indistinguishable from ref), checkpoint swaps. `cot` is off, so melody/improvisation is a
 sampler + prompt + selection question, not a checkpoint question.
 
-Nothing built or run yet; no GPU touched.
+### Probe Q — artifacts (built 2026-10-12, dry-run validated, NOT run)
+
+One manifest per opts-group, because `EXTRA_REQUEST_OPTS` is env-level and not a per-song key. Lyrics
+live in **one** file (`lyrics_file` is a song key, not a `defaults` key); paths resolve relative to the
+JSON's own directory.
+
+- `INFERENCE/probe_q_lyrics.txt` — the frozen lyrics, byte-verbatim (1460 chars / 35 lines), shared
+- `INFERENCE/songs.v3_probe_q.{default,g15,g20,rp135,g15rp135}.json` — 6 arms over 5 groups
+- `INFERENCE/v3_probe_q.sh` — driver; `DRY=1` skips the GPU checks and passes `--dry-run`
+
+| file | arm | style | opts |
+|---|---|---|---|
+| `.default.json` | `v3q_Q0_ctm_default` | CTM 41 w | — |
+| `.g15.json` | `v3q_Q1_ctm_g15` | CTM | `guidance_scale=1.5` |
+| `.g15.json` | `v3q_Q5_retarget_g15` | T3 32 w | `guidance_scale=1.5` |
+| `.g20.json` | `v3q_Q2_ctm_g20` | CTM | `guidance_scale=2.0` |
+| `.rp135.json` | `v3q_Q3_ctm_rp135` | CTM | `semantic_repetition_penalty=1.35` |
+| `.g15rp135.json` | `v3q_Q4_ctm_g15rp135` | CTM | `guidance_scale=1.5 semantic_repetition_penalty=1.35` |
+
+All six: seed `2640605763`, cap `7000`. Dry-run: 5 groups, **6 tracks**, one seed, one cap, all exit 0.
+
+Run (Colab, GPU VM, detached):
+```bash
+cd /content/maqamrock-yue2-lora-finetuning && git pull
+DRY=1 bash INFERENCE/v3_probe_q.sh                               # CPU validation, must plan 6
+gcloud storage rsync -r "$GCP_BACKUP_BASE/v3_arabmaqamrock_lora/convert" /content/converter/out
+setsid nohup bash INFERENCE/v3_probe_q.sh > /content/logs/v3_probe_q.log 2>&1 < /dev/null & disown
+tail -f /content/logs/v3_probe_q.log
+```
+Stop: `pkill -f v3_probe_q.sh` · Resume: rerun the launch line (same `OUTROOT` → succeeded takes
+skip). Output: `…/out/v3_probe_q/{q0,q1_q5,q2,q3,q4}/`, one `v3q_<arm>_2640605763.wav` each.
+
+Eval folder = **7 files**: the 6 new arms + the banked `v3pp_S1_core_2640605763.wav` as the free
+drift anchor (deterministic re-render would be byte-identical, so re-running it buys nothing).
+
+No GPU touched here; nothing run.
