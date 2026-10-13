@@ -2,6 +2,19 @@
 
 Dated records of docs changes: file, what-and-why, and the authority. One entry per pass.
 
+## 2026-10-13 — publish pass (HF LoRAs + lean repo): docs wired to the new artifacts
+
+- Published `akbargherbal/arabmaqamrock-yue2-lora` (v3 final) and
+  `akbargherbal/quran-pronunciation-yue2-lora` (`quran_ahh_r32` final); `hf download` round-trip
+  sha256 verified against each model card (`docs/PUBLISH_PLAN.md` §9).
+- New end-user repo `github.com/akbargherbal/arabmaqamrock` (generation + production; **MIT**
+  code, CC-BY-NC-4.0 weights; no GCS/`/content`/training references).
+- Docs wired: `README.md` gained "Published artifacts & downstream"; `SOURCE_OF_TRUTH.md` gained
+  two authority rows (published LoRAs; end-user repo); `docs/README.md`'s `PUBLISH_PLAN.md` row
+  marked done; `docs/PUBLISH_PLAN.md` §1 locked and §9 records the execution + hashes.
+- Authority: the artifacts themselves + `hf` (the model cards and `docs/PUBLISH_PLAN.md`).
+- No config or hyperparameter changed; training frozen.
+
 ## 2026-09-23 — `DECISIONS.md` / `PROGRESS.md` consolidation (frozen-doc exemption, user-approved)
 
 - `DECISIONS.md`: 38 entries / 565 lines → 35 entries / 227 lines. Admission test applied (keep only what a fresh session would otherwise re-litigate or rediscover); merged the three L4/A100 entries into one and folded the two T4-attention entries; archived the v2-build-process and "Current plan (2026-09-21)" narratives to git. Baseline recorded in the header: `git show 50c8de8:DECISIONS.md`.

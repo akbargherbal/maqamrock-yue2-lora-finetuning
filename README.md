@@ -63,6 +63,23 @@ Listening evaluations run in the external **rating app**
   `qfinal_a0.3` / `qfinal_a0.5` merges — **retired 2026-10-07**, archived under
   `<base>/archive/quran_long_aya_legacy/`. Superseded by `quran_ahh_r32`.
 
+## Published artifacts & downstream
+
+Training is frozen; what already exists is now published (2026-10-13). These are the
+stable identities — verify with the adapter sha256, not prose.
+
+- **Weights — Hugging Face (CC-BY-NC-4.0, model repos):**
+  - [`akbargherbal/arabmaqamrock-yue2-lora`](https://huggingface.co/akbargherbal/arabmaqamrock-yue2-lora)
+    — **ArabMaqamRock v3 final**: converted AR `3531bb91…` / NAR `a7eabcad…`. v2 is not published.
+  - [`akbargherbal/quran-pronunciation-yue2-lora`](https://huggingface.co/akbargherbal/quran-pronunciation-yue2-lora)
+    — **`quran_ahh_r32` final**: converted AR `c9305c35…` / NAR `2097fd6e…`.
+  Each model card carries the trigger word, load options, provenance, and the non-commercial notice.
+- **End-user repo — [`akbargherbal/arabmaqamrock`](https://github.com/akbargherbal/arabmaqamrock)**
+  — the lean **generation + production** half (install → download → generate). Its code is **MIT**;
+  the weights it fetches stay **CC-BY-NC-4.0**. It references this repo as the parent for provenance.
+
+The plan, decisions, and verification record live in [`docs/PUBLISH_PLAN.md`](docs/PUBLISH_PLAN.md).
+
 ## Repo layout
 
 ```

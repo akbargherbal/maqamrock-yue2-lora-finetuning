@@ -1,8 +1,9 @@
 # Plan — publish the LoRAs on Hugging Face + a lean end-user generation repo
 
-_Status: **PLAN — not started.** Written 2026-10-13; **§1 decisions recorded 2026-10-13**
-(publish under CC-BY-NC-4.0; ship v3 final + `quran_ahh_r32`). Training is frozen; this plan
-ships what already exists. Nothing here is executed until the user types each command (§8)._
+_Status: **EXECUTING.** Written 2026-10-13; **all §1 decisions locked 2026-10-13** (publish
+under CC-BY-NC-4.0; ship v3 final + `quran_ahh_r32`; new repo `akbargherbal/arabmaqamrock`,
+MIT code license, public). Training is frozen; this plan ships what already exists. Each
+state-changing or networked step is run deliberately (§8)._
 
 Two deliverables:
 
@@ -20,27 +21,23 @@ Authority for what exists: `docs/LORA_INVENTORY.md` (adapters + hashes), `docs/I
 
 ## 1. Decisions
 
-**Decided (2026-10-13, user):**
+**All decided (2026-10-13, user):**
 
 1. **License — publish under CC-BY-NC-4.0.** YuE2 is CC-BY-NC-4.0
    (`docs/yue2-gguf-lora-findings.md:54`), so the LoRAs are non-commercial derivatives.
-   **Accepted:** publish publicly, with `license: cc-by-nc-4.0` in the model card and a
-   prominent non-commercial notice. (The *new repo's* code license is still open — see #4.)
+   **Accepted** (user, 2026-10-13): publish publicly, with `license: cc-by-nc-4.0` in each
+   model card and a prominent non-commercial notice.
 2. **Weights — ArabMaqamRock v3 final only** (step 5000); **Quran = `quran_ahh_r32` final**
    (AR+NAR, rank 32/32, 3 epochs). The **v2 style adapter is not published**.
-
-**Open (ask when we reach them — none block a start):**
-
-3. **HF namespace** — which account/org owns the model repos (needed for `hf repos create`).
-   The token is the user's: `hf auth login`, never pasted into chat.
-4. **New repo** — owner, name (proposals: `arabmaqamrock`, `maqamrock-yue2-generate`,
-   `arabmaqamrock-studio`), visibility, and its code license.
-5. **The runtime binary.** `audiocpp_cli` is staged from a **private GCS** build (sm_75/T4,
-   CUDA 12); a public repo cannot use that. Options: (a) require a **source build**
-   (`docs/audiocpp_gpu_arch_builds.md`, ~21 min CPU), (b) ship a **GitHub/HF release asset** per
-   arch, (c) both (build script + optional prebuilt).
-6. **Dataset** — default **do not publish** (Suno-rendered audio → Suno ToS + poem copyright).
-   Confirm only if that changes.
+3. **HF namespace — `akbargherbal`.** Both model repos live under this account. The token is
+   the user's: `hf auth login`, never pasted into chat.
+4. **New repo — `akbargherbal/arabmaqamrock`**, **public**, **MIT** code license (the parent
+   has no LICENSE). Weights stay CC-BY-NC-4.0; the MIT LICENSE covers the repo's own code only.
+5. **Runtime binary — build script + prebuilt asset.** `install.sh` builds `audiocpp_cli` from
+   source for the local arch (`docs/audiocpp_gpu_arch_builds.md`, ~21 min CPU), and the
+   already-verified **sm_75/T4** binary is attached as a downstream release asset. (The private
+   GCS sm_75 build itself is not publicly reachable.)
+6. **Dataset — do NOT publish.** Suno-rendered audio → Suno ToS + poem copyright. Confirmed.
 
 ---
 
@@ -188,3 +185,30 @@ MODEL_CARD.md             # what the LoRA is, trigger word, license, hashes
 3. Phase B: scaffold the lean repo, export prompts, rewrite the two scripts, README, LICENSE.
 4. Fresh-VM round-trip test (§6) — the real acceptance gate.
 5. Wire §5 back into this repo; update `SOURCE_OF_TRUTH.md` + `docs/README.md`; log the pass.
+
+---
+
+## 9. Outcome — executed 2026-10-13 (record)
+
+**Phase A — done + verified.** Created (public)
+`akbargherbal/arabmaqamrock-yue2-lora` and `akbargherbal/quran-pronunciation-yue2-lora`;
+uploaded, then **round-trip verified** (`hf download` → sha256 equals the model card):
+
+| Adapter | sha256 |
+|---|---|
+| v3 AR `arabmaqamrock-v3-ar.safetensors` | `3531bb9106d2292eefe58eabe11ec08bb7dddc69554f2b016dc9f13f711fab18` |
+| v3 NAR `arabmaqamrock-v3-nar.safetensors` | `a7eabcadb22146048bcb5e65d04828ee9454559523ca161bd38c06060deb0cae` |
+| quran AR `quran-pronunciation-ar.safetensors` | `c9305c35798c5453a54419fd54c8a74543e9f40d8c95481e02a7af647269ce28` |
+| quran NAR `quran-pronunciation-nar.safetensors` | `2097fd6eb9ec8728f34441e16758c71cec7df2d79ef1a449e1eba95f79408159` |
+
+Payload per repo: the `<name>-{ar,nar}.safetensors` pair + `README.md` (model card) +
+`source/` manifest. The Quran bytes were fetched from GCS
+`<base>/quran_ahh_r32/convert/final/` (the `adapter_manifest.json`'s own `*_gcs` paths are
+stale pre-rename `quran_ahh_r8_rank32/` references).
+
+**Phase B — scaffolded** as `github.com/akbargherbal/arabmaqamrock` (15 files; **MIT** code,
+NC weights; zero GCS / `/content` / training references). It fetches the weights from the two
+HF model repos and carries the four `*_style.txt` exported from `<base>/audiocpp_inference/prompts/`.
+
+**Outstanding (user-typed, §6 gate):** create + push the GitHub repo; attach the prebuilt
+sm_75/T4 `audiocpp_cli` as a release asset; and the fresh-VM generate acceptance test on a GPU.
