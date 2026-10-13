@@ -13,6 +13,7 @@ execution record) and `SOURCE_OF_TRUTH.md`.
   Dry-run passes: `python3 generate.py songs.example.json --dry-run`.
 - Parent repo wired (this commit): `README.md` "Published artifacts & downstream",
   `SOURCE_OF_TRUTH.md` rows, `docs/README.md`, `docs/PUBLISH_PLAN.md` §9, `RECONCILIATION_LOG.md`.
+  Drift reconciler pass run: **30 → 19** flagged (all false positives curated).
 
 ## Outstanding
 1. **Create the new GitHub repo** — https://github.com/new → owner `akbargherbal`, name
