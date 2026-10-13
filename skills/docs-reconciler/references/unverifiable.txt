@@ -223,3 +223,14 @@ docs/LISTENING_EVAL.md :: --audio
 skills/listening-eval/SKILL.md :: --audio
 user_cheatsheet.md :: --audio
 
+# 2026-10-13 — publish pass: PUBLISH_PLAN.md describes the *lean end-user repo* (a separate
+# repository, github.com/akbargherbal/arabmaqamrock) and the HF CLI, so its filenames and the
+# hf commands' flags are legitimately not in this repo.
+docs/PUBLISH_PLAN.md :: install.sh
+docs/PUBLISH_PLAN.md :: MODEL_CARD.md
+docs/PUBLISH_PLAN.md :: adapter_manifest.json
+docs/PUBLISH_PLAN.md :: --type
+docs/PUBLISH_PLAN.md :: --public
+# bracket-trick false positive in the pkill/pgrep gotcha (`[t]rain_watchdog.py` -> `rain_watchdog.py`)
+docs/COMMAND_HANDOVER_GOTCHAS.md :: rain_watchdog.py
+

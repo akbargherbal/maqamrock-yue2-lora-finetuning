@@ -15,6 +15,21 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
 - Authority: the artifacts themselves + `hf` (the model cards and `docs/PUBLISH_PLAN.md`).
 - No config or hyperparameter changed; training frozen.
 
+## 2026-10-13 — drift reconciliation (live docs) after the publish pass, 30 → 19
+
+- Reconciler run after the `README.md` / `SOURCE_OF_TRUTH.md` / `docs/PUBLISH_PLAN.md` edits:
+  2669 claims, 1656 checkable, 30 flagged (1.8%) → **19** (1.2%).
+- Real drift from this pass: **none** — every flagged token was a false positive.
+- Curated in `references/unverifiable.txt` (scoped to `docs/PUBLISH_PLAN.md` unless noted):
+  `install.sh`, `MODEL_CARD.md`, `adapter_manifest.json`, and the `hf` CLI flags `--type` / `--public`
+  — all name the separate lean repo (`github.com/akbargherbal/arabmaqamrock`) and the external `hf`
+  tool; plus `docs/COMMAND_HANDOVER_GOTCHAS.md :: rain_watchdog.py` (the `[t]rain_watchdog.py`
+  bracket-trick false positive).
+- Not touched (pre-existing, not this pass's; queued for a dedicated pass): `docs/DATASET_V3_PLAN.md`,
+  `results/rating_20261012-1008.md`, `datasets/v3_arabmaqrock/README.md`, `README.md:137`
+  (`manifest.json`), `docs/V3_SPICE_SWEEP.md:132`.
+- No frozen doc, config, or hyperparameter changed.
+
 ## 2026-09-23 — `DECISIONS.md` / `PROGRESS.md` consolidation (frozen-doc exemption, user-approved)
 
 - `DECISIONS.md`: 38 entries / 565 lines → 35 entries / 227 lines. Admission test applied (keep only what a fresh session would otherwise re-litigate or rediscover); merged the three L4/A100 entries into one and folded the two T4-attention entries; archived the v2-build-process and "Current plan (2026-09-21)" narratives to git. Baseline recorded in the header: `git show 50c8de8:DECISIONS.md`.
