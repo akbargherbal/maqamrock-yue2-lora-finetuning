@@ -111,6 +111,35 @@ narrative lives in git — pre-rewrite history at `git show 39d1bbd:PROGRESS.md`
   *take the song's melody, the Quran's diction.* Evaluation moved to the external rating app
   (`github.com/akbargherbal/ai_music_rating_app`; `docs/LISTENING_EVAL.md`).
 
+## M13 — LoRAs published on Hugging Face · 2026-10-13
+
+- Published two **public** model repos under `akbargherbal`, both **CC-BY-NC-4.0** (inherited from
+  YuE2): `arabmaqamrock-yue2-lora` (**v3 final**, converted AR `3531bb91…` / NAR `a7eabcad…`) and
+  `quran-pronunciation-yue2-lora` (**`quran_ahh_r32` final**, AR `c9305c35…` / NAR `2097fd6e…`).
+  v2 is **not** published; neither is the dataset (Suno-rendered audio + poem copyright).
+- Payload per repo: the converted `<name>-{ar,nar}.safetensors` pair + a model card (trigger
+  `arabmaqamrock`, or none for the Quran adapter; load options; provenance; the NC notice) + a
+  `source/` manifest. **Verified by round-trip** — `hf download` → sha256 equals each model card.
+- Record: `docs/PUBLISH_PLAN.md` (§9); authority rows in `SOURCE_OF_TRUTH.md`.
+
+## M14 — Lean end-user repo `arabmaqamrock` + Colab hardening · 2026-10-13
+
+- Extracted a **generation-only** public repo, `github.com/akbargherbal/arabmaqamrock` (**MIT** code,
+  NC weights): `install.sh`, `run_one.sh`, `generate.py` (rewritten off GCS / `/content`),
+  `duration_cap.py`, `cuda_loader_path.sh`, `songs.example.json`, `prompts/` (4 style templates),
+  README + MODEL_CARD. It names this repo as the parent for provenance.
+- **Colab hardening** (the workflow is Colab-centric, so `/content` is ephemeral): a new GCS prefix
+  at the **bucket root** `gs://akbar-december-2024-backup/arabmaqamrock/` (`binaries/`, `runs/`,
+  `logs/`) — held in its own `GCP_ROOT`, separate from this project's `GCP_BACKUP_BASE`; a `plumbing/`
+  layer (`fetch_binary.sh`: arch auto-select → sha256 verify → build-from-source fallback;
+  `backup_to_gcp.py` ported); and `setup_colab.sh`. Prebuilts staged: sm75-t4 `7ad69d1c…`, sm89-l4
+  `97028a71…`, each with a `manifest.json` (audio.cpp commit / CUDA / flags — the 2026-09-22 builds
+  predate any pin, so their commit is recorded `unknown`).
+- Verified CPU-only (fetch sha256 round-trip, backup dry-run, generate dry-run); the GPU acceptance
+  test is outstanding. Plan + result: `docs/COLAB_PLAN.md`. Supersedes `PUBLISH_PLAN.md` §4/§6's
+  "no GCS references" rule — the generation path stays credential-free; GCS is an explicit
+  durability layer.
+
 ## Open items
 
 - **New arabmaqamrock round — ~400–450 songs (planned).** `config/A100_akbar_arabic_rock_lora.yml`
@@ -121,6 +150,11 @@ narrative lives in git — pre-rewrite history at `git show 39d1bbd:PROGRESS.md`
   adapter compensates for lyric-free style training* — is **untested**; v1's lyric-free run is
   the counter-evidence. Keep the banked `quran_ahh_r32` (+ merges) for this.
 - **Clean-VM proof** of `bootstrap/setup.sh --inference` + cold timing (warm-VM only so far).
-- **Per-arch binary auto-selection** (bootstrap stages only the flat sm_75 object).
+- **Per-arch binary auto-selection** — done in the lean repo (`plumbing/fetch_binary.sh`); this
+  repo's `bootstrap/setup.sh` still stages only the flat sm_75 object.
+- **Pin `audio.cpp`** for the prebuilt binaries — the 2026-09-22 sm_75/sm_89 builds record
+  `audio_cpp_commit: unknown`; set `plumbing/audio_cpp.pin` on the next verified build.
+- **Fresh-VM acceptance test** of the lean repo (`setup_colab.sh` → `generate.py`, on a GPU) —
+  `docs/COLAB_PLAN.md` §7.
 - **vm-continuity** Milestone 1 — idle-time only, never GPU-paid.
 - See `docs/IMPROVEMENTS.md` for the fuller backlog.

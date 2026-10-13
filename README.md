@@ -2,8 +2,8 @@
 
 **BETA.** A LoRA fine-tune of [YuE2](https://github.com/ostris/ai-toolkit) (3B, int8
 `convrot`) for generating **full, structurally coherent Arabic maqam rock songs**, plus a
-small AR-only **pronunciation adapter** trained on Quran recitation to sharpen articulation.
-Trained with [`ostris/ai-toolkit`](https://github.com/ostris/ai-toolkit); generated with
+**pronunciation adapter** (rank 32, AR+NAR) trained on Quran recitation to sharpen Arabic
+diction. Trained with [`ostris/ai-toolkit`](https://github.com/ostris/ai-toolkit); generated with
 [`0xShug0/audio.cpp`](https://github.com/0xShug0/audio.cpp) (GGUF + the converted LoRA).
 
 The style backbone is a single LoRA over the maqamrock dataset — **438 clips across four

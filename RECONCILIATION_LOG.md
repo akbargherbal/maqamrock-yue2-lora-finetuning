@@ -2,6 +2,19 @@
 
 Dated records of docs changes: file, what-and-why, and the authority. One entry per pass.
 
+## 2026-10-13 — publish milestones recorded; inventory + README drift fixed
+
+- `PROGRESS.md`: appended **M13** (LoRAs published on Hugging Face) and **M14** (lean repo
+  `arabmaqamrock` + Colab hardening) — additive, per the user's instruction; existing milestones
+  untouched. Updated the per-arch/`--inference` open item and added two (audio.cpp pin; fresh-VM
+  acceptance).
+- `docs/LORA_INVENTORY.md`: added a "Published on Hugging Face" section (v3 final + `quran_ahh_r32`
+  final, with the HF repos and converted-AR sha256) — the map did not record the publication.
+- `README.md`: the intro called the pronunciation adapter "small AR-only"; the current donor is
+  `quran_ahh_r32` (**rank 32, AR+NAR**). Corrected to match `LORA_INVENTORY.md` + `PROGRESS.md` M12.
+- Reconciler: 1.2% flagged, unchanged (no new mechanical drift). Frozen docs (`DECISIONS.md`,
+  `PROGRESS.md` history, `IMPROVEMENTS.md`) not rewritten.
+
 ## 2026-10-13 — Colab hardening of the lean repo: new plan doc + one reversed rule
 
 - New live doc `docs/COLAB_PLAN.md` (authority for the lean repo's GCS plumbing); added to the

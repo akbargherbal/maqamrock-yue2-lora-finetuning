@@ -35,6 +35,21 @@ current pronunciation donor is **`quran_ahh_r32`** (rank 32, AR+NAR; AHH-filtere
 (Earlier, 2026-09-27: the `pron_lora_ar_only_r8` family was archived to
 `<base>/archive/pron_lora_ar_only_legacy/`.)
 
+## Published on Hugging Face (2026-10-13)
+
+Two adapters are released as **public** HF model repos (CC-BY-NC-4.0, inherited from YuE2); the
+bytes equal the converted adapters below, sha256-verified by `hf download` round-trip
+(`docs/PUBLISH_PLAN.md` §9):
+
+| Adapter | HF repo | converted AR sha256 |
+|---|---|---|
+| **v3 style final** (step 5000) | `akbargherbal/arabmaqamrock-yue2-lora` | `3531bb9106d2292eefe58eabe11ec08bb7dddc69554f2b016dc9f13f711fab18` |
+| **`quran_ahh_r32` final** (AR+NAR, 3 epochs) | `akbargherbal/quran-pronunciation-yue2-lora` | `c9305c35798c5453a54419fd54c8a74543e9f40d8c95481e02a7af647269ce28` |
+
+Publication does **not** move anything in the library: `loras/audio_cpp/style/` still holds v2 (the
+production path), and v3 stays un-promoted here. The end-user generation repo is
+`github.com/akbargherbal/arabmaqamrock`. Authority rows: `SOURCE_OF_TRUTH.md`.
+
 ## Counts
 
 | Class | Count | Notes |
