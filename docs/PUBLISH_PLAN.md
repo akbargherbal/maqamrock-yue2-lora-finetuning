@@ -1,7 +1,8 @@
 # Plan — publish the LoRAs on Hugging Face + a lean end-user generation repo
 
-_Status: **PLAN — not started.** Written 2026-10-13. Training is frozen; this plan ships
-what already exists. Nothing here is executed until the user types each command (§8)._
+_Status: **PLAN — not started.** Written 2026-10-13; **§1 decisions recorded 2026-10-13**
+(publish under CC-BY-NC-4.0; ship v3 final + `quran_ahh_r32`). Training is frozen; this plan
+ships what already exists. Nothing here is executed until the user types each command (§8)._
 
 Two deliverables:
 
@@ -17,29 +18,29 @@ Authority for what exists: `docs/LORA_INVENTORY.md` (adapters + hashes), `docs/I
 
 ---
 
-## 1. Blocking decisions (user — answer before Phase A)
+## 1. Decisions
 
-1. **License posture — the gate.** YuE2 is **CC-BY-NC-4.0** (non-commercial; inherited from
-   `m-a-p/YuE2-3B` — `docs/yue2-gguf-lora-findings.md:54`). A LoRA trained on YuE2 is a
-   derivative, so the published weights inherit **NC**. Confirm you accept that and publish
-   with a prominent non-commercial notice. (This is a decision, not a formality: it also
-   governs whether the *new repo* can be used commercially.) There is **no `LICENSE` file**
-   in this repo today.
-2. **HF namespace** — which account/org owns the model repos (user's HF username), and the
-   token. The `hf` CLI (v2.2.0) is on this box; **no token is cached** (`hf auth whoami`).
-3. **Which weights ship.** ArabMaqamRock: **v3 final (step 5000)** is the latest trained; the
-   **v2 style** adapter is still the promoted production style (`docs/LORA_INVENTORY.md`).
-   Publish v3 only? v2 only? both (v2 as "current", v3 as "latest, under evaluation")?
-   Quran: **`quran_ahh_r32` final** (AR+NAR, rank 32/32, 3 epochs).
+**Decided (2026-10-13, user):**
+
+1. **License — publish under CC-BY-NC-4.0.** YuE2 is CC-BY-NC-4.0
+   (`docs/yue2-gguf-lora-findings.md:54`), so the LoRAs are non-commercial derivatives.
+   **Accepted:** publish publicly, with `license: cc-by-nc-4.0` in the model card and a
+   prominent non-commercial notice. (The *new repo's* code license is still open — see #4.)
+2. **Weights — ArabMaqamRock v3 final only** (step 5000); **Quran = `quran_ahh_r32` final**
+   (AR+NAR, rank 32/32, 3 epochs). The **v2 style adapter is not published**.
+
+**Open (ask when we reach them — none block a start):**
+
+3. **HF namespace** — which account/org owns the model repos (needed for `hf repos create`).
+   The token is the user's: `hf auth login`, never pasted into chat.
 4. **New repo** — owner, name (proposals: `arabmaqamrock`, `maqamrock-yue2-generate`,
-   `arabmaqamrock-studio`), visibility, and its code license (MIT/Apache for code is
-   independent of the NC weights).
+   `arabmaqamrock-studio`), visibility, and its code license.
 5. **The runtime binary.** `audiocpp_cli` is staged from a **private GCS** build (sm_75/T4,
-   CUDA 12). A public repo cannot use that. Options: (a) require the user to **build from
-   source** (`docs/audiocpp_gpu_arch_builds.md`, ~21 min CPU), (b) ship a **GitHub/HF release
-   asset** per arch, (c) both (build script + optional prebuilt).
-6. **Dataset** — publish the 438-track training set too? It is **Suno-rendered audio**, so it
-   carries both the Suno ToS and the poem-copyright question. Default: **do not publish**.
+   CUDA 12); a public repo cannot use that. Options: (a) require a **source build**
+   (`docs/audiocpp_gpu_arch_builds.md`, ~21 min CPU), (b) ship a **GitHub/HF release asset** per
+   arch, (c) both (build script + optional prebuilt).
+6. **Dataset** — default **do not publish** (Suno-rendered audio → Suno ToS + poem copyright).
+   Confirm only if that changes.
 
 ---
 
@@ -47,12 +48,12 @@ Authority for what exists: `docs/LORA_INVENTORY.md` (adapters + hashes), `docs/I
 
 | Artifact | Where (GCS `<base>` = the private backup bucket) | Identity |
 |---|---|---|
-| ArabMaqamRock **v3** final | `<base>/v3_arabmaqamrock_lora/convert/` → `v3_arabmaqamrock_lora_{ar,nar}.safetensors` | converted AR sha256 `3531bb91…` (`LORA_INVENTORY.md:60`) |
-| ArabMaqamRock **v2** style | `<base>/loras/audio_cpp/style/` → `akbar_arabic_rock_lora_{ar,nar}.safetensors` | `747d5cfe…` (`LORA_INVENTORY.md`) |
-| **Quran** `quran_ahh_r32` | `<base>/quran_ahh_r32/convert/` → `quran_ahh_r32_{ar,nar}.safetensors` | rank 32/32 AR+NAR |
+| **ArabMaqamRock v3 final** — publish | `<base>/v3_arabmaqamrock_lora/convert/` → `v3_arabmaqamrock_lora_{ar,nar}.safetensors` | converted AR sha256 `3531bb91…` (`LORA_INVENTORY.md:60`) |
+| **Quran `quran_ahh_r32`** — publish | `<base>/quran_ahh_r32/convert/` → `quran_ahh_r32_{ar,nar}.safetensors` | rank 32/32 AR+NAR |
 
-Not published: the `qahh_a0*` merges (v2 × quran, unlistened, donor **shelved**), the archived
-donors, and the pre-rename v1 (no surviving copy).
+Not published: the v2 style adapter (`<base>/loras/audio_cpp/style/`, `747d5cfe…`) — the
+promoted production style, but not the "final" (§1.2); the `qahh_a0*` merges (v2 × quran,
+unlistened, donor **shelved**); the archived donors; and the pre-rename v1 (no surviving copy).
 
 ---
 
@@ -80,7 +81,7 @@ hf repos create <user>/quran-pronunciation-yue2-lora --type model --public
 ---
 base_model: m-a-p/YuE2-3B
 library_name: audiocpp          # consumed by audio.cpp, not transformers
-license: cc-by-nc-4.0           # inherited from YuE2 — confirm §1.1
+license: cc-by-nc-4.0           # decided 2026-10-13 (§1.1)
 tags: [audio, music-generation, yue2, lora, arabic, maqam]
 ---
 ```

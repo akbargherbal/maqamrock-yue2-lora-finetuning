@@ -7,14 +7,13 @@ frozen; the next session ships what already exists.
 - **A.** Final **ArabMaqamRock** LoRA + **Quran** (`quran_ahh_r32`) LoRA → Hugging Face model repos.
 - **B.** A new **lean end-user repo** (generation + production), referencing this repo as parent.
 
-## Blocking decisions — answer these first (details in the plan §1)
-1. **License.** YuE2 is **CC-BY-NC-4.0** → our LoRAs are NC derivatives. Accept + publish with a
-   notice? And a code license for the new repo. (This repo has **no LICENSE**.)
-2. HF **namespace + token** (`hf` CLI installed; no token cached).
-3. **Which weights**: v3 final (latest) and/or v2 (promoted production style); Quran = final.
-4. New **repo owner + name + visibility**.
-5. **Binary**: build from source per arch, or also ship a prebuilt release asset.
-6. **Dataset**: do not publish (Suno-rendered) unless told otherwise.
+## Decisions (recorded 2026-10-13)
+- **License: publish under CC-BY-NC-4.0** (inherited from YuE2; plan §1.1). Model card carries
+  the NC notice.
+- **Weights: ArabMaqamRock v3 final** (step 5000) + **Quran `quran_ahh_r32` final**.
+  The v2 style adapter is **not** published.
+- **Open (ask at execution):** HF namespace; new repo name/visibility + code license; binary
+  distribution; dataset (default: don't publish). Full detail: `docs/PUBLISH_PLAN.md` §1.
 
 ## Fast facts gathered this session (verified)
 - Parent repo `akbargherbal/maqamrock-yue2-lora-finetuning` is **public**, **no license file**.
