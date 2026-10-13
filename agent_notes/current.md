@@ -7,8 +7,9 @@ Copy/read surface only, **not authority**. Authority: `docs/COLAB_PLAN.md` (§7 
 - **Published (HF):** `akbargherbal/arabmaqamrock-yue2-lora` (v3 final) + `…/quran-pronunciation-yue2-lora`;
   `hf download` round-trip sha256 matches each model card.
 - **Lean repo live:** `github.com/akbargherbal/arabmaqamrock` @ `6411d43` (public, MIT code, NC weights).
-- **Colab hardening (new):** GCS prefix `…/OSTRIS_Arabic_Suno_Finetuning/arabmaqamrock/` with
-  `binaries/{sm75-t4,sm89-l4}/` (binary + `.sha256` + `manifest.json`). The repo gains `plumbing/`
+- **Colab hardening (new):** GCS prefix at the **bucket root**
+  `gs://akbar-december-2024-backup/arabmaqamrock/` with `binaries/{sm75-t4,sm89-l4}/` (binary +
+  `.sha256` + `manifest.json`). The repo gains `plumbing/`
   (`fetch_binary.sh`, `backup_to_gcp.py`, `env.sh`, `arch.sh`, `audio_cpp.pin`, `README.md`) and
   `setup_colab.sh`; `install.sh` rewired to the shared fetch. `binaries/sm75-t4` sha256 =
   `7ad69d1c…`, `sm89-l4` = `97028a71…`.
@@ -26,7 +27,8 @@ Copy/read surface only, **not authority**. Authority: `docs/COLAB_PLAN.md` (§7 
    python3 generate.py songs.example.json --dry-run
    python3 generate.py songs.example.json
    ```
-   Confirm a WAV under `out/…` and that `…/arabmaqamrock/runs/` gets the mirrored run.
+   Confirm a WAV under `out/…` and that `gs://akbar-december-2024-backup/arabmaqamrock/runs/` gets
+   the mirrored run.
 2. **Pin audio.cpp** the next time a build is verified: put the commit in `plumbing/audio_cpp.pin`
    (the 2026-09-22 prebuilts record `audio_cpp_commit: unknown`).
 

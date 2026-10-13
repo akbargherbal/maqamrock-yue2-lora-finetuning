@@ -38,8 +38,10 @@ Config-free base: `GCP_BACKUP_BASE = gs://akbar-december-2024-backup/OSTRIS_Arab
 
 ## 3. Decisions (settled 2026-10-13)
 
-1. **GCS prefix** — a new dedicated `…/OSTRIS_Arabic_Suno_Finetuning/arabmaqamrock/`, organised
-   cleanly from scratch (not a mirror of the parent's layout). Never collides with the run prefixes.
+1. **GCS prefix** — a new dedicated `gs://akbar-december-2024-backup/arabmaqamrock/` **at the
+   bucket root** (not nested under the project prefix `OSTRIS_Arabic_Suno_Finetuning/`), organised
+   cleanly from scratch. Its bucket root is held in `GCP_ROOT`, separate from the parent's
+   `GCP_BACKUP_BASE` (a project prefix), so exporting one never relocates the other.
 2. **Folder name** — `plumbing/`.
 3. **Binary source** — **GCS-first** (the author is the primary user; fastest path), with a
    build-from-source fallback so outsiders need no credentials. `install.sh` and `setup_colab.sh`
@@ -53,8 +55,10 @@ Config-free base: `GCP_BACKUP_BASE = gs://akbar-december-2024-backup/OSTRIS_Arab
 
 ### 4.1 GCS prefix layout
 
+At the bucket root — `gs://akbar-december-2024-backup/arabmaqamrock/` (`$GCP_ROOT/arabmaqamrock`):
+
 ```
-<base>/arabmaqamrock/
+gs://akbar-december-2024-backup/arabmaqamrock/
   README.md                                what this prefix is + the layout
   binaries/<arch-tag>/audiocpp_cli         prebuilt CUDA CLI, arch-selected at fetch time
   binaries/<arch-tag>/audiocpp_cli.sha256  sha256 of the binary
@@ -114,8 +118,9 @@ repo stays repo-root-relative (Colab clones it to `/content/arabmaqamrock`).
 
 ## 7. Result — 2026-10-13
 
-**GCS prefix created** (`…/OSTRIS_Arabic_Suno_Finetuning/arabmaqamrock/`), binary staged from the
-existing objects (server-side copy + re-hash):
+**GCS prefix created** at the bucket root — `gs://akbar-december-2024-backup/arabmaqamrock/`
+(relocated from a first cut under the project prefix; old copy deleted, sizes matched) — binary
+staged from the existing objects (server-side copy + re-hash):
 
 | arch tag | sha256 | bytes |
 |---|---|---|

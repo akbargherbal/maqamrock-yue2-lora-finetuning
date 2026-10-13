@@ -12,9 +12,14 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   `PUBLISH_PLAN.md` §9 and `COLAB_PLAN.md` §7.
 - `SOURCE_OF_TRUTH.md` lean-repo row: "no training/GCS" → the GCS prefix `<base>/arabmaqamrock/`
   + `plumbing/`.
-- Verified (CPU-only): `…/arabmaqamrock/` prefix created; sm75/sm89 staged with `.sha256` +
-  `manifest.json`; `fetch_binary.sh` round-trip sha256 matched; `backup_to_gcp.py --dry-run`
-  targets correct; `generate.py --dry-run` regression pass. No config or hyperparameter changed.
+- Verified (CPU-only): prefix created at the **bucket root** `gs://akbar-december-2024-backup/arabmaqamrock/`;
+  sm75/sm89 staged with `.sha256` + `manifest.json`; `fetch_binary.sh` round-trip sha256 matched;
+  `backup_to_gcp.py --dry-run` targets correct; `generate.py --dry-run` regression pass. No config or
+  hyperparameter changed.
+- Follow-up (same day): the prefix was moved from `…/OSTRIS_Arabic_Suno_Finetuning/arabmaqamrock/`
+  to the bucket root; the old copy was deleted after a size-matched server-side copy. The lean repo
+  now uses `GCP_ROOT` (bucket root) — deliberately separate from the parent's `GCP_BACKUP_BASE`
+  (a project prefix).
 
 ## 2026-10-13 — publish pass (HF LoRAs + lean repo): docs wired to the new artifacts
 
