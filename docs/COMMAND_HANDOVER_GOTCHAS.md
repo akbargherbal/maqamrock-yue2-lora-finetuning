@@ -295,3 +295,20 @@ human and invisible to the agent — so they get written down here.
   Note: an **interactive** user typing `pkill -f X` is unaffected (the interactive shell's cmdline is
   just `-bash`); this bites the **agent's long `bash -c` one-liners**.
 
+## 2026-10-13 — a secret exported in `~/.bashrc` is invisible to a non-interactive shell; and a careless `sed` mask leaks quoted values
+
+- **Fact (part 1):** `HF_TOKEN` was exported in `~/.bashrc`. The *interactive* user's
+  `hf auth whoami` therefore worked, while the agent's non-interactive `bash -c` shell reported
+  **"Not logged in"** (it sees neither the exported var nor `~/.cache/huggingface/token`). "The user is
+  logged in" ≠ "the agent's shell is logged in".
+- **Fact (part 2):** masking with `sed -E 's/(HF_TOKEN[^=]*=)[^ "]*/\1<MASKED>/'` **leaked the token**:
+  the value is quoted (`export HF_TOKEN="hf_…"`), so the negated class `[^ "]*` matched **zero**
+  characters at the opening quote and the rest printed verbatim.
+- **Failure prevented:** a credential printed into the chat transcript (must then be treated as
+  compromised and rotated), and a wrong "not authenticated" diagnosis.
+- **Correct pattern:** never `cat`/`grep`/`sed` a secret-bearing file in a way that can print the value.
+  Extract silently and report only a length/count:
+  `TOKEN="$(grep -oP '(?<=HF_TOKEN=")[^"]+' "$HOME/.bashrc" | head -n1)"; echo "read ${#TOKEN} chars"`.
+  Prefer `hf auth login` (writes `~/.cache/huggingface/token`, readable by any shell) over an env var in
+  an interactive-only rc file. If a secret does get printed, revoke it immediately and say so.
+
