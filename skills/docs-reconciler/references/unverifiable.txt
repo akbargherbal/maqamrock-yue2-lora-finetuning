@@ -234,3 +234,19 @@ docs/PUBLISH_PLAN.md :: --public
 # bracket-trick false positive in the pkill/pgrep gotcha (`[t]rain_watchdog.py` -> `rain_watchdog.py`)
 docs/COMMAND_HANDOVER_GOTCHAS.md :: rain_watchdog.py
 
+# 2026-10-13 — COLAB_PLAN.md describes the *lean repo's* plumbing (a separate repository,
+# github.com/akbargherbal/arabmaqamrock) and fetch_binary.sh's own flags, so none of these
+# resolve inside this repo.
+docs/COLAB_PLAN.md :: setup_colab.sh
+docs/COLAB_PLAN.md :: install.sh
+docs/COLAB_PLAN.md :: env.sh
+docs/COLAB_PLAN.md :: arch.sh
+docs/COLAB_PLAN.md :: fetch_binary.sh
+docs/COLAB_PLAN.md :: backup_to_gcp.py
+docs/COLAB_PLAN.md :: gcs.py
+docs/COLAB_PLAN.md :: manifest.json
+docs/COLAB_PLAN.md :: plumbing/*.sh
+docs/COLAB_PLAN.md :: plumbing/*.py
+docs/COLAB_PLAN.md :: --build
+docs/COLAB_PLAN.md :: --publish
+

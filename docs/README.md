@@ -36,6 +36,7 @@ operating contract is `../AGENTS.md`.
 | Repo audit: stale docs, drift & workflow backlog | [IMPROVEMENTS.md](IMPROVEMENTS.md) |
 | Use / refresh the repo knowledge graph (graphify) | [GRAPHIFY.md](GRAPHIFY.md) |
 | Publish the final LoRAs to Hugging Face + build a lean end-user generation repo — **done 2026-10-13** | [PUBLISH_PLAN.md](PUBLISH_PLAN.md) |
+| Harden the lean repo for Colab (GCS prefix, arch-selected prebuilts, backup) — **done 2026-10-13** | [COLAB_PLAN.md](COLAB_PLAN.md) |
 
 Future ideas (not runbooks, not scheduled): [FUTURE_PRONUNCIATION_LORA.md](FUTURE_PRONUNCIATION_LORA.md)
 — fixing Arabic pronunciation with a second, AR-only LoRA.

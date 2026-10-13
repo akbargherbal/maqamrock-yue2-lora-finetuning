@@ -2,6 +2,20 @@
 
 Dated records of docs changes: file, what-and-why, and the authority. One entry per pass.
 
+## 2026-10-13 — Colab hardening of the lean repo: new plan doc + one reversed rule
+
+- New live doc `docs/COLAB_PLAN.md` (authority for the lean repo's GCS plumbing); added to the
+  `docs/README.md` index.
+- **Rule reversed:** `docs/PUBLISH_PLAN.md` §4/§6 said the lean repo carries "no GCS references".
+  The repo now has an explicit `plumbing/` layer (arch-selected binary fetch + GCS backup) so it
+  works on ephemeral Colab; the *generation* path stays credential-free. Recorded in
+  `PUBLISH_PLAN.md` §9 and `COLAB_PLAN.md` §7.
+- `SOURCE_OF_TRUTH.md` lean-repo row: "no training/GCS" → the GCS prefix `<base>/arabmaqamrock/`
+  + `plumbing/`.
+- Verified (CPU-only): `…/arabmaqamrock/` prefix created; sm75/sm89 staged with `.sha256` +
+  `manifest.json`; `fetch_binary.sh` round-trip sha256 matched; `backup_to_gcp.py --dry-run`
+  targets correct; `generate.py --dry-run` regression pass. No config or hyperparameter changed.
+
 ## 2026-10-13 — publish pass (HF LoRAs + lean repo): docs wired to the new artifacts
 
 - Published `akbargherbal/arabmaqamrock-yue2-lora` (v3 final) and

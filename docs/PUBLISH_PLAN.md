@@ -206,9 +206,12 @@ Payload per repo: the `<name>-{ar,nar}.safetensors` pair + `README.md` (model ca
 `<base>/quran_ahh_r32/convert/final/` (the `adapter_manifest.json`'s own `*_gcs` paths are
 stale pre-rename `quran_ahh_r8_rank32/` references).
 
-**Phase B — scaffolded** as `github.com/akbargherbal/arabmaqamrock` (15 files; **MIT** code,
-NC weights; zero GCS / `/content` / training references). It fetches the weights from the two
-HF model repos and carries the four `*_style.txt` exported from `<base>/audiocpp_inference/prompts/`.
+**Phase B — published** as `github.com/akbargherbal/arabmaqamrock` (**MIT** code, NC weights):
+the generation path (prebuilt/HF) plus a GCS **plumbing** layer added 2026-10-13 — `plumbing/`
+(arch-selected binary fetch + backup) and `setup_colab.sh`. See [`COLAB_PLAN.md`](COLAB_PLAN.md).
+*(Supersedes the "no GCS references" note in §4/§6: the generation path is still credential-free;
+GCS is now an explicit durability layer.)*
 
-**Outstanding (user-typed, §6 gate):** create + push the GitHub repo; attach the prebuilt
-sm_75/T4 `audiocpp_cli` as a release asset; and the fresh-VM generate acceptance test on a GPU.
+**Outstanding (§6 gate):** the fresh-VM generate acceptance test on a GPU. The GitHub repo is
+live; the prebuilt binary is **not** a release asset — it lives in the GCS prefix
+`<base>/arabmaqamrock/binaries/` (decision in `COLAB_PLAN.md` §3.5).
