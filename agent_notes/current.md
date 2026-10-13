@@ -1,25 +1,44 @@
-# current.md — next session: publish + lean repo (plan written) — 2026-10-13
+# current.md — publish DONE (Phase A verified; Phase B scaffolded) — 2026-10-13
 
-Copy/read surface only, **not authority**. Authority is **`docs/PUBLISH_PLAN.md`**. Training is
-frozen; the next session ships what already exists.
+Copy/read surface only, **not authority**. Authority: `docs/PUBLISH_PLAN.md` (§9 = the
+execution record) and `SOURCE_OF_TRUTH.md`.
 
-## The two deliverables
-- **A.** Final **ArabMaqamRock** LoRA + **Quran** (`quran_ahh_r32`) LoRA → Hugging Face model repos.
-- **B.** A new **lean end-user repo** (generation + production), referencing this repo as parent.
+## Done this session
+- **Phase A (HF) — complete + verified.** Public model repos created and the weights
+  round-trip-checked (`hf download` → sha256 equals the model card):
+  - `akbargherbal/arabmaqamrock-yue2-lora` (v3 final) — AR `3531bb91…`, NAR `a7eabcad…`
+  - `akbargherbal/quran-pronunciation-yue2-lora` (`quran_ahh_r32` final) — AR `c9305c35…`, NAR `2097fd6e…`
+- **Phase B (lean repo) — scaffolded + committed locally** at `/tmp/opencode/lean-repo`
+  (15 files; **MIT** code, CC-BY-NC-4.0 weights; zero GCS/`/content`/training references).
+  Dry-run passes: `python3 generate.py songs.example.json --dry-run`.
+- Parent repo wired (this commit): `README.md` "Published artifacts & downstream",
+  `SOURCE_OF_TRUTH.md` rows, `docs/README.md`, `docs/PUBLISH_PLAN.md` §9, `RECONCILIATION_LOG.md`.
 
-## Decisions (recorded 2026-10-13)
-- **License: publish under CC-BY-NC-4.0** (inherited from YuE2; plan §1.1). Model card carries
-  the NC notice.
-- **Weights: ArabMaqamRock v3 final** (step 5000) + **Quran `quran_ahh_r32` final**.
-  The v2 style adapter is **not** published.
-- **Open (ask at execution):** HF namespace; new repo name/visibility + code license; binary
-  distribution; dataset (default: don't publish). Full detail: `docs/PUBLISH_PLAN.md` §1.
+## Outstanding — you run these
+1. **Create the new GitHub repo** (public, empty — no README/license) `akbargherbal/arabmaqamrock`,
+   then push the local scaffold:
+   ```bash
+   cd /tmp/opencode/lean-repo
+   git remote add origin https://github.com/akbargherbal/arabmaqamrock.git
+   git push -u origin main
+   ```
+2. **Prebuilt T4 binary (optional release asset).** Build script is the default in `install.sh`;
+   the verified **sm_75/T4** `audiocpp_cli` is in GCS
+   `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/build/audiocpp_cli`
+   (350,161,824 B) — attach it to the repo's first release as `audiocpp_cli.sm75-t4`.
+3. **Fresh-VM generate acceptance test (the §6 gate, needs a GPU).** On a fresh GPU VM:
+   ```bash
+   git clone https://github.com/akbargherbal/arabmaqamrock.git && cd arabmaqamrock
+   ./install.sh                                       # or ./install.sh --cuda-arch <CC>
+   python3 generate.py songs.example.json --dry-run   # validate the plan, no GPU
+   python3 generate.py songs.example.json             # real run → out/<ts>_songs-example/*.wav
+   ```
 
-## Fast facts gathered this session (verified)
-- Parent repo `akbargherbal/maqamrock-yue2-lora-finetuning` is **public**, **no license file**.
-- v3 converted adapter sha256 `3531bb91…` (`docs/LORA_INVENTORY.md:60`); v2 style in `loras/`;
-  Quran converted pair `quran_ahh_r32_{ar,nar}.safetensors` under `<base>/quran_ahh_r32/convert/`.
-- Base model for the runtime comes from HF `audio-cpp/Yue2-3B-GGUF`; the **binary** comes from a
-  **private GCS** build (sm_75/T4) — that path is not reusable publicly (plan §1.5).
-- The 4 style prompts are **not in this repo** (GCS `audiocpp_inference/prompts/`) — the lean repo
-  must export them.
+## Security
+- The HF token was accidentally printed into the chat by a broken masking regex earlier this
+  session. **Revoke it** at https://huggingface.co/settings/tokens and store the replacement via
+  `hf auth login` (→ `~/.cache/huggingface/token`), not in `~/.bashrc`.
+
+## Environment (verified)
+- localhost (no `/content`, no GPU). `hf` 2.2.0; `gcloud` works; `gh` absent (create the repo via web or install `gh`).
+- Stored git credentials exist; `git push` to origin works.
