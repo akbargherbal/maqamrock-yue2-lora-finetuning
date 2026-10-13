@@ -8,19 +8,16 @@ execution record) and `SOURCE_OF_TRUTH.md`.
   round-trip-checked (`hf download` → sha256 equals the model card):
   - `akbargherbal/arabmaqamrock-yue2-lora` (v3 final) — AR `3531bb91…`, NAR `a7eabcad…`
   - `akbargherbal/quran-pronunciation-yue2-lora` (`quran_ahh_r32` final) — AR `c9305c35…`, NAR `2097fd6e…`
-- **Phase B (lean repo) — scaffolded + committed locally** at `/tmp/opencode/lean-repo`
-  (15 files; **MIT** code, CC-BY-NC-4.0 weights; zero GCS/`/content`/training references).
+- **Phase B (lean repo) — published.** `github.com/akbargherbal/arabmaqamrock` (public, `main`,
+  commit `c4636fa`, 15 files; **MIT** code, CC-BY-NC-4.0 weights; zero GCS/`/content`/training refs).
   Dry-run passes: `python3 generate.py songs.example.json --dry-run`.
 - Parent repo wired (this commit): `README.md` "Published artifacts & downstream",
   `SOURCE_OF_TRUTH.md` rows, `docs/README.md`, `docs/PUBLISH_PLAN.md` §9, `RECONCILIATION_LOG.md`.
   Drift reconciler pass run: **30 → 19** flagged (all false positives curated).
 
 ## Outstanding
-1. **Create the new GitHub repo** — https://github.com/new → owner `akbargherbal`, name
-   `arabmaqamrock`, **Public**, and **initialize it empty** (no README, no .gitignore, no license).
-   The local repo at `/tmp/opencode/lean-repo` is committed and its remote is set; **say "created"
-   and the agent pushes** (`git -C /tmp/opencode/lean-repo push -u origin main`). A non-empty repo
-   would reject the push.
+1. ~~Create the new GitHub repo~~ — **done (2026-10-13)**: `github.com/akbargherbal/arabmaqamrock`
+   is live (public, `main`, commit `c4636fa`).
 2. **Prebuilt T4 binary (optional release asset).** Build script is the default in `install.sh`;
    the verified **sm_75/T4** `audiocpp_cli` is in GCS
    `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/build/audiocpp_cli`
