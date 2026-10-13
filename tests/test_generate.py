@@ -324,8 +324,9 @@ def test_cli_dry_run_example(gen, repo_root, capsys):
     example = repo_root / "INFERENCE" / "songs.example.json"
     assert gen.main([str(example), "--dry-run"]) == 0
     out = capsys.readouterr()
-    assert "plan: 2 song(s), 3 track(s)" in out.out
+    assert "plan: 4 song(s), 7 track(s)" in out.out
     assert "<random>" in out.out and "750" in out.out
+    assert "2640605763" in out.out and "7000" in out.out
 
 
 def test_cli_malformed_json(gen, tmp_path, capsys):

@@ -501,3 +501,26 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   `datasets/v3_arabmaqamrock/{README,manifest,build_report,v3_overrides}`.
 - **Left as history / open:** held-out set + `sample.samples` are stale vs v3 (regenerate before
   eval); `docs/IMPROVEMENTS.md` frozen-leftovers unchanged.
+
+## 2026-10-13 — canonical manifest example: pinned "quality recipe" + seed-sweep form
+
+- **Driving change:** the Probe Q read-out picked the pruned CTM style + `guidance_scale=1.5` (Q1)
+  as the provisional default; the canonical `generate.py` example showed neither that recipe, nor
+  the pinned-vs-sweep seed forms, nor the fact that sampler knobs are not manifest fields.
+- **Reconciler (Steps 1–2):** 2598 claims / 69 live docs; 1602 checkable; **22 flagged (1.4%)** —
+  all pre-existing missing paths in `docs/DATASET_V3_PLAN.md`, `docs/L4_HANDOFF_TASK14C.md`,
+  `skills/docs-reconciler/references/source_of_truth_template.md`, `README.md:118`, and
+  `results/rating_20261012-1008.md` (`workflow.md` = external repo). **No flags in the changed
+  files.** No structural warning.
+- **Edits (authority: the `docs/INFERENCE.md` schema table + `INFERENCE/generate.py`, verified by
+  `--dry-run`):**
+  - `INFERENCE/songs.example.json`: added `kurd_quality_recipe` (pinned `seed 2640605763`,
+    `cap 7000`, `lyrics_file: probe_q_lyrics.txt`, CTM Kurd style) and `kurd_seed_sweep`
+    (`seeds: [2640605763, 101, 202]`). Plan is now 4 songs / 7 tracks.
+  - `docs/INFERENCE.md`: the worked example block mirrors those two entries; added a note that
+    `guidance_scale` / `semantic_temperature` / `semantic_repetition_penalty` are **not** manifest
+    fields (they go via `EXTRA_REQUEST_OPTS`), and that `repeat: N` draws fresh random seeds while
+    `seeds: [...]` pins them.
+  - `tests/test_generate.py::test_cli_dry_run_example`: expected plan updated to `4 song(s), 7
+    track(s)` and now asserts the pinned seed/cap. `pytest tests/test_generate.py` → 61 passed.
+- **Open (unrelated, deliberately not fixed):** the 22 pre-existing missing-path flags above.

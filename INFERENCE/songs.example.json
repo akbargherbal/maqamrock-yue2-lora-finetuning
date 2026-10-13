@@ -14,6 +14,20 @@
     {
       "name": "sabah_alwatan",
       "lyrics": "[Intro]\nيا صَباحَ الوَطَنِ المَشدودِ بِالأَلَمِ...\n\n[Verse 1]\nيا صَباحَ الوَطَنِ المَشدودِ بِالأَلَمِ\nنادِ الفَجْرَ وَخُذْ بِيَ إلى النَّدَى...\n\n[Chorus]\nوَإِذا ما سَأَلوني عَن حَبيبي\nقُلتُ: ذاكَ الصَّوتُ في قَلبِ المَدى...\n\n[Outro]\nيا صَباحَ الوَطَنِ المَشدودِ بِالأَلَمِ..."
+    },
+    {
+      "name": "kurd_quality_recipe",
+      "style": "arabmaqamrock dark symphonic rock, slow stately groove, 100 BPM. Maqam Kurd. deep male vocals, breath-supported melismatic runs, melismatic phrasing in Maqam Kurd, unhurried phrase-ending sustains. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: solemn, ominous, grave.",
+      "lyrics_file": "probe_q_lyrics.txt",
+      "seed": 2640605763,
+      "cap": 7000
+    },
+    {
+      "name": "kurd_seed_sweep",
+      "style": "arabmaqamrock dark symphonic rock, slow stately groove, 100 BPM. Maqam Kurd. deep male vocals, breath-supported melismatic runs, melismatic phrasing in Maqam Kurd, unhurried phrase-ending sustains. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: solemn, ominous, grave.",
+      "lyrics_file": "probe_q_lyrics.txt",
+      "seeds": [2640605763, 101, 202],
+      "cap": 7000
     }
   ]
 }

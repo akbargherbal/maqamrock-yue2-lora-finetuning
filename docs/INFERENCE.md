@@ -152,10 +152,23 @@ python INFERENCE/generate.py my_songs.json                            # real run
       "lyrics_file": "../my_lyrics/kurd_night.txt",
       "seeds": [101, 202, 303],
       "lora": "qahh_a0p1" },
-    { "name": "quick_smoke", "style": "...", "lyrics": "...", "seed": 7, "cap": 750 }
+    { "name": "quick_smoke", "style": "...", "lyrics": "...", "seed": 7, "cap": 750 },
+    { "name": "kurd_quality_recipe",
+      "style": "arabmaqamrock dark symphonic rock, ... Mood: solemn, ominous, grave.",
+      "lyrics_file": "probe_q_lyrics.txt",
+      "seed": 2640605763, "cap": 7000 },
+    { "name": "kurd_seed_sweep", "style": "<the same Kurd style>",
+      "lyrics_file": "probe_q_lyrics.txt",
+      "seeds": [2640605763, 101, 202], "cap": 7000 }
   ]
 }
 ```
+
+Sampler knobs (`guidance_scale`, `semantic_temperature`,
+`semantic_repetition_penalty`) are **not** manifest fields — pass them via
+`EXTRA_REQUEST_OPTS` (see "Extra request options" above). `repeat: N` draws N fresh
+random seeds; `seeds: [...]` pins them. The canonical example is
+`INFERENCE/songs.example.json`.
 
 Per-song fields (unknown keys are a hard error):
 

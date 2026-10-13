@@ -1,95 +1,84 @@
-# current.md — Probe Q read-out (2026-10-12)
+# current.md — Probe Q: win recipe ("regenerate the song") — 2026-10-12
 
-Copy/read surface only, not authority. Authority = the banked audio
-`…/v3_arabmaqamrock_lora/probe_q/{,eval}` (7 files) + the run dirs under
-`/content/audiocpp_inference/out/v3_probe_q/`. Design = arm table below +
-`docs/INFERENCE.md`.
+Copy/read surface only, **not authority**. Sources: `results/rating_20261012-1539.md`,
+`INFERENCE/songs.v3_probe_q.*.json`, `INFERENCE/v3_probe_q.sh`, `INFERENCE/probe_q_lyrics.txt`.
+(The switch inventory from the previous revision of this file is in git history.)
 
-## Run facts (commit `4387dba`, this Colab session)
+## The fork — decide this first
 
-**6/6 tracks `exit=0`, none truncated, all 48 kHz stereo**, one session, one pinned
-seed `2640605763`, cap `7000`. Wall 08:21:05Z → 09:18:13Z ≈ **57 min** (≈8.9 min/track;
-the dry-run's 6.5 min/track was optimistic). Adapters sha256 `3531bb91…` / `a7eabcad…`
-(match Probe S). Driver log:189 → `banked -> …/v3_arabmaqamrock_lora/probe_q`. GPU free
-(0 MiB / 0 %) at start and end. Lyric file sha256 `8a5e9fba…`, byte-identical across all arms.
+**Seed 2640605763 is pinned, and generation is deterministic (Pass 1's `ref` re-rendered
+byte-identical).** So:
 
-## Pull the eval package to the local machine (Windows)
+- **Same seed + same config ⇒ byte-identical to Q1.** You don't regenerate anything — the
+  take already exists, banked at `…/v3_arabmaqamrock_lora/probe_q/eval/v3q_Q1_ctm_g15.wav`
+  (rated **4 overall / keep=yes / "slightly better than the 4/5 baseline"**). Zero GPU.
+- **New seed ⇒ a fresh take of the same recipe.** This is the *untested* Pass 2. It may be
+  better or worse than Q1; nothing measured predicts which. This is the only reason to spend GPU.
 
-Seven files, one arm per file, blind-scored:
+## The recipe (best known: Q1 — pruned CTM style + `guidance_scale=1.5`)
 
-```bat
-gsutil -m rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora/probe_q/eval "C:\Users\DELL\Downloads\v3_probe_q\eval"
+| Item | Value |
+|---|---|
+| style (41 w, "CTM") | the string below, verbatim |
+| lyrics | `INFERENCE/probe_q_lyrics.txt` (FROZEN; byte-verbatim, shared by all Probe Q arms) |
+| `EXTRA_REQUEST_OPTS` | `guidance_scale=1.5` — **the only change** |
+| rep-pen / temp / cot | `1.2` (default) / `1.0` (default) / `off` |
+| adapters | v3 final pair, `/content/converter/out/v3_arabmaqamrock_lora_{ar,nar}.safetensors`, scale **1.0 / 1.0** |
+| seed | `2640605763` (replay) **or** a fresh value (new take) |
+| cap | `7000` (as in Probe Q; upper cap) |
+| expected | ≈224 s, 2 ch / 48 kHz — Q1's measured shape |
+
+Style (verbatim):
+`arabmaqamrock dark symphonic rock, slow stately groove, 100 BPM. Maqam Kurd. deep male vocals, breath-supported melismatic runs, melismatic phrasing in Maqam Kurd, unhurried phrase-ending sustains. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: solemn, ominous, grave.`
+
+Co-equal alternative: swap the knob for `semantic_repetition_penalty=1.35` (= Q3, same scores).
+Do **not** combine them (= Q4, the one rejected take). Do **not** use the T3 retarget wording (= Q5, generic).
+
+## New one-song manifest (do NOT edit the frozen probe manifests)
+
+`INFERENCE/songs.v3_q1_g15.json`:
+```json
+{ "defaults": { "repeat": 1 },
+  "songs": [ { "name": "v3_q1_g15",
+    "style": "arabmaqamrock dark symphonic rock, slow stately groove, 100 BPM. Maqam Kurd. deep male vocals, breath-supported melismatic runs, melismatic phrasing in Maqam Kurd, unhurried phrase-ending sustains. Distorted electric guitars, orchestral strings, weighted acoustic rock drums, tight rhythm section. Mood: solemn, ominous, grave.",
+    "lyrics_file": "probe_q_lyrics.txt", "seed": 2640605763, "cap": 7000 } ] }
 ```
+**Existing manifests to copy** (the knob is NOT in the manifest — it's `EXTRA_REQUEST_OPTS`):
+- `INFERENCE/songs.v3_probe_q.rp135.json` — single song, byte-identical shape to the above
+  (same CTM style, same `lyrics_file`, same seed/cap); only the `name` differs. Closest template.
+- `INFERENCE/songs.v3_probe_q.g15.json` — holds the exact Q1 entry, but also Q5 (renders 2).
+- `INFERENCE/songs.example.json` — **updated 2026-10-13**: now carries the pinned quality recipe
+  (`kurd_quality_recipe`) + a seed-sweep form (`kurd_seed_sweep`); plan = 4 songs / 7 tracks
+  (`docs/INFERENCE.md:127-160`; test updated; see `RECONCILIATION_LOG.md` 2026-10-13).
 
-(`gcloud storage rsync -r <same>/probe_q/eval "…\eval"` is the equivalent on the newer CLI.)
+Schema notes (`docs/INFERENCE.md:160-196`): `style` **or** `style_file` (exactly one);
+`lyrics` **or** `lyrics_file` (exactly one); `seed` **or** `seeds` (list), mutually exclusive
+with `repeat` (N takes, **fresh random seeds** — so `"repeat": 8` is the Pass 2 seed sweep in
+one line); `cap` **or** `quantile`; `lora` alias → `defaults.lora` → `--lora-ar/--lora-nar`.
+Unknown keys are a hard error; adapter pairs are existence-checked in preflight (before GPU).
 
-## Rate (Windows box, rating-app dir)
+## Render (Colab GPU VM only — check `nvidia-smi` first; never overlap)
 
-Same scorecard as Probe S so the numbers stay comparable:
+CPU validation (no GPU): `cd /content/maqamrock-yue2-lora-finetuning && git pull` then
+`EXTRA_REQUEST_OPTS="guidance_scale=1.5" python INFERENCE/generate.py INFERENCE/songs.v3_q1_g15.json --dry-run`
 
-```bat
-cd C:\Users\DELL\Jupyter_Notebooks\ai_music_rating_app
-py app.py --audio "C:\Users\DELL\Downloads\v3_probe_q\eval" --label v3_probe_q --blind --scorecard "C:\Users\DELL\Downloads\v3_spice.json"
-```
-
-## Eval folder = exactly 7 files (banked, verified)
-
-| file | arm | style | EXTRA_REQUEST_OPTS (as applied) | ch/sr | dur |
-|---|---|---|---|---|---|
-| `v3q_Q0_ctm_default.wav` | `v3q_Q0_ctm_default` | CTM 41 w | — (guidance 1.01, rep-pen 1.2) | 2/48k | 217.8 s |
-| `v3q_Q1_ctm_g15.wav` | `v3q_Q1_ctm_g15` | CTM | `guidance_scale=1.5` | 2/48k | 224.0 s |
-| `v3q_Q2_ctm_g20.wav` | `v3q_Q2_ctm_g20` | CTM | `guidance_scale=2.0` | 2/48k | 228.0 s |
-| `v3q_Q3_ctm_rp135.wav` | `v3q_Q3_ctm_rp135` | CTM | `semantic_repetition_penalty=1.35` | 2/48k | 232.4 s |
-| `v3q_Q4_ctm_g15rp135.wav` | `v3q_Q4_ctm_g15rp135` | CTM | `guidance_scale=1.5 semantic_repetition_penalty=1.35` | 2/48k | 214.0 s |
-| `v3q_Q5_retarget_g15.wav` | `v3q_Q5_retarget_g15` | T3 retarget 32 w | `guidance_scale=1.5` | 2/48k | 227.6 s |
-| `ANCHOR_s1_core.wav` | Probe S `S1_core` | T2 26 w | free drift anchor (already rated 4) | 2/48k | 228.1 s |
-
-Anchor = copy of the banked `…/prompt_probe/lora_on/v3pp_S1_core_2640605763.wav`
-(43,791,148 B) — no GPU track spent (deterministic re-render would be byte-identical).
-
-## Knob check — proved from the runtime trace, not the manifest
-
-Caution: `batch_manifest.json` **does not record** `EXTRA_REQUEST_OPTS` (its `tracks[]`
-schema is idx/name/take/seed/cap/quantile/n_letters/style_file/style_sha256/lyrics_file/
-lyrics_sha256 only). The applied knob is proven by the audio.cpp trace in each arm's
-`.log` (line 16 `yue2.request … guidance_scale=` / line 17 `yue2.sampling.semantic …
-repetition_penalty=`) and the exact CLI args in each `_time.txt`. All five groups applied
-the intended opts:
-
-| arm | `guidance_scale` (log:16) | `repetition_penalty` (log:17) | intended? |
-|---|---|---|---|
-| `Q0` | `1.01` | `1.2` | ✅ defaults |
-| `Q1` | `1.5` | `1.2` | ✅ |
-| `Q5` | `1.5` | `1.2` | ✅ |
-| `Q2` | `2` | `1.2` | ✅ |
-| `Q3` | `1.01` | `1.35` | ✅ |
-| `Q4` | `1.5` | `1.35` | ✅ |
-
-No group silently fell back to defaults; no OOM; no truncation (`trunc=no` on all six).
-
-## What the arms test (read-out, do not judge here)
-
-- **Q0 vs Q1 vs Q2** — does `guidance_scale` help on the *pruned* prompt, and where is the
-  knee? (Pass 1 said 1.5 good / 2.5 breaks arrangement — but against the bad template.)
-- **Q3 vs Q0** — does the repetition penalty strip repeats the model *adds* on top of the text?
-- **Q4** — guidance + penalty combined.
-- **Q5** — the retarget wording (only above-baseline arm in Probe S) at guidance 1.5.
-- **ANCHOR** — literally the audio already rated 4; any score change is listener drift.
-
-Constraint (user): **LYRICS FROZEN.** `INFERENCE/probe_q_lyrics.txt` is byte-verbatim and
-shared by every arm; no lyric edits of any kind.
-
-## Run / stop / resume (Colab, GPU VM, detached)
+terminal: **detached** — survives Ctrl+C / closing the tab;
+log `/content/logs/v3_q1_g15.log`; stop `pkill -f songs.v3_q1_g15`;
+resume rerun the same line (succeeded takes skip).
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning && git pull
-DRY=1 bash INFERENCE/v3_probe_q.sh                               # CPU validation, must plan 6
 gcloud storage rsync -r "$GCP_BACKUP_BASE/v3_arabmaqamrock_lora/convert" /content/converter/out
-bash bootstrap/setup.sh --inference > /content/logs/setup.log 2>&1
-setsid nohup bash INFERENCE/v3_probe_q.sh > /content/logs/v3_probe_q.log 2>&1 < /dev/null & disown
-tail -f /content/logs/v3_probe_q.log
+export EXTRA_REQUEST_OPTS="guidance_scale=1.5"
+setsid nohup python INFERENCE/generate.py INFERENCE/songs.v3_q1_g15.json \
+  --lora-ar /content/converter/out/v3_arabmaqamrock_lora_ar.safetensors \
+  --lora-nar /content/converter/out/v3_arabmaqamrock_lora_nar.safetensors \
+  --out-dir /content/audiocpp_inference/out/v3_q1_g15 --label v3_q1_g15 \
+  > /content/logs/v3_q1_g15.log 2>&1 < /dev/null & disown
+tail -f /content/logs/v3_q1_g15.log      # ~9 min/track
 ```
 
-Stop: `pkill -f v3_probe_q.sh` · Resume: rerun the launch line (same `OUTROOT` → succeeded
-takes skip). Output: `…/out/v3_probe_q/{q0,q1_q5,q2,q3,q4}/`, one `v3q_<arm>_2640605763.wav`
-each. Banks: `…/v3_arabmaqamrock_lora/probe_q/{q..,eval/}`.
+## Caveat
+
+The pick is **provisional**: n=1, one song, one seed, and the in-package anchor drifted ≈0.9 pt
+(same file, 4→3). "Best outcome" here means *best measured so far*, not validated.
