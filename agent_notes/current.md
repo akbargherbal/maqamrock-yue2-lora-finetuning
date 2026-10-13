@@ -14,14 +14,12 @@ execution record) and `SOURCE_OF_TRUTH.md`.
 - Parent repo wired (this commit): `README.md` "Published artifacts & downstream",
   `SOURCE_OF_TRUTH.md` rows, `docs/README.md`, `docs/PUBLISH_PLAN.md` §9, `RECONCILIATION_LOG.md`.
 
-## Outstanding — you run these
-1. **Create the new GitHub repo** (public, empty — no README/license) `akbargherbal/arabmaqamrock`,
-   then push the local scaffold:
-   ```bash
-   cd /tmp/opencode/lean-repo
-   git remote add origin https://github.com/akbargherbal/arabmaqamrock.git
-   git push -u origin main
-   ```
+## Outstanding
+1. **Create the new GitHub repo** — https://github.com/new → owner `akbargherbal`, name
+   `arabmaqamrock`, **Public**, and **initialize it empty** (no README, no .gitignore, no license).
+   The local repo at `/tmp/opencode/lean-repo` is committed and its remote is set; **say "created"
+   and the agent pushes** (`git -C /tmp/opencode/lean-repo push -u origin main`). A non-empty repo
+   would reject the push.
 2. **Prebuilt T4 binary (optional release asset).** Build script is the default in `install.sh`;
    the verified **sm_75/T4** `audiocpp_cli` is in GCS
    `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/audiocpp_inference/build/audiocpp_cli`
