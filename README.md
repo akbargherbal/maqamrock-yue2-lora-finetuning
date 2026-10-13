@@ -22,9 +22,11 @@ Nothing is training right now.
   A100-SXM4-80GB. Style/timbre/arrangement match the target strongly; pronunciation improved
   over v1 to **~9/10** (a few letters still soften: ح→خ/ه, ع→أ). Dataset: 267
   lyric-conditioned pairs (`./yue2_dataset`; GCS `v2_arabmaqamrock_dataset/`).
-- **v3 dataset built (2026-10-10); next run not started.** 438 lyric/caption pairs (v2's
-  267 + 171; verbatim Suno lyric tags, style header stripped), GCS
-  `v3_arabmaqamrock_dataset.zip`. Planned run `v3_arabmaqamrock_lora` (A100, 5000 steps).
+- **v3 style LoRA** (`v3_arabmaqamrock_lora`, rank 32) — ran **5000/5000** on an A100-SXM4-80GB
+  (complete 2026-10-10). Dataset: 438 lyric/caption pairs (v2's 267 + 171; verbatim Suno lyric
+  tags, style header stripped), GCS `v3_arabmaqamrock_dataset.zip`. Final adapter converted
+  (`<base>/v3_arabmaqamrock_lora/convert/`; **not** promoted into `loras/` — v2 stays the
+  production style). Under listening evaluation (`docs/V3_SPICE_SWEEP.md`).
 - **Pronunciation donor — parked, not adopted for arabmaqamrock (2026-10-09).** **`quran_ahh_r32`**
   (rank 32, AR+NAR; AHH-filtered **3 reciters** — Husary, Hudhaify, Abdul Basit — 9,489 pairs)
   merged into v2 with `merge_quran_lora.py` at **α0.1** → the `qahh_a0*` candidates. Across two
@@ -110,7 +112,7 @@ native `mp3, 48000 Hz, stereo`, exactly what YuE2's loader expects. Captions are
 text (genre, maqam, vocals, production, instrumentation, mood) plus a
 `\n[Lyrics]\n{cleaned_lyrics}` block, with the trigger `arabmaqamrock ` baked in.
 
-**v3 (2026-10-10) is the dataset for the next run** — 438 pairs (a strict superset of v2:
+**v3 (2026-10-10) is the dataset behind the v3 run** — 438 pairs (a strict superset of v2:
 +171), GCS `v3_arabmaqamrock_dataset.zip`. Differences from v2: the **lyric tags are kept
 verbatim** (v2 collapsed `[Section | asides]` → `[Section]` and dropped non-section tags like
 `[orchestral strings swell]`), and for three tracks a stray female phrase is joined into the

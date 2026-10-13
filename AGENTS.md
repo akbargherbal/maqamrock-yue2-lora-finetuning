@@ -1,6 +1,6 @@
 # AGENTS.md
 
-_Last revised: 2026-09-28._
+_Last revised: 2026-10-13._
 
 ## 0. Read order — don't read everything
 
@@ -152,8 +152,8 @@ keep `SOURCE_OF_TRUTH.md` + the `docs/README.md` index current. **`AGENTS.md` is
 reconciled:** when its claims drift, fix it in the same change and bump the revision line.
 Persistence rule: an experience lesson only survives if it lands here (or in a skill) in
 the same turn — otherwise the next session re-earns it. Skills: `crash-diagnose-and-resume`,
-`inference-batch-run`, `command-handover`, `docs-reconciler`, `ab-blind-eval`; the runbooks
-stay the source of truth. Knowledge graph — **orientation only, never authority** (not in §4's ground-truth set;
+`inference-batch-run`, `command-handover`, `docs-reconciler`, `ab-blind-eval`,
+`listening-eval`; the runbooks stay the source of truth. Knowledge graph — **orientation only, never authority** (not in §4's ground-truth set;
 never outranks the config, code, or docs). For "how does X relate to Y", prefer
 `graphify query "<q>" --budget 1500` over reading the tree. `graphify-out/GRAPH_REPORT.md`
 is a dated snapshot — quote its `built_at_commit`, never cite it as fact. Refresh is

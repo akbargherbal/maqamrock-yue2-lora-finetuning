@@ -524,3 +524,33 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   - `tests/test_generate.py::test_cli_dry_run_example`: expected plan updated to `4 song(s), 7
     track(s)` and now asserts the pinned seed/cap. `pytest tests/test_generate.py` → 61 passed.
 - **Open (unrelated, deliberately not fixed):** the 22 pre-existing missing-path flags above.
+
+## 2026-10-13 — docs reconciliation (v3 run status; renamed configs; skills/index gaps)
+
+- **Driving change:** the `v3_arabmaqamrock_lora` run completed 2026-10-10 (commit `3a0453b`,
+  "v3 run complete (5000/5000)") and its adapter is what every probe since has used — but three
+  live docs still described the run as unstarted, and two docs still cited the pre-rename
+  `config/A100_akbar_arabic_rock_lora.yml`.
+- **Reconciler (Steps 1–2):** 2598 claims / 69 live docs; 1605 checkable; **22 flagged (1.4%)**
+  before, **19 (1.2%)** after. All are `missing_path`; **20 of 22 are false positives** (GCS
+  object names inside a `gs://` block; bucket `README.txt`/`LAYOUT.json`; the parent-dir build
+  script; `$SCRIPT_DIR` shell vars; `[t]rain_watchdog.py` bracket trick; `docs/START.` cut by a
+  sentence period; `manifest.json` qualified by prose; a legacy config name quoted *with its
+  replacement* in `docs/DATASET_V3_PLAN.md`). No structural warning.
+- **Edits (authority: the run artifacts + the live `SOURCE_OF_TRUTH.md`):**
+  - `README.md` — v3 bullet "dataset built … next run not started / planned" → "ran 5000/5000
+    (complete 2026-10-10), adapter converted, **not** promoted into `loras/`"; §Datasets "the
+    dataset for the next run" → "the dataset behind the v3 run".
+  - `docs/V3_SPICE_SWEEP.md`, `docs/V3_JARIR_SEED_PROBE.md` — status "not started" /
+    "executing" → "Pass 1 executed 2026-10-11" / "complete (4/5)".
+  - `SOURCE_OF_TRUTH.md` — spice-sweep row note "implement on Colab" → "Pass 1 complete".
+  - `docs/README.md` — env row now lists `GCP_DATASET_ZIP`; index gains the
+    `V3_JARIR_SEED_PROBE.md` row (previously omitted).
+  - `AGENTS.md` — skills list gains `listening-eval`; revision line bumped (§12).
+  - `docs/L4_HANDOFF_TASK14C.md`, `skills/docs-reconciler/references/source_of_truth_template.md`
+    — legacy config names → the v3 configs (the pre-rename files no longer exist).
+- **Found, not fixed (needs a call):** `README.md:24` gives the v2 GCS folder as
+  `v2_arabmaqrock_dataset/`; the canonical name is `v2_arabmaqamrock_dataset/`
+  (`SOURCE_OF_TRUTH.md:9`, `DECISIONS.md:28`). Missed by the mechanical pass.
+- **Deferred (user-approved):** curating `unverifiable.txt` for the recurring bucket tokens;
+  de-rotting the editable-runbook list in `skills/docs-reconciler/SKILL.md:15-19`.

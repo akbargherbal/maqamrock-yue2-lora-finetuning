@@ -1,6 +1,6 @@
 # v3 "spice" sweep — lift the Jarir probe from 4/5 to 5/5
 
-_Plan written 2026-10-10 (CPU-only session; **not started**). Implement on a Colab runtime (§7).
+_Plan written 2026-10-10 (CPU-only session). **Pass 1 executed 2026-10-11; Pass 2 pending (§5).**
 Authority for settings: this doc + `config/v3_arabmaqamrock_lora.yml`. Output is listening-judged
 by the user — the agent cannot hear audio._
 

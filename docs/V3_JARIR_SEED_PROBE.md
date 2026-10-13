@@ -1,6 +1,6 @@
 # T4 probe — 5 random seeds × v3 final adapter × one Jarir poem
 
-_Drafted + finalised 2026-10-10. Status: **executing (agent-run, background)**. Decisions in §7._
+_Drafted + finalised 2026-10-10. Status: **complete** — 5 takes, all exit 0; user verdict 4/5. Decisions in §7._
 
 ## 1. Goal
 

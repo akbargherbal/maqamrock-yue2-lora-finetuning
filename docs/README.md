@@ -17,6 +17,7 @@ operating contract is `../AGENTS.md`.
 | Build `audiocpp_cli` for a target GPU on a CPU-only runtime | [audiocpp_gpu_arch_builds.md](audiocpp_gpu_arch_builds.md) |
 | Run inference (YuE2 GGUF + LoRA) on a fresh VM | [INFERENCE.md](INFERENCE.md) |
 | Tune v3 output quality — "spice" sweep (sampler / scale / checkpoint), 4/5 → 5/5 | [V3_SPICE_SWEEP.md](V3_SPICE_SWEEP.md) |
+| Probe 5 seeds × v3 final adapter (the 4/5 Jarir take) | [V3_JARIR_SEED_PROBE.md](V3_JARIR_SEED_PROBE.md) |
 | Train the AR-only pronunciation LoRA | [PRON_LORA.md](PRON_LORA.md) |
 | **Run / resume the long-aya Quran LoRA (`quran_long_aya_r8_s10`) — RETIRED 2026-10-07** | [PRON_LORA_LONG.md](PRON_LORA_LONG.md) |
 | Verify / offline-eval the pronunciation LoRA (source + AR-loss replay) | [PRON_LORA_VERIFICATION.md](PRON_LORA_VERIFICATION.md) |
@@ -57,7 +58,7 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 | GCS base | `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning` |
 | LoRA library | `<GCS base>/loras/` (see [LORA_INVENTORY.md](LORA_INVENTORY.md)) |
 | Listening packages | `<GCS base>/listening/<PACKAGE>_INPUT/` (audio; not in the repo) |
-| Secrets/env | `/root/.secrets.env` (exports `HF_TOKEN`, `GCP_DATASET_PATH`, `GCP_BACKUP_BASE`) |
+| Secrets/env | `/root/.secrets.env` (exports `HF_TOKEN`, `GCP_DATASET_ZIP` (v3 zip, preferred) or `GCP_DATASET_PATH` (v2 folder), `GCP_BACKUP_BASE`) |
 | Inference workspace | `/content/audiocpp_inference/` (GCS `<base>/audiocpp_inference/`) |
 | Inference output | `/content/audiocpp_inference/out/` (`_runs_status.log`, `*_time.txt`, `*.json`) |
 | Inference prompts | `/content/audiocpp_inference/prompts/<Maqam>_{style,lyrics}.txt` |
