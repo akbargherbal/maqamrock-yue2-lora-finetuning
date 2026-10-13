@@ -35,6 +35,7 @@ operating contract is `../AGENTS.md`.
 | How the text→duration cap is derived | [text_to_duration_formula.md](text_to_duration_formula.md) |
 | Repo audit: stale docs, drift & workflow backlog | [IMPROVEMENTS.md](IMPROVEMENTS.md) |
 | Use / refresh the repo knowledge graph (graphify) | [GRAPHIFY.md](GRAPHIFY.md) |
+| Publish the final LoRAs to Hugging Face + build a lean end-user generation repo | [PUBLISH_PLAN.md](PUBLISH_PLAN.md) |
 
 Future ideas (not runbooks, not scheduled): [FUTURE_PRONUNCIATION_LORA.md](FUTURE_PRONUNCIATION_LORA.md)
 — fixing Arabic pronunciation with a second, AR-only LoRA.

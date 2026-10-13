@@ -554,3 +554,16 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   (`SOURCE_OF_TRUTH.md:9`, `DECISIONS.md:28`). Missed by the mechanical pass.
 - **Deferred (user-approved):** curating `unverifiable.txt` for the recurring bucket tokens;
   de-rotting the editable-runbook list in `skills/docs-reconciler/SKILL.md:15-19`.
+
+## 2026-10-13 — publish plan added (HF LoRAs + lean end-user repo)
+
+- **Change:** new `docs/PUBLISH_PLAN.md` — freeze training; publish the final ArabMaqamRock +
+  Quran (`quran_ahh_r32`) LoRAs to Hugging Face; build a lean end-user generation repo.
+  Indexed in `docs/README.md`; `agent_notes/next_session_prompt.md` refreshed to the new opener.
+- **Reconciler (Steps 1–2):** 2660 claims / 70 live docs; 1652 checkable; **27 flagged (1.6%)** =
+  22 `missing_path` (20 pre-existing false positives + 3 where the plan names files that will
+  live in the *new* repo: `install.sh`, `MODEL_CARD.md`) + 5 `unknown_flag` (`hf` CLI
+  `--type`/`--public` — an external CLI). No structural warning.
+- **Note:** the plan legitimately names not-yet-existing paths and an external CLI's flags.
+  Curating `references/unverifiable.txt` for `docs/PUBLISH_PLAN.md` is **not applied** (deferred
+  with the other unverifiable.txt item).
