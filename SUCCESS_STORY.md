@@ -131,8 +131,8 @@ file. Every run tail-able. Every checkpoint a path. Everything *legible.*
 
 That is no longer a matter of taste. **Choose tools whose entire state is text.**
 In an agent-assisted workflow, legibility to a text-based collaborator is a
-hard requirement, not a convenience — and it's why the last three weeks produced
-259 commits while the canvas-based attempts produced frustration.
+hard requirement, not a convenience — and it's why the repo's first three weeks
+produced 259 commits while the canvas-based attempts produced frustration.
 
 ---
 
@@ -148,7 +148,7 @@ Three weeks after the repo's first commit:
   trainer, the checkpoints, the adapter.
 
 And the honest scoreboard: the output is at about **4 out of 5**, not yet the
-5.5-grade experience I was used to on the platform that locked me out. I'm
+**v5.5** experience I was used to on the platform that locked me out. I'm
 tuning samplers and checkpoint selection to close that gap.
 
 So this is not a story about beating the incumbent. It's a story about no longer
