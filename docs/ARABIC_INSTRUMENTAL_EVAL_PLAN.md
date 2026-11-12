@@ -2,9 +2,11 @@
 
 _Status: **partly executed, 2026-11-12.** The 5-track checkpoint screen (`P0a` × {base,
 ck3000, ck4000, ck5000, ck5500}) was rendered on this A100 and published to
-`<base>/<run>/eval/{audio,mp3}/screen_*`. The **13-track depth round is deferred** — it needs
-a checkpoint pick from the screen. Remaining plan is unchanged and executable on any GPU with
-a staged `audiocpp_cli` (T4: sm75 binary, ~7.1 min/track; A100: sm80, measured 1:58.55)._
+`<base>/<run>/eval/{audio,mp3}/screen_*`. **Checkpoint locked: `ck5500`** (user listening
+verdict, 2026-11-12) — the staged depth JSONs are already pinned to it, so the depth round needs
+no regeneration or reconversion. The **13-track depth round is deferred** until a GPU is up.
+Remaining plan is unchanged and executable on any GPU with a staged `audiocpp_cli` (T4: sm75
+binary, ~7.1 min/track; A100: sm80, measured 1:58.55)._
 
 Grounding: `docs/INFERENCE.md` (T4 benchmark, flags), `docs/AB_BLIND_EVAL.md` +
 `skills/ab-blind-eval`, `docs/LISTENING_EVAL.md`, `docs/PRON_LORA_SWEEP.md` (sweep
@@ -382,7 +384,11 @@ Rules for this folder:
    `artifacts` no worse than base. A style gain bought with major artifacts is a loss.
 3. **Checkpoint:** highest `style_fidelity`; tie-break on `coherence` then `artifacts`; if
    still tied, take the **later** checkpoint (more exposure, same risk). Report the full
-   ladder, not just the winner.
+   ladder, not just the winner. — **Applied 2026-11-12: `ck5500`.** Converted pair (GCS
+   `<base>/arabic_instrumental_lora/converted/ck5500/`): AR
+   `69517eea8bbc9fec2ace47c271f1bde7058881e89eabe9f9c0b10cb91ae97edb`, NAR
+   `f84fdd4e9332c8be27e2d716fec9048f3d8ea3835c5e7582d6689322b6e0ea2f`; source adapter
+   `cf6d44bb…3584`.
 4. **Generalization (Q3):** H-caption scores must not be more than 1 point above P1/P2
    scores; a large gap means prompt replay, not style learning.
 5. **Vocal leakage (Q4):** any `words` on LoRA takes that base doesn't produce = flag. It is

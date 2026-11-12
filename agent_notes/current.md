@@ -1,10 +1,10 @@
-# Current — `arabic_instrumental_lora` · 2026-11-12 · training done, eval = NOW
+# Current — `arabic_instrumental_lora` · 2026-11-12 · **ck5500 LOCKED**, depth round pending
 
-**Nothing is running. The VM is off. What's left is the listening evaluation, and the only
-two things you can do locally today are (1) score the 4-checkpoint screen and (2) judge the
-base take. Everything that tests generalization (Q3/Q4/Q5) needs a GPU round that is staged
-but not rendered.** Authority: `docs/ARABIC_INSTRUMENTAL_EVAL_PLAN.md` (every claim below is
-from it or from the GCS artifacts it names).
+**Nothing is running. The VM is off. Checkpoint decision: `ck5500` (your listening verdict,
+2026-11-12) — recorded in `docs/ARABIC_INSTRUMENTAL_EVAL_PLAN.md` §9 rule 3.** The staged depth
+inputs are already pinned to it, so the depth round needs no regeneration. What remains is
+(1) the 13-track depth round on a GPU (Q3/Q4/Q5) and (2) the separate promotion/publish
+decisions.
 
 ## What is on your Windows box (verified against GCS, 2026-11-12)
 
@@ -62,8 +62,10 @@ that the LoRA stretched to 260 s. This is the reference line for decision rule 2
 Rendered inputs are already staged in GCS at `…/eval/inputs/`:
 `input_depth_ck5500_loRA.json` (7 songs: `p0b_noprefix`, `h1_0153_vocal`, `h2_0032_vocal`,
 `h3_0211_clean`, `p1_noperc`, `p3_piano_control`, `p0a_rep_prefix_s202`) + the `_base` twin
-(same, LoRA scale 0). Both are pinned to `ck5500`; if the screen winner is another checkpoint,
-regenerate the two JSONs — the converted pairs already exist, nothing to reconvert.
+(same, LoRA scale 0). Both are pinned to `ck5500` — the locked pick — so neither JSON needs
+regenerating and nothing needs reconverting. Provenance of the pair: GCS
+`<base>/arabic_instrumental_lora/converted/ck5500/`, AR `69517eea…97edb`, NAR
+`f84fdd4e…6ea2f`, source adapter `cf6d44bb…3584`.
 
 Cost: ~26 min on A100, ~1.5 h on T4. GPU rule: `nvidia-smi` first; no overlap with anything.
 
