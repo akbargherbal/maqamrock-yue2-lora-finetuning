@@ -1,83 +1,59 @@
-# Current — 2026-11-12 (preflight pass)
+# Current — `arabic_instrumental_lora` · 2026-11-12 13:50 UTC (16:50 Bahrain) · TRAINING
 
-**`arabic_instrumental_lora` passed local preflight with three plan fixes. Nothing is
-training. Next action: commit + push this branch, then open the A100 Colab session and paste
-`agent_notes/vm_start_prompt.md`.**
-
-Plan + rationale: `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md` (D1–D10, accepted as defaults).
-Dataset runbook: `docs/ARABIC_INSTRUMENTAL_DATASET.md`.
-VM session prompt: `agent_notes/vm_start_prompt.md` (paste as-is).
-
-## State (verified this turn, 2026-11-12)
+## State
 
 ```
-git              main @ 106aa15 · pushed to origin · tree clean before edits
-gpu              local box: no /content, no CUDA checks applicable
-training         not running · no output/arabic_instrumental_lora/
-GCS dataset      arabic_instrumental_dataset.zip 3,162,874,610 B @ 2026-11-12T10:49:46Z
-                 sha256 cea34fa2e584472d0b134f51dc0ae83b66d999ee1dffbc40dad4dcd783e39954
-GCS sidecars     _manifest.json 349,574 B · _report.md 2,966 B · .zip.sha256 98 B — all present
-manifest         482 tracks · 36.60 h · 283 vocal-flagged / 199 clean
-configs          parse; A100 vs L4 differ only in name/log_dir/gradient_checkpointing
+run        RUNNING · pid 22456 · started 12:22:58 · 3885/5500 steps (71 %)
+rate       2.60 s/it · 2:32:51 elapsed → ETA ~1:09:56 → finish ≈ 16:15 UTC ≈ 19:15 Bahrain
+gpu        100 % util · 73,840 MiB · 66 C
+oom        100 total = 2.57 % of steps — steady, isolated, no 2/3 or 3/3
+errors     0 tracebacks/exceptions
 ```
 
-## Preflight findings (three gaps, all fresh-VM specific)
-
-| # | Gap | Fix now in the plan |
-|---|---|---|
-| P1 | The launch notebook's secrets cell pins `GCP_DATASET_ZIP=…/v3_arabmaqamrock_dataset.zip` and sets no `GCP_DATASET_COUNT` → a stock launch pulls **438** tracks and the verify passes | §4.3 env guard: assert/append both vars after the secrets cell, before bootstrap |
-| P2 | `stop`/`status` also default to the v3 config and reject the live process; the output run name comes from the config's `name:`, not `--run-name` | §5.2/§5.3 + F8: all verbs carry `--config` |
-| P3 | §4.4 read the manifest from the build workspace (absent on a fresh VM) and never persisted the 8-track eval set | §4.4: fetch manifest from GCS; upload `/content/eval_holdout` |
-
-Also appended: two entries in `docs/COMMAND_HANDOVER_GOTCHAS.md` (v3-zip default; stop/status
-config matching).
-
-## Holdout — pinned (D7, seed 42, rehearsed against the GCS manifest)
+## Loss (225-step bins, `loss/loss`)
 
 ```
-yt500   vocal  yt500-0153-HU_nX3kcvBk        yt500   clean  yt500-0211-yAl48Tk0Sno
-yt500   vocal  yt500-0032-a8TZVDBsxTo        yt500   clean  yt500-0188-3bKyiwq30Fc
-yt500   vocal  yt500-0327-TZVrsUGhKTw        yt500   clean  yt500-0108-CPLgqU65Dss
-fs18    vocal  fs18-waynak_habib_2204908989  yt500   clean  yt500-0083-gU2rAJVlw1A
+ 500- 749  4.130      1500-1749  4.024
+ 750- 999  4.091      1750-1999  4.028
+1000-1249  4.061
+1250-1499  4.068
+first100 4.455 → last100 4.003 (Δ −0.451, −10 %) · slope since 1000: −6.1e-5/step
+linear projection @5500 ≈ 3.79 (indicative only — the curve is decelerating, not linear)
+ar_ce 3.512 → 3.122
 ```
 
-The VM run must pick exactly these; a different list = wrong manifest.
+Reading: still descending, but the slope since step 1000 is ~6× shallower than the opening
+phase. Normal deceleration for a style adapter; loss is not the verdict — audio is.
 
-## To do before the VM
+## Checkpoints
+
+```
+local   1000 1250 1500 1750 2000 2250 2500 2750 3000 3250 3500 3750  (12 = the keep cap)
+        → rotation began at 3250; 250/500/750 are gone locally, by design
+GCS     250 500 750 1000 1250 1500 1750 2000 2250 2500 2750 3000 3250 3500 3750  (15, complete)
+backup  last pass 15:04:19 "3/3 folders synced" — current · output prefix 1.5 GB local
+disk    205 GB free on /content
+```
+
+## Eval plan written (draft)
+
+`docs/ARABIC_INSTRUMENTAL_EVAL_PLAN.md` — checkpoint screen (base/3000/4000/5000/5500) on
+5 prompts ≈ 2.7 h T4, then depth on the winner ≈ 3 h. Pending your approval + index row.
+
+## Open items for the post-run docs pass (not touched mid-run)
+
+1. Plan F3/§8 quotes ~15–16 GB whole-song VRAM. `TRAINING_ANALYSIS/ANALYSIS.md:71-79` records
+   v3 at peak 81,144 MiB / 776 MiB headroom on the same A100 — the 15–16 GB number is the
+   L4/checkpointing-on case. Worth correcting, since it hid the OOM mechanism.
+2. Coverage gap: the 13 tracks ≥ ~377 s are dropped every epoch (53 OOMs = 2.65 %, matching
+   13/474). Adapter = 461 effective tracks. User decision: accept, do not stop.
+3. `status.py:33` hardcodes `RUN_NAME = "v3_arabmaqrock_lora"` → wrong run label/db path/sidecar pid.
+4. `pgrep -f 'bash bootstrap/setup.sh'` self-matches the watcher's own command line (a watcher
+   spun for the full hour after setup finished). Append to `docs/COMMAND_HANDOVER_GOTCHAS.md`.
+
+## Stop / resume (yours)
 
 ```bash
-cd /content/maqamrock-yue2-lora-finetuning   # or this worktree
-git add -A && git commit -m "preflight: arabic_instrumental_lora fresh-VM guards (env, holdout, stop)"
-git push origin main
+python train_ctl.py stop   --config config/arabic_instrumental_lora.yml
+# resume = re-run the identical start command
 ```
-
-Auth comes from your terminal (`bash bootstrap/github_auth.sh` if needed) — not from the agent.
-The VM prompt is self-contained, so it still works if the push is skipped; the repo plan would
-just be the older revision.
-
-## Launch (A100; the command is yours to type)
-
-terminal: detached — log `/content/logs/setup.log`; stop: `pkill -f bootstrap/setup.sh`;
-resume: re-run the same line (already-present files are skipped).
-
-```bash
-mkdir -p /content/logs
-cd /content/maqamrock-yue2-lora-finetuning
-setsid nohup bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 & disown
-```
-
-Gate: `[ok] dataset: 482 tracks` + `sha256sum /content/yue2_dataset.zip` = `cea34fa2…39954`
-→ holdout (474 mp3) → sidecars → dry run → then:
-
-```bash
-python train_ctl.py start --config config/arabic_instrumental_lora.yml --run-name arabic_instrumental_lora
-python train_ctl.py stop  --config config/arabic_instrumental_lora.yml   # checkpoint-safe
-```
-
-## Unchanged / still open
-
-- **Composability:** one file per expert → "mixed" = offline merge. This adapter + pron donor =
-  `merge_pron_lora.py`; this adapter + v3 style = no tool yet (plan §1.1).
-- Cosmetic drift: fixed this turn — the `config/arabic_instrumental_lora*.yml` comments now say
-  482 tracks and max **478.3 s** (were 438 / 370 s). No value changed.
-- Sidecars are down because there is no run to mirror — start both at launch (plan §5.1).

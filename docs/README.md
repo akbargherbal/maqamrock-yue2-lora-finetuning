@@ -11,6 +11,7 @@ operating contract is `../AGENTS.md`.
 | Get training running on a fresh Colab VM | [START.md](START.md) |
 | Build / verify the `arabic_instrumental_dataset` (482-track zip) | [ARABIC_INSTRUMENTAL_DATASET.md](ARABIC_INSTRUMENTAL_DATASET.md) |
 | **Plan** — train `arabic_instrumental_lora` on that 482-track zip (configs written, not launched) | [ARABIC_INSTRUMENTAL_LORA_PLAN.md](ARABIC_INSTRUMENTAL_LORA_PLAN.md) |
+| **Eval** — post-training listening plan for `arabic_instrumental_lora` (checkpoint ladder vs base, on a T4) | [ARABIC_INSTRUMENTAL_EVAL_PLAN.md](ARABIC_INSTRUMENTAL_EVAL_PLAN.md) |
 | Stop for the night and resume next session | [PAUSE_RESUME.md](PAUSE_RESUME.md) |
 | GCS mirror layout, verify a backup, restore from it | [BACKUP_RESTORE.md](BACKUP_RESTORE.md) |
 | Check how training is going | [MONITOR.md](MONITOR.md) |
