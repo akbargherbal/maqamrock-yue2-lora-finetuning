@@ -648,3 +648,23 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
 - **Note:** the plan legitimately names not-yet-existing paths and an external CLI's flags.
   Curating `references/unverifiable.txt` for `docs/PUBLISH_PLAN.md` is **not applied** (deferred
   with the other unverifiable.txt item).
+
+## 2026-11-12 — `arabic_instrumental_lora` training plan (draft)
+
+- **Change:** new `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md` — plan to train a fresh style LoRA
+  on `<base>/arabic_instrumental_dataset.zip` (482 tracks), with decisions D1–D9 and an
+  execution checklist. Indexed in `docs/README.md` (marked DRAFT / not launched).
+- **Reconciler (Steps 1–2):** 2968 claims / 74 live docs; 1810 checkable; **64 flagged (3.5%)**
+  = all `missing_path`. No structural warning. **43 of 64 are the new plan naming artifacts that
+  do not exist yet by design** (`config/arabic_instrumental_lora.yml` + `_l4.yml`,
+  `/content/eval_holdout/…/HOLDOUT.json`, GCS `_manifest.json`/`_report.md` suffixes); the other
+  21 are the pre-existing false positives (GCS object names, parent-dir build script, legacy
+  names quoted in `docs/DATASET_V3_PLAN.md`).
+- **Found while planning (not fixed — they are plan items, not doc drift):**
+  - `bootstrap/setup.sh:552-556` hard-codes `438` tracks for any zip dataset; the 482-track zip
+    fails bootstrap until the count becomes an env var (`GCP_DATASET_COUNT`, default 438). §4.1.
+  - `config/v3_arabmaqamrock_lora.yml`'s `trigger_word: arabmaqamrock` is a no-op *only because*
+    v3 captions contain it; on this dataset it would be injected into every caption
+    (`DECISIONS.md:26`, `toolkit/prompt_utils.py:715-748`). Plan D6.
+- **Not applied:** no edits to `SOURCE_OF_TRUTH.md` yet — the run config does not exist until the
+  user approves D1–D9, and an authority row for a non-existent config would be a false claim.

@@ -1,57 +1,66 @@
 # Current — 2026-11-12
 
-**Done: `arabic_instrumental_dataset` built, uploaded, and end-to-end verified.**
+**Plan written: `arabic_instrumental_lora` (style LoRA on the 482-track Arabic instrumental zip).
+Nothing launched, no config written — waiting on D1–D9 approval.**
 
-## Delivered
+Full plan (copy/read target): `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md`
+Dataset runbook (already delivered, verified): `docs/ARABIC_INSTRUMENTAL_DATASET.md`
 
-`gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/`
+## State (verified this turn)
 
-| object | size |
+```
+status.py        env Colab · git main @ f1d4b1b · disk 113.0 GB free
+training         not running (v3_arabmaqamrock_lora) · no loss_log.db
+gpu              Tesla T4 · 15,360 MiB · 0% util · no processes   <- cannot train this recipe
+sidecars         backup_to_gcp.py DOWN · gpu_logger.py DOWN · vm-continuity not installed
+GCS dataset      arabic_instrumental_dataset.zip 3,162,874,610 B (2026-11-12T10:49:46Z)
+manifest         482 tracks · 36.60 h · p50 272 s · max 478 s · 283 vocal-flagged / 199 clean
+```
+
+## Two findings that change the launch
+
+1. **Bootstrap blocks it:** `bootstrap/setup.sh:552-556` hard-codes `438` tracks for a zip
+   dataset → a 482-track zip makes setup print `[FAIL] dataset:` and stop. Fix = env var
+   `GCP_DATASET_COUNT` (default 438), plan §4.1.
+2. **`trigger_word` would fire:** v3's `arabmaqamrock` appears in **none** of these captions, so
+   toolkit injects it into every prompt (`DECISIONS.md:26`). Plan D6 sets it to
+   `Middle Eastern fusion` (present in all 482 → no-op).
+
+## Plan in one table
+
+| | |
 |---|---|
-| `arabic_instrumental_dataset.zip` | 3,162,874,610 B (964 entries: 482 mp3 + 482 txt) |
-| `arabic_instrumental_dataset.zip.sha256` | `cea34fa2e584472d0b134f51dc0ae83b66d999ee1dffbc40dad4dcd783e39954` |
-| `arabic_instrumental_dataset_manifest.json` | per-track records (482) |
-| `arabic_instrumental_dataset_report.md` | build report |
+| New run | `arabic_instrumental_lora` (+ `_l4`) — fresh from base, **not** an extension of v3 |
+| Config | v3 pair with 5 edits: `name`, `log_dir`, `trigger_word`, `train.steps` 5000→5500, sample prompts |
+| Steps | 5500 ≈ 11.4 epochs (v3 exposure) · eval holdout 8 tracks → 474 trained |
+| Wall clock | ~5–6 h A100 · ~22–24 h L4 · cost ≈ equal (4.3× measured vs 4.35× break-even) |
+| GPU needed | L4 24 GB or A100 — **T4 is out** |
 
-482 tracks = 460 `yt500_instrumental` + 22 `fadhl_shaker_instrumental_18_shortlist`;
-3,162,110,202 B audio; 36.60 h.
+## Commands for when the GPU is right (approval first)
 
-Every `.txt` = `Middle Eastern fusion, instrumental. ` + caption verbatim + `\n[Lyrics]\n` +
-section tags. Captions/sections copied byte-for-byte; source datasets untouched.
-
-## Verified
-
-- 482 mp3 + 482 txt, one-to-one; every prompt has the prefix, one `[Lyrics]`, tag-only lines.
-- All 482 mp3 decode (`ffprobe`), positive duration.
-- `unzip -t` OK; 4 random tracks re-hashed out of the zip match the manifest.
-- Remote zip streamed: sha256 `cea34fa2…39954` == local recorded sha256.
-- Manifest/report/sha256 sidecars byte-identical remote vs local.
-
-## Use
+terminal: detached — log `/content/logs/setup.log`; stop: `pkill -f bootstrap/setup.sh`;
+resume: re-run the same line.
 
 ```bash
 export GCP_DATASET_ZIP=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_dataset.zip
+export GCP_DATASET_COUNT=482
+mkdir -p /content/logs
+cd /content/maqamrock-yue2-lora-finetuning
+setsid nohup bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 & disown
 ```
 
-`bootstrap/setup.sh` unzips it flat into `/content/yue2_dataset` (`job_dataset_zip`).
+terminal: detached — log `/content/logs/train.log`; stop: `python train_ctl.py stop`;
+resume: the identical start line.
 
-## Repo
+```bash
+cd /content/maqamrock-yue2-lora-finetuning
+python train_ctl.py start --config config/arabic_instrumental_lora.yml \
+  --run-name arabic_instrumental_lora --dry-run
+```
 
-Committed locally (`git log -1`). Not pushed to GitHub yet (needs
-`bash bootstrap/github_auth.sh` + `git push origin main`). A full `git bundle` is in
-`<base>/repo_bundles/` so the work survives VM shutdown without GitHub auth.
+## Next action (needs you)
 
-- new: `prepare_arabic_instrumental_dataset.py`, `docs/ARABIC_INSTRUMENTAL_DATASET.md`,
-  `docs/ARABIC_INSTRUMENTAL_DATASET_PLAN.md`
-- edited: `SOURCE_OF_TRUTH.md` (dataset row), `docs/README.md` (index row),
-  `RECONCILIATION_LOG.md` (pass entry; 52 flagged = 3.0%, all `missing_path` false positives)
+Approve D1–D9 (or override). Then: write the two configs + the `setup.sh` count change, commit,
+push (needs `bash bootstrap/github_auth.sh` + PAT). Nothing GPU-side happens before that.
 
-## Build workspace
-
-`/content/arabic_instrumental_build/` (`src/`, flat dataset with hardlinks, zip, manifest,
-report, build.log). Safe to delete to reclaim ~6.5 GB; GCS copy is verified.
-
-## Caveats
-
-- Captions are prose (not v3's tag-style captions) and 283/482 mention vocal material
-  (`caption_vocal_terms` in the manifest). Details: `docs/ARABIC_INSTRUMENTAL_DATASET.md`.
+Repo: uncommitted = this plan + `docs/README.md` row + `RECONCILIATION_LOG.md` entry.
