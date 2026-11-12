@@ -1,7 +1,7 @@
 # Current — 2026-11-12
 
 **Plan written: `arabic_instrumental_lora` (style LoRA on the 482-track Arabic instrumental zip).
-Nothing launched, no config written — waiting on D1–D9 approval.**
+Nothing launched, no config written — waiting on D1–D10 approval.**
 
 Full plan (copy/read target): `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md`
 Dataset runbook (already delivered, verified): `docs/ARABIC_INSTRUMENTAL_DATASET.md`
@@ -35,6 +35,7 @@ manifest         482 tracks · 36.60 h · p50 272 s · max 478 s · 283 vocal-fl
 | Steps | 5500 ≈ 11.4 epochs (v3 exposure) · eval holdout 8 tracks → 474 trained |
 | Wall clock | ~5–6 h A100 · ~22–24 h L4 · cost ≈ equal (4.3× measured vs 4.35× break-even) |
 | GPU needed | L4 24 GB or A100 — **T4 is out** |
+| Deliverable | converted AR+NAR pair + sha256, new `loras/` row → standalone α=1, or `merge_pron_lora.py` with the pron donor. **Style×style mixing has no tool yet** (§1.1). |
 
 ## Commands for when the GPU is right (approval first)
 
@@ -60,7 +61,7 @@ python train_ctl.py start --config config/arabic_instrumental_lora.yml \
 
 ## Next action (needs you)
 
-Approve D1–D9 (or override). Then: write the two configs + the `setup.sh` count change, commit,
+Approve D1–D10 (or override). Then: write the two configs + the `setup.sh` count change, commit,
 push (needs `bash bootstrap/github_auth.sh` + PAT). Nothing GPU-side happens before that.
 
 Repo: uncommitted = this plan + `docs/README.md` row + `RECONCILIATION_LOG.md` entry.

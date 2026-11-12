@@ -1,7 +1,7 @@
 # Plan — `arabic_instrumental_lora` (style LoRA on the 482-track Arabic instrumental set)
 
 _Status: **DRAFT 2026-11-12.** Nothing has been launched, and no training config exists yet:
-this document is the proposal. Decisions D1–D9 are mine as defaults — reply "go with
+this document is the proposal. Decisions D1–D10 are mine as defaults — reply "go with
 defaults", or override any row, and the config + commands get written to match._
 
 Goal: train a **fresh** YuE2 style LoRA from the base checkpoint on
@@ -51,6 +51,34 @@ v3's ~20 min for 438); A3 that a 8-track holdout (§2 D7) changes training quali
 | GCS mirror | `<base>/arabic_instrumental_lora/` (sidecar `backup_to_gcp.py --run-name`) |
 | Artifact | A/NAR-converted adapter pair + sha256, evaluated by ear (§7) |
 
+### 1.1 Composability — the point of a separate LoRA (your requirement, 2026-11-12)
+
+You want this usable **on its own** and later **mixed** with the existing LoRAs. That constraint
+shapes three things, and the plan already satisfies the first:
+
+1. **Train from the base model, with no donor and no v3 init** (D1). A delta trained on top of
+   another adapter is not a clean second term; the mix would be uninterpretable.
+2. **Ship the converted pair, not just the ai-toolkit checkpoint.** The deliverable is the
+   AR + NAR `.safetensors` pair produced by `converter/convert_aitoolkit_yue2_lora.py`, with its
+   sha256 recorded — the same shape as everything in `<base>/loras/`. Raw ai-toolkit output is
+   not loadable by audio.cpp.
+3. **Mixing is an offline file merge, never a runtime flag.** `yue2.ar_lora` / `yue2.nar_lora`
+   each accept exactly **one** file and one scale (`docs/PRON_LORA_MERGE.md` §Why a file merge).
+   So "independently or mixed" means: render with this adapter at α=1 (standalone), and render
+   from a fused file (mixed).
+
+What is already supported, and what is not:
+
+| Mix | Tool | Status |
+|---|---|---|
+| this style adapter + `quran_ahh_r32` pron donor | `merge_pron_lora.py --alpha` (rank-concat on the **AR** branch, NAR copied from style) | **Supported** — this LoRA slots in as the style input; α grid 0.2/0.5/1.0 as in `docs/PRON_LORA_SWEEP.md` |
+| this adapter alone (α=1) | none needed | Supported — it is just a converted pair |
+| this adapter + **v3 style** (style×style) | — | **Not supported today.** Every existing merge is style+pron; two full style adapters overlap on **both** AR and NAR, and no script merges two style deltas. If you want that, it is a new small tool (both branches, same rank-concat math) and a separate run decision. |
+
+Two consequences for the config, both already in place: keep `linear/linear_alpha 32/32` and
+`conv 16/16` (D3) so the file is rank-compatible with the library, and never overwrite v3's
+`loras/audio_cpp/style/` — this becomes a **new** row there (`docs/LORA_INVENTORY.md`).
+
 ---
 
 ## 2. Decisions
@@ -66,6 +94,7 @@ v3's ~20 min for 438); A3 that a 8-track holdout (§2 D7) changes training quali
 | **D7** | Hold out **8 tracks** (7 `yt500` + 1 `fs18`, 4 vocal-flagged + 4 clean, seed 42) from training and use them as the eval set | **Yes, 8** | v3's eval was contaminated because the train set contained every prompt (F8 in `docs/DATASET_V3_PLAN.md`). A real holdout costs 1.7 % of data and makes the listening test mean something. |
 | **D8** | Train on L4, A100, or both | **A100 if turnaround matters; L4 is cost-equivalent** | Measured 4.3× (A100 3.10 s/step vs L4 13.4 s/step) against a 4.35× cost ratio: the A100 buys ~5 h instead of ~22 h for about the same money (§6). |
 | **D9** | Do not touch `sample.samples` (three stale v3 prompts, inert because `disable_sampling: true`) | **Replace with 2 prose instrumental prompts** | They are inert during training but would be the template anyone copy-pastes for offline sampling — and the v3 format is the wrong prompt shape for this LoRA. |
+| **D10** | Post-run deliverable = converted **AR + NAR pair** with sha256, registered as a new row in `<base>/loras/` | **Yes** | Makes it independently loadable and mixable (§1.1); the ai-toolkit checkpoint alone is not loadable by audio.cpp. |
 
 ---
 
@@ -273,8 +302,10 @@ steps on songs that are somewhat longer, so **plan for ~5–6 h on A100 or ~22�
    rather than replaying prompts.
 4. **Blind A/B.** Package variants with `INFERENCE/prepare_ab_eval.py` (skill `ab-blind-eval`)
    and rate with `docs/LISTENING_EVAL.md` — a 1–5 ear score, not loss.
-5. **Only then**: pick the checkpoint, convert (AR/NAR), record the converted sha256, and
-   decide whether to promote into `<base>/loras/` and/or publish to HF — a separate decision.
+5. **Only then**: pick the checkpoint, convert (AR/NAR), record the converted sha256, register a
+   new `<base>/loras/` row (D10). Then the mix test: this adapter at α=1 (standalone) vs
+   `merge_pron_lora.py --alpha {0.2, 0.5, 1.0}` with `quran_ahh_r32` (§1.1), same prompts and
+   seeds, blind A/B. Publishing to HF stays a separate decision.
 
 ---
 
@@ -296,7 +327,7 @@ steps on songs that are somewhat longer, so **plan for ~5–6 h on A100 or ~22�
 
 ## 9. Out of scope
 
-- No training launch, no GPU work, no config written until you approve D1–D9.
+- No training launch, no GPU work, no config written until you approve D1–D10.
 - No dataset rebuild, filter, or edit — the zip stays the authority.
 - No merge with `quran_ahh_r32` / v3, no HF publish, no `loras/` promotion.
 - No change to `/content/yue2_dataset` contents beyond the D7 holdout move.
@@ -305,7 +336,7 @@ steps on songs that are somewhat longer, so **plan for ~5–6 h on A100 or ~22�
 
 ## 10. Execution checklist (in order)
 
-- [ ] You approve D1–D9 (or override rows).
+- [ ] You approve D1–D10 (or override rows).
 - [ ] Commit `config/arabic_instrumental_lora.yml` + `_l4.yml`, the `setup.sh` count change,
       this plan; run `docs-reconciler`; note it in `RECONCILIATION_LOG.md`; add a `docs/README.md`
       index row and a `SOURCE_OF_TRUTH.md` row (config + this plan).
@@ -317,3 +348,4 @@ steps on songs that are somewhat longer, so **plan for ~5–6 h on A100 or ~22�
 - [ ] `train_ctl.py start --config … --run-name …` (typed by you).
 - [ ] First checkpoint at 250 reaches GCS before trusting the run.
 - [ ] Eval at 3000/4000/5000/5500; record the verdict.
+- [ ] Convert (AR/NAR), sha256, new `loras/` row; standalone vs α-mixed listening (§1.1, D10).
