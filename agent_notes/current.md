@@ -24,18 +24,22 @@ that length gap is itself a finding (the adapter changes structure, not only tim
 No new tool: `merge_quran_lora.py` is branch-generic (AR+NAR rank-concat, α into donor B).
 v3 = carrier (`--v2`), instrument = donor (`--quran`) → **α=0 is bit-identical to v3**.
 
-```bash
-python3 merge_quran_lora.py --alpha 0.5 \
-  --v2   /content/merge_src/v3/v3_arabmaqamrock_lora.safetensors \
-  --quran /content/merge_src/instr/arabic_instrumental_lora.safetensors \
-  --out  /content/merged/v3instr_a0.5.safetensors
-python /content/converter/convert_aitoolkit_yue2_lora.py \
-  /content/merged/v3instr_a0.5.safetensors \
-  --out-dir /content/converter/out/v3instr_a0.5 --stem v3instr_a0.5
-```
+**Grid built 2026-11-13 (CPU, this box), converted, uploaded to
+`<base>/arabic_instrumental_lora/mix_v3/a<α>/` with `MANIFEST.json`:**
 
-Grid: α ∈ {0.25, 0.5, 0.75, 1.0} + v3 control; start at **0.5**. Full recipe (download →
-merge → convert → render): `docs/PRON_LORA_MERGE.md` § "style × style".
+| α | effective share of the AR style delta | AR sha256 |
+|---:|---:|---|
+| 0.1 | 8.9 % | `d48109b3…64a0` |
+| 0.2 | 16.5 % | `820f1ce9…dd6` |
+| 0.3 | 22.8 % | `3a342098…12fe` |
+| 0.5 | 33.0 % | `5bef39fe…c7c5` |
+
+Control = v3 itself (α=0 is tensor-identical). Merge input identity proven: the GCS fused file
+`37dba84a…` is the MANIFEST source of the HF pair, and local conversion reproduced it exactly
+(AR `3531bb91…`, NAR `a7eabcad…`).
+
+Render: `loras.<arm>.dir` → `/content/converter/out/v3instr_a<α>` after pulling each arm, one
+prompt / seed / pinned cap across arms. Full recipe: `docs/PRON_LORA_MERGE.md` § "style × style".
 
 ## Step 1 (local, no GPU) — rate the 4 checkpoints in the app → Q1 + Q2
 
@@ -117,3 +121,19 @@ Only after 1–6: convert/register the winner in `<base>/loras/audio_cpp/style/`
   (`generate.py` prepends the v3 trigger unless `--no-trigger`).
 - Don't let `cap` be `auto` (tag-only lyrics → 2750 ≈ 110 s).
 - Don't rebuild the binary; check `gs://…/arabmaqrock/binaries/index.json` first.
+
+**Render JSON ready (dry-run validated):** `INFERENCE/input_mix_v3instr.json` — 5 arms
+(`v3`, `a0.1`, `a0.2`, `a0.3`, `a0.5`), Hijaz prompt from the staged
+`/content/audiocpp_inference/prompts/Hijaz_{style,lyrics}.txt`, seed 101, q=0.95 → cap **7250**
+for every arm (same lyrics ⇒ same cap). **No `--no-trigger`**: the stage style file already
+starts with `arabmaqamrock`, and the mix's conditioning side is v3, so v3's prompt shape wins.
+
+```bash
+B=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning
+gsutil -m rsync -r "$B/arabic_instrumental_lora/mix_v3" /content/mix
+mkdir -p /content/mix/v3
+gsutil -m cp "$B/v3_arabmaqamrock_lora/convert/v3_arabmaqamrock_lora_"*.safetensors /content/mix/v3/
+python INFERENCE/generate.py INFERENCE/input_mix_v3instr.json --dry-run
+setsid nohup python INFERENCE/generate.py INFERENCE/input_mix_v3instr.json \
+  --label mix_v3instr > /content/logs/mix_v3instr.log 2>&1 & disown
+```
