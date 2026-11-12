@@ -1,10 +1,18 @@
 # Plan — `arabic_instrumental_lora` (style LoRA on the 482-track Arabic instrumental set)
 
-_Status: **configs written 2026-11-12; preflight 2026-11-12; nothing launched.** D1–D10 were accepted as defaults, so
-`config/arabic_instrumental_lora.yml` + `_l4.yml` exist and the bootstrap count check is fixed
-(§4.1). Local preflight closed three fresh-VM gaps: the notebook's v3-zip default (§4.3 env
-guard), the holdout manifest path + eval-set upload (§4.4), and the zip sha256 check (§4.3).
-Launch still needs a 24 GB+ GPU and your typed command (§5.2)._
+_Status: **COMPLETED 2026-11-12 — 5500/5500 on an A100-SXM4-80GB in 3 h 36 min.**
+Final adapter `output/arabic_instrumental_lora/arabic_instrumental_lora.safetensors`,
+sha256 `cf6d44bbf4c03b28b2511e03c985e1d49894f6d4b2508a23a8f2bda3182e3584`; 21 numbered
+checkpoints (250…5250) + final adapter + `optimizer.pt` are in GCS. Eval: the 5-track
+checkpoint screen is rendered and published; the 13-track depth round is **deferred**
+(`docs/ARABIC_INSTRUMENTAL_EVAL_PLAN.md`)._
+
+**What actually happened vs this plan:** the recipe ran as written, but the longest tracks
+(≥ ~377 s, 13 of 474) OOM at the 80 GB ceiling and are skipped every epoch — 129 isolated
+skips, 2.5 % of steps. The adapter is therefore trained on **461 effective tracks**; the
+remaining 13 are disproportionately `fallback`-caption. Also, this plan's §0 F3 "15–16 GB"
+figure was the L4/checkpointing number: v3 on this A100 also ran at ~79 GB
+(`TRAINING_ANALYSIS/ANALYSIS.md:71-79`). Both corrections belong in the reconciler pass.
 
 Goal: train a **fresh** YuE2 style LoRA from the base checkpoint on
 `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_dataset.zip`

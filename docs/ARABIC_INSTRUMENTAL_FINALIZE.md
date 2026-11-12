@@ -12,8 +12,9 @@ paying for the VM. Tick in order; each item names the check that proves it.
 <out>  = /content/ai-toolkit/output/arabic_instrumental_lora
 ```
 
-Run shape: 5500/5500 steps · save_every 250 → **22 numbered checkpoints (250…5500)** ·
-`max_step_saves_to_keep: 12` → only the newest 12 stay local, **all 22 must be in GCS** ·
+Run shape: 5500/5500 steps · save_every 250 → **21 numbered checkpoints (250…5250)** ·
+`max_step_saves_to_keep: 12` → only the newest 12 stay local, **all 21 must be in GCS**; the
+step-5500 save is the unnumbered final adapter ·
 plus the final adapter `<run>.safetensors` · 0 samples (`disable_sampling: true`).
 
 ---
@@ -50,7 +51,7 @@ nvidia-smi --query-gpu=memory.used --format=csv,noheader   # expect ~0 MiB
 
 ```bash
 ls -lh <out>/ | tail -6
-ls <out>/*_00000*.safetensors | wc -l      # expect 12 (rotation cap; 22 exist up to GCS)
+ls <out>/*_00000*.safetensors | wc -l      # expect 12 (rotation cap; 21 numbered exist in GCS)
 ls -lh <out>/arabic_instrumental_lora.safetensors   # final adapter, ~115 MB
 ls -lh <out>/optimizer.pt <out>/loss_log.db <out>/config.yaml
 python monitor_loss.py <out>/loss_log.db --history 5 --total-steps 5500
@@ -79,13 +80,13 @@ tail -n 8 /content/logs/gcp_backup_stdout.log
 ```bash
 . /root/.secrets.env
 B="$GCP_BACKUP_BASE/arabic_instrumental_lora"
-gsutil ls "$B/output/"*_00000*.safetensors | wc -l      # expect 22
+gsutil ls "$B/output/"*_00000*.safetensors | wc -l      # expect 21
 gsutil ls "$B/output/arabic_instrumental_lora.safetensors"   # expect present
 gsutil ls -l "$B/output/optimizer.pt" "$B/output/loss_log.db" "$B/output/config.yaml"
 gsutil -m rsync -r -n <out> "$B/output" | head          # expect NO transfers
 ```
 
-- [ ] **22** numbered checkpoints in GCS (not 12) + the final adapter
+- [ ] **21** numbered checkpoints in GCS (not 12) + the final adapter
 - [ ] `optimizer.pt` / `loss_log.db` sizes match local
 - [ ] dry-run rsync prints no files to copy
 - [ ] last checkpoint's mtime is after the final save
@@ -160,7 +161,7 @@ vm-continuity status        # leave running until the session truly ends
 
 - [ ] `run.py` exited with no traceback; GPU free
 - [ ] local: 12 numbered + final adapter + optimizer.pt + loss_log.db + config + tensorboard
-- [ ] GCS: **22 numbered + final adapter**, optimizer/db sizes match, dry-run rsync clean
+- [ ] GCS: **21 numbered + final adapter**, optimizer/db sizes match, dry-run rsync clean
 - [ ] final adapter sha256 recorded and identical local↔GCS
 - [ ] eval holdout + manifest + dataset manifest on GCS
 - [ ] repo: docs updated, `HEAD == origin/main`, tree clean

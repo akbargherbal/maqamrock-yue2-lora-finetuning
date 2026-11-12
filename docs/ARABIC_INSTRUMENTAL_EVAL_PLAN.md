@@ -1,9 +1,10 @@
 # Eval plan — did `arabic_instrumental_lora` learn the Arabic instrumental style?
 
-_Status: **draft, 2026-11-12**. Nothing here has run. Blocked on (a) training reaching
-"Job stopped", (b) a free GPU, (c) your go-ahead. This is an evaluation plan, not an
-authority doc — it needs your approval, a `docs/README.md` index row and the
-`docs-reconciler` pass before it becomes one._
+_Status: **partly executed, 2026-11-12.** The 5-track checkpoint screen (`P0a` × {base,
+ck3000, ck4000, ck5000, ck5500}) was rendered on this A100 and published to
+`<base>/<run>/eval/{audio,mp3}/screen_*`. The **13-track depth round is deferred** — it needs
+a checkpoint pick from the screen. Remaining plan is unchanged and executable on any GPU with
+a staged `audiocpp_cli` (T4: sm75 binary, ~7.1 min/track; A100: sm80, measured 1:58.55)._
 
 Grounding: `docs/INFERENCE.md` (T4 benchmark, flags), `docs/AB_BLIND_EVAL.md` +
 `skills/ab-blind-eval`, `docs/LISTENING_EVAL.md`, `docs/PRON_LORA_SWEEP.md` (sweep
