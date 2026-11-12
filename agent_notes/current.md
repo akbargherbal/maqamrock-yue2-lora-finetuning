@@ -19,6 +19,24 @@ Consequence: **the checkpoint ladder is a fair blind comparison** (same prompt, 
 6500, same 260 s duration). **base-vs-LoRA is not blind** — 114.7 s vs 260 s gives it away, and
 that length gap is itself a finding (the adapter changes structure, not only timbre).
 
+## Mix with v3 (`arabic_instrumental_lora` × `arabmaqamrock`) — supported, verified
+
+No new tool: `merge_quran_lora.py` is branch-generic (AR+NAR rank-concat, α into donor B).
+v3 = carrier (`--v2`), instrument = donor (`--quran`) → **α=0 is bit-identical to v3**.
+
+```bash
+python3 merge_quran_lora.py --alpha 0.5 \
+  --v2   /content/merge_src/v3/v3_arabmaqamrock_lora.safetensors \
+  --quran /content/merge_src/instr/arabic_instrumental_lora.safetensors \
+  --out  /content/merged/v3instr_a0.5.safetensors
+python /content/converter/convert_aitoolkit_yue2_lora.py \
+  /content/merged/v3instr_a0.5.safetensors \
+  --out-dir /content/converter/out/v3instr_a0.5 --stem v3instr_a0.5
+```
+
+Grid: α ∈ {0.25, 0.5, 0.75, 1.0} + v3 control; start at **0.5**. Full recipe (download →
+merge → convert → render): `docs/PRON_LORA_MERGE.md` § "style × style".
+
 ## Step 1 (local, no GPU) — rate the 4 checkpoints in the app → Q1 + Q2
 
 The app groups by **parent folder**, so one folder per arm is all it needs (no renaming, no
