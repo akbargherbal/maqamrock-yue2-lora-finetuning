@@ -3,10 +3,10 @@
 ## State
 
 ```
-run        RUNNING · pid 22456 · started 12:22:58 · 3885/5500 steps (71 %)
-rate       2.60 s/it · 2:32:51 elapsed → ETA ~1:09:56 → finish ≈ 16:15 UTC ≈ 19:15 Bahrain
-gpu        100 % util · 73,840 MiB · 66 C
-oom        100 total = 2.57 % of steps — steady, isolated, no 2/3 or 3/3
+run        RUNNING · pid 22456 · started 12:22:58 · 4407/5500 steps (80 %)
+rate       1.74 s/it recent · 2:53:22 elapsed → ETA ~32 min → finish ≈ 18:57–19:05 Bahrain
+gpu        100 % util · 73,846 MiB · 66 C
+oom        112 total = 2.54 % of steps — steady, isolated
 errors     0 tracebacks/exceptions
 ```
 
