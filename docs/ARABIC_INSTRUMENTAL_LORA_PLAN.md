@@ -83,7 +83,7 @@ What is already supported, and what is not:
 |---|---|---|
 | this style adapter + `quran_ahh_r32` pron donor | `merge_pron_lora.py --alpha` (rank-concat on the **AR** branch, NAR copied from style) | **Supported** — this LoRA slots in as the style input; α grid 0.2/0.5/1.0 as in `docs/PRON_LORA_SWEEP.md` |
 | this adapter alone (α=1) | none needed | Supported — it is just a converted pair |
-| this adapter + **v3 style** (style×style) | — | **Not supported today.** Every existing merge is style+pron; two full style adapters overlap on **both** AR and NAR, and no script merges two style deltas. If you want that, it is a new small tool (both branches, same rank-concat math) and a separate run decision. |
+| this adapter + **v3 style** (style×style) | **`merge_quran_lora.py --alpha`** (rank-concat on **both** AR and NAR) | **Supported — corrected 2026-11-13.** The earlier "no script merges two style deltas" was wrong: `merge_quran_lora.py` is branch-generic (it was written for the AR+NAR `quran_ahh_r32` donor), not quran-specific. Verified on the real files: AR/NAR ranks 32+32 → 64, and the merged dense delta equals `dW_v3 + α·dW_instrumental` to 1e-8; α=0 is bit-identical to v3 (clean control). Use v3 as `--v2` (carrier) and this adapter as `--quran` so α dials the instrumental side. Output metadata still says `merge_quran_*` — record provenance by hand. |
 
 Two consequences for the config, both already in place: keep `linear/linear_alpha 32/32` and
 `conv 16/16` (D3) so the file is rank-compatible with the library, and never overwrite v3's
@@ -380,6 +380,11 @@ steps on songs that are somewhat longer, so **plan for ~5–6 h on A100 or ~22�
    new `<base>/loras/` row (D10). Then the mix test: this adapter at α=1 (standalone) vs
    `merge_pron_lora.py --alpha {0.2, 0.5, 1.0}` with `quran_ahh_r32` (§1.1), same prompts and
    seeds, blind A/B. Publishing to HF stays a separate decision.
+   **Added 2026-11-13:** the v3 × instrumental mix is now the first mix test the user asked
+   for — `merge_quran_lora.py --alpha` with v3 as carrier (§1.1 row 3); measured delta norms are
+   ≈0.99× (AR) / 0.88× (NAR) of v3's, so α=1 roughly doubles the style delta and α≈0.5 is the
+   natural midpoint. Grid and commands: `docs/PRON_LORA_MERGE.md` § style×style (added the same
+   day).
 
 ---
 

@@ -169,3 +169,64 @@ and regenerable in <1 s). `regenerate.sh` reproduces the converted AR/NAR sha256
 order, so a merged file's whole-file sha256 is **not** reproducible run-to-run (the tensors
 and parsed metadata are). Verify with the converted AR/NAR sha256 or the tensor digest, not
 `merged_sha256`. Details: `DECISIONS.md` ("Merged file sha256 is NOT reproducible").
+
+---
+
+## style × style: v3 × `arabic_instrumental_lora` (added 2026-11-13)
+
+The instrument-style adapter and the v3 maqam-rock style adapter are both full AR+NAR
+adapters at the same recipe (rank 32/32, conv 16/16, 224 tensors per branch — verified on the
+two files). Mixing them is the **same rank-concatenation merge**, and `merge_quran_lora.py`
+already does it: it is branch-generic (written for the AR+NAR `quran_ahh_r32` donor), so the
+"no tool merges two style deltas" line in `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md` §1.1 was
+wrong and has been corrected.
+
+Use **v3 as the carrier** (`--v2`) and the instrument adapter as the donor (`--quran`), so
+`--alpha` dials the instrumental side and **α=0 is bit-identical to v3** — a free control.
+
+```bash
+# CPU only, any box (inputs are the two raw ai-toolkit fused adapters from GCS)
+B=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning
+mkdir -p /content/merge_src/v3 /content/merge_src/instr
+gsutil cp "$B/v3_arabmaqamrock_lora/output/v3_arabmaqamrock_lora.safetensors" /content/merge_src/v3/
+gsutil cp "$B/arabic_instrumental_lora/output/arabic_instrumental_lora.safetensors" /content/merge_src/instr/
+
+for A in 0.25 0.5 0.75 1.0; do
+  python3 merge_quran_lora.py --alpha "$A" \
+    --v2   /content/merge_src/v3/v3_arabmaqamrock_lora.safetensors \
+    --quran /content/merge_src/instr/arabic_instrumental_lora.safetensors \
+    --out  "/content/merged/v3instr_a${A}.safetensors"
+done
+# convert each (the converter is staged by bootstrap/setup.sh --inference)
+for A in 0.25 0.5 0.75 1.0; do
+  python /content/converter/convert_aitoolkit_yue2_lora.py \
+    "/content/merged/v3instr_a${A}.safetensors" \
+    --out-dir "/content/converter/out/v3instr_a${A}" --stem "v3instr_a${A}"
+done
+sha256sum /content/converter/out/v3instr_a*/*.safetensors | tee /content/logs/v3instr_sha256.txt
+```
+
+Then render exactly as in `docs/ARABIC_INSTRUMENTAL_EVAL_PLAN.md` §5, pointing each arm's
+`loras.<arm>.dir` at `/content/converter/out/v3instr_a<A>`; one prompt, one seed, one pinned cap
+across all arms (`--no-trigger`, prefix in the style text).
+
+**Verified on the real files (2026-11-13, CPU):**
+
+| check | result |
+|---|---|
+| ranks | AR 32+32 → 64, NAR 32+32 → 64 (224 tensors per branch) |
+| dense delta of the merge | over **all 224 projections**, `max|dW_mix − (dW_v3 + 0.5·dW_instr)| = 3.0e-8` (rel 4.4e-7), AR and NAR both included |
+| α=0 | tensor-for-tensor identical to v3 |
+| delta magnitude | ‖dW_instr‖ / ‖dW_v3‖ median **0.985** (AR, n=112), **0.878** (NAR, n=112) |
+
+That last row is why α=1 is the top end and not the default: at α=1 the two style deltas are
+of equal size, i.e. the total style delta is ~1.9× either adapter alone. Start at **α=0.5**
+(roughly one third instrumental, two thirds v3) and bracket with 0.25 / 0.75 / 1.0.
+
+**Caveats**
+
+- Rank doubles (64), so the fused file is ~235 MB and the converted pair ~2× the usual size.
+  The converter's single-rank guard is satisfied (both branches are 64).
+- Output metadata still says `merge_tool: merge_quran_lora.py` / `merge_quran: …`; it is the
+  instrumental adapter. Record that in the run's manifest — the tool is not quran-specific.
+- Whole-file sha256 is not reproducible (`DECISIONS.md`); verify with the converted AR/NAR pair.

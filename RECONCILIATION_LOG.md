@@ -752,3 +752,20 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   the report prints raw option values (`true`/`false`), so it uses `choice` with Arabic v/t.
 - **Not done:** no full reconciler sweep (additive content in one doc line + two new files; no
   claim in any runbook changed). No scorecard committed to the app repo; it is copied per use.
+
+## 2026-11-13 — style×style merge exists: v3 × `arabic_instrumental_lora`
+
+- **Correction:** `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md` §1.1 claimed "no script merges two
+  style deltas — new small tool needed". Wrong: `merge_quran_lora.py` is branch-generic
+  (AR+NAR rank-concat with α folded into donor B) and was written for `quran_ahh_r32`, not for
+  quran content. The row now points at it with the verified recipe; §7.5 records the v3 mix as
+  the first mix test.
+- **New doc section:** `docs/PRON_LORA_MERGE.md` § "style × style" — commands (merge grid →
+  converter → render by `loras.<arm>.dir`), measured numbers, caveats.
+- **Verified on the real files (CPU, this box):** both adapters are 448 tensors / 224 per branch,
+  all rank 32; merge α=0.5 → rank 64 both branches, 235 MB; dense delta over all 224
+  projections matches `dW_v3 + 0.5·dW_instr` (max abs 3.0e-8, rel 4.4e-7); α=0 is tensor-identical
+  to v3; ‖dW_instr‖/‖dW_v3‖ median 0.985 (AR) / 0.878 (NAR) → α=1 ≈ 1.9× style strength, so
+  α≈0.5 is the recommended start.
+- **Not done:** no merge uploaded to GCS, no render, no checkpoint/pick change (ck5500 stands);
+  conversion still needs the GPU VM (converter is staged by `bootstrap/setup.sh --inference`).
