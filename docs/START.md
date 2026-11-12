@@ -1,8 +1,9 @@
 # Start training on a fresh Colab VM
 
-Assumes: a Colab L4 runtime, and the launching notebook has staged
-`/root/.secrets.env` (it exports `HF_TOKEN`, `GCP_DATASET_PATH`,
-`GCP_BACKUP_BASE`). Nothing here is bucket- or account-specific in the repo.
+Assumes: a Colab GPU runtime (a 24 GB L4 or an A100), and the launching notebook has staged
+`/root/.secrets.env` (it exports `HF_TOKEN`, `GCP_DATASET_ZIP`, `GCP_BACKUP_BASE`; add
+`GCP_DATASET_COUNT` yourself whenever the zip is not the 438-track v3). Nothing here is
+bucket- or account-specific in the repo.
 
 > If `/content` survived (same VM), skip to step 4 — but check whether the run
 > output still has checkpoints: relaunching will **auto-resume** from them. To
@@ -20,7 +21,9 @@ cd /content/maqamrock-yue2-lora-finetuning
 
 Does everything slow in parallel: clones ai-toolkit, installs its deps (pinned
 torch 2.13 / cu130 — see `../DECISIONS.md`), pre-warms the HF cache, and pulls
-the 438-track v3 dataset (a zip) from GCS.
+the dataset named by `GCP_DATASET_ZIP` from GCS (the 438-track v3 zip by default; the
+`arabic_instrumental_lora` run sets the 482-track instrumental zip **and**
+`GCP_DATASET_COUNT=482`, otherwise the verify fails).
 
 ```bash
 mkdir -p /content/logs
@@ -43,7 +46,9 @@ See [PAUSE_RESUME.md](PAUSE_RESUME.md). Skip for a fresh start.
 
 ## 4. Start the two sidecars
 
-Backup daemon (needs `GCP_BACKUP_BASE`, from the notebook) and GPU logger:
+Backup daemon (needs `GCP_BACKUP_BASE`, from the notebook) and GPU logger. `--run-name` must equal
+the config's `name:` key — `v3_arabmaqamrock_lora` is only the default/current example;
+`arabic_instrumental_lora` is the next run.
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
@@ -63,13 +68,22 @@ python train_ctl.py start
 
 Launches **detached** (its own session), so a stray Ctrl+C in this tab can't kill
 it, and writes a pid/state file plus both logs. It reuses the latent cache if
-present (else caches ~12 min first), then trains to `train.steps`. Note: the very
-first thing after start is the **step-0 sample generation**, so `loss_log.db`
-stays at 0 steps for a few minutes — that is normal, not a stall.
+present, else caches first — A2 estimates ~22 min for the 482-track set (v3's 438 was
+quoted at ~20 min; older v2 notes say ~12 min, so treat it as tens of minutes). With
+`sample`/`disable_sampling: true` (the current configs) there is **no**
+step-0 sample, so `loss_log.db` sits at 0 steps for the whole cache pass — normal,
+not a stall. A config with sampling enabled instead spends a few minutes generating
+step 0 first.
 
 ```bash
 python train_ctl.py status    # running? pid? log tail
 python train_ctl.py stop      # SIGINT; waits for "Job stopped"
 ```
+
+The bare verbs above are correct **only for the default v3 config**. Any other run
+(`arabic_instrumental_lora`, the L4 variant, a pron run) must pass its config to all three:
+`--config config/<run>.yml`. `start` otherwise launches v3, and `stop`/`status` otherwise
+reject the live process with "not our training run" — see `docs/COMMAND_HANDOVER_GOTCHAS.md`
+(2026-11-12).
 
 Then monitor it: [MONITOR.md](MONITOR.md).

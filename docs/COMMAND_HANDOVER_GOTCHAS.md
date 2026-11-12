@@ -312,3 +312,33 @@ human and invisible to the agent — so they get written down here.
   Prefer `hf auth login` (writes `~/.cache/huggingface/token`, readable by any shell) over an env var in
   an interactive-only rc file. If a secret does get printed, revoke it immediately and say so.
 
+
+## 2026-11-12 — the launch notebook's secrets cell pins the *v3* dataset zip
+
+- **Fact:** `notebooks/L4_QPRON_ArabicSuno_vscode_anywhere.ipynb` cell 2 hardcodes
+  `GCP_DATASET_ZIP = "…/v3_arabmaqamrock_dataset.zip"` and never writes `GCP_DATASET_COUNT`.
+  For any non-v3 run (e.g. `arabic_instrumental_lora`, 482 tracks) a "just run the notebook"
+  launch therefore pulls a *valid* 438-track dataset: `bootstrap`'s verify passes, and training
+  starts on the wrong data under the new run name. Nothing in `/content/logs/setup.log` looks
+  wrong except the count.
+- **Correct pattern:** after the secrets cell and **before** `bootstrap/setup.sh`, assert both
+  vars, and append overrides to `/root/.secrets.env` (sourced at the end of `setup.sh`, so the
+  later `export` wins):
+  `grep -E '^export GCP_DATASET' /root/.secrets.env` →
+  expect `…/arabic_instrumental_dataset.zip` and `GCP_DATASET_COUNT=482`.
+  Then require `[ok] dataset: 482 tracks` in the setup summary — 438 is the tell.
+- **Note:** the secrets cell rewrites `/root/.secrets.env` from scratch, so an override added
+  *before* that cell runs is wiped. Order: secrets cell → assert/append → bootstrap.
+
+## 2026-11-12 — `train_ctl.py stop/status` also default to the v3 config, and refuse your run
+
+- **Fact:** `start` launches `run.py <absolute-config> -l <log>` — the run's output name comes from
+  the config's `name:` key, and `--run-name` only labels `/content/logs/train.pid`. `stop` and
+  `status` re-derive "is this our process" from **their own** `--config`/`--run-name` args
+  (`_cmdline_matches`, `train_ctl.py:89-92`). Called bare, they resolve the v3 config, fail the
+  match, and print `refusing to signal pid … not our training run` (stop) or `not running` (status)
+  while the job is very much alive.
+- **Correct pattern:** always pass the run's config to all three verbs:
+  `python train_ctl.py start|stop|status --config config/<run>.yml`.
+  The launch command in your notes and the stop command must be edited **together** — copying only
+  the start line leaves a stop that silently can't stop.

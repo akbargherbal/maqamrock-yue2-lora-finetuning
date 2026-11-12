@@ -19,10 +19,13 @@ Schema (fixed, verified against toolkit/logging_aitk.py):
     metrics(step, key, value_real, value_text)
 
 Usage:
-    python monitor_loss.py output/v3_arabmaqamrock_lora/loss_log.db
-    python monitor_loss.py output/v3_arabmaqamrock_lora/loss_log.db --history 50
-    python monitor_loss.py output/v3_arabmaqamrock_lora/loss_log.db --key nar_flow --history 200
-    python monitor_loss.py output/v3_arabmaqamrock_lora/loss_log.db --watch 30
+    python monitor_loss.py output/arabic_instrumental_lora/loss_log.db
+    python monitor_loss.py output/arabic_instrumental_lora/loss_log.db --history 50
+    python monitor_loss.py output/arabic_instrumental_lora/loss_log.db --key "loss/ar_ce" --history 200
+    python monitor_loss.py output/arabic_instrumental_lora/loss_log.db --watch 30
+
+Confirmed keys: additional_model_loss, learning_rate, loss/ar_ce, loss/ar_kl,
+loss/loss -- there is no nar_flow (DECISIONS.md).
 """
 
 from __future__ import annotations

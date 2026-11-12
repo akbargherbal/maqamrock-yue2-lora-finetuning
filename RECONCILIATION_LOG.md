@@ -2,6 +2,52 @@
 
 Dated records of docs changes: file, what-and-why, and the authority. One entry per pass.
 
+## 2026-11-12 — preflight of `arabic_instrumental_lora` (local, no GPU)
+
+- **Change:** three plan corrections, all found by re-deriving the fresh-VM path against the code,
+  no hyperparameter/config edits:
+  - `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md` §4.3 — env guard: the notebook's secrets cell pins
+    the **v3** zip and never sets `GCP_DATASET_COUNT`, so the stock launch would pull 438 tracks
+    and the verify would pass (authority: `notebooks/L4_QPRON_ArabicSuno_vscode_anywhere.ipynb`
+    cell 2 + `bootstrap/setup.sh:105-107,555-565`).
+  - §4.3 — post-bootstrap `sha256sum /content/yue2_dataset.zip` (bootstrap does not check the
+    download; authority: `.zip.sha256` = `cea34fa2…39954`).
+  - §4.4 — the holdout manifest is **not** inside the zip (archive = 482 mp3 + 482 txt) and the
+    build workspace does not exist on a fresh VM, so the script now fetches it from GCS into
+    `/tmp/ai_manifest.json`; also added the one-time upload of `/content/eval_holdout` (the eval
+    set is otherwise VM-local, and `backup_to_gcp.py` mirrors only output/logs/agent_notes).
+  - §5.2/§5.3/F8 — `stop`/`status` also default to the v3 config and reject the live process
+    (`_cmdline_matches`), so both must carry `--config config/arabic_instrumental_lora.yml`; and
+    the output run name comes from the config's `name:` key, not `--run-name` (authority:
+    `train_ctl.py:89-92,121-138,183-224`; `DECISIONS.md:47`).
+- **Rehearsal:** the §4.4 selection was run locally against the real GCS manifest with seed 42 —
+  482 records, `yt500` 277 vocal / 183 clean, `fs18` 6 vocal / 16 clean, and it produced exactly
+  8 tracks (4 vocal + 4 clean). Those 8 names are now written into §4.4 as the expected set, so
+  the VM run is a comparison, not a first attempt.
+- **Second pass — factual corrections for the next run** (user request, same day):
+  - configs: two stale comments corrected (dataset 438→482 tracks; max duration 370 s→478.3 s);
+    header now says "five deliberate VALUE edits" + the two comment fixes, so the §3 audit claim
+    stays true. No key the trainer reads changed (`yaml` still parses; value diff vs v3 is still
+    name/log_dir/trigger/steps/samples).
+  - plan: D9/§3 said "three stale v3 prompts" — the v3 config has **four** (measured); F3
+    percentiles recomputed with an explicit method (p50 271.7, p90 335.2, max 478.3, mean 273.3);
+    §4.2 "today's VM is a T4" dated to the 2026-11-12 preflight VM.
+  - `docs/START.md`, `docs/MONITOR.md`, `docs/PAUSE_RESUME.md`: run name and step total
+    parameterized (`RUN`, `STEPS`); corrected the 0-steps explanation (these configs have
+    `disable_sampling: true`, so the gap is latent caching, not step-0 sampling); reconciled the
+    cache-time claim (v2 ~12 min / v3 ~20 min / 482-track ~22 min, plan A2) and fixed
+    `DECISIONS.md`'s one-line version; `--run-name` must equal the config's `name:`.
+  - `docs/README.md` constants: split last-run vs next-run output/metrics rows (next run marked
+    not launched).
+  - `monitor_loss.py`: docstring example used `--key nar_flow`, a key that does not exist
+    (`DECISIONS.md:12`); switched to `loss/ar_ce` and listed the real keys.
+- **Also:** `docs/COMMAND_HANDOVER_GOTCHAS.md` — new entry for the notebook v3-zip default.
+- **Verified, unchanged:** both configs parse and differ from the v3 pair only in
+  name/log_dir/trigger/steps/samples (L4 additionally `gradient_checkpointing: true`); `bash -n`
+  `setup.sh` clean; GCS objects live at F1 sizes; `origin/main` = local HEAD `106aa15`;
+  `train_ctl.py start` accepts `--config/--run-name/--dry-run`; manifest fields
+  (`tracks/out_name/source_dataset/caption_vocal_terms`) exist in the builder.
+
 ## 2026-11-12 — arabic_instrumental_dataset built, uploaded, documented
 
 - **New dataset** (authority: the GCS objects + their `.sha256`/manifest, re-derived from the two

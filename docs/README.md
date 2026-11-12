@@ -51,13 +51,14 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 
 | | |
 |---|---|
-| Run name | `v3_arabmaqamrock_lora` (A100) · `v3_arabmaqamrock_lora_l4` (L4) · `arabic_instrumental_lora`(`_l4`) — written, not launched |
+| Run name | last run: `v3_arabmaqamrock_lora` (A100) · `v3_arabmaqamrock_lora_l4` (L4). Next (configs written, **not launched**): `arabic_instrumental_lora` (A100) · `arabic_instrumental_lora_l4` (L4) |
 | Repo | `/content/maqamrock-yue2-lora-finetuning` |
 | ai-toolkit | `/content/ai-toolkit` (cloned by bootstrap, tracks `main`) |
-| Dataset | `/content/yue2_dataset` (v3, 438 tracks, from `GCP_DATASET_ZIP`) · instrumental run: 482 tracks, needs `GCP_DATASET_COUNT=482` |
-| Run output | `/content/ai-toolkit/output/v3_arabmaqamrock_lora/` |
+| Dataset | same folder for every run, `/content/yue2_dataset`; contents come from `GCP_DATASET_ZIP`. v3 = 438 tracks (default count); next run = 482 tracks, needs `GCP_DATASET_COUNT=482` |
+| Run output (last) | `/content/ai-toolkit/output/v3_arabmaqamrock_lora/` |
+| Run output (next) | `/content/ai-toolkit/output/arabic_instrumental_lora/` — after launch, not before |
 | Train log | `/content/logs/train.log` |
-| Metrics db | `/content/ai-toolkit/output/v3_arabmaqamrock_lora/loss_log.db` |
+| Metrics db | `<run output>/loss_log.db` — last: `…/v3_arabmaqamrock_lora/loss_log.db` · next: `…/arabic_instrumental_lora/loss_log.db` |
 | GPU csv | `/content/logs/gpu_usage.csv` |
 | GCS base | `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning` |
 | LoRA library | `<GCS base>/loras/` (see [LORA_INVENTORY.md](LORA_INVENTORY.md)) |

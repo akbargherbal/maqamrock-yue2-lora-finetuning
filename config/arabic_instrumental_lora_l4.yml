@@ -3,21 +3,23 @@ job: "extension"
 config:
   # arabic_instrumental_lora (2026-11-12): fresh style LoRA on the 482-track
   #   arabic_instrumental_dataset.zip (36.60 h, prose captions, section-tag
-  #   "lyrics"). Forked from the v3 config with FIVE deliberate edits only --
+  #   "lyrics"). Forked from the v3 config with FIVE deliberate VALUE edits --
   #   name / log_dir / trigger_word / train.steps / sample.samples. Every other
-  #   value is v3's, so the dataset is the single experimental variable.
+  #   value is v3's, so the dataset is the single experimental variable. Two
+  #   inherited comments were also corrected to this dataset's numbers (438->482
+  #   tracks; max duration 370s->478.3s); no hyperparameter moved.
   #   Plan + rationale: docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md (D1-D10).
-  #   trigger_word: "Middle Eastern fusion" occurs in every caption, so AI
-  #   Toolkit's injector is a no-op (toolkit/prompt_utils.py:715-748); the v3
-  #   word "arabmaqamrock" appears in NONE of these captions and would have been
-  #   prepended to all of them.
+  #   trigger_word: "Middle Eastern fusion" occurs in every prompt (the
+  #   builder's prefix), so AI Toolkit's injector is a no-op
+  #   (toolkit/prompt_utils.py:715-748); the v3 word "arabmaqamrock" appears in
+  #   NONE of these prompts and would have been prepended to all of them.
   name: "arabic_instrumental_lora_l4"
   process:
     - type: "diffusion_trainer"
       training_folder: "/content/ai-toolkit/output"
       sqlite_db_path: "/content/ai-toolkit/aitk_db.db"   # made absolute -- easier to target in the backup script below
       device: "cuda"
-      trigger_word: "Middle Eastern fusion"   # present in all 482 captions -> injector is a no-op (plan D6)
+      trigger_word: "Middle Eastern fusion"   # in every prompt via the builder's prefix -> injector is a no-op (plan D6)
       performance_log_every: 10
       network:
         type: "lora"
@@ -52,7 +54,7 @@ config:
         save_format: "diffusers"
         push_to_hub: false
       datasets:
-        - folder_path: "/content/yue2_dataset"  # downloaded fresh into /content/ each Colab session via bootstrap/setup.sh's job_dataset(), backed up by backup_to_gcp.py
+        - folder_path: "/content/yue2_dataset"  # fetched as a zip (GCP_DATASET_ZIP) via bootstrap/setup.sh's job_dataset_zip(); the 482 mp3+txt land flat here (8 are moved to /content/eval_holdout before launch -- plan D7)
           mask_path: null
           mask_min_value: 0.1
           default_caption: ""
@@ -124,7 +126,7 @@ config:
           # only. Fine for a pure timbre/style adapter; wrong for a full-song-structure goal,
           # since the AR expert never once saw a gradient spanning a verse->chorus transition.
           # 0 = whole song, no cropping (condition_noisy_latents no-ops when window<=0). Safe per
-          # verification.md: dataset max is 370s, well inside the ~983s AR context ceiling
+          # plan F3 (manifest, numpy linear p50/p90): dataset max is 478.3s (482 tracks), well inside the ~983s AR context ceiling
           # (CONTEXT 24576 / 25fps), and the VAE's "60s chunks" are only an offline encode-time
           # memory trick (src/vae.py encode()) -- cached latents are one contiguous per-song
           # tensor, so a larger window isn't crossing any real boundary.

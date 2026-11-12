@@ -1,8 +1,10 @@
 # Plan — `arabic_instrumental_lora` (style LoRA on the 482-track Arabic instrumental set)
 
-_Status: **configs written 2026-11-12; nothing launched.** D1–D10 were accepted as defaults, so
+_Status: **configs written 2026-11-12; preflight 2026-11-12; nothing launched.** D1–D10 were accepted as defaults, so
 `config/arabic_instrumental_lora.yml` + `_l4.yml` exist and the bootstrap count check is fixed
-(§4.1). Launch still needs a 24 GB+ GPU and your typed command (§5.2)._
+(§4.1). Local preflight closed three fresh-VM gaps: the notebook's v3-zip default (§4.3 env
+guard), the holdout manifest path + eval-set upload (§4.4), and the zip sha256 check (§4.3).
+Launch still needs a 24 GB+ GPU and your typed command (§5.2)._
 
 Goal: train a **fresh** YuE2 style LoRA from the base checkpoint on
 `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_dataset.zip`
@@ -24,14 +26,14 @@ Authorities: dataset = `docs/ARABIC_INSTRUMENTAL_DATASET.md`; hyperparameters =
 |---|---|---|
 | F1 | The four GCS objects exist at the recorded sizes: `arabic_instrumental_dataset.zip` **3,162,874,610 B** (2026-11-12T10:49:46Z), plus `.zip.sha256` (98 B), `_manifest.json` (349,574 B), `_report.md` (2,966 B). | `gsutil ls -l .../arabic_instrumental_dataset*` |
 | F2 | Manifest: **482 tracks**, **36.60 h**, audio 3,162,110,202 B; 460 `yt500` + 22 `fadhl_shaker_shortlist`; prompt prefix `Middle Eastern fusion, instrumental. `; `[Lyrics]` block = section tags only. | manifest read (`/tmp/ai_manifest.json`) |
-| F3 | Duration distribution (from `audio_duration_s`): **min 143.1 s · p50 271.7 s · p90 335.3 s · max 478.3 s**. **0 tracks > 600 s**, 0 > 983 s. So `train_window_frames: 0` (whole song) is still inside the AR context ceiling (~983 s), as in v3. | same read |
+| F3 | Duration distribution (from `audio_duration_s`, numpy linear percentiles): **min 143.1 s · p50 271.7 s · p90 335.2 s · max 478.3 s** (mean 273.3 s). **0 tracks > 600 s**, 0 > 983 s. So `train_window_frames: 0` (whole song) is still inside the AR context ceiling (~983 s), as in v3. | `audio_duration_s` in the manifest, recomputed 2026-11-12 |
 | F4 | Caption status: **439 `ok`, 35 `fallback`, 6 `failed`, 2 `single_chunk`**; **283/482** carry a vocal term (`caption_vocal_terms` non-empty), **199** are clean. | same read |
 | F5 | `bootstrap/setup.sh` already consumes a zip (`job_dataset_zip`, unzip **flat** into `/content/yue2_dataset`), so the config's `folder_path` does not change. | `sed -n 265,282p bootstrap/setup.sh` |
 | F6 | **Blocker (fixed 2026-11-12): the bootstrap verify hard-coded 438 tracks** and failed the whole setup when a zip was used and the count differed (`setup.sh:552-556` before the fix). Pointing `GCP_DATASET_ZIP` at the 482-track zip failed bootstrap as written. | `sed -n 550,562p bootstrap/setup.sh`; fixed per §4.1 |
 | F7 | **`trigger_word` is not inert on this dataset.** Toolkit injection prepends `trigger + " "` when the trigger appears **zero** times in the caption (`toolkit/prompt_utils.py:715-748`, recorded in `DECISIONS.md` line 26). `arabmaqamrock` appears in **none** of these captions, so reusing the v3 config verbatim would silently train on `arabmaqamrock Middle Eastern fusion, instrumental. …` — a prompt shape no inference script will ever produce. | `DECISIONS.md` line 26 + dataset prompt template |
-| F8 | `train_ctl.py` starts `config/v3_arabmaqamrock_lora.yml` unless `--config` is passed, and names the run from the config stem unless `--run-name` is passed. | `train_ctl.py:40,260,268` |
+| F8 | `train_ctl.py` starts `config/v3_arabmaqamrock_lora.yml` unless `--config` is passed; the output run name comes from the config's `name:` key (its `--run-name` only labels the pid/state file), and `stop`/`status` also default to v3 and then reject the live process. | `train_ctl.py:40,121,138,183,210-224` |
 | F9 | This VM is a **Tesla T4, 15,360 MiB, 0 % util, no processes**. The v3 whole-song run peaked at ~15.8 GB on an L4 (24 GB) and ~15–16 GB on an A100, so a T4 cannot train this recipe (and is Turing — no bf16 tensor cores). | `nvidia-smi`, `docs/GPU_L4_VS_A100.md` |
-| F10 | The built, unzipped dataset still exists locally at `/content/arabic_instrumental_build/arabic_instrumental_dataset` (964 files); disk free **113.0 GB**. Useful for holdout/eval work without re-downloading; not used as the training path (provenance stays the GCS zip). | `ls`, `du`, `status.py` |
+| F10 | The built, unzipped dataset still exists locally at `/content/arabic_instrumental_build/arabic_instrumental_dataset` (964 files); disk free **113.0 GB**. That workspace is **VM-local to the 2026-11-12 T4 box** — a fresh A100 does not have it, and the manifest is not inside the zip, so §4.4 fetches it from GCS. Not used as the training path (provenance stays the GCS zip). | `ls`, `du`, `status.py` |
 
 **Assumed, not verified** (named so they aren't mistaken for facts):
 A1 step-time scaling with song length (§6, ±10 %); A2 latent-cache time (~22 min, scaled from
@@ -90,10 +92,10 @@ Two consequences for the config, both already in place: keep `linear/linear_alph
 | **D3** | Keep the v3 network/optimiser recipe unchanged (rank 32/32, conv 16/16, lr 1e-4, adamw8bit, EMA 0.999, bf16, whole-song window, `ar_kl_weight: 0`, `cot: off`) | **Unchanged** | One variable at a time: the dataset is the experiment. Any LoRA-size/LR change is a second variable and not measurable at n=1. |
 | **D4** | `train.steps` = **5500** | **5500** | Reproduces v3's per-track exposure: 5000/438 = 11.42 epochs → 11.42 × 482 = **5504**. 5500 lands on the 250-step save cadence (§6). |
 | **D5** | Train on **all 482** tracks as delivered (including the 41 `fallback`/`failed` captions and the 283 vocal-flagged ones) | **All 482** | The delivered artifact is the authority; filtering is a second dataset decision. The vocal flags are a captioner artifact inherited from the sources, and cutting 283 tracks would cut 59 % of the data. Revisit only if the first run's audio shows it mattered. |
-| **D6** | `trigger_word` | **`Middle Eastern fusion`** | Present in every caption, so injection is a no-op (F7). Any trigger absent from the captions gets injected and mismatches inference. |
+| **D6** | `trigger_word` | **`Middle Eastern fusion`** | Present in every prompt via the builder's `Middle Eastern fusion, instrumental.` prefix, so AI Toolkit's injector is a no-op (F7). Any trigger absent from the prompt text gets injected and mismatches inference. |
 | **D7** | Hold out **8 tracks** (7 `yt500` + 1 `fs18`, 4 vocal-flagged + 4 clean, seed 42) from training and use them as the eval set | **Yes, 8** | v3's eval was contaminated because the train set contained every prompt (F8 in `docs/DATASET_V3_PLAN.md`). A real holdout costs 1.7 % of data and makes the listening test mean something. |
 | **D8** | Train on L4, A100, or both | **A100 if turnaround matters; L4 is cost-equivalent** | Measured 4.3× (A100 3.10 s/step vs L4 13.4 s/step) against a 4.35× cost ratio: the A100 buys ~5 h instead of ~22 h for about the same money (§6). |
-| **D9** | Do not touch `sample.samples` (three stale v3 prompts, inert because `disable_sampling: true`) | **Replace with 2 prose instrumental prompts** | They are inert during training but would be the template anyone copy-pastes for offline sampling — and the v3 format is the wrong prompt shape for this LoRA. |
+| **D9** | Do not touch `sample.samples` (four stale v3 prompts, inert because `disable_sampling: true`) | **Replace with 2 prose instrumental prompts** | They are inert during training but would be the template anyone copy-pastes for offline sampling — and the v3 format is the wrong prompt shape for this LoRA. |
 | **D10** | Post-run deliverable = converted **AR + NAR pair** with sha256, registered as a new row in `<base>/loras/` | **Yes** | Makes it independently loadable and mixable (§1.1); the ai-toolkit checkpoint alone is not loadable by audio.cpp. |
 
 ---
@@ -109,7 +111,7 @@ Two consequences for the config, both already in place: keep `linear/linear_alph
 | `log_dir` | `output/v3_arabmaqamrock_lora/tensorboard` | `output/arabic_instrumental_lora/tensorboard` |
 | `trigger_word` | `arabmaqamrock` | `Middle Eastern fusion` (D6) |
 | `train.steps` | `5000` | `5500` (D4) |
-| `sample.samples` | 3 stale v3 maqam-rock poems | 2 instrumental prose prompts (D9, inert) |
+| `sample.samples` | 4 stale v3 maqam-rock poems | 2 instrumental prose prompts (D9, inert) |
 
 Everything else stays byte-identical, including the parts that look odd but are deliberate:
 `ar_kl_weight: 0.0`, `cot: "off"`, `train_window_frames: 0`, `gradient_checkpointing: false`
@@ -117,6 +119,11 @@ Everything else stays byte-identical, including the parts that look odd but are 
 `max_step_saves_to_keep: 12`, `cache_latents_to_disk: true`,
 `cache_text_embeddings: true`, `datasets[0].folder_path: /content/yue2_dataset`,
 `caption_ext: "txt"`, `caption_dropout_rate: 0`.
+
+Two **comment-only** corrections were made on 2026-11-12 so the inherited text stops describing
+v3: the dataset comment now says 482 tracks (not 438) and the `train_window_frames` note says
+max **478.3 s** (not 370 s). A `diff` against the v3 pair therefore shows the five value edits
+**plus** those comments; no key the trainer reads differs.
 
 Two things **not** to copy from the v3 config into any new sampling prompt: the
 `arabmaqamrock …` prefix and the `[Verse 1 | … ]` tag style. This dataset's prompts are prose
@@ -160,9 +167,27 @@ pgrep -af 'run.py|train_ctl|generate.py'
 ```
 
 Expect a **24 GB L4 or an A100**, 0 % util, no `run.py`. If anything is running, stop here —
-no overlap, ever. Today's VM is a T4 (F9): it cannot run this and must be switched first.
+no overlap, ever. The 2026-11-12 preflight VM was a T4 (F9): it cannot run this, so the run needs
+a fresh A100 (or L4) VM first.
 
 ### 4.3 Bootstrap (fresh VM)
+
+**Env guard first — the repo notebook still stages the v3 zip.** Cell 2 of
+`notebooks/L4_QPRON_ArabicSuno_vscode_anywhere.ipynb` writes
+`GCP_DATASET_ZIP=…/v3_arabmaqamrock_dataset.zip` and does **not** write
+`GCP_DATASET_COUNT`, so the stock launch would pull the **438-track** set, pass the verify,
+and train this config on the wrong dataset under this run name. After the secrets cell has
+run and before `bootstrap/setup.sh`, confirm/override:
+
+```bash
+grep -E '^export GCP_DATASET' /root/.secrets.env
+# Must show the instrumental zip and count 482; if not, append (later export wins):
+cat >> /root/.secrets.env <<'EOF'
+export GCP_DATASET_ZIP="gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_dataset.zip"
+export GCP_DATASET_COUNT=482
+EOF
+. /root/.secrets.env && echo "$GCP_DATASET_ZIP count=$GCP_DATASET_COUNT"
+```
 
 terminal: detached — log `/content/logs/setup.log`; stop: `pkill -f bootstrap/setup.sh`;
 resume: re-run the same command (it skips what is already there).
@@ -178,6 +203,17 @@ Anything else (438, or `[FAIL] dataset:`) means the env var did not reach the sh
 marker `/content/yue2_dataset/.bootstrap_complete` also means a re-run will skip the pull, so
 delete `/content/yue2_dataset` (and the zip) before retrying.
 
+`job_dataset_zip` downloads to `/content/yue2_dataset.zip` and **keeps** it, so the download
+is verifiable after the fact (bootstrap itself does not check it):
+
+```bash
+sha256sum /content/yue2_dataset.zip
+# expect cea34fa2e584472d0b134f51dc0ae83b66d999ee1dffbc40dad4dcd783e39954
+```
+
+A mismatch means a truncated/corrupt pull: delete `/content/yue2_dataset` **and** the zip,
+then re-run bootstrap.
+
 ### 4.4 Hold out the 8 eval tracks (D7)
 
 Must run **after** the dataset verify and **before** `train_ctl.py start`, so the latent cache
@@ -187,9 +223,12 @@ terminal: foreground — instant, but it moves files.
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
+# The manifest is NOT in the zip (the archive holds 482 mp3 + 482 txt only) and the build
+# workspace does not exist on a fresh VM — always fetch it from GCS.
+gsutil cp "$GCP_BACKUP_BASE/arabic_instrumental_dataset_manifest.json" /tmp/ai_manifest.json
 python3 - <<'PY'
 import json, random, pathlib, shutil
-man = json.load(open('/content/arabic_instrumental_build/arabic_instrumental_dataset_manifest.json'))
+man = json.load(open('/tmp/ai_manifest.json'))
 recs = man['tracks']
 rng = random.Random(42)
 pick = []
@@ -210,11 +249,32 @@ PY
 find /content/yue2_dataset -maxdepth 1 -name '*.mp3' | wc -l   # expect 474
 ```
 
-(3 + 4 from `yt500`, 1 from `fs18`; 4 vocal-flagged + 4 clean — the split `D7` promises. If the
-build workspace is gone, read the manifest from GCS instead: `gsutil cp …/arabic_instrumental_dataset_manifest.json /tmp/`.)
+(3 + 4 from `yt500`, 1 from `fs18`; 4 vocal-flagged + 4 clean — the split `D7` promises.)
+
+The eval set lives only on `/content` until it is copied off, and `backup_to_gcp.py` mirrors
+`output/` + `logs/` + `agent_notes/` only. Upload it once, right after the move (~50 MB):
+
+```bash
+gsutil -m cp -r /content/eval_holdout/arabic_instrumental "$GCP_BACKUP_BASE/arabic_instrumental_lora/eval_holdout"
+```
 
 The chosen names are then fixed by `HOLDOUT.json` — record them in `current.md` and do not
-change them between runs, or the A/B loses its baseline.
+change them between runs, or the A/B loses its baseline. The selection is deterministic (seed
+42, sorted names), and a local rehearsal against the GCS manifest on 2026-11-12 picked exactly:
+
+| source | kind | dur | track |
+|---|---|---|---|
+| yt500 | vocal | 289.6 s | `yt500-0153-HU_nX3kcvBk` |
+| yt500 | vocal | 333.9 s | `yt500-0032-a8TZVDBsxTo` |
+| yt500 | vocal | 228.8 s | `yt500-0327-TZVrsUGhKTw` |
+| yt500 | clean | 256.2 s | `yt500-0211-yAl48Tk0Sno` |
+| yt500 | clean | 251.2 s | `yt500-0188-3bKyiwq30Fc` |
+| yt500 | clean | 222.9 s | `yt500-0108-CPLgqU65Dss` |
+| yt500 | clean | 274.0 s | `yt500-0083-gU2rAJVlw1A` |
+| fs18 | vocal | 224.4 s | `fs18-waynak_habib_2204908989` |
+
+The VM must reproduce this set; a different list means the wrong manifest or a changed
+tie-break — stop and compare before training.
 
 ---
 
@@ -239,7 +299,8 @@ pgrep -af 'backup_to_gcp.py|gpu_logger.py'
 
 ### 5.2 Start (you type this)
 
-terminal: detached — log `/content/logs/train.log`; stop: `python train_ctl.py stop`;
+terminal: detached — log `/content/logs/train.log`; stop:
+`python train_ctl.py stop --config config/arabic_instrumental_lora.yml`;
 resume: re-run the identical `start` command (same name auto-resumes the newest checkpoint).
 
 ```bash
@@ -250,21 +311,27 @@ python train_ctl.py start --config config/arabic_instrumental_lora.yml \
   --run-name arabic_instrumental_lora              # the real launch
 ```
 
-`--config` and `--run-name` are mandatory here (F8) — the defaults still point at v3, and a
-"default" launch would train the v3 config against the instrumental dataset under the v3 name,
-which is the exact same-name-resume hazard `DECISIONS.md` warns about.
+`--config` is the load-bearing flag: without it both `start` **and** `stop`/`status` default to
+the v3 config — `stop`/`status` then reject the live process with "not our training run"
+(`train_ctl.py:92` matches on the absolute config path or the run name, and the launched argv
+carries only the config path). The run's **output name** comes from the config's `name:` key
+(`arabic_instrumental_lora`), not from `--run-name`; `--run-name` only labels `/content/logs/train.pid`
+and its state file. Never launch this config with the default `--config` — that would train the
+instrumental dataset under v3's name and auto-resume its checkpoints.
 
 The first ~22 min is latent caching (A2), then step 0. `loss_log.db` stays at 0 steps during
 caching — normal.
 
 ### 5.3 Monitor
 
-terminal: foreground — read-only.
+terminal: foreground — read-only. `--watch` holds the terminal, so for an agent-driven session
+use single-shot reads and print `status.py` in between.
 
 ```bash
 python monitor_loss.py /content/ai-toolkit/output/arabic_instrumental_lora/loss_log.db \
-  --watch 30 --total-steps 5500
+  --history 20 --total-steps 5500
 python status.py
+python train_ctl.py status --config config/arabic_instrumental_lora.yml   # needs --config, see §5.2
 ```
 
 Read `loss/loss` as a smoothed trend (batch 1 is noisy). Reference shape from v3: still
@@ -340,11 +407,14 @@ steps on songs that are somewhat longer, so **plan for ~5–6 h on A100 or ~22�
       this plan; run `docs-reconciler`; note it in `RECONCILIATION_LOG.md`; add a `docs/README.md`
       index row and a `SOURCE_OF_TRUTH.md` row (config + this plan).
 - [ ] Update `docs/README.md` constants for the new run name once launched.
-- [ ] Fresh L4/A100 VM; `GCP_DATASET_ZIP` + `GCP_DATASET_COUNT=482` staged.
-- [ ] `nvidia-smi` clean → bootstrap detached → verify `[ok] dataset: 482 tracks`.
-- [ ] Holdout move → 474 mp3.
+- [ ] Fresh A100/L4 VM; after the notebook secrets cell, **assert** `GCP_DATASET_ZIP` is the
+      instrumental zip and `GCP_DATASET_COUNT=482` (the notebook defaults to v3 — §4.3).
+- [ ] `nvidia-smi` clean (A100/L4, 0 %, no `run.py`) → bootstrap detached → verify
+      `[ok] dataset: 482 tracks` **and** the zip sha256 (§4.3).
+- [ ] Holdout move (manifest fetched from GCS) → 474 mp3 → upload the eval set to GCS (§4.4).
 - [ ] Sidecars up (`pgrep -af` shows both).
-- [ ] `train_ctl.py start --config … --run-name …` (typed by you).
+- [ ] `train_ctl.py start --config config/arabic_instrumental_lora.yml --run-name arabic_instrumental_lora`
+      (typed by you); `stop`/`status` must carry the same `--config` (§5.2).
 - [ ] First checkpoint at 250 reaches GCS before trusting the run.
 - [ ] Eval at 3000/4000/5000/5500; record the verdict.
 - [ ] Convert (AR/NAR), sha256, new `loras/` row; standalone vs α-mixed listening (§1.1, D10).

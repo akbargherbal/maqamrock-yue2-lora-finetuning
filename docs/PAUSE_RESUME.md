@@ -16,8 +16,8 @@ continues from the last checkpoint.
 `ai-toolkit` auto-resumes from the newest checkpoint in the run's output folder:
 it reads `training_info.step` from the `.safetensors` metadata and loads
 `optimizer.pt`, then loops from that step. Same run name + same config = it
-continues toward `steps: 3000`. (Verified in
-`jobs/process/BaseSDTrainProcess.py`; see `../DECISIONS.md`.)
+continues toward that config's `train.steps` (v3: 5000; `arabic_instrumental_lora`:
+5500). (Verified in `jobs/process/BaseSDTrainProcess.py`; see `../DECISIONS.md`.)
 
 ## Pause (at night)
 
@@ -26,13 +26,16 @@ continues toward `steps: 3000`. (Verified in
    cd /content/maqamrock-yue2-lora-finetuning
    python train_ctl.py stop      # SIGINT; waits for "Job stopped"
    ```
+   For any run that is not the default v3 config, add `--config config/<run>.yml` (and match
+   the `backup_to_gcp.py --run-name` below) — a bare `stop` refuses a non-v3 process.
 2. Force one backup pass and confirm the latest checkpoint is in GCS:
    ```bash
    cd /content/maqamrock-yue2-lora-finetuning
-   python backup_to_gcp.py --run-name v3_arabmaqamrock_lora --once
-   gsutil ls -l gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/v3_arabmaqamrock_lora/output/ | tail
+   RUN=arabic_instrumental_lora        # the config's `name:` (v3 was v3_arabmaqamrock_lora)
+   python backup_to_gcp.py --run-name "$RUN" --once
+   gsutil ls -l "gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/$RUN/output/" | tail
    ```
-   You want to see the newest `v3_arabmaqamrock_lora_0000NNNNNN.safetensors`
+   You want to see the newest `<run>_0000NNNNNN.safetensors`
    **and** `optimizer.pt`, with sizes matching local.
 3. You can now let the VM go. You do not need to keep the tab open.
 
@@ -48,7 +51,8 @@ step that is a multiple of 250.
    rsync collapses to the restore instant), and creates the destination first:
    ```bash
    cd /content/maqamrock-yue2-lora-finetuning
-   python bootstrap/restore_run.py --run-name v3_arabmaqamrock_lora --apply
+   RUN=arabic_instrumental_lora        # the config's `name:` (v3 was v3_arabmaqamrock_lora)
+   python bootstrap/restore_run.py --run-name "$RUN" --apply
    ```
    A bare `gsutil -m rsync -r <base>/<run>/output <output-root>/<run>` also works but
    leaves the ctime order to chance (see `COMMAND_HANDOVER_GOTCHAS.md`, 2026-10-06).
@@ -60,8 +64,8 @@ step that is a multiple of 250.
 
 ## Notes
 
-- The latent cache is **not** in GCS; a fresh VM rebuilds it (~12 min) during
-  startup. That is expected.
+- The latent cache is **not** in GCS; a fresh VM rebuilds it during startup — ~20 min for
+  v3's 438 tracks (v2 notes said ~12), and A2 estimates ~22 min for the 482-track set. That is expected.
 - Use the **same run name and config**. A changed config/hyperparameter is not a
   resume — archive the old run and start fresh instead
   ([BACKUP_RESTORE.md](BACKUP_RESTORE.md)).
