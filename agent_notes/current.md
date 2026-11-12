@@ -1,80 +1,99 @@
-# Current — `arabic_instrumental_lora` · 2026-11-12 · RUN COMPLETE, eval screen done, depth deferred
+# Current — `arabic_instrumental_lora` · 2026-11-12 · training done, eval = NOW
 
-**Training finished 5500/5500 (3 h 36 min on A100-SXM4-80GB). All artifacts are in GCS and
-verified. The 5-track checkpoint screen rendered; the 13-track depth round was deliberately
-not started. Nothing is running now — the VM is safe to shut down.**
+**Nothing is running. The VM is off. What's left is the listening evaluation, and the only
+two things you can do locally today are (1) score the 4-checkpoint screen and (2) judge the
+base take. Everything that tests generalization (Q3/Q4/Q5) needs a GPU round that is staged
+but not rendered.** Authority: `docs/ARABIC_INSTRUMENTAL_EVAL_PLAN.md` (every claim below is
+from it or from the GCS artifacts it names).
 
-## Run — final facts
-
-```
-run        arabic_instrumental_lora · 5500/5500 · started 12:22:58 · ended ~16:08 UTC
-adapter    /content/ai-toolkit/output/arabic_instrumental_lora/arabic_instrumental_lora.safetensors
-sha256     cf6d44bbf4c03b28b2511e03c985e1d49894f6d4b2508a23a8f2bda3182e3584   (local == remote)
-steps     129 isolated OOM skips (2.5 %) → trained on 461 effective tracks
-loss       last-100 3.547 · last-250 3.538 · min 2.391 · plateaued ~4.0 from step 1000
-checkpoints 21 numbered (250…5250) + final adapter + optimizer.pt, all in GCS
-drift      gsutil rsync -n output → empty (no drift)
-```
-
-## GCS — everything (base = `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_lora/`)
+## What is on your Windows box (verified against GCS, 2026-11-12)
 
 ```
-output/     21 numbered checkpoints + arabic_instrumental_lora.safetensors + optimizer.pt
-            + loss_log.db + config.yaml + tensorboard/
-logs/       train.log, gpu_usage.csv, setup*.log, gcp_backup logs
-agent_notes/current.md (+ this handover)
-converted/  ck3000|ck4000|ck5000|ck5500 × {ar,nar}.safetensors  (558 MB, sha256 in eval/inputs/)
-eval_holdout/  8 held-out tracks (mp3+txt) + HOLDOUT.json
-eval/audio/    smoke_a100, screen_loRA, screen_base  (WAV + sidecars + manifests)
-eval/mp3/      same batches as 192k mp3
-eval/inputs/   input_{smoke,screen_*,depth_ck5500_*}.json, HOLDOUT.json,
-               dataset_manifest.json, final_adapter_sha256.txt, converted_sha256.txt
+mp3/screen_loRA/   p0a_ck3000|ck4000|ck5000|ck5500_101.mp3   4 takes, all 260.0 s, cap 6500
+mp3/screen_base/   p0a_base_101.mp3                          1 take, 114.7 s, ended naturally
+audio/...          the authoritative WAVs (mp3 = listening copy)
+inputs/            HOLDOUT.json, input_depth_ck5500_{loRA,base}.json, converted_sha256.txt
 ```
 
-Download everything for local listening:
+Consequence: **the checkpoint ladder is a fair blind comparison** (same prompt, seed 101, cap
+6500, same 260 s duration). **base-vs-LoRA is not blind** — 114.7 s vs 260 s gives it away, and
+that length gap is itself a finding (the adapter changes structure, not only timbre).
 
-```bash
-gsutil -m rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_lora/eval ./ai_eval
+## Step 1 (local, no GPU) — rate the 4 checkpoints in the app → Q1 + Q2
+
+The app groups by **parent folder**, so one folder per arm is all it needs (no renaming, no
+`prepare_ab_eval`; that tool is only for handing a package to a *different* person):
+
+```powershell
+$src = "C:\Users\DELL\Downloads\ai_eval\mp3\screen_loRA"
+$dst = "C:\Users\DELL\Downloads\ai_eval\app_src"
+foreach ($ck in "3000","4000","5000","5500") {
+  New-Item -ItemType Directory -Force "$dst\ck$ck" | Out-Null
+  Copy-Item "$src\p0a_ck${ck}_101.mp3" "$dst\ck$ck\p0a_101.mp3"
+}
 ```
 
-## Eval — what exists, what is deferred
+Copy the card into the app, then launch blind:
 
-Screen (5 tracks, `P0a` = the representative prompt, seed 101, cap 6500):
-
-```
-ck3000 1:59 · ck4000 1:59 · ck5000 1:59 · ck5500 1:58   → 260 s audio, all hit the cap
-base   0:35                                            → 114.7 s, ended naturally
-```
-
-The base take is **half the length** — the adapter is already changing structure, not only
-timbre. Consequence: base-vs-LoRA cannot be perfectly blind (length gives it away).
-
-Depth (deferred, 13 tracks ≈ 26 min on A100): `{P0b, H1, H2, H3, P1, P3} × {winner, base}`
-plus one variance take (`P0a`, seed 202). Inputs are staged in `eval/inputs/`; only the
-`ck5500` variant exists, so a different winner means regenerating the two JSONs (the pairs
-are already converted and uploaded — nothing to reconvert).
-
-Open decision: **which checkpoint** — `ck3000/4000/5000/5500`, or default to `ck5500`
-(tie-break: latest).
-
-## Docs state
-
-```
-pushed   7122d70 eval plan (18-track round, A100 budget, GCS download paths)
-         + this session's final docs commit (run completion + 21-vs-22 fix)
-pending  docs-reconciler pass; PROGRESS.md entry; SOURCE_OF_TRUTH row
-known    plan F3's "15–16 GB" is the L4 number — v3 also ran ~79 GB on A100
-         coverage gap: 13 tracks ≥ ~377 s dropped every epoch
-         status.py:33 hardcodes v3 run name (mislabels this run)
-         pgrep -f '<pattern>' self-matches a watcher's own cmdline (bit us twice)
+```powershell
+Copy-Item "<repo>\INFERENCE\scorecards\arabic_instrumental_quick.json" .\ai_music_rating_app\scorecards\
+cd ai_music_rating_app
+py app.py --audio "C:\Users\DELL\Downloads\ai_eval\app_src" `
+  --label ainst_screen --scorecard arabic_instrumental_quick --blind
 ```
 
-## Restarting eval on a fresh (lower-grade) VM
+Card: `INFERENCE/scorecards/arabic_instrumental_quick.json` — 6 نعم/لا + `arm_guess` +
+`overall` (1–5, the summary metric) + notes; validated with the app's own loader.
+Full card (`…_style.json`) if you want the 1–5 breakdown instead.
 
-1. `bash bootstrap/setup.sh --inference` (T4 sm75 staged automatically; L4 needs the
-   `sm89` copy from `gs://akbar-december-2024-backup/arabmaqrock/binaries/`).
-2. Pull the converted pairs: `gsutil -m rsync -r <base>/arabic_instrumental_lora/converted
-   /content/converter/out` then point the JSON `loras` at each `ck*` dir.
-3. Pull the audio + inputs: `gsutil -m rsync -r <base>/arabic_instrumental_lora/eval /content/eval`.
-4. Depth = 13 tracks (~1.5 h on T4, ~26 min on A100); see
-   `docs/ARABIC_INSTRUMENTAL_EVAL_PLAN.md` §4–§6.
+Base take: separate run against its own folder, **without** `--blind` — 1:54 vs 4:20 gives it
+away, so mixing it in only breaks the blind for that one track.
+
+**نسخة ورقية (بدون تطبيق):** `agent_notes/quick_score.md` — نفس الأسئلة.
+
+## Step 2 (local) — judge the base take, openly
+
+`mp3/screen_base/p0a_base_101.mp3`, arms known. The only question is **does base even sound
+like an Arabic acoustic ensemble on this prompt** (style_fidelity), and what it did in 114.7 s
+that the LoRA stretched to 260 s. This is the reference line for decision rule 2.
+
+## Step 3 (needs a GPU VM) — the 13-track depth round → Q3/Q4/Q5
+
+Rendered inputs are already staged in GCS at `…/eval/inputs/`:
+`input_depth_ck5500_loRA.json` (7 songs: `p0b_noprefix`, `h1_0153_vocal`, `h2_0032_vocal`,
+`h3_0211_clean`, `p1_noperc`, `p3_piano_control`, `p0a_rep_prefix_s202`) + the `_base` twin
+(same, LoRA scale 0). Both are pinned to `ck5500`; if the screen winner is another checkpoint,
+regenerate the two JSONs — the converted pairs already exist, nothing to reconvert.
+
+Cost: ~26 min on A100, ~1.5 h on T4. GPU rule: `nvidia-smi` first; no overlap with anything.
+
+What each track answers:
+
+| prompt | question |
+|---|---|
+| `h1/h2/h3` | Q3 contamination-free recall (only 3 of the 8 holdouts are in this round) |
+| `p1_noperc` | Q3b instruction-following: can it *remove* percussion? |
+| `p3_piano_control` | Q5 over-application — must be style_fidelity ≤ 2 on both arms |
+| `p0b_noprefix` | Q1b robustness to prompt shape |
+| `p0a_rep_prefix_s202` | variance: is the screen ranking stable across seeds? |
+
+## Decision rules (plan §9, fixed before listening)
+
+1. Discrimination ≥ 10/13 correct `arm_guess` = audible (p < 0.05); fewer = don't pick a ckpt.
+2. Style win: LoRA median `style_fidelity` ≥ 4 **and** ≥ 1 point over base, artifacts no worse.
+3. Checkpoint: highest `style_fidelity`; tie-break `coherence`, then `artifacts`; still tied →
+   later checkpoint.
+4. H-caption scores must not exceed P1 by > 1 point (else it's prompt replay, not style).
+5. Any `words` vocals on LoRA that base doesn't produce = flag (283/482 captions named vocals).
+6. P3 must be ≤ 2 on both arms.
+
+Only after 1–6: convert/register the winner in `<base>/loras/audio_cpp/style/`, then the
+`quran_ahh_r32` α-merge test. Publishing stays a separate decision.
+
+## Not to do
+
+- Don't judge on `loss/loss` (plateaued ~4.0 from step 1000 by design).
+- Don't pass the `arabmaqamrock` trigger — the LoRA was trained on `Middle Eastern fusion, instrumental.`
+  (`generate.py` prepends the v3 trigger unless `--no-trigger`).
+- Don't let `cap` be `auto` (tag-only lyrics → 2750 ≈ 110 s).
+- Don't rebuild the binary; check `gs://…/arabmaqrock/binaries/index.json` first.

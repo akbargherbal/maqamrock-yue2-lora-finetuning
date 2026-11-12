@@ -737,3 +737,18 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   output paths, GCS sidecar suffixes), 21 are the pre-existing false positives. No structural
   warning.
 - **Not changed:** no run launched; no dataset edit; v3's config and `loras/` untouched.
+
+## 2026-11-12 — listening scorecards for `arabic_instrumental_lora`
+
+- **Change:** two new app scorecards, `INFERENCE/scorecards/arabic_instrumental_quick.json`
+  (the fast pass: 6 نعم/لا + `arm_guess` + `overall` as `summary_metric` + notes) and
+  `…_style.json` (the full 10-criteria card that the eval plan §8 carried as a draft). Plan §8
+  now points at both files instead of a draft block. `agent_notes/quick_score.md` (paper
+  fallback) is gitignored by design.
+- **Verified:** both files pass `rating_app.scorecard.validate_scorecard` + `load_scorecard`
+  (cloned `akbargherbal/ai_music_rating_app` to `/tmp`); `summary_metric` resolves to a
+  `rating` criterion as the app requires; `render_markdown` on a simulated 4-arm run prints the
+  per-arm means and the نعم/لا distributions. `boolean` was rejected for the quick card because
+  the report prints raw option values (`true`/`false`), so it uses `choice` with Arabic v/t.
+- **Not done:** no full reconciler sweep (additive content in one doc line + two new files; no
+  claim in any runbook changed). No scorecard committed to the app repo; it is copied per use.

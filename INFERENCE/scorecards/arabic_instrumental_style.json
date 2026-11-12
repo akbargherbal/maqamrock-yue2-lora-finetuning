@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "name": "arabic_instrumental_lora — style fidelity (base vs LoRA, ckpt ladder)",
+  "description": "Listening test for the arabic_instrumental_lora style adapter. Question set (docs/ARABIC_INSTRUMENTAL_EVAL_PLAN.md §1): Q1 does the adapter move the sound toward the Arabic acoustic ensemble, Q2 which checkpoint wins, Q3 does it follow new prose, Q4 vocal leakage, Q5 over-application on a non-Arabic prompt. Judge the AUDIO only — the training loss plateau is not evidence. summary_metric = style_fidelity.",
+  "summary_metric": "style_fidelity",
+  "criteria": [
+    {
+      "key": "style_fidelity",
+      "label": "Arabic instrumental ensemble character",
+      "type": "rating",
+      "max": 5,
+      "scale_labels": {
+        "1": "wrong genre — no Arabic colour",
+        "2": "faint colour",
+        "3": "some Arabic colour",
+        "4": "clearly Arabic instrumental",
+        "5": "convincingly Arabic acoustic ensemble"
+      },
+      "required": true,
+      "help": "Ignore mix and performance quality; judge whether this sounds like the intended Arabic acoustic ensemble the prompt asked for."
+    },
+    {
+      "key": "instruments",
+      "label": "Instrument realism (oud / violin / cello / darbuka / riq)",
+      "type": "rating",
+      "max": 5,
+      "scale_labels": {
+        "1": "named instruments absent",
+        "3": "present but synthetic / wrong character",
+        "5": "physically plausible attack, bow noise, skin and jingle detail"
+      },
+      "required": true,
+      "help": "Are the named instruments actually present, or is this a generic synth pad standing in for an ensemble?"
+    },
+    {
+      "key": "ornamentation",
+      "label": "Ornamentation / microtonality",
+      "type": "rating",
+      "max": 5,
+      "scale_labels": {
+        "1": "straight equal-tempered lines",
+        "3": "some slides or vibrato",
+        "5": "maqam inflections, slides, call-and-response between oud and strings"
+      },
+      "required": true,
+      "help": "Slides, vibrato, microtonal inflections, and phrasing handed between oud and the bowed strings."
+    },
+    {
+      "key": "coherence",
+      "label": "Structure / section flow",
+      "type": "rating",
+      "max": 5,
+      "scale_labels": {
+        "1": "loops or wanders, no sections",
+        "3": "sections arrive but flat",
+        "5": "tagged sections build and release naturally"
+      },
+      "required": true,
+      "help": "Do the [intro]/[verse]/[chorus] tags produce real section changes — or one texture repeated? Note that the base take ended at 114.7 s while the LoRA takes ran to the 260 s cap."
+    },
+    {
+      "key": "production",
+      "label": "Mix / production",
+      "type": "rating",
+      "max": 5,
+      "scale_labels": {
+        "1": "muddy, harsh or clipped",
+        "3": "serviceable",
+        "5": "warm room, natural reverb, clean and clear"
+      },
+      "required": true,
+      "help": "Warm acoustic room, natural reverb, no mud, no digital harshness."
+    },
+    {
+      "key": "vocals",
+      "label": "Vocals present",
+      "type": "choice",
+      "options": [
+        {"v": "none", "t": "None (correct for an instrumental prompt)"},
+        {"v": "nonlex", "t": "Non-lexical vocalisations"},
+        {"v": "words", "t": "Sung words"}
+      ],
+      "required": true,
+      "help": "Q4. 283/482 training captions named vocals, so leakage is an expected risk — record it, don't rationalise it."
+    },
+    {
+      "key": "artifacts",
+      "label": "Artifacts",
+      "type": "choice",
+      "options": [
+        {"v": "none", "t": "None"},
+        {"v": "minor", "t": "Minor"},
+        {"v": "major", "t": "Major"},
+        {"v": "broken", "t": "Broken / unusable"}
+      ],
+      "required": true,
+      "help": "A style gain bought with major artifacts is a loss (decision rule 2)."
+    },
+    {
+      "key": "arm_guess",
+      "label": "Which arm is this?",
+      "type": "choice",
+      "options": [
+        {"v": "base", "t": "Base model"},
+        {"v": "lora", "t": "LoRA"},
+        {"v": "unsure", "t": "Can't tell"}
+      ],
+      "required": true,
+      "help": "Forced guess on every take — this is the discrimination test (Q1). Only meaningful on duration-matched pairs; the base take in this round is shorter and therefore not blind."
+    },
+    {
+      "key": "overall",
+      "label": "Overall",
+      "type": "rating",
+      "max": 5,
+      "required": true
+    },
+    {
+      "key": "notes",
+      "label": "Notes",
+      "type": "notes",
+      "required": false,
+      "help": "Timecodes for artifacts, the instrument that gave the arm away, anything structurally broken."
+    }
+  ]
+}

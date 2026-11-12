@@ -295,7 +295,11 @@ python INFERENCE/prepare_ab_eval.py \
 Hand the evaluator `EVAL.txt` + audio only; `KEYS.txt` opens after listening. Then rate with
 `ai_music_rating_app` (`--blind`), not an in-repo app (`docs/LISTENING_EVAL.md`).
 
-**Scorecard** — draft for `INFERENCE/scorecards/arabic_instrumental_style.json`:
+**Scorecard** — written 2026-11-12 as two files, both validated with the app's own loader:
+`INFERENCE/scorecards/arabic_instrumental_quick.json` (6 نعم/لا + `arm_guess` + `overall`, for
+the fast screen pass) and `INFERENCE/scorecards/arabic_instrumental_style.json` (the full
+10-criteria version below, for the depth round). Use `quick` on the screen, `style` on depth.
+Full version:
 
 ```json
 {
