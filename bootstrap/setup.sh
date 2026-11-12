@@ -99,8 +99,12 @@ VM_CONTINUITY_REPO="https://github.com/akbargherbal/vm-continuity.git"
 #   GCP_DATASET_PATH  a FOLDER prefix (v2 and earlier) -> gsutil rsync
 #   GCP_DATASET_ZIP   a single .zip (v3+)              -> gcloud cp + unzip
 # Exactly one is used per session; GCP_DATASET_ZIP wins if both are set.
+# GCP_DATASET_COUNT is the expected flat-track count for the zip (default 438 =
+# the v3 maqam-rock zip); a different dataset zip must set it or the verify
+# below fails the run (e.g. arabic_instrumental_dataset.zip -> 482).
 DATASET_LOCAL="/content/yue2_dataset"
 DATASET_ZIP_URL="${GCP_DATASET_ZIP:-}"
+DATASET_EXPECTED="${GCP_DATASET_COUNT:-438}"
 if [ "$MODE" = "training" ]; then
   DATASET_GCS="${GCP_DATASET_PATH:-}"
   if [ -z "$DATASET_GCS" ] && [ -z "$DATASET_ZIP_URL" ]; then
@@ -550,8 +554,8 @@ confirm_hf() {
 
 if [ "$MODE" = "training" ]; then
   track_count=$(find "$DATASET_LOCAL" -maxdepth 1 -name "*.mp3" 2>/dev/null | wc -l)
-  if [ -n "$DATASET_ZIP_URL" ] && [ "$track_count" -ne 438 ]; then
-    echo "[FAIL] dataset: $track_count tracks in $DATASET_LOCAL (expected 438 for the v3 zip) — check /content/logs/dataset_zip.log"
+  if [ -n "$DATASET_ZIP_URL" ] && [ "$track_count" -ne "$DATASET_EXPECTED" ]; then
+    echo "[FAIL] dataset: $track_count tracks in $DATASET_LOCAL (expected $DATASET_EXPECTED via GCP_DATASET_COUNT) — check /content/logs/dataset_zip.log"
     fail=1
   elif [ "$track_count" -eq 0 ]; then
     echo "[FAIL] dataset looks empty in $DATASET_LOCAL — check /content/logs/dataset*.log and the GCS path"

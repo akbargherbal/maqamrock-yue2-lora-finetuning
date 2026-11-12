@@ -10,7 +10,7 @@ operating contract is `../AGENTS.md`.
 | Quick copy-paste commands for common ops (index, not authority) | [../user_cheatsheet.md](../user_cheatsheet.md) |
 | Get training running on a fresh Colab VM | [START.md](START.md) |
 | Build / verify the `arabic_instrumental_dataset` (482-track zip) | [ARABIC_INSTRUMENTAL_DATASET.md](ARABIC_INSTRUMENTAL_DATASET.md) |
-| **Plan** — train `arabic_instrumental_lora` on that 482-track zip (DRAFT, not launched) | [ARABIC_INSTRUMENTAL_LORA_PLAN.md](ARABIC_INSTRUMENTAL_LORA_PLAN.md) |
+| **Plan** — train `arabic_instrumental_lora` on that 482-track zip (configs written, not launched) | [ARABIC_INSTRUMENTAL_LORA_PLAN.md](ARABIC_INSTRUMENTAL_LORA_PLAN.md) |
 | Stop for the night and resume next session | [PAUSE_RESUME.md](PAUSE_RESUME.md) |
 | GCS mirror layout, verify a backup, restore from it | [BACKUP_RESTORE.md](BACKUP_RESTORE.md) |
 | Check how training is going | [MONITOR.md](MONITOR.md) |
@@ -51,10 +51,10 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 
 | | |
 |---|---|
-| Run name | `v3_arabmaqamrock_lora` (A100) · `v3_arabmaqamrock_lora_l4` (L4) |
+| Run name | `v3_arabmaqamrock_lora` (A100) · `v3_arabmaqamrock_lora_l4` (L4) · `arabic_instrumental_lora`(`_l4`) — written, not launched |
 | Repo | `/content/maqamrock-yue2-lora-finetuning` |
 | ai-toolkit | `/content/ai-toolkit` (cloned by bootstrap, tracks `main`) |
-| Dataset | `/content/yue2_dataset` (v3, 438 tracks, from `GCP_DATASET_ZIP`) |
+| Dataset | `/content/yue2_dataset` (v3, 438 tracks, from `GCP_DATASET_ZIP`) · instrumental run: 482 tracks, needs `GCP_DATASET_COUNT=482` |
 | Run output | `/content/ai-toolkit/output/v3_arabmaqamrock_lora/` |
 | Train log | `/content/logs/train.log` |
 | Metrics db | `/content/ai-toolkit/output/v3_arabmaqamrock_lora/loss_log.db` |
@@ -62,7 +62,7 @@ Not runbooks — kept for the record. `LIVE_STATUS.md` is a point-in-time snapsh
 | GCS base | `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning` |
 | LoRA library | `<GCS base>/loras/` (see [LORA_INVENTORY.md](LORA_INVENTORY.md)) |
 | Listening packages | `<GCS base>/listening/<PACKAGE>_INPUT/` (audio; not in the repo) |
-| Secrets/env | `/root/.secrets.env` (exports `HF_TOKEN`, `GCP_DATASET_ZIP` (v3 zip, preferred) or `GCP_DATASET_PATH` (v2 folder), `GCP_BACKUP_BASE`) |
+| Secrets/env | `/root/.secrets.env` (exports `HF_TOKEN`, `GCP_DATASET_ZIP` (v3 zip, preferred) or `GCP_DATASET_PATH` (v2 folder), `GCP_BACKUP_BASE`, and `GCP_DATASET_COUNT` when the zip is not the 438-track v3) |
 | Inference workspace | `/content/audiocpp_inference/` (GCS `<base>/audiocpp_inference/`) |
 | Inference output | `/content/audiocpp_inference/out/` (`_runs_status.log`, `*_time.txt`, `*.json`) |
 | Inference prompts | `/content/audiocpp_inference/prompts/<Maqam>_{style,lyrics}.txt` |

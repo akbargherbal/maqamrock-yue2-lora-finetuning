@@ -8,6 +8,7 @@ History files are authoritative for what happened, never for what is true now.
 | Run config / hyperparameters | `config/v3_arabmaqamrock_lora.yml` (A100) · `config/v3_arabmaqamrock_lora_l4.yml` (L4); `config/LEGACY_akbar_arabic_rock_lora.yml` = v1/v2 | `DECISIONS.md` explains why; agents never edit either |
 | Maqamrock training dataset (v2 folder / v3 zip) | GCS `<base>/v2_arabmaqamrock_dataset/` (267) · `<base>/v3_arabmaqamrock_dataset.zip` (438, verbatim) | renamed + v3 added 2026-10-10; `GCP_DATASET_ZIP` selects v3, else `GCP_DATASET_PATH` |
 | Arabic instrumental dataset (482 tracks: 460 yt500 + 22 Fadl Shaker shortlist) | GCS `<base>/arabic_instrumental_dataset.zip` + `_manifest.json`; runbook `docs/ARABIC_INSTRUMENTAL_DATASET.md` | built 2026-11-12; prose captions prefixed `Middle Eastern fusion, instrumental.`; flat `<name>.mp3` + `<name>.txt`; sha256 `cea34fa2…39954` |
+| Arabic instrumental LoRA run (`arabic_instrumental_lora`) | `config/arabic_instrumental_lora.yml` (A100) · `config/arabic_instrumental_lora_l4.yml` (L4); plan `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md` | configs written 2026-11-12, **not launched**; fresh from base (not an extension of v3); `GCP_DATASET_COUNT=482` |
 | Start / pause / resume training | `docs/START.md`, `docs/PAUSE_RESUME.md` | |
 | Run metrics & liveness | `loss_log.db` via `monitor_loss.py` | files, not prose |
 | Backup layout / restore | `docs/BACKUP_RESTORE.md` + `backup_to_gcp.py --help` | script flags beat prose |

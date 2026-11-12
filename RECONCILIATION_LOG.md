@@ -668,3 +668,26 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
     (`DECISIONS.md:26`, `toolkit/prompt_utils.py:715-748`). Plan D6.
 - **Not applied:** no edits to `SOURCE_OF_TRUTH.md` yet — the run config does not exist until the
   user approves D1–D9, and an authority row for a non-existent config would be a false claim.
+
+## 2026-11-12 — `arabic_instrumental_lora` configs + bootstrap count fix (D1–D10 accepted)
+
+- **Change:** `config/arabic_instrumental_lora.yml` + `_l4.yml` written as the v3 pair with
+  exactly five edits (`name`, `log_dir`, `trigger_word`, `train.steps` 5000→5500, the inert
+  `sample.samples`). `bootstrap/setup.sh` now takes `DATASET_EXPECTED="${GCP_DATASET_COUNT:-438}"`
+  (was a literal 438 in the zip verify); the plan's §4.1/§F6 and
+  `docs/ARABIC_INSTRUMENTAL_DATASET.md` §Use were updated to match. `SOURCE_OF_TRUTH.md` gains the
+  run row (config is authority; plan is the runbook); `docs/README.md` gains the index row plus
+  the run-name / dataset / env constant rows.
+- **Verified:** `bash -n bootstrap/setup.sh`; both YAMLs `yaml.safe_load`; per-key diff vs v3 shows
+  only the five edits and v3-frozen values (lr 1e-4, window 0, cot off, ar_kl 0.0, lora 32/32,
+  conv 16/16, save_every 250, folder `/content/yue2_dataset`); the verify branch was replicated
+  in isolation (482/482 ok, 438/438 ok, 438-vs-482 fail).
+- **Bug caught while writing:** the sample prompts were first inserted through `re.sub`'s
+  replacement template, which expanded the intended literal `\n` escapes into real newlines and
+  made YAML fold them to spaces. Fixed with a `lambda` replacement; the file now carries real
+  `\n` escapes and parses to 7 lines with `[Lyrics]` on its own line.
+- **Reconciler (Steps 1–2):** 2968 claims / 74 live docs; 1824 checkable; **60 flagged (3.3%)**,
+  all `missing_path` — 39 are the plan's not-yet-existing artifacts (`HOLDOUT.json`, runtime
+  output paths, GCS sidecar suffixes), 21 are the pre-existing false positives. No structural
+  warning.
+- **Not changed:** no run launched; no dataset edit; v3's config and `loras/` untouched.

@@ -122,11 +122,12 @@ set the launching notebook/env to
 
 ```bash
 export GCP_DATASET_ZIP=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_dataset.zip
+export GCP_DATASET_COUNT=482          # required: the verify defaults to 438 (the v3 zip)
 ```
 
 and the dataset is unzipped flat into `/content/yue2_dataset` on bootstrap. No config edit is
 included here: which run consumes this dataset (and at what steps/LR) is a separate, user-typed
-launch decision.
+launch decision — see `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md`.
 
 ## Caveats
 

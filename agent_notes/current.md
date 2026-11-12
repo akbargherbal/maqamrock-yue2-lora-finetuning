@@ -1,46 +1,40 @@
 # Current — 2026-11-12
 
-**Plan written: `arabic_instrumental_lora` (style LoRA on the 482-track Arabic instrumental zip).
-Nothing launched, no config written — waiting on D1–D10 approval.**
+**`arabic_instrumental_lora` is configured and the bootstrap blocker is fixed. Nothing is
+training. Next action: a 24 GB+ GPU (this VM is a T4) and your typed launch command.**
 
-Full plan (copy/read target): `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md`
-Dataset runbook (already delivered, verified): `docs/ARABIC_INSTRUMENTAL_DATASET.md`
+Plan + rationale: `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md` (D1–D10, accepted as defaults).
+Dataset runbook: `docs/ARABIC_INSTRUMENTAL_DATASET.md`.
 
-## State (verified this turn)
+## State (verified 2026-11-12)
 
 ```
-status.py        env Colab · git main @ f1d4b1b · disk 113.0 GB free
-training         not running (v3_arabmaqamrock_lora) · no loss_log.db
+git              main @ (this commit) · pushed to origin
+training         not running · no output/arabic_instrumental_lora/
 gpu              Tesla T4 · 15,360 MiB · 0% util · no processes   <- cannot train this recipe
-sidecars         backup_to_gcp.py DOWN · gpu_logger.py DOWN · vm-continuity not installed
-GCS dataset      arabic_instrumental_dataset.zip 3,162,874,610 B (2026-11-12T10:49:46Z)
+disk             113.0 GB free
+GCS dataset      arabic_instrumental_dataset.zip 3,162,874,610 B, sha256 cea34fa2…39954
 manifest         482 tracks · 36.60 h · p50 272 s · max 478 s · 283 vocal-flagged / 199 clean
+sidecars         backup_to_gcp.py DOWN · gpu_logger.py DOWN (no run yet — start them at launch)
 ```
 
-## Two findings that change the launch
+## What changed today
 
-1. **Bootstrap blocks it:** `bootstrap/setup.sh:552-556` hard-codes `438` tracks for a zip
-   dataset → a 482-track zip makes setup print `[FAIL] dataset:` and stop. Fix = env var
-   `GCP_DATASET_COUNT` (default 438), plan §4.1.
-2. **`trigger_word` would fire:** v3's `arabmaqamrock` appears in **none** of these captions, so
-   toolkit injects it into every prompt (`DECISIONS.md:26`). Plan D6 sets it to
-   `Middle Eastern fusion` (present in all 482 → no-op).
-
-## Plan in one table
-
-| | |
+| file | change |
 |---|---|
-| New run | `arabic_instrumental_lora` (+ `_l4`) — fresh from base, **not** an extension of v3 |
-| Config | v3 pair with 5 edits: `name`, `log_dir`, `trigger_word`, `train.steps` 5000→5500, sample prompts |
-| Steps | 5500 ≈ 11.4 epochs (v3 exposure) · eval holdout 8 tracks → 474 trained |
-| Wall clock | ~5–6 h A100 · ~22–24 h L4 · cost ≈ equal (4.3× measured vs 4.35× break-even) |
-| GPU needed | L4 24 GB or A100 — **T4 is out** |
-| Deliverable | converted AR+NAR pair + sha256, new `loras/` row → standalone α=1, or `merge_pron_lora.py` with the pron donor. **Style×style mixing has no tool yet** (§1.1). |
+| `config/arabic_instrumental_lora.yml` | new — v3 config with exactly 5 edits: `name`, `log_dir`, `trigger_word: "Middle Eastern fusion"`, `steps: 5500`, 2 prose sample prompts |
+| `config/arabic_instrumental_lora_l4.yml` | same 5 edits on the L4 base (`gradient_checkpointing: true` kept) |
+| `bootstrap/setup.sh` | `DATASET_EXPECTED="${GCP_DATASET_COUNT:-438}"`; verify message uses it (v3 default unchanged) |
+| `docs/ARABIC_INSTRUMENTAL_LORA_PLAN.md` | the plan (D1–D10, composability §1.1, launch/eval checklist) |
+| `docs/README.md`, `SOURCE_OF_TRUTH.md` | index row + authority row for the new run |
 
-## Commands for when the GPU is right (approval first)
+Verified: `bash -n bootstrap/setup.sh` ok; both YAMLs parse; sample prompts contain
+`\n[Lyrics]\n[intro]…` (newlines, not folded) and no `arabmaqrock`; diff vs v3 = 5 changes only.
+
+## Launch (needs a 24 GB+ GPU — L4 or A100)
 
 terminal: detached — log `/content/logs/setup.log`; stop: `pkill -f bootstrap/setup.sh`;
-resume: re-run the same line.
+resume: re-run the same lines (already-present files are skipped).
 
 ```bash
 export GCP_DATASET_ZIP=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_dataset.zip
@@ -50,18 +44,26 @@ cd /content/maqamrock-yue2-lora-finetuning
 setsid nohup bash bootstrap/setup.sh --training > /content/logs/setup.log 2>&1 & disown
 ```
 
+Expect `[ok] dataset: 482 tracks`. Then hold out the 8 eval tracks (plan §4.4 — the
+`python3 - <<'PY'` block), start the two sidecars, and:
+
 terminal: detached — log `/content/logs/train.log`; stop: `python train_ctl.py stop`;
-resume: the identical start line.
+resume: the identical start line (same run name auto-resumes the newest checkpoint).
 
 ```bash
 cd /content/maqamrock-yue2-lora-finetuning
 python train_ctl.py start --config config/arabic_instrumental_lora.yml \
   --run-name arabic_instrumental_lora --dry-run
+python train_ctl.py start --config config/arabic_instrumental_lora.yml \
+  --run-name arabic_instrumental_lora
 ```
 
-## Next action (needs you)
+`--config` and `--run-name` are required: `train_ctl.py` still defaults to the v3 config, and a
+default launch would mix the instrumental dataset with the v3 name.
 
-Approve D1–D10 (or override). Then: write the two configs + the `setup.sh` count change, commit,
-push (needs `bash bootstrap/github_auth.sh` + PAT). Nothing GPU-side happens before that.
+## Unchanged / still open
 
-Repo: uncommitted = this plan + `docs/README.md` row + `RECONCILIATION_LOG.md` entry.
+- **Composability:** one LoRA file per expert, so "mixed" = offline merge. This adapter + pron
+  donor = `merge_pron_lora.py`; this adapter + v3 style = no tool yet (plan §1.1).
+- Push works today via `gh`'s stored token; on a fresh VM run `bash bootstrap/github_auth.sh`.
+- Sidecars are down because there is no run to mirror — start both at launch (plan §5.1).

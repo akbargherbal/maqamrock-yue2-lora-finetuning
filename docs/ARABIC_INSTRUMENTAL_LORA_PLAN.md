@@ -1,8 +1,8 @@
 # Plan — `arabic_instrumental_lora` (style LoRA on the 482-track Arabic instrumental set)
 
-_Status: **DRAFT 2026-11-12.** Nothing has been launched, and no training config exists yet:
-this document is the proposal. Decisions D1–D10 are mine as defaults — reply "go with
-defaults", or override any row, and the config + commands get written to match._
+_Status: **configs written 2026-11-12; nothing launched.** D1–D10 were accepted as defaults, so
+`config/arabic_instrumental_lora.yml` + `_l4.yml` exist and the bootstrap count check is fixed
+(§4.1). Launch still needs a 24 GB+ GPU and your typed command (§5.2)._
 
 Goal: train a **fresh** YuE2 style LoRA from the base checkpoint on
 `gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_dataset.zip`
@@ -27,7 +27,7 @@ Authorities: dataset = `docs/ARABIC_INSTRUMENTAL_DATASET.md`; hyperparameters =
 | F3 | Duration distribution (from `audio_duration_s`): **min 143.1 s · p50 271.7 s · p90 335.3 s · max 478.3 s**. **0 tracks > 600 s**, 0 > 983 s. So `train_window_frames: 0` (whole song) is still inside the AR context ceiling (~983 s), as in v3. | same read |
 | F4 | Caption status: **439 `ok`, 35 `fallback`, 6 `failed`, 2 `single_chunk`**; **283/482** carry a vocal term (`caption_vocal_terms` non-empty), **199** are clean. | same read |
 | F5 | `bootstrap/setup.sh` already consumes a zip (`job_dataset_zip`, unzip **flat** into `/content/yue2_dataset`), so the config's `folder_path` does not change. | `sed -n 265,282p bootstrap/setup.sh` |
-| F6 | **Blocker found: the bootstrap verify hard-codes 438 tracks** and fails the whole setup when a zip is used and the count differs (`setup.sh:552-556`). Pointing `GCP_DATASET_ZIP` at the 482-track zip fails bootstrap as written. | `sed -n 550,562p bootstrap/setup.sh` |
+| F6 | **Blocker (fixed 2026-11-12): the bootstrap verify hard-coded 438 tracks** and failed the whole setup when a zip was used and the count differed (`setup.sh:552-556` before the fix). Pointing `GCP_DATASET_ZIP` at the 482-track zip failed bootstrap as written. | `sed -n 550,562p bootstrap/setup.sh`; fixed per §4.1 |
 | F7 | **`trigger_word` is not inert on this dataset.** Toolkit injection prepends `trigger + " "` when the trigger appears **zero** times in the caption (`toolkit/prompt_utils.py:715-748`, recorded in `DECISIONS.md` line 26). `arabmaqamrock` appears in **none** of these captions, so reusing the v3 config verbatim would silently train on `arabmaqamrock Middle Eastern fusion, instrumental. …` — a prompt shape no inference script will ever produce. | `DECISIONS.md` line 26 + dataset prompt template |
 | F8 | `train_ctl.py` starts `config/v3_arabmaqamrock_lora.yml` unless `--config` is passed, and names the run from the config stem unless `--run-name` is passed. | `train_ctl.py:40,260,268` |
 | F9 | This VM is a **Tesla T4, 15,360 MiB, 0 % util, no processes**. The v3 whole-song run peaked at ~15.8 GB on an L4 (24 GB) and ~15–16 GB on an A100, so a T4 cannot train this recipe (and is Turing — no bf16 tensor cores). | `nvidia-smi`, `docs/GPU_L4_VS_A100.md` |
@@ -127,18 +127,17 @@ caveat 1).
 
 ## 4. Pre-flight (one code change, then GPU checks)
 
-### 4.1 The bootstrap count check (F6)
+### 4.1 The bootstrap count check (F6) — **applied 2026-11-12**
 
-`bootstrap/setup.sh` must stop assuming 438. Minimal change — an env var with the old value
-as default, so nothing else moves:
+`bootstrap/setup.sh` no longer assumes 438: the expected count is an env var whose default is
+the old value, so v3 bootstrap is unchanged.
 
 ```bash
-# setup.sh, in the training verify block
--DATASET_EXPECTED=438
-+DATASET_EXPECTED="${GCP_DATASET_COUNT:-438}"
- if [ -n "$DATASET_ZIP_URL" ] && [ "$track_count" -ne "$DATASET_EXPECTED" ]; then
--  echo "[FAIL] dataset: $track_count tracks in $DATASET_LOCAL (expected 438 for the v3 zip) — ..."
-+  echo "[FAIL] dataset: $track_count tracks in $DATASET_LOCAL (expected $DATASET_EXPECTED) — ..."
+# setup.sh:107
+DATASET_EXPECTED="${GCP_DATASET_COUNT:-438}"
+# setup.sh:557-558
+if [ -n "$DATASET_ZIP_URL" ] && [ "$track_count" -ne "$DATASET_EXPECTED" ]; then
+  echo "[FAIL] dataset: $track_count tracks in $DATASET_LOCAL (expected $DATASET_EXPECTED via GCP_DATASET_COUNT) — check /content/logs/dataset_zip.log"
 ```
 
 Then the launching notebook stages, next to `HF_TOKEN` / `GCP_BACKUP_BASE`:
@@ -148,8 +147,8 @@ export GCP_DATASET_ZIP=gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetu
 export GCP_DATASET_COUNT=482
 ```
 
-This is a code change, not a hyperparameter change: it needs your approval, and it gets the
-`docs-reconciler` pass + a `RECONCILIATION_LOG.md` entry in the same commit.
+`bash -n` passes, and the branch was replicated in isolation: `482/482 → [ok]`,
+`438/438 → [ok]` (v3 default unchanged), `438 with GCP_DATASET_COUNT=482 → [FAIL]`.
 
 ### 4.2 GPU rule
 
