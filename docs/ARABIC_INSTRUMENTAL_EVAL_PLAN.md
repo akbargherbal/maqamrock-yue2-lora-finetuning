@@ -125,6 +125,38 @@ grep -n '\[FAIL\]' /content/logs/setup_inf.log || echo "no failures"
 converter, and the canonical v3 adapters (not ours). It needs `HF_TOKEN` +
 `GCP_BACKUP_BASE` in `/root/.secrets.env`.
 
+### Binary: check the shared library **before** building anything
+
+There is a maintained per-arch binary library at
+**`gs://akbar-december-2024-backup/arabmaqamrock/binaries/`** (other projects publish there).
+Read its `index.json` first; never rebuild on a whim.
+
+| artifact | path | size | sha256 | built |
+|---|---|---:|---|---|
+| T4 default | `sm75-t4/audiocpp_cli` | 350,161,824 | `7ad69d1c…9caa93c` | 2026-09-22 |
+| T4 **prefix-capable** | `sm75-t4/prefix/audiocpp_cli_prefix_sm75` | 351,827,640 | `4117a46a…13a77e45` | 2026-10-23 |
+| L4 | `sm89-l4/audiocpp_cli` | 352,411,648 | `97028a71…ad3d4` | 2026-09-22 |
+| A100 | `sm80-a100/audiocpp_cli` | 367,171,256 | `78f47859…9d023` | 2026-11-09 |
+
+The T4 default is **the same object** `setup.sh` stages from
+`audiocpp_inference/build/audiocpp_cli` — its `manifest.json` records that as `source`. The
+**prefix-capable** build (audio_cpp `7d70104`) adds `semantic_prefix` /
+`semantic_prefix_file`; this eval does not need it (style + lyrics are passed directly), but
+it is the right pick if a later test needs prefix conditioning.
+
+```bash
+# inspect before staging; verify the bytes, don't trust the path
+gsutil cat gs://akbar-december-2024-backup/arabmaqamrock/binaries/index.json | head -40
+gsutil cp gs://akbar-december-2024-backup/arabmaqamrock/binaries/sm75-t4/audiocpp_cli \
+  /content/audiocpp_inference/bin/audiocpp_cli
+sha256sum /content/audiocpp_inference/bin/audiocpp_cli
+# expect 7ad69d1ccfe432b8c5e100009188b56013e48dc117ae391958b1000439caa93c
+```
+
+**Rule:** if a binary is missing or a flag is unsupported, check this library (and its
+`index.json`/`manifest.json`) before compiling. Building is the last resort, and the build
+must be published back there with `sha256` + `manifest.json`.
+
 **Stage our checkpoints and convert them.** The ai-toolkit files are not loadable by
 audio.cpp; each needs `convert_aitoolkit_yue2_lora.py` (in GCS
 `audiocpp_inference/converter/`, staged to `/content/converter/`):
@@ -314,7 +346,8 @@ GCS                       …/arabic_instrumental_lora/eval/<stage>/  (backup_to
 ```
 
 Provenance to record next to the key: the four converted adapters' sha256, GGUF names,
-binary sha256, `input.json` + `batch_manifest.json`, blinding seed, and the 8 holdout names
+binary sha256 (`7ad69d1c…` for the T4 default, or the prefix build's `4117a46a…` if used),
+`input.json` + `batch_manifest.json`, blinding seed, and the 8 holdout names
 from `HOLDOUT.json`.
 
 ---
@@ -326,6 +359,7 @@ from `HOLDOUT.json`.
 | `arabmaqamrock` trigger left on | every prompt is out-of-distribution; LoRA looks broken | `--no-trigger` + prefix in style (§2.1); assert in `batch_manifest.json` |
 | `[Lyrics]` header passed to `--lyrics` | double header, mangled conditioning | split on `\n[Lyrics]\n` (§2.2) |
 | cap recomputed per arm | different durations, unfair A/B | pin one integer per prompt (§2.3) |
+| rebuilding the binary "to be safe" | unknown provenance, duplicated effort, possible flag/format drift | check `gs://…/arabmaqrock/binaries/index.json` first (§5) |
 | `auto` cap on tag-only lyrics | 2750 tokens ≈ 110 s — too short to judge style | pin `cap: 6500` (§2.3) |
 | two concurrent renders | NAR OOM, corrupt batch | sequential only (§6) |
 | T4 16 GB + long cap | slow or OOM on very long prompts | cap ~6500 for 7 tags; `--limit 1` smoke test first |
@@ -339,6 +373,7 @@ from `HOLDOUT.json`.
 
 - [ ] training "Job stopped"; `nvidia-smi` clean; no `run.py`
 - [ ] `bootstrap/setup.sh --inference` all `[ok]`; `grep '\[FAIL\]'` empty
+- [ ] binary sha256 matches the shared library (`7ad69d1c…` for the T4 default)
 - [ ] 4 checkpoints pulled + converted; `converted_sha256.txt` written
 - [ ] holdout contamination check: 8 names absent from `/content/yue2_dataset`
 - [ ] prompts JSON validates (`--dry-run`) and prints a sane projected time
