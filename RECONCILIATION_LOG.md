@@ -769,3 +769,17 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   α≈0.5 is the recommended start.
 - **Not done:** no merge uploaded to GCS, no render, no checkpoint/pick change (ck5500 stands);
   conversion still needs the GPU VM (converter is staged by `bootstrap/setup.sh --inference`).
+
+## 2026-11-13 — mix runbook (`docs/MIX_V3_INSTRUMENTAL.md`)
+
+- **New runbook:** the three-stage mix workflow (A build on CPU → B render on GPU → C listen),
+  with the α grid, the two arithmetic gates (α=0 identity, delta-sum on all 224 projections), the
+  measured CPU timings, the render spec pointer, and the pre-written decision rule.
+- **Indexed:** `docs/README.md` row; `SOURCE_OF_TRUTH.md` gains a style×style row and the
+  `arabic_instrumental_lora` row now says *run complete / ck5500 locked* instead of *not launched*
+  (it was stale — the run finished 2026-11-12).
+- **Verified while writing:** `INFERENCE/input_mix_v3instr.json` passes `generate.py --dry-run`
+  (5 songs, cap 7250, seed 101, five distinct lora aliases); the local converter reproduces the
+  HF v3 pair byte-for-byte; the four arms' converted sha256 are recorded in the GCS MANIFEST.
+- **Not claimed:** no render, no listening, no α verdict. Stage A outputs already exist, so the
+  runbook says the CPU stage is optional unless rebuilding or reproducing.
