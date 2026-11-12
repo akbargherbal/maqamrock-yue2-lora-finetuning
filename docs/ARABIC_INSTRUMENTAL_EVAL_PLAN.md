@@ -71,19 +71,33 @@ separate decisions after the verdict (§10).
 
 ---
 
-## 4. Prompt battery
+## 4. Prompt battery and the 18-track round
 
-`P0` is your representative prompt, verbatim. `H1..H8` are the held-out training captions.
-`P1..P3` are probes **not** in any training caption.
+`P0` is your representative prompt, verbatim. `H1..H3` are three of the eight held-out
+captions (2 vocal-flagged + 1 clean). `P1`, `P3` are probes **not** in any training caption.
 
 | id | text | what it tests |
 |---|---|---|
 | **P0a** | `Middle Eastern fusion, instrumental. ` + your prompt | in-distribution prompt shape |
 | **P0b** | your prompt alone, no prefix | robustness to prompt shape (still `--no-trigger`) |
-| **H1–H8** | each held-out `.txt`, split per §2.2 | contamination-free recall of the dataset's own style |
+| **H1** | holdout `yt500-0153-HU_nX3kcvBk` (vocal-flagged, 289.6 s) | contamination-free recall |
+| **H2** | holdout `yt500-0032-a8TZVDBsxTo` (vocal-flagged, 333.9 s) | contamination-free recall |
+| **H3** | holdout `yt500-0211-yAl48Tk0Sno` (clean, 256.2 s) | contamination-free recall |
 | **P1** | new ensemble: `solo oud and cello, no percussion, slow taqsim-like introduction that opens into a 6/8 darbuka groove` | instruction-following: can it *remove* instruments? |
-| **P2** | new combination: `qanun-led trio with ney and riq, fast 9/8, trading phrases, mostly mid-register, dry close mix` | generalization to an ensemble/feel absent from the prompt set |
 | **P3** | **negative control**: `solo grand piano ballad, no Middle Eastern instruments, no percussion, no oud, no strings section` | over-application: does it force the style anyway? |
+| P2 | `qanun-led trio with ney and riq, fast 9/8, trading phrases, mostly mid-register, dry close mix` | **not in this round** — hold for a follow-up (+2 tracks) |
+
+### The round is 18 tracks, in two phases
+
+| phase | what | tracks |
+|---|---|---:|
+| **Screen** (`P0a`) | base + `ck3000` + `ck4000` + `ck5000` + `ck5500`, one seed (101) | **5** |
+| **Depth** | {`P0b`, `H1`, `H2`, `H3`, `P1`, `P3`} × {winner, base}, seed 101 | **12** |
+| **Variance** | `P0a` on the winner, seed 202 | **1** |
+| | | **18** |
+
+The screen is deliberately one prompt: it ranks checkpoints on the same input, which is all
+it has to do. Everything that tests generalization happens in depth, on the winner only.
 
 Your prompt and lyrics for **P0**, verbatim:
 
@@ -101,10 +115,10 @@ LYRICS:
 [outro]
 ```
 
-Use the same 7-tag lyrics for P1–P3 so cap and section count are comparable.
+Use the same 7-tag lyrics for P1/P3 so cap and section count are comparable.
 
-**Seeds:** `101` for every prompt in Stage A; in Stage B add `202` for P0a only, to measure
-take-to-take variance. Same seed across arms is what makes the pair comparable.
+**Seeds:** `101` everywhere; the single variance take uses `202`. Same seed across arms is
+what makes a pair comparable.
 
 ---
 
@@ -210,14 +224,24 @@ Note: `generate.py` **refuses** to run while an ai-toolkit training run is detec
 
 ---
 
-## 6. Budget on a T4 (~6.5 min/track measured at auto cap; **~7.1 min at cap 6500**,
-`INFERENCE.md:300` — Hijaz at 6500 took 424 s)
+## 6. Budget — measured on the A100, with the T4 as fallback
 
-| stage | arms | prompts | tracks | wall |
-|---|---|---|---:|---:|
-| **A — checkpoint screen** | base, 3000, 4000, 5000, 5500 | P0a + H1,H2 (vocal) + H3,H4 (clean) | 25 | **≈ 3.0 h** |
-| **B — depth on the winner** | winner + base | P0a×2 seeds, P0b, H1–H8, P1–P3 | 28 | **≈ 3.3 h** |
-| total | | | 53 | **≈ 6.3 h** |
+**Measured 2026-11-12 on this A100-SXM4-80GB** (`sm80-a100` binary, bf16 GGUF,
+`attention=flash`, cap 6500, seed 101, LoRA 1.0/1.0): **1:58.55 wall, 260 s audio,
+exit 0**, model load included (`/usr/bin/time -v`).
+
+| | tracks | A100 @ 2 min | T4 @ 7.1 min |
+|---|---:|---:|---:|
+| screen (`P0a` × 5 arms) | 5 | ~10 min | ~36 min |
+| depth (6 prompts × 2 arms) | 12 | ~24 min | ~85 min |
+| variance (`P0a` winner, seed 202) | 1 | ~2 min | ~7 min |
+| **total** | **18** | **~36 min + batch loads** | **~2.1 h** |
+
+Four batch invocations (model load per batch, not per track): screen-LoRA, screen-base,
+depth-winner, depth-base. Budget ~50 min end-to-end on the A100.
+
+The T4 column stays here because a T4 is the fallback and its `sm75` binary is staged by
+`bootstrap/setup.sh --inference` with no extra work.
 
 Run **sequentially, detached**, one stage at a time:
 
@@ -305,6 +329,45 @@ Hand the evaluator `EVAL.txt` + audio only; `KEYS.txt` opens after listening. Th
 
 ---
 
+### Download for local listening
+
+Everything rendered is mirrored under this prefix, in a fixed, re-runnable layout:
+
+```
+<base>/arabic_instrumental_lora/eval/
+  audio/<batch>/    WAV 48 kHz stereo, ~48 MB/track, plus the per-track
+                    .json / .log / _time.txt / _gpu.csv and batch_manifest.json
+  mp3/<batch>/      192k mp3 review copies, ~6 MB/track (convenience only)
+  AB/<stage>/       blinded package: EVAL.txt + KEYS.txt + <track>_<label>.mp3
+```
+
+Batch names as rendered:
+
+```
+audio/smoke_a100/            p0a_rep_prefix_101.wav
+audio/screen_loRA/           p0a_ck3000_101.wav … p0a_ck5500_101.wav
+audio/screen_base/           p0a_base_101.wav
+audio/depth_ck5500_loRA/     p0b_noprefix_101.wav, h1_0153_vocal_101.wav, …
+audio/depth_ck5500_base/     the same names with _base
+```
+
+Pull them to your machine (any box with `gsutil` auth):
+
+```bash
+gsutil -m rsync -r gs://akbar-december-2024-backup/OSTRIS_Arabic_Suno_Finetuning/arabic_instrumental_lora/eval ./ai_eval
+# then, relative to the folder you ran it in:
+#   ./ai_eval/mp3/screen_loRA/p0a_ck5500_101.mp3
+#   ./ai_eval/audio/screen_loRA/p0a_ck5500_101.wav
+```
+
+Rules for this folder:
+
+- **WAV is authoritative**, mp3 is a listening copy — never normalize, trim or fade either.
+- The mirror is refreshed after every batch; re-running the same `rsync` is safe and
+  only copies what changed.
+- When a blinded package exists, hand the evaluator `AB/<stage>/` **without** `KEYS.txt`.
+  `KEYS.txt` stays with whoever set the test up, and is what you open after scoring.
+
 ## 9. Decision rules (written before listening, so the result can't be rationalised)
 
 1. **Did it learn anything?** Discrimination: of the paired P0a/H1–H4 takes in Stage A,
@@ -342,7 +405,7 @@ results/arabic_instrumental_eval/
   report.md / .csv       from ai_music_rating_app
   mert_similarity.csv    objective side-check
 audio                     192k mp3 review copies (committed); raw WAVs stay in GCS
-GCS                       …/arabic_instrumental_lora/eval/<stage>/  (backup_to_gcp.py --inference)
+GCS                       …/arabic_instrumental_lora/eval/{audio,mp3,AB}/<batch|stage>/
 ```
 
 Provenance to record next to the key: the four converted adapters' sha256, GGUF names,
