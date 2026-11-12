@@ -2,6 +2,27 @@
 
 Dated records of docs changes: file, what-and-why, and the authority. One entry per pass.
 
+## 2026-11-12 — arabic_instrumental_dataset built, uploaded, documented
+
+- **New dataset** (authority: the GCS objects + their `.sha256`/manifest, re-derived from the two
+  read-only source datasets):
+  `<base>/arabic_instrumental_dataset.zip` — 3,162,874,610 B, 964 entries, sha256
+  `cea34fa2e584472d0b134f51dc0ae83b66d999ee1dffbc40dad4dcd783e39954`; 482 tracks
+  (460 `yt500_instrumental` + 22 `fadhl_shaker_instrumental_18_shortlist`), 3,162,110,202 B,
+  36.60 h. Remote sha256 + crc32c match the local build.
+- **Files:**
+  - `prepare_arabic_instrumental_dataset.py` — builder (prefix + verbatim caption + `[Lyrics]` +
+    section tags; hardlink audio; `ffprobe` all; per-file sha256; manifest + report). Mirrors the
+    v3 "commit the build script" rule (`docs/DATASET_V3_PLAN.md`, D5).
+  - `docs/ARABIC_INSTRUMENTAL_DATASET.md` — new live runbook (format, build, verify, use,
+    caveats); indexed in `docs/README.md`.
+  - `docs/ARABIC_INSTRUMENTAL_DATASET_PLAN.md` — plan, marked **EXECUTED** with the delivered
+    checksums.
+  - `SOURCE_OF_TRUTH.md` — new row for this dataset (GCS zip + manifest authority).
+- **Reconciler (Steps 1–2):** 2848 claims / 73 live docs; 1733 checkable; **52 flagged (3.0%)**,
+  all `missing_path` false positives — filenames inside source track folders and GCS object names
+  (31 introduced by the two new docs). No drift edit proposed; no structural warning.
+
 ## 2026-10-13 — publish milestones recorded; inventory + README drift fixed
 
 - `PROGRESS.md`: appended **M13** (LoRAs published on Hugging Face) and **M14** (lean repo

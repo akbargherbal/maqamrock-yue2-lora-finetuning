@@ -9,6 +9,7 @@ operating contract is `../AGENTS.md`.
 |---|---|
 | Quick copy-paste commands for common ops (index, not authority) | [../user_cheatsheet.md](../user_cheatsheet.md) |
 | Get training running on a fresh Colab VM | [START.md](START.md) |
+| Build / verify the `arabic_instrumental_dataset` (482-track zip) | [ARABIC_INSTRUMENTAL_DATASET.md](ARABIC_INSTRUMENTAL_DATASET.md) |
 | Stop for the night and resume next session | [PAUSE_RESUME.md](PAUSE_RESUME.md) |
 | GCS mirror layout, verify a backup, restore from it | [BACKUP_RESTORE.md](BACKUP_RESTORE.md) |
 | Check how training is going | [MONITOR.md](MONITOR.md) |
