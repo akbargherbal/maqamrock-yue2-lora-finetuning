@@ -30,9 +30,11 @@ v3 = carrier (`--v2`), instrument = donor (`--quran`) → **α=0 is bit-identica
 | α | effective share of the AR style delta | AR sha256 |
 |---:|---:|---|
 | 0.1 | 8.9 % | `d48109b3…64a0` |
-| 0.2 | 16.5 % | `820f1ce9…dd6` |
-| 0.3 | 22.8 % | `3a342098…12fe` |
-| 0.5 | 33.0 % | `5bef39fe…c7c5` |
+| 0.2 | **16.5 %** (primary) | `820f1ce9…dd6` |
+
+**a0.3 and a0.5 were built, then deleted from GCS 2026-11-13 — high α rejected by the user.**
+Only 0.1 / 0.2 exist; do not rebuild them without a new decision. The render spec
+(`INFERENCE/input_mix_v3instr.json`) now carries 3 arms: `v3` + `a0p1` + `a0p2` (default `a0p2`).
 
 Control = v3 itself (α=0 is tensor-identical). Merge input identity proven: the GCS fused file
 `37dba84a…` is the MANIFEST source of the HF pair, and local conversion reproduced it exactly

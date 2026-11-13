@@ -1,6 +1,7 @@
 # Mix plan — `v3_arabmaqamrock_lora` × `arabic_instrumental_lora` (style × style)
 
-_Status: **artifacts already built and verified 2026-11-13** (α = 0.1/0.2/0.3/0.5, converted,
+_Status: **artifacts built and verified 2026-11-13** (α = **0.1 / 0.2** only — a0.3 and a0.5
+were built, then deleted the same day when the user rejected high α; see §2), converted,
 uploaded to `<base>/arabic_instrumental_lora/mix_v3/` with `MANIFEST.json`). Nothing has been
 **rendered or listened to yet.** This doc is the repeatable procedure for the three stages and
 the decision rule — not a claim that any α wins._
@@ -35,7 +36,8 @@ artifacts. If neither is needed, go straight to stage B.
 | **B — render** | GPU VM (sm80/sm75 binary) | pull arms → dry-run → batch render → mirror to GCS | yes |
 | **C — listen** | your machine | blind package → rate → apply the decision rule | no |
 
-Arm names are fixed: `v3` (control), `a0.1`, `a0.2`, `a0.3`, `a0.5`.
+Arm names are fixed: `v3` (control), `a0.1`, `a0.2`. **`a0.3` / `a0.5` were rejected and
+removed 2026-11-13** — do not rebuild them unless that decision is revisited.
 
 ---
 
@@ -66,7 +68,7 @@ check fails, stop — everything downstream would be built on the wrong file.
 
 ```bash
 # merge: v3 = carrier (--v2), instrumental = donor (--quran); α dials the instrumental side
-for A in 0.1 0.2 0.3 0.5; do
+for A in 0.1 0.2; do
   python3 merge_quran_lora.py --alpha "$A" \
     --v2   /tmp/mix/src/v3_arabmaqamrock_lora.safetensors \
     --quran /tmp/mix/src/arabic_instrumental_lora.safetensors \
@@ -80,10 +82,12 @@ written):
 - `--alpha 0` must be **tensor-identical** to v3 (`torch.equal` over all 448 tensors). This is
   what makes the control arm free.
 - for each α, the dense delta must satisfy `B_mix @ A_mix == B_v3 @ A_v3 + α · (B_instr @ A_instr)`
-  on **all 224 projections** (measured max abs error 3.0e-8 at α=0.5).
+  on **all 224 projections**. At α=0.5 (a power-of-two scale, so the folded block is exact in
+  bf16) the measured max abs error was 3.0e-8; at the shipped α=0.2 it is 3.5e-5 (rel 4.6e-4),
+  which is bf16 rounding of the α-scaled donor block — not an arithmetic error.
 
 ```bash
-for A in 0.1 0.2 0.3 0.5; do
+for A in 0.1 0.2; do
   python /tmp/mix/tools/convert_aitoolkit_yue2_lora.py \
     "/tmp/mix/grid/v3instr_a${A}.safetensors" \
     --out-dir "/tmp/mix/conv/a${A}" --stem "v3instr_a${A}"
@@ -97,7 +101,7 @@ Expected: `rank 64` on both branches, and the converter's own line
 ```bash
 # upload (an existing prefix — re-running overwrites the same four arms)
 gsutil -m cp /tmp/mix/conv/a0.1/*.safetensors "$B/arabic_instrumental_lora/mix_v3/a0.1/"
-# … a0.2 / a0.3 / a0.5 likewise, then the manifest
+# … a0.2 likewise, then the manifest (it lists only the arms that exist)
 gsutil cp /tmp/mix/MANIFEST.json "$B/arabic_instrumental_lora/mix_v3/"
 ```
 
@@ -113,8 +117,8 @@ carrier, so α is not a small knob:
 |---:|---:|---|
 | 0.1 | 8.9 % | may be below the audibility threshold |
 | 0.2 | 16.5 % | first likely audible step |
-| 0.3 | 22.8 % | upper recommendation |
-| 0.5 | 33.0 % | curiosity probe, expect vocal cost |
+| 0.3 | 22.8 % | built, **rejected 2026-11-13** (high α does not work) |
+| 0.5 | 33.0 % | built, **rejected 2026-11-13** |
 
 Low ceiling on purpose: the donor's captions are `Middle Eastern fusion, instrumental.` +
 **tags only, no words**, so its AR (conditioning) delta pulls toward "instrumental, no vocal".
@@ -155,7 +159,7 @@ Budget: **~32 min on a T4** (dry-run projection, 5 tracks), **~10–12 min on an
 
 1. Pull the batch (`…/audiocpp_inference/out/<run>/`) and, for a blind pass, build a package
    with `INFERENCE/prepare_ab_eval.py` (one folder per arm, matching stems) — or stage
-   `v3/a0.1/a0.2/a0.3/a0.5` as five folders and use the rating app with `--blind`.
+   `v3/a0.1/a0.2` as three folders and use the rating app with `--blind`.
 2. Scorecard: `INFERENCE/scorecards/arabic_instrumental_quick.json` if you want speed;
    the 1–5 breakdown in `…_style.json` if you want to separate performance from production.
 3. **Pre-written decision rule** (so the result cannot be rationalised afterwards):
@@ -190,7 +194,7 @@ Budget: **~32 min on a T4** (dry-run projection, 5 tracks), **~10–12 min on an
 - [ ] converted pairs exist at rank 64 with `byte-level verification: OK`
 - [ ] `MANIFEST.json` uploaded next to the arms
 - [ ] `nvidia-smi` clean before stage B
-- [ ] arms pulled to `/content/mix/{v3,a0.1,a0.2,a0.3,a0.5}`
+- [ ] arms pulled to `/content/mix/{v3,a0.1,a0.2}`
 - [ ] `--dry-run` shows 5 songs, cap 7250, seed 101, five distinct loras
 - [ ] batch rendered detached, log `/content/logs/mix_v3instr.log`
 - [ ] batch mirrored to GCS (`backup_to_gcp.py --inference`)

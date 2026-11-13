@@ -783,3 +783,19 @@ Dated records of docs changes: file, what-and-why, and the authority. One entry 
   HF v3 pair byte-for-byte; the four arms' converted sha256 are recorded in the GCS MANIFEST.
 - **Not claimed:** no render, no listening, no α verdict. Stage A outputs already exist, so the
   runbook says the CPU stage is optional unless rebuilding or reproducing.
+
+## 2026-11-13 — α grid cut to 0.1 / 0.2
+
+- **Change:** user rejected high α. `gsutil rm -r …/mix_v3/a0.3 …/mix_v3/a0.5` (4 objects
+  deleted); `MANIFEST.json` rewritten on GCS with only the 0.1/0.2 arms, a `decisions` block and
+  a note that the manifest now describes the surviving set. `INFERENCE/input_mix_v3instr.json`
+  reduced to 3 arms (`v3` control + `a0p1` + `a0p2`, default `a0p2`).
+- **Docs:** `docs/MIX_V3_INSTRUMENTAL.md` (status, arm names, both loops, grid table, checklist)
+  and `docs/PRON_LORA_MERGE.md` § style×style (grid, delta-check row, the α-discussion paragraph)
+  now say 0.1/0.2 and record the 0.3/0.5 rejection. `agent_notes/current.md` likewise.
+- **Verified:** `generate.py --dry-run` on the reduced spec → 3 songs / cap 7250 / seed 101 /
+  three distinct lora aliases; GCS listing shows exactly MANIFEST + a0.1 + a0.2.
+- **Correction recorded:** the delta-sum check is exact at α=0.5 (3.0e-8) because 0.5 is a power
+  of two; at the shipped α=0.2 it is 3.5e-5 abs / 4.6e-4 rel, which is bf16 rounding of the
+  α-scaled donor block, not a merge error. Both numbers are now in the docs.
+- **Not done:** nothing rendered; no listening verdict; a0.1/a0.2 files untouched (same shas).

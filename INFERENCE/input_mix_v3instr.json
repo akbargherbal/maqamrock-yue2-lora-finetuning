@@ -11,19 +11,11 @@
     "a0p2": {
       "ar": "/content/mix/a0.2/v3instr_a0.2_ar.safetensors",
       "nar": "/content/mix/a0.2/v3instr_a0.2_nar.safetensors"
-    },
-    "a0p3": {
-      "ar": "/content/mix/a0.3/v3instr_a0.3_ar.safetensors",
-      "nar": "/content/mix/a0.3/v3instr_a0.3_nar.safetensors"
-    },
-    "a0p5": {
-      "ar": "/content/mix/a0.5/v3instr_a0.5_ar.safetensors",
-      "nar": "/content/mix/a0.5/v3instr_a0.5_nar.safetensors"
     }
   },
   "defaults": {
     "quantile": 0.95,
-    "lora": "v3"
+    "lora": "a0p2"
   },
   "songs": [
     {
@@ -43,20 +35,6 @@
     {
       "name": "hijaz_a0p2",
       "lora": "a0p2",
-      "style_file": "/content/audiocpp_inference/prompts/Hijaz_style.txt",
-      "lyrics_file": "/content/audiocpp_inference/prompts/Hijaz_lyrics.txt",
-      "seed": 101
-    },
-    {
-      "name": "hijaz_a0p3",
-      "lora": "a0p3",
-      "style_file": "/content/audiocpp_inference/prompts/Hijaz_style.txt",
-      "lyrics_file": "/content/audiocpp_inference/prompts/Hijaz_lyrics.txt",
-      "seed": 101
-    },
-    {
-      "name": "hijaz_a0p5",
-      "lora": "a0p5",
       "style_file": "/content/audiocpp_inference/prompts/Hijaz_style.txt",
       "lyrics_file": "/content/audiocpp_inference/prompts/Hijaz_lyrics.txt",
       "seed": 101

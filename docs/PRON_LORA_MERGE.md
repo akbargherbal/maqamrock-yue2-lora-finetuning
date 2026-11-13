@@ -191,14 +191,14 @@ mkdir -p /content/merge_src/v3 /content/merge_src/instr
 gsutil cp "$B/v3_arabmaqamrock_lora/output/v3_arabmaqamrock_lora.safetensors" /content/merge_src/v3/
 gsutil cp "$B/arabic_instrumental_lora/output/arabic_instrumental_lora.safetensors" /content/merge_src/instr/
 
-for A in 0.25 0.5 0.75 1.0; do
+for A in 0.1 0.2; do
   python3 merge_quran_lora.py --alpha "$A" \
     --v2   /content/merge_src/v3/v3_arabmaqamrock_lora.safetensors \
     --quran /content/merge_src/instr/arabic_instrumental_lora.safetensors \
     --out  "/content/merged/v3instr_a${A}.safetensors"
 done
 # convert each (the converter is staged by bootstrap/setup.sh --inference)
-for A in 0.25 0.5 0.75 1.0; do
+for A in 0.1 0.2; do
   python /content/converter/convert_aitoolkit_yue2_lora.py \
     "/content/merged/v3instr_a${A}.safetensors" \
     --out-dir "/content/converter/out/v3instr_a${A}" --stem "v3instr_a${A}"
@@ -206,22 +206,25 @@ done
 sha256sum /content/converter/out/v3instr_a*/*.safetensors | tee /content/logs/v3instr_sha256.txt
 ```
 
-Then render exactly as in `docs/ARABIC_INSTRUMENTAL_EVAL_PLAN.md` §5, pointing each arm's
-`loras.<arm>.dir` at `/content/converter/out/v3instr_a<A>`; one prompt, one seed, one pinned cap
-across all arms (`--no-trigger`, prefix in the style text).
+Then render per `docs/MIX_V3_INSTRUMENTAL.md` §3 (the committed spec is
+`INFERENCE/input_mix_v3instr.json`); one prompt, one seed, one pinned cap across all arms.
+**No `--no-trigger` for this mix** — v3's style file already carries the `arabmaqamrock`
+prefix, and v3 is the conditioning side.
 
 **Verified on the real files (2026-11-13, CPU):**
 
 | check | result |
 |---|---|
 | ranks | AR 32+32 → 64, NAR 32+32 → 64 (224 tensors per branch) |
-| dense delta of the merge | over **all 224 projections**, `max|dW_mix − (dW_v3 + 0.5·dW_instr)| = 3.0e-8` (rel 4.4e-7), AR and NAR both included |
+| dense delta of the merge | over **all 224 projections**: at α=0.5 `max|err| = 3.0e-8` (exact — 0.5 is a power of two, so the bf16 scale is lossless); at the shipped α=0.2 `3.5e-5` (rel 4.6e-4), i.e. bf16 rounding of the scaled donor block |
 | α=0 | tensor-for-tensor identical to v3 |
 | delta magnitude | ‖dW_instr‖ / ‖dW_v3‖ median **0.985** (AR, n=112), **0.878** (NAR, n=112) |
 
-That last row is why α=1 is the top end and not the default: at α=1 the two style deltas are
-of equal size, i.e. the total style delta is ~1.9× either adapter alone. Start at **α=0.5**
-(roughly one third instrumental, two thirds v3) and bracket with 0.25 / 0.75 / 1.0.
+That row is why α is not a small knob: the donor's delta is the same size as the carrier's, so
+α=1 makes the total style delta ~1.9× either adapter alone, α=0.3 puts ~23 % of the style mass
+on the donor, and α=0.2 → ~16 %. **Shipped grid: α = 0.1 / 0.2** (a0.3/a0.5 were built and then
+deleted 2026-11-13 — high α rejected by the user). The residual risk at any α is the donor's
+instrumental-only conditioning pulling the vocals, so the smallest α that beats v3 wins.
 
 **Caveats**
 
